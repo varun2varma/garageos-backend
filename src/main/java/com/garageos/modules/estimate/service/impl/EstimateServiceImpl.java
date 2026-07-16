@@ -1,6 +1,8 @@
 package com.garageos.modules.estimate.service.impl;
 
 import com.garageos.core.enums.EstimateStatus;
+import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.EstimateNumberGenerator;
 import com.garageos.modules.estimate.dto.request.CreateEstimateRequest;
@@ -114,5 +116,51 @@ public class EstimateServiceImpl implements EstimateService {
                                 "Estimate not found with id : " + id));
 
         repository.delete(estimate);
+    }
+
+    @Override
+    public EstimateResponse approveEstimate(Long id) {
+
+        Estimate estimate = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate not found with id : " + id));
+
+        if (estimate.getStatus() == EstimateStatus.APPROVED) {
+            throw new BusinessException(
+                    "Estimate is already approved.");
+        }
+
+        estimate.setStatus(EstimateStatus.APPROVED);
+
+        JobCard jobCard = estimate.getJobCard();
+
+        jobCard.setStatus(JobCardStatus.ESTIMATE_APPROVED);
+
+        jobCardRepository.save(jobCard);
+
+        estimate = repository.save(estimate);
+
+        return mapper.toResponse(estimate);
+    }
+
+    @Override
+    public EstimateResponse rejectEstimate(Long id) {
+
+        Estimate estimate = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate not found with id : " + id));
+
+        if (estimate.getStatus() == EstimateStatus.REJECTED) {
+            throw new BusinessException(
+                    "Estimate is already rejected.");
+        }
+
+        estimate.setStatus(EstimateStatus.REJECTED);
+
+        estimate = repository.save(estimate);
+
+        return mapper.toResponse(estimate);
     }
 }

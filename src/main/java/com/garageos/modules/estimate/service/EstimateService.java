@@ -19,5 +19,7 @@ public interface EstimateService {
             CreateEstimateRequest request);
 
     void deleteEstimate(Long id);
+    EstimateResponse approveEstimate(Long id);
 
+    EstimateResponse rejectEstimate(Long id);
 }

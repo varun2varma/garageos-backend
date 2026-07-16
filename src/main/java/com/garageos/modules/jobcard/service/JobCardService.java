@@ -22,4 +22,8 @@ public interface JobCardService {
             int size,
             String sortBy,
             String direction);
+
+    JobCardResponse completeJobCard(Long id);
+    JobCardResponse readyForDelivery(Long id);
+    JobCardResponse closeJobCard(Long id);
 }

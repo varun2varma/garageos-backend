@@ -2,6 +2,7 @@ package com.garageos.modules.invoice.service.impl;
 
 import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.InvoiceStatus;
+import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.PaymentStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -14,6 +15,8 @@ import com.garageos.modules.invoice.entity.Invoice;
 import com.garageos.modules.invoice.mapper.InvoiceMapper;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.invoice.service.InvoiceService;
+import com.garageos.modules.jobcard.entity.JobCard;
+import com.garageos.modules.jobcard.repository.JobCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository repository;
     private final EstimateRepository estimateRepository;
     private final InvoiceMapper mapper;
+    private final JobCardRepository jobCardRepository;
 
     @Override
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
@@ -70,6 +74,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGrandTotal(estimate.getGrandTotal());
 
         invoice = repository.save(invoice);
+
+        JobCard jobCard = estimate.getJobCard();
+
+        jobCard.setStatus(JobCardStatus.WORK_COMPLETED);
+
+        jobCardRepository.save(jobCard);
 
         return mapper.toResponse(invoice);
     }

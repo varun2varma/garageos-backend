@@ -89,4 +89,34 @@ public class JobCardController {
                 )
         );
     }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<ApiResponse<JobCardResponse>> completeJobCard(
+            @PathVariable Long id) {
+
+        return ApiResponseUtil.success(
+                "Job Card marked as work completed.",
+                service.completeJobCard(id)
+        );
+    }
+
+    @PutMapping("/{id}/ready-for-delivery")
+    public ResponseEntity<ApiResponse<JobCardResponse>> readyForDelivery(
+            @PathVariable Long id) {
+
+        return ApiResponseUtil.success(
+                "Job Card is ready for delivery.",
+                service.readyForDelivery(id)
+        );
+    }
+
+    @PutMapping("/{id}/close")
+    public ResponseEntity<ApiResponse<JobCardResponse>> closeJobCard(
+            @PathVariable Long id) {
+
+        return ApiResponseUtil.success(
+                "Job Card closed successfully.",
+                service.closeJobCard(id)
+        );
+    }
 }

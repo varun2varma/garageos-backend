@@ -12,6 +12,9 @@ public enum JobCardStatus {
     QUALITY_CHECK,
     READY_FOR_DELIVERY,
     DELIVERED,
-    CANCELLED
+    CANCELLED,
+    ESTIMATE_APPROVED,
+    WORK_COMPLETED,
+    CLOSED
 
 }

@@ -141,4 +141,50 @@ public class JobCardServiceImpl implements JobCardService {
 
         return jobCards.map(mapper::toResponse);
     }
+
+    @Override
+    public JobCardResponse completeJobCard(Long id) {
+
+        JobCard jobCard = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + id));
+
+        jobCard.setStatus(JobCardStatus.WORK_COMPLETED);
+
+        jobCard = repository.save(jobCard);
+
+        return mapper.toResponse(jobCard);
+    }
+
+    @Override
+    public JobCardResponse readyForDelivery(Long id) {
+
+        JobCard jobCard = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + id));
+
+        jobCard.setStatus(JobCardStatus.READY_FOR_DELIVERY);
+
+        jobCard = repository.save(jobCard);
+
+        return mapper.toResponse(jobCard);
+    }
+
+    @Override
+    public JobCardResponse closeJobCard(Long id) {
+
+        JobCard jobCard = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + id));
+
+        jobCard.setStatus(JobCardStatus.CLOSED);
+
+        jobCard = repository.save(jobCard);
+
+        return mapper.toResponse(jobCard);
+    }
+
 }

@@ -69,4 +69,24 @@ public class EstimateController {
                 "Estimate deleted successfully."
         );
     }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<ApiResponse<EstimateResponse>> approveEstimate(
+            @PathVariable Long id) {
+
+        return ApiResponseUtil.success(
+                "Estimate approved successfully.",
+                service.approveEstimate(id)
+        );
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<ApiResponse<EstimateResponse>> rejectEstimate(
+            @PathVariable Long id) {
+
+        return ApiResponseUtil.success(
+                "Estimate rejected successfully.",
+                service.rejectEstimate(id)
+        );
+    }
 }
