@@ -7,6 +7,7 @@ import com.garageos.modules.customer.dto.response.CustomerResponse;
 import com.garageos.modules.customer.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,14 +32,6 @@ public class CustomerController {
         );
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<CustomerResponse>>> getAllCustomers() {
-
-        return ApiResponseUtil.success(
-                "Customers fetched successfully.",
-                service.getAllCustomers()
-        );
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CustomerResponse>> getCustomer(
@@ -60,5 +53,34 @@ public class CustomerController {
                 "Customer deleted successfully."
         );
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerResponse> updateCustomer(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCustomerRequest request) {
+
+        return ResponseEntity.ok(service.updateCustomer(id, request));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CustomerResponse> getCustomerByMobileNumber(
+            @RequestParam String mobileNumber) {
+
+        return ResponseEntity.ok(service.getCustomerByMobileNumber(mobileNumber));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<CustomerResponse>>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        return ApiResponseUtil.success(
+                "Customers fetched successfully.",
+                service.getAllCustomers(page, size, sortBy, direction)
+        );
+    }
+
 
 }

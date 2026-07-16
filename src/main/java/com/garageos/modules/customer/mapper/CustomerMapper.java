@@ -5,6 +5,7 @@ import com.garageos.modules.customer.dto.response.CustomerResponse;
 import com.garageos.modules.customer.entity.Customer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -23,4 +24,8 @@ public interface CustomerMapper {
     CustomerResponse toResponse(Customer customer);
 
     List<CustomerResponse> toResponseList(List<Customer> customers);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(CreateCustomerRequest request, @MappingTarget Customer customer);
 }
