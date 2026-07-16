@@ -44,6 +44,30 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public List<ComplaintResponse> createComplaintList(
+            Long jobCardId,
+            List<CreateComplaintRequest> request) {
+
+        JobCard jobCard = jobCardRepository.findById(jobCardId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + jobCardId));
+
+        List<Complaint> complaints = mapper.toEntity(request);
+
+        complaints.forEach(complaint -> {
+            complaint.setJobCard(jobCard);
+            complaint.setStatus(ComplaintStatus.OPEN);
+
+
+        });
+        complaints = repository.saveAll(complaints);
+
+
+        return mapper.toResponse(complaints);
+    }
+
+    @Override
     public ComplaintResponse getComplaint(Long id) {
 
         Complaint complaint = repository.findById(id)

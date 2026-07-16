@@ -1,5 +1,6 @@
 package com.garageos.modules.jobcard.dto.request;
 
+import com.garageos.modules.complaint.dto.request.CreateComplaintRequest;
 import com.garageos.modules.complaint.dto.response.ComplaintResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -18,7 +19,7 @@ public class CreateJobCardRequest {
     @NotNull(message = "Odometer reading is required.")
     private Long odometerReading;
 
-    private List<ComplaintResponse> complaints;
+    private List<CreateComplaintRequest> complaints;
     private LocalDate estimatedDeliveryDate;
 
     private String remarks;

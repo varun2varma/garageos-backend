@@ -11,6 +11,9 @@ public interface ComplaintService {
             Long jobCardId,
             CreateComplaintRequest request);
 
+    List<ComplaintResponse> createComplaintList(
+            Long jobCardId,
+            List<CreateComplaintRequest> request);
     ComplaintResponse getComplaint(Long id);
 
     List<ComplaintResponse> getComplaints(Long jobCardId);

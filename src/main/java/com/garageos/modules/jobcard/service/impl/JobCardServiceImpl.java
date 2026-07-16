@@ -5,6 +5,7 @@ import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.JobCardNumberGenerator;
+import com.garageos.modules.complaint.service.ComplaintService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -14,6 +15,7 @@ import com.garageos.modules.jobcard.service.JobCardService;
 import com.garageos.modules.vehicle.entity.Vehicle;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +29,8 @@ public class JobCardServiceImpl implements JobCardService {
     private final JobCardRepository repository;
     private final VehicleRepository vehicleRepository;
     private final JobCardMapper mapper;
-
+    @Autowired
+    private final ComplaintService complaintService;
     @Override
     public JobCardResponse createJobCard(CreateJobCardRequest request) {
 
@@ -53,8 +56,8 @@ public class JobCardServiceImpl implements JobCardService {
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
         jobCard.setStatus(JobCardStatus.OPEN);
-
         jobCard = repository.save(jobCard);
+        complaintService.createComplaintList(jobCard.getId(),request.getComplaints());
 
         return mapper.toResponse(jobCard);
     }

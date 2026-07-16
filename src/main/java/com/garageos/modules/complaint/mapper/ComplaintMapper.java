@@ -8,6 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.List;
+
 @Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.ERROR
@@ -21,8 +23,18 @@ public interface ComplaintMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Complaint toEntity(CreateComplaintRequest request);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "jobCard", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    List<Complaint> toEntity(List<CreateComplaintRequest> request);
+
     @Mapping(source = "jobCard.id", target = "jobCardId")
     ComplaintResponse toResponse(Complaint complaint);
+
+    @Mapping(source = "jobCard.id", target = "jobCardId")
+    List<ComplaintResponse> toResponse(List<Complaint> complaint);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jobCard", ignore = true)

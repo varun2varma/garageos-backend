@@ -20,13 +20,13 @@ public class ComplaintController {
     private final ComplaintService service;
 
     @PostMapping("/jobcards/{jobCardId}/complaints")
-    public ResponseEntity<ApiResponse<ComplaintResponse>> createComplaint(
+    public ResponseEntity<ApiResponse<List<ComplaintResponse>>> createComplaint(
             @PathVariable Long jobCardId,
-            @Valid @RequestBody CreateComplaintRequest request) {
+            @Valid @RequestBody List<CreateComplaintRequest> request) {
 
         return ApiResponseUtil.created(
                 "Complaint created successfully.",
-                service.createComplaint(jobCardId, request));
+                service.createComplaintList(jobCardId, request));
     }
 
     @GetMapping("/jobcards/{jobCardId}/complaints")
