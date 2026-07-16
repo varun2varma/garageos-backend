@@ -1,0 +1,17 @@
+package com.garageos.core.enums;
+
+public enum JobCardStatus {
+
+    OPEN,
+    INSPECTION_PENDING,
+    INSPECTION_COMPLETED,
+    ESTIMATE_PENDING,
+    WAITING_FOR_APPROVAL,
+    APPROVED,
+    REPAIR_IN_PROGRESS,
+    QUALITY_CHECK,
+    READY_FOR_DELIVERY,
+    DELIVERED,
+    CANCELLED
+
+}
