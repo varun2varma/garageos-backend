@@ -4,6 +4,7 @@ import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import org.springframework.data.domain.Page;
 
+
 public interface JobCardService {
 
     JobCardResponse createJobCard(CreateJobCardRequest request);
@@ -23,7 +24,21 @@ public interface JobCardService {
             String sortBy,
             String direction);
 
-    JobCardResponse completeJobCard(Long id);
-    JobCardResponse readyForDelivery(Long id);
-    JobCardResponse closeJobCard(Long id);
+    JobCardResponse startInspection(String jobCardNumber);
+
+    JobCardResponse completeInspection(String jobCardNumber);
+
+    JobCardResponse prepareEstimate(String jobCardNumber);
+
+    JobCardResponse approveEstimate(String jobCardNumber);
+
+    JobCardResponse startRepair(String jobCardNumber);
+
+    JobCardResponse completeRepair(String jobCardNumber);
+
+    JobCardResponse performQualityCheck(String jobCardNumber);
+
+    JobCardResponse readyForDelivery(String jobCardNumber);
+
+    JobCardResponse closeJobCard(String jobCardNumber);
 }

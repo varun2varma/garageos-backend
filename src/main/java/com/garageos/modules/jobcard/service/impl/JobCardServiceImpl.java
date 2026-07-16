@@ -12,8 +12,10 @@ import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.mapper.JobCardMapper;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.jobcard.service.JobCardService;
+import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
 import com.garageos.modules.vehicle.entity.Vehicle;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -26,10 +28,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JobCardServiceImpl implements JobCardService {
 
-    private final JobCardRepository repository;
+    private final JobCardRepository jobCardRepository;
     private final VehicleRepository vehicleRepository;
-    private final JobCardMapper mapper;
-    @Autowired
+    private final JobCardMapper jobCardMapper;
+    private final JobCardStatusValidator statusValidator;
     private final ComplaintService complaintService;
     @Override
     public JobCardResponse createJobCard(CreateJobCardRequest request) {
@@ -41,7 +43,7 @@ public class JobCardServiceImpl implements JobCardService {
                                         + request.getVehicleId()));
 
         Optional<JobCard> latestJobCard =
-                repository.findTopByOrderByIdDesc();
+                jobCardRepository.findTopByOrderByIdDesc();
 
         String jobCardNumber =
                 JobCardNumberGenerator.generate(
@@ -49,28 +51,25 @@ public class JobCardServiceImpl implements JobCardService {
                                 .map(JobCard::getJobCardNumber)
                                 .orElse(null));
 
-        JobCard jobCard = mapper.toEntity(request);
+        JobCard jobCard = jobCardMapper.toEntity(request);
 
         jobCard.setJobCardNumber(jobCardNumber);
         jobCard.setVehicle(vehicle);
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
         jobCard.setStatus(JobCardStatus.OPEN);
-        jobCard = repository.save(jobCard);
+        jobCard = jobCardRepository.save(jobCard);
         complaintService.createComplaintList(jobCard.getId(),request.getComplaints());
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
 
     @Override
     public JobCardResponse getJobCard(Long id) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+        JobCard jobCard = getJobCardByIdOrThrow(id);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
 
     @Override
@@ -78,10 +77,7 @@ public class JobCardServiceImpl implements JobCardService {
             Long id,
             CreateJobCardRequest request) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+        JobCard jobCard = getJobCardByIdOrThrow(id);
 
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() ->
@@ -89,38 +85,31 @@ public class JobCardServiceImpl implements JobCardService {
                                 "Vehicle not found with id : "
                                         + request.getVehicleId()));
 
-        mapper.updateEntity(request, jobCard);
+        jobCardMapper.updateEntity(request, jobCard);
 
         jobCard.setVehicle(vehicle);
         jobCard.setCustomer(vehicle.getCustomer());
 
-        jobCard = repository.save(jobCard);
+        jobCard = jobCardRepository.save(jobCard);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
 
     @Override
     public void deleteJobCard(Long id) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+        JobCard jobCard = getJobCardByIdOrThrow(id);
 
-        repository.delete(jobCard);
+        jobCardRepository.delete(jobCard);
     }
 
     @Override
     public JobCardResponse getJobCardByNumber(
             String jobCardNumber) {
 
-        JobCard jobCard = repository.findByJobCardNumber(jobCardNumber)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found : "
-                                        + jobCardNumber));
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
 
     @Override
@@ -137,54 +126,177 @@ public class JobCardServiceImpl implements JobCardService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<JobCard> jobCards =
-                repository.findAll(pageable);
+                jobCardRepository.findAll(pageable);
 
-        return jobCards.map(mapper::toResponse);
+        return jobCards.map(jobCardMapper::toResponse);
     }
 
-    @Override
-    public JobCardResponse completeJobCard(Long id) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+    @Override
+    @Transactional
+    public JobCardResponse startInspection(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.INSPECTION_PENDING
+        );
+
+        jobCard.setStatus(JobCardStatus.INSPECTION_PENDING);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse completeInspection(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.INSPECTION_COMPLETED
+        );
+
+        jobCard.setStatus(JobCardStatus.INSPECTION_COMPLETED);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse prepareEstimate(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.ESTIMATE_PENDING
+        );
+
+        jobCard.setStatus(JobCardStatus.ESTIMATE_PENDING);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse approveEstimate(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.ESTIMATE_APPROVED
+        );
+
+        jobCard.setStatus(JobCardStatus.ESTIMATE_APPROVED);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse startRepair(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.REPAIR_IN_PROGRESS
+        );
+
+        jobCard.setStatus(JobCardStatus.REPAIR_IN_PROGRESS);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse completeRepair(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.WORK_COMPLETED
+        );
 
         jobCard.setStatus(JobCardStatus.WORK_COMPLETED);
 
-        jobCard = repository.save(jobCard);
+        jobCardRepository.save(jobCard);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
-
     @Override
-    public JobCardResponse readyForDelivery(Long id) {
+    @Transactional
+    public JobCardResponse performQualityCheck(String jobCardNumber) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.QUALITY_CHECK
+        );
+
+        jobCard.setStatus(JobCardStatus.QUALITY_CHECK);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse readyForDelivery(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.READY_FOR_DELIVERY
+        );
 
         jobCard.setStatus(JobCardStatus.READY_FOR_DELIVERY);
 
-        jobCard = repository.save(jobCard);
+        jobCardRepository.save(jobCard);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
-
     @Override
-    public JobCardResponse closeJobCard(Long id) {
+    @Transactional
+    public JobCardResponse closeJobCard(String jobCardNumber) {
 
-        JobCard jobCard = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Job Card not found with id : " + id));
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.CLOSED
+        );
 
         jobCard.setStatus(JobCardStatus.CLOSED);
 
-        jobCard = repository.save(jobCard);
+        jobCardRepository.save(jobCard);
 
-        return mapper.toResponse(jobCard);
+        return jobCardMapper.toResponse(jobCard);
     }
 
+    private JobCard getJobCardByIdOrThrow(Long id) {
+        return jobCardRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + id));
+    }
+    private JobCard getJobCardByNumberOrThrow(String jobCardNumber) {
+
+        return jobCardRepository.findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+    }
 }

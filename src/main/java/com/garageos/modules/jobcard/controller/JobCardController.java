@@ -11,18 +11,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/jobcards")
 @RequiredArgsConstructor
 public class JobCardController {
 
-    private final JobCardService service;
+    private final JobCardService jobCardService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<JobCardResponse>> createJobCard(
             @Valid @RequestBody CreateJobCardRequest request) {
 
-        JobCardResponse response = service.createJobCard(request);
+        JobCardResponse response = jobCardService.createJobCard(request);
 
         return ApiResponseUtil.created(
                 "Job Card created successfully.",
@@ -36,7 +38,7 @@ public class JobCardController {
 
         return ApiResponseUtil.success(
                 "Job Card fetched successfully.",
-                service.getJobCard(id)
+                jobCardService.getJobCard(id)
         );
     }
 
@@ -47,7 +49,7 @@ public class JobCardController {
 
         return ApiResponseUtil.success(
                 "Job Card updated successfully.",
-                service.updateJobCard(id, request)
+                jobCardService.updateJobCard(id, request)
         );
     }
 
@@ -55,7 +57,7 @@ public class JobCardController {
     public ResponseEntity<ApiResponse<Void>> deleteJobCard(
             @PathVariable Long id) {
 
-        service.deleteJobCard(id);
+        jobCardService.deleteJobCard(id);
 
         return ApiResponseUtil.success(
                 "Job Card deleted successfully."
@@ -68,7 +70,7 @@ public class JobCardController {
 
         return ApiResponseUtil.success(
                 "Job Card fetched successfully.",
-                service.getJobCardByNumber(jobCardNumber)
+                jobCardService.getJobCardByNumber(jobCardNumber)
         );
     }
 
@@ -81,7 +83,7 @@ public class JobCardController {
 
         return ApiResponseUtil.success(
                 "Job Cards fetched successfully.",
-                service.getAllJobCards(
+                jobCardService.getAllJobCards(
                         page,
                         size,
                         sortBy,
@@ -90,33 +92,74 @@ public class JobCardController {
         );
     }
 
-    @PutMapping("/{id}/complete")
-    public ResponseEntity<ApiResponse<JobCardResponse>> completeJobCard(
-            @PathVariable Long id) {
+//    @PutMapping("/{jobCardNumber}/complete")
+//    public ResponseEntity<ApiResponse<JobCardResponse>> completeJobCard(
+//            @PathVariable String jobCardNumber) {
+//
+//        return ApiResponseUtil.success(
+//                "Job Card marked as work completed.",
+//                jobCardService.completeJobCard(jobCardNumber)
+//        );
+//    }
 
-        return ApiResponseUtil.success(
-                "Job Card marked as work completed.",
-                service.completeJobCard(id)
-        );
-    }
-
-    @PutMapping("/{id}/ready-for-delivery")
+    @PutMapping("/{jobCardNumber}/ready-for-delivery")
     public ResponseEntity<ApiResponse<JobCardResponse>> readyForDelivery(
-            @PathVariable Long id) {
+            @PathVariable String jobCardNumber) {
 
         return ApiResponseUtil.success(
                 "Job Card is ready for delivery.",
-                service.readyForDelivery(id)
+                jobCardService.readyForDelivery(jobCardNumber)
         );
     }
 
-    @PutMapping("/{id}/close")
+    @PutMapping("/{jobCardNumber}/close")
     public ResponseEntity<ApiResponse<JobCardResponse>> closeJobCard(
-            @PathVariable Long id) {
+            @PathVariable String jobCardNumber) {
 
         return ApiResponseUtil.success(
                 "Job Card closed successfully.",
-                service.closeJobCard(id)
+                jobCardService.closeJobCard(jobCardNumber)
         );
+    }
+    @PostMapping("/{jobCardNumber}/inspection/start")
+    public ResponseEntity<JobCardResponse> startInspection(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.startInspection(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/inspection/complete")
+    public ResponseEntity<JobCardResponse> completeInspection(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.completeInspection(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/estimate/prepare")
+    public ResponseEntity<JobCardResponse> prepareEstimate(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.prepareEstimate(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/estimate/approve")
+    public ResponseEntity<JobCardResponse> approveEstimate(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.approveEstimate(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/repair/start")
+    public ResponseEntity<JobCardResponse> startRepair(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.startRepair(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/quality-check")
+    public ResponseEntity<JobCardResponse> qualityCheck(
+            @PathVariable String jobCardNumber) {
+
+        return ResponseEntity.ok(jobCardService.performQualityCheck(jobCardNumber));
     }
 }
