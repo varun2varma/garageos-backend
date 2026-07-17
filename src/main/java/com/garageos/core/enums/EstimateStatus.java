@@ -6,6 +6,8 @@ public enum EstimateStatus {
 
     SENT_FOR_APPROVAL,
 
+    WAITING_FOR_APPROVAL,
+
     APPROVED,
 
     REJECTED,

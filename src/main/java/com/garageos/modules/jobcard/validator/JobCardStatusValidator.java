@@ -63,9 +63,17 @@ public class JobCardStatusValidator {
 
         VALID_TRANSITIONS.put(
                 JobCardStatus.READY_FOR_DELIVERY,
-                EnumSet.of(JobCardStatus.DELIVERED)
+                EnumSet.of(JobCardStatus.INVOICE_GENERATED)
         );
 
+        VALID_TRANSITIONS.put(
+                JobCardStatus.INVOICE_GENERATED,
+                EnumSet.of(JobCardStatus.PAYMENT_COMPLETED)
+        );
+        VALID_TRANSITIONS.put(
+                JobCardStatus.PAYMENT_COMPLETED,
+                EnumSet.of(JobCardStatus.DELIVERED)
+        );
         VALID_TRANSITIONS.put(
                 JobCardStatus.DELIVERED,
                 EnumSet.of(JobCardStatus.CLOSED)

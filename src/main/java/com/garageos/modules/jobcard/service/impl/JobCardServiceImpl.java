@@ -270,14 +270,31 @@ public class JobCardServiceImpl implements JobCardService {
     }
     @Override
     @Transactional
-    public JobCardResponse closeJobCard(String jobCardNumber) {
+    public JobCardResponse invoiceGenerated(String jobCardNumber) {
 
         JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
 
         statusValidator.validate(
                 jobCard.getStatus(),
-                JobCardStatus.CLOSED
+                JobCardStatus.INVOICE_GENERATED
         );
+
+        jobCard.setStatus(JobCardStatus.INVOICE_GENERATED);
+
+        jobCardRepository.save(jobCard);
+
+        return jobCardMapper.toResponse(jobCard);
+    }
+    @Override
+    @Transactional
+    public JobCardResponse closeJobCard(String jobCardNumber) {
+
+        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+//        statusValidator.validate(
+//                jobCard.getStatus(),
+//                JobCardStatus.CLOSED
+//        );
 
         jobCard.setStatus(JobCardStatus.CLOSED);
 

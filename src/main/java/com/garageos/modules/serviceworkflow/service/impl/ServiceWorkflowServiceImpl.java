@@ -157,7 +157,7 @@ public class ServiceWorkflowServiceImpl
         InvoiceResponse invoice =
                 invoiceService.generateInvoice(jobCardNumber);
 
-        jobCardService.readyForDelivery(jobCardNumber);
+        jobCardService.invoiceGenerated(jobCardNumber);
 
         return WorkflowResponse.builder()
                 .data(invoice)

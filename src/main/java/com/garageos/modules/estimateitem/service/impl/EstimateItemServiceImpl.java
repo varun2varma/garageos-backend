@@ -1,6 +1,7 @@
 package com.garageos.modules.estimateitem.service.impl;
 
 import com.garageos.core.enums.EstimateItemType;
+import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.MoneyCalculator;
 import com.garageos.modules.complaint.entity.Complaint;
@@ -162,6 +163,7 @@ public class EstimateItemServiceImpl
         estimate.setSubtotal(subtotal);
         estimate.setGst(gst);
         estimate.setGrandTotal(grandTotal);
+        estimate.setStatus(EstimateStatus.WAITING_FOR_APPROVAL);
 
         estimateRepository.save(estimate);
     }

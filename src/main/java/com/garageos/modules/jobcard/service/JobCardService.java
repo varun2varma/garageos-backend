@@ -41,4 +41,5 @@ public interface JobCardService {
     JobCardResponse readyForDelivery(String jobCardNumber);
 
     JobCardResponse closeJobCard(String jobCardNumber);
+    JobCardResponse invoiceGenerated(String jobCardNumber);
 }
