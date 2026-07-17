@@ -1,6 +1,7 @@
 package com.garageos.modules.estimate.service.impl;
 
 import com.garageos.core.enums.EstimateStatus;
+import com.garageos.core.enums.InspectionStatus;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -11,6 +12,11 @@ import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.mapper.EstimateMapper;
 import com.garageos.modules.estimate.repository.EstimateRepository;
 import com.garageos.modules.estimate.service.EstimateService;
+import com.garageos.core.enums.EstimateItemType;
+import com.garageos.modules.estimateitem.entity.EstimateItem;
+import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
+import com.garageos.modules.inspection.entity.Inspection;
+import com.garageos.modules.inspection.repository.InspectionRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import jakarta.transaction.Transactional;
@@ -18,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +35,8 @@ public class EstimateServiceImpl implements EstimateService {
     private final EstimateRepository estimateRepository;
     private final JobCardRepository jobCardRepository;
     private final EstimateMapper estimateMapper;
+    private final InspectionRepository inspectionRepository;
+    private final EstimateItemRepository estimateItemRepository;
 
     @Override
     public EstimateResponse createEstimate(CreateEstimateRequest request) {
@@ -177,8 +186,23 @@ public class EstimateServiceImpl implements EstimateService {
 
         if (estimateRepository.existsByJobCardId(jobCard.getId())) {
             throw new BusinessException(
-                    "Estimate already exists for Job Card : "
-                            + jobCardNumber);
+                    "Estimate already exists for Job Card.");
+        }
+
+        List<Inspection> inspections =
+                inspectionRepository.findByComplaintJobCardId(jobCard.getId());
+
+        if (inspections.isEmpty()) {
+            throw new BusinessException(
+                    "No inspections found for Job Card.");
+        }
+
+        for (Inspection inspection : inspections) {
+
+            if (inspection.getStatus() != InspectionStatus.COMPLETED) {
+                throw new BusinessException(
+                        "Complete all inspections before creating estimate.");
+            }
         }
 
         Optional<Estimate> latestEstimate =
@@ -193,17 +217,60 @@ public class EstimateServiceImpl implements EstimateService {
         Estimate estimate = new Estimate();
 
         estimate.setEstimateNumber(estimateNumber);
+
         estimate.setJobCard(jobCard);
+
         estimate.setStatus(EstimateStatus.DRAFT);
 
         estimate.setSubtotal(BigDecimal.ZERO);
+
         estimate.setDiscount(BigDecimal.ZERO);
+
         estimate.setGst(BigDecimal.ZERO);
+
         estimate.setGrandTotal(BigDecimal.ZERO);
 
         estimate = estimateRepository.save(estimate);
 
+        createEstimateItems(estimate, inspections);
+
         return estimateMapper.toResponse(estimate);
+    }
+
+    private void createEstimateItems(
+            Estimate estimate,
+            List<Inspection> inspections) {
+
+        List<EstimateItem> items = new ArrayList<>();
+
+        for (Inspection inspection : inspections) {
+
+            if (inspection.getRecommendedWork() == null
+                    || inspection.getRecommendedWork().isBlank()) {
+                continue;
+            }
+
+            EstimateItem item = new EstimateItem();
+
+            item.setEstimate(estimate);
+
+            item.setComplaint(inspection.getComplaint());
+
+            item.setItemType(EstimateItemType.LABOUR);
+
+            item.setDescription(
+                    inspection.getRecommendedWork());
+
+            item.setQuantity(BigDecimal.ONE);
+
+            item.setUnitPrice(BigDecimal.ZERO);
+
+            item.setTotalPrice(BigDecimal.ZERO);
+
+            items.add(item);
+        }
+
+        estimateItemRepository.saveAll(items);
     }
 
     @Override
