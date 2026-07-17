@@ -24,4 +24,7 @@ public interface InvoiceService {
 
     InvoiceResponse getInvoiceByInvoiceNumber(
             String invoiceNumber);
+
+    InvoiceResponse generateInvoice(String jobCardNumber);
+    InvoiceResponse receivePayment(String jobCardNumber);
 }

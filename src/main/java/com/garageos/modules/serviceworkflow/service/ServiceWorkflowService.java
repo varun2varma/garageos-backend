@@ -1,7 +1,10 @@
 package com.garageos.modules.serviceworkflow.service;
 
+import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
+
+import java.util.List;
 
 public interface ServiceWorkflowService {
 
@@ -24,5 +27,11 @@ public interface ServiceWorkflowService {
     WorkflowResponse readyForDelivery(String jobCardNumber);
 
     WorkflowResponse closeJob(String jobCardNumber);
+
+    WorkflowResponse completeInspection(
+            String jobCardNumber,
+            List<CreateInspectionRequest> request);
+    WorkflowResponse generateInvoice(String jobCardNumber);
+    WorkflowResponse receivePayment(String jobCardNumber);
 
 }

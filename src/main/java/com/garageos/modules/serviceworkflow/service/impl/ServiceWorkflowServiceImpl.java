@@ -1,5 +1,12 @@
 package com.garageos.modules.serviceworkflow.service.impl;
 
+import com.garageos.modules.estimate.dto.response.EstimateResponse;
+import com.garageos.modules.estimate.service.EstimateService;
+import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
+import com.garageos.modules.inspection.dto.response.InspectionResponse;
+import com.garageos.modules.inspection.service.InspectionService;
+import com.garageos.modules.invoice.dto.response.InvoiceResponse;
+import com.garageos.modules.invoice.service.InvoiceService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.service.JobCardService;
@@ -8,12 +15,18 @@ import com.garageos.modules.serviceworkflow.service.ServiceWorkflowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ServiceWorkflowServiceImpl
         implements ServiceWorkflowService {
 
     private final JobCardService jobCardService;
+    private final InspectionService inspectionService;
+    private final EstimateService estimateService;
+    private final InvoiceService invoiceService;
+
 
     @Override
     public WorkflowResponse createJob(CreateJobCardRequest request) {
@@ -30,17 +43,36 @@ public class ServiceWorkflowServiceImpl
     @Override
     public WorkflowResponse startInspection(String jobCardNumber) {
 
+        List<InspectionResponse> inspections =
+                inspectionService.startInspection(jobCardNumber);
+
+        jobCardService.startInspection(jobCardNumber);
+
         return WorkflowResponse.builder()
-                .data(jobCardService.startInspection(jobCardNumber))
+                .data(inspections)
                 .message("Inspection started successfully.")
                 .build();
     }
 
     @Override
     public WorkflowResponse completeInspection(String jobCardNumber) {
+        return null;
+    }
+
+    @Override
+    public WorkflowResponse completeInspection(
+            String jobCardNumber,
+            List<CreateInspectionRequest> request) {
+
+        List<InspectionResponse> inspection =
+                inspectionService.completeInspection(
+                        jobCardNumber,
+                        request);
+
+        jobCardService.completeInspection(jobCardNumber);
 
         return WorkflowResponse.builder()
-                .data(jobCardService.completeInspection(jobCardNumber))
+                .data(inspection)
                 .message("Inspection completed successfully.")
                 .build();
     }
@@ -48,8 +80,13 @@ public class ServiceWorkflowServiceImpl
     @Override
     public WorkflowResponse prepareEstimate(String jobCardNumber) {
 
+        EstimateResponse estimate =
+                estimateService.createEstimate(jobCardNumber);
+
+        jobCardService.prepareEstimate(jobCardNumber);
+
         return WorkflowResponse.builder()
-                .data(jobCardService.prepareEstimate(jobCardNumber))
+                .data(estimate)
                 .message("Estimate prepared successfully.")
                 .build();
     }
@@ -57,8 +94,13 @@ public class ServiceWorkflowServiceImpl
     @Override
     public WorkflowResponse approveEstimate(String jobCardNumber) {
 
+        EstimateResponse estimate =
+                estimateService.approveEstimate(jobCardNumber);
+
+        jobCardService.approveEstimate(jobCardNumber);
+
         return WorkflowResponse.builder()
-                .data(jobCardService.approveEstimate(jobCardNumber))
+                .data(estimate)
                 .message("Estimate approved successfully.")
                 .build();
     }
@@ -107,4 +149,36 @@ public class ServiceWorkflowServiceImpl
                 .message("Job closed successfully.")
                 .build();
     }
+
+    @Override
+    public WorkflowResponse generateInvoice(
+            String jobCardNumber) {
+
+        InvoiceResponse invoice =
+                invoiceService.generateInvoice(jobCardNumber);
+
+        jobCardService.readyForDelivery(jobCardNumber);
+
+        return WorkflowResponse.builder()
+                .data(invoice)
+                .message("Invoice generated successfully.")
+                .build();
+    }
+
+    @Override
+    public WorkflowResponse receivePayment(
+            String jobCardNumber) {
+
+        InvoiceResponse invoice =
+                invoiceService.receivePayment(jobCardNumber);
+
+        jobCardService.closeJobCard(jobCardNumber);
+
+        return WorkflowResponse.builder()
+                .data(invoice)
+                .message("Payment received successfully.")
+                .build();
+    }
+
+
 }

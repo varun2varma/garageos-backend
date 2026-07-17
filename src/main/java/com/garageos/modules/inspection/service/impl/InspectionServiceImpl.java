@@ -10,18 +10,23 @@ import com.garageos.modules.inspection.entity.Inspection;
 import com.garageos.modules.inspection.mapper.InspectionMapper;
 import com.garageos.modules.inspection.repository.InspectionRepository;
 import com.garageos.modules.inspection.service.InspectionService;
+import com.garageos.modules.jobcard.entity.JobCard;
+import com.garageos.modules.jobcard.repository.JobCardRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class InspectionServiceImpl implements InspectionService {
 
-    private final InspectionRepository repository;
+    private final InspectionRepository inspectionRepository;
     private final ComplaintRepository complaintRepository;
-    private final InspectionMapper mapper;
+    private final InspectionMapper inspectionMapper;
+    private final JobCardRepository jobCardRepository;
 
     @Override
     public InspectionResponse createInspection(
@@ -33,33 +38,33 @@ public class InspectionServiceImpl implements InspectionService {
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + complaintId));
 
-        Inspection inspection = mapper.toEntity(request);
+        Inspection inspection = inspectionMapper.toEntity(request);
 
         inspection.setComplaint(complaint);
         inspection.setStatus(InspectionStatus.PENDING);
 
-        inspection = repository.save(inspection);
+        inspection = inspectionRepository.save(inspection);
 
-        return mapper.toResponse(inspection);
+        return inspectionMapper.toResponse(inspection);
     }
 
     @Override
     public InspectionResponse getInspection(Long id) {
 
-        Inspection inspection = repository.findById(id)
+        Inspection inspection = inspectionRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
 
-        return mapper.toResponse(inspection);
+        return inspectionMapper.toResponse(inspection);
     }
 
     @Override
     public List<InspectionResponse> getInspections(Long complaintId) {
 
-        return repository.findByComplaintId(complaintId)
+        return inspectionRepository.findByComplaintId(complaintId)
                 .stream()
-                .map(mapper::toResponse)
+                .map(inspectionMapper::toResponse)
                 .toList();
     }
 
@@ -68,28 +73,157 @@ public class InspectionServiceImpl implements InspectionService {
             Long id,
             CreateInspectionRequest request) {
 
-        Inspection inspection = repository.findById(id)
+        Inspection inspection = inspectionRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
 
-        mapper.updateEntity(request, inspection);
+        inspectionMapper.updateEntity(request, inspection);
 
         inspection.setStatus(InspectionStatus.COMPLETED);
 
-        inspection = repository.save(inspection);
+        inspection = inspectionRepository.save(inspection);
 
-        return mapper.toResponse(inspection);
+        return inspectionMapper.toResponse(inspection);
     }
 
     @Override
     public void deleteInspection(Long id) {
 
-        Inspection inspection = repository.findById(id)
+        Inspection inspection = inspectionRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
 
-        repository.delete(inspection);
+        inspectionRepository.delete(inspection);
     }
+
+//    @Override
+//    public InspectionResponse startInspection(Long complaintId) {
+//
+//        Complaint complaint = complaintRepository.findById(complaintId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException(
+//                                "Complaint not found with id : " + complaintId));
+//
+//        Inspection inspection = new Inspection();
+//
+//        inspection.setComplaint(complaint);
+//        inspection.setStatus(InspectionStatus.PENDING);
+//
+//        inspection = inspectionRepository.save(inspection);
+//
+//        return inspectionMapper.toResponse(inspection);
+//    }
+    @Override
+    @Transactional
+    public List<InspectionResponse> startInspection(String jobCardNumber) {
+
+        JobCard jobCard = jobCardRepository
+                .findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+        // Prevent duplicate inspection creation
+        List<Inspection> existingInspections =
+                inspectionRepository.findByComplaintJobCardId(jobCard.getId());
+
+        if (!existingInspections.isEmpty()) {
+            throw new IllegalStateException(
+                    "Inspection already started for Job Card : "
+                            + jobCardNumber);
+        }
+        List<Complaint> complaints =
+                complaintRepository.findByJobCardId(jobCard.getId());
+
+        if (complaints.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No complaints found for Job Card : " + jobCardNumber);
+        }
+
+        List<Inspection> inspections = new ArrayList<>();
+
+        for (Complaint complaint : complaints) {
+
+            Inspection inspection = new Inspection();
+
+            inspection.setComplaint(complaint);
+            inspection.setStatus(InspectionStatus.PENDING);
+
+            inspections.add(inspection);
+        }
+
+        inspections = inspectionRepository.saveAll(inspections);
+
+        return inspections.stream()
+                .map(inspectionMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<InspectionResponse> completeInspection(
+            String jobCardNumber,
+            List<CreateInspectionRequest> requests) {
+
+        JobCard jobCard = jobCardRepository
+                .findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+
+        List<Complaint> complaints =
+                complaintRepository.findByJobCardId(jobCard.getId());
+
+        if (complaints.size() != requests.size()) {
+            throw new IllegalArgumentException(
+                    "Inspection count must match complaint count.");
+        }
+
+        List<InspectionResponse> responses = new ArrayList<>();
+
+        for (int i = 0; i < complaints.size(); i++) {
+
+            Complaint complaint = complaints.get(i);
+
+            Inspection inspection = inspectionRepository
+                    .findByComplaintId(complaint.getId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Inspection not found for complaint : "
+                                            + complaint.getId()));
+
+            CreateInspectionRequest request = requests.get(i);
+
+            inspection.setInspectionNotes(request.getInspectionNotes());
+            inspection.setRecommendedWork(request.getRecommendedWork());
+            inspection.setStatus(InspectionStatus.COMPLETED);
+
+            inspection = inspectionRepository.save(inspection);
+
+            responses.add(inspectionMapper.toResponse(inspection));
+        }
+
+        return responses;
+    }
+
+//    @Override
+//    public InspectionResponse completeInspection(
+//            Long inspectionId,
+//            CreateInspectionRequest request) {
+//
+//        Inspection inspection = inspectionRepository.findById(inspectionId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException(
+//                                "Inspection not found with id : " + inspectionId));
+//
+//        inspection.setInspectionNotes(request.getInspectionNotes());
+//        inspection.setRecommendedWork(request.getRecommendedWork());
+//        inspection.setStatus(InspectionStatus.COMPLETED);
+//
+//        inspection = inspectionRepository.save(inspection);
+//
+//        return inspectionMapper.toResponse(inspection);
+//    }
+
 }

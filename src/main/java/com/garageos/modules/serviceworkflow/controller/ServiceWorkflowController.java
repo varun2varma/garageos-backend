@@ -1,5 +1,8 @@
 package com.garageos.modules.serviceworkflow.controller;
 
+import com.garageos.core.api.response.ApiResponse;
+import com.garageos.core.api.response.ApiResponseUtil;
+import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
 import com.garageos.modules.serviceworkflow.service.ServiceWorkflowService;
@@ -8,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/workflow")
@@ -25,34 +30,42 @@ public class ServiceWorkflowController {
     }
 
     @PostMapping("/{jobCardNumber}/inspection/start")
-    public ResponseEntity<WorkflowResponse> startInspection(
+    public ResponseEntity<ApiResponse<WorkflowResponse>> startInspection(
             @PathVariable String jobCardNumber) {
 
-        return ResponseEntity.ok(
+        return ApiResponseUtil.success(
+                "Inspection started successfully.",
                 workflowService.startInspection(jobCardNumber));
     }
 
     @PostMapping("/{jobCardNumber}/inspection/complete")
-    public ResponseEntity<WorkflowResponse> completeInspection(
-            @PathVariable String jobCardNumber) {
+    public ResponseEntity<ApiResponse<WorkflowResponse>> completeInspection(
+            @PathVariable String jobCardNumber,
+            @RequestBody List<CreateInspectionRequest> request) {
 
-        return ResponseEntity.ok(
-                workflowService.completeInspection(jobCardNumber));
+        return ApiResponseUtil.success(
+                "Inspection completed successfully.",
+                workflowService.completeInspection(
+                        jobCardNumber,
+                        request));
     }
 
-    @PostMapping("/{jobCardNumber}/estimate/prepare")
-    public ResponseEntity<WorkflowResponse> prepareEstimate(
+    @PostMapping("/{jobCardNumber}/estimate")
+    public ResponseEntity<ApiResponse<WorkflowResponse>>
+    prepareEstimate(
             @PathVariable String jobCardNumber) {
 
-        return ResponseEntity.ok(
+        return ApiResponseUtil.success(
+                "Estimate prepared successfully.",
                 workflowService.prepareEstimate(jobCardNumber));
     }
 
     @PostMapping("/{jobCardNumber}/estimate/approve")
-    public ResponseEntity<WorkflowResponse> approveEstimate(
+    public ResponseEntity<ApiResponse<WorkflowResponse>> approveEstimate(
             @PathVariable String jobCardNumber) {
 
-        return ResponseEntity.ok(
+        return ApiResponseUtil.success(
+                "Estimate approved successfully.",
                 workflowService.approveEstimate(jobCardNumber));
     }
 
@@ -94,5 +107,24 @@ public class ServiceWorkflowController {
 
         return ResponseEntity.ok(
                 workflowService.closeJob(jobCardNumber));
+    }
+
+    @PostMapping("/{jobCardNumber}/invoice")
+    public ResponseEntity<ApiResponse<WorkflowResponse>>
+    generateInvoice(
+            @PathVariable String jobCardNumber) {
+
+        return ApiResponseUtil.success(
+                "Invoice generated successfully.",
+                workflowService.generateInvoice(jobCardNumber));
+    }
+    @PostMapping("/{jobCardNumber}/payment")
+    public ResponseEntity<ApiResponse<WorkflowResponse>>
+    receivePayment(
+            @PathVariable String jobCardNumber) {
+
+        return ApiResponseUtil.success(
+                "Payment received successfully.",
+                workflowService.receivePayment(jobCardNumber));
     }
 }

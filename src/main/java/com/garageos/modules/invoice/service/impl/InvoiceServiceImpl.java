@@ -17,6 +17,7 @@ import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.invoice.service.InvoiceService;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
 
-    private final InvoiceRepository repository;
+    private final InvoiceRepository invoiceRepository;
     private final EstimateRepository estimateRepository;
-    private final InvoiceMapper mapper;
+    private final InvoiceMapper invoiceMapper;
     private final JobCardRepository jobCardRepository;
 
     @Override
@@ -46,13 +47,13 @@ public class InvoiceServiceImpl implements InvoiceService {
                     "Only approved estimates can be converted to invoice.");
         }
 
-        if (repository.existsByEstimateId(estimate.getId())) {
+        if (invoiceRepository.existsByEstimateId(estimate.getId())) {
             throw new BusinessException(
                     "Invoice already exists for this estimate.");
         }
 
         Optional<Invoice> latestInvoice =
-                repository.findTopByOrderByIdDesc();
+                invoiceRepository.findTopByOrderByIdDesc();
 
         String invoiceNumber =
                 InvoiceNumberGenerator.generate(
@@ -60,7 +61,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                                 .map(Invoice::getInvoiceNumber)
                                 .orElse(null));
 
-        Invoice invoice = mapper.toEntity(request);
+        Invoice invoice = invoiceMapper.toEntity(request);
 
         invoice.setInvoiceNumber(invoiceNumber);
         invoice.setEstimate(estimate);
@@ -73,7 +74,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGst(estimate.getGst());
         invoice.setGrandTotal(estimate.getGrandTotal());
 
-        invoice = repository.save(invoice);
+        invoice = invoiceRepository.save(invoice);
 
         JobCard jobCard = estimate.getJobCard();
 
@@ -81,18 +82,18 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         jobCardRepository.save(jobCard);
 
-        return mapper.toResponse(invoice);
+        return invoiceMapper.toResponse(invoice);
     }
 
     @Override
     public InvoiceResponse getInvoice(Long id) {
 
-        Invoice invoice = repository.findById(id)
+        Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Invoice not found with id : " + id));
 
-        return mapper.toResponse(invoice);
+        return invoiceMapper.toResponse(invoice);
     }
 
     @Override
@@ -108,8 +109,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return repository.findAll(pageable)
-                .map(mapper::toResponse);
+        return invoiceRepository.findAll(pageable)
+                .map(invoiceMapper::toResponse);
     }
 
 //    @Override
@@ -124,23 +125,112 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public void deleteInvoice(Long id) {
 
-        Invoice invoice = repository.findById(id)
+        Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Invoice not found with id : " + id));
 
-        repository.delete(invoice);
+        invoiceRepository.delete(invoice);
     }
 
     @Override
     public InvoiceResponse getInvoiceByInvoiceNumber(
             String invoiceNumber) {
 
-        Invoice invoice = repository.findByInvoiceNumber(invoiceNumber)
+        Invoice invoice = invoiceRepository.findByInvoiceNumber(invoiceNumber)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Invoice not found : " + invoiceNumber));
 
-        return mapper.toResponse(invoice);
+        return invoiceMapper.toResponse(invoice);
     }
+
+    @Override
+    @Transactional
+    public InvoiceResponse generateInvoice(String jobCardNumber) {
+
+        JobCard jobCard = jobCardRepository
+                .findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+
+        Estimate estimate = estimateRepository
+                .findByJobCardId(jobCard.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate not found for Job Card : "
+                                        + jobCardNumber));
+
+        if (estimate.getStatus() != EstimateStatus.APPROVED) {
+            throw new BusinessException(
+                    "Estimate must be approved before invoice generation.");
+        }
+
+        if (invoiceRepository.existsByEstimateId(estimate.getId())) {
+            throw new BusinessException(
+                    "Invoice already exists for this Job Card.");
+        }
+
+        Optional<Invoice> latestInvoice =
+                invoiceRepository.findTopByOrderByIdDesc();
+
+        String invoiceNumber =
+                InvoiceNumberGenerator.generate(
+                        latestInvoice
+                                .map(Invoice::getInvoiceNumber)
+                                .orElse(null));
+
+        Invoice invoice = new Invoice();
+
+        invoice.setInvoiceNumber(invoiceNumber);
+
+        invoice.setEstimate(estimate);
+
+        invoice.setInvoiceStatus(InvoiceStatus.GENERATED);
+
+        invoice.setPaymentStatus(PaymentStatus.PENDING);
+
+        invoice.setSubtotal(estimate.getSubtotal());
+
+        invoice.setDiscount(estimate.getDiscount());
+
+        invoice.setGst(estimate.getGst());
+
+        invoice.setGrandTotal(estimate.getGrandTotal());
+
+        invoice = invoiceRepository.save(invoice);
+
+        return invoiceMapper.toResponse(invoice);
+    }
+
+    @Override
+    @Transactional
+    public InvoiceResponse receivePayment(String jobCardNumber) {
+
+        JobCard jobCard = jobCardRepository
+                .findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+
+        Invoice invoice = invoiceRepository
+                .findByEstimateJobCardId(jobCard.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Invoice not found for Job Card : "
+                                        + jobCardNumber));
+
+        if (invoice.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new BusinessException(
+                    "Invoice already paid.");
+        }
+
+        invoice.setPaymentStatus(PaymentStatus.PAID);
+
+        invoice = invoiceRepository.save(invoice);
+
+        return invoiceMapper.toResponse(invoice);
+    }
+
 }

@@ -9,4 +9,8 @@ public interface EstimateRepository extends JpaRepository<Estimate, Long> {
 
     Optional<Estimate> findByEstimateNumber(String estimateNumber);
     Optional<Estimate> findTopByOrderByIdDesc();
+
+    boolean existsByJobCardId(Long jobCardId);
+
+    Optional<Estimate> findByJobCardId(Long jobCardId);
 }

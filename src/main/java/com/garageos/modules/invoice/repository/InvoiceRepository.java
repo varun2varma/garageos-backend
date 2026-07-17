@@ -13,5 +13,6 @@ public interface InvoiceRepository
     Optional<Invoice> findTopByOrderByIdDesc();
 
     boolean existsByEstimateId(Long estimateId);
+    Optional<Invoice> findByEstimateJobCardId(Long jobCardId);
 
 }

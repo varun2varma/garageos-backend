@@ -20,5 +20,9 @@ public interface InspectionService {
             CreateInspectionRequest request);
 
     void deleteInspection(Long id);
+    List<InspectionResponse> startInspection(String jobCardNumber);
 
+    List<InspectionResponse> completeInspection(
+            String jobCardNumber,
+            List<CreateInspectionRequest> request);
 }
