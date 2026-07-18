@@ -2,6 +2,16 @@ window.EstimateItemStep = {
 
     currentComplaintIndex: 0,
 
+    getCurrentInspection() {
+
+        return WorkflowHelper.state.inspections[
+
+            this.currentComplaintIndex
+
+        ];
+
+    },
+
     render() {
 
         const inspections =
@@ -23,6 +33,23 @@ window.EstimateItemStep = {
 
         const inspection =
             inspections[this.currentComplaintIndex];
+
+        if (!inspection) {
+
+            this.currentComplaintIndex = 0;
+
+            if (inspections.length === 0) {
+
+                return `
+        <div class="alert alert-warning">
+        No inspection records found.
+        </div>
+        `;
+            }
+
+            return this.render();
+
+        }
 
         return `
 
@@ -343,17 +370,14 @@ class="btn btn-success"
 
     renderCurrentItems() {
 
-        const inspection =
-            WorkflowHelper.state.inspections[
-                this.currentComplaintIndex
-            ];
+        const inspection = this.getCurrentInspection();
 
         const complaintId = inspection.complaintId;
 
         const items =
             WorkflowHelper.state.estimateItems.filter(
 
-                item => item.complaintId === complaintId
+                item => Number(item.complaintId) === Number(complaintId)
 
             );
 
@@ -532,22 +556,14 @@ class="btn btn-success"
 
         }
 
+//        this.showEstimateSummary();
         Workflow.nextStep();
-
     },
 
     refresh() {
 
-        const stepContainer =
-            document.getElementById("stepContent");
-
-        if (!stepContainer) {
-
-            return;
-
-        }
-
-        stepContainer.innerHTML = this.render();
+        document.getElementById("workflowContent").innerHTML =
+            this.render();
 
         this.bindEvents();
 
@@ -557,10 +573,7 @@ class="btn btn-success"
 
         try {
 
-            const inspection =
-                WorkflowHelper.state.inspections[
-                    this.currentComplaintIndex
-                ];
+            const inspection = this.getCurrentInspection();
 
             const description =
                 document.getElementById(
@@ -611,6 +624,8 @@ class="btn btn-success"
 
             console.log("Part Added", item);
 
+            await WorkflowService.loadEstimateItems();
+
             this.clearPartForm();
 
             this.refresh();
@@ -645,10 +660,7 @@ class="btn btn-success"
 
         try {
 
-            const inspection =
-                WorkflowHelper.state.inspections[
-                    this.currentComplaintIndex
-                ];
+            const inspection = this.getCurrentInspection();
 
             const description =
                 document.getElementById(
@@ -693,6 +705,8 @@ class="btn btn-success"
             console.log("Labour Added", item);
 
             this.clearLabourForm();
+
+            await WorkflowService.loadEstimateItems();
 
             this.refresh();
 
@@ -744,10 +758,7 @@ class="btn btn-success"
 
     calculateComplaintTotals() {
 
-        const inspection =
-            WorkflowHelper.state.inspections[
-                this.currentComplaintIndex
-            ];
+        const inspection = this.getCurrentInspection();
 
         const complaintId =
             inspection.complaintId;
@@ -755,7 +766,7 @@ class="btn btn-success"
         const items =
             WorkflowHelper.state.estimateItems.filter(
 
-                x => x.complaintId === complaintId
+                x => Number(x.complaintId) === Number(complaintId)
 
             );
 

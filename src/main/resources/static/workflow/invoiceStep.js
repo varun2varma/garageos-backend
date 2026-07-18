@@ -2,71 +2,275 @@ window.InvoiceStep = {
 
     render() {
 
+        const invoice =
+            WorkflowHelper.state.invoice;
+
+        const customer =
+            WorkflowHelper.state.customer;
+
+        const vehicle =
+            WorkflowHelper.state.vehicle;
+
+        const items =
+            WorkflowHelper.state.estimateItems || [];
+
+        if (!invoice) {
+
+            return `
+
+<div class="alert alert-danger">
+
+Invoice not available.
+
+</div>
+
+`;
+
+        }
+
+        let rows = "";
+
+        items.forEach(item => {
+
+            rows += `
+
+<tr>
+
+<td>${item.itemType}</td>
+
+<td>${item.description}</td>
+
+<td>${item.quantity}</td>
+
+<td>₹ ${item.unitPrice}</td>
+
+<td>₹ ${item.totalPrice}</td>
+
+</tr>
+
+`;
+
+        });
+
         return `
 
-<div class="card shadow-sm">
+<div class="card shadow">
 
-    <div class="card-header">
+<div class="card-header bg-success text-white">
 
-        <h4 class="mb-0">
+<h3>
 
-            Generate Invoice
+Tax Invoice
 
-        </h4>
+</h3>
 
-    </div>
+</div>
 
-    <div class="card-body">
+<div class="card-body">
 
-        <div class="alert alert-info">
+<div class="row">
 
-            <strong>Estimate ID :</strong>
+<div class="col-md-3">
 
-            <span id="estimateIdLabel">
+<label class="fw-bold">
 
-                ${AppState.workflow.estimateId ?? "-"}
+Invoice No
 
-            </span>
+</label>
 
-        </div>
+<p>
 
-        <div class="mb-4">
+${invoice.invoiceNumber}
 
-            <label class="form-label">
+</p>
 
-                Remarks
+</div>
 
-            </label>
+<div class="col-md-3">
 
-            <textarea
-                id="invoiceRemarks"
-                rows="4"
-                class="form-control"
-                placeholder="Optional remarks"></textarea>
+<label class="fw-bold">
 
-        </div>
+Customer
 
-        <div class="d-flex justify-content-between">
+</label>
 
-            <button
-                id="previousBtn"
-                class="btn btn-outline-secondary">
+<p>
 
-                ← Previous
+${customer.firstName}
 
-            </button>
+</p>
 
-            <button
-                id="generateInvoiceBtn"
-                class="btn btn-success">
+</div>
 
-                Generate Invoice
+<div class="col-md-3">
 
-            </button>
+<label class="fw-bold">
 
-        </div>
+Vehicle
 
-    </div>
+</label>
+
+<p>
+
+${vehicle.registrationNumber}
+
+</p>
+
+</div>
+
+<div class="col-md-3">
+
+<label class="fw-bold">
+
+Status
+
+</label>
+
+<p>
+
+<span class="badge bg-warning">
+
+${invoice.paymentStatus}
+
+</span>
+
+</p>
+
+</div>
+
+</div>
+
+<hr>
+
+<table class="table table-bordered">
+
+<thead>
+
+<tr>
+
+<th>Type</th>
+
+<th>Description</th>
+
+<th>Qty</th>
+
+<th>Price</th>
+
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${rows}
+
+</tbody>
+
+</table>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-3">
+
+<h6>
+
+Subtotal
+
+</h6>
+
+<h4>
+
+₹ ${invoice.subtotal}
+
+</h4>
+
+</div>
+
+<div class="col-md-3">
+
+<h6>
+
+GST
+
+</h6>
+
+<h4>
+
+₹ ${invoice.gst}
+
+</h4>
+
+</div>
+
+<div class="col-md-3">
+
+<h6>
+
+Discount
+
+</h6>
+
+<h4>
+
+₹ ${invoice.discount}
+
+</h4>
+
+</div>
+
+<div class="col-md-3">
+
+<h6 class="text-success">
+
+Grand Total
+
+</h6>
+
+<h3 class="text-success">
+
+₹ ${invoice.grandTotal}
+
+</h3>
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="d-flex justify-content-between">
+
+<button
+
+id="printInvoiceBtn"
+
+class="btn btn-outline-primary"
+
+>
+
+🖨 Print Invoice
+
+</button>
+
+<button
+
+id="paymentBtn"
+
+class="btn btn-success"
+
+>
+
+Proceed To Payment →
+
+</button>
+
+</div>
+
+</div>
 
 </div>
 
@@ -76,76 +280,19 @@ window.InvoiceStep = {
 
     bindEvents() {
 
-        // Reserved for future use
+        document
+            .getElementById("paymentBtn")
+            ?.addEventListener(
+                "click",
+                () => Workflow.nextStep()
+            );
 
-    },
-
-    validate() {
-
-        if (!AppState.workflow.estimateId) {
-
-            alert("Estimate is not available.");
-
-            return false;
-
-        }
-
-        return true;
-
-    },
-
-    collectData() {
-
-        return {
-
-            estimateId:
-                AppState.workflow.estimateId,
-
-            remarks:
-                document
-                    .getElementById("invoiceRemarks")
-                    .value
-                    .trim()
-
-        };
-
-    },
-
-    async save() {
-
-        if (!this.validate()) {
-
-            return false;
-
-        }
-
-        try {
-
-            const request =
-                this.collectData();
-
-            const response =
-                await InvoiceService.createInvoice(request);
-
-            AppState.workflow.invoice =
-                response;
-
-            AppState.workflow.invoiceId =
-                response.id;
-
-            console.log("Invoice Generated", response);
-
-            return true;
-
-        }
-
-        catch (e) {
-
-            alert(e.message);
-
-            return false;
-
-        }
+        document
+            .getElementById("printInvoiceBtn")
+            ?.addEventListener(
+                "click",
+                () => window.print()
+            );
 
     }
 

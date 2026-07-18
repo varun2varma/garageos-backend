@@ -223,7 +223,7 @@ window.WorkflowService = {
 
             }
 
-            WorkflowHelper.state.estimateItems.push(item);
+            await this.loadEstimateItems();
 
             return item;
 
@@ -248,9 +248,9 @@ window.WorkflowService = {
 
                 );
 
-            WorkflowHelper.state.estimateItems = response;
+            WorkflowHelper.state.estimateItems = response.data;
 
-            return response;
+            return response.data;
 
         } catch (e) {
 
@@ -293,12 +293,13 @@ window.WorkflowService = {
 
             await EstimateItemService.deleteItem(itemId);
 
-            WorkflowHelper.state.estimateItems =
-                WorkflowHelper.state.estimateItems.filter(
-
-                    item => item.id !== itemId
-
-                );
+            await this.loadEstimateItems();
+//            WorkflowHelper.state.estimateItems =
+//                WorkflowHelper.state.estimateItems.filter(
+//
+//                    item => item.id !== itemId
+//
+//                );
 
         } catch (e) {
 
@@ -330,6 +331,14 @@ window.WorkflowService = {
 
         }
 
-    }
+    },
+
+    async generateInvoice() {
+
+        console.log("Generating Invoice...");
+
+        return Promise.resolve();
+
+    },
 
 };

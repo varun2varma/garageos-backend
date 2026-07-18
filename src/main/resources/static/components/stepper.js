@@ -7,6 +7,7 @@ window.Stepper = {
         "Inspection",
         "Estimate",
         "Estimate Items",
+        "Estimate Summary",
         "Invoice",
         "Payment"
     ],

@@ -2,7 +2,7 @@ window.Workflow = {
 
     currentStep: 1,
 
-    totalSteps: 8,
+    totalSteps: 9,
 
     render() {
 
@@ -68,9 +68,12 @@ window.Workflow = {
                 return EstimateItemStep.render();
 
             case 7:
-                return InvoiceStep.render();
+                return EstimateSummaryStep.render();
 
             case 8:
+                return InvoiceStep.render();
+
+            case 9:
                 return this.paymentStep();
 
             default:
@@ -171,17 +174,29 @@ window.Workflow = {
 
             case 6:
 
-                EstimateItemStep.bindEvents();
+                WorkflowService
+                    .loadEstimateItems()
+                    .then(() => {
+
+                        EstimateItemStep.refresh();
+
+                    });
 
                 break;
 
             case 7:
 
-                InvoiceStep.bindEvents();
+                EstimateSummaryStep.bindEvents();
 
                 break;
 
             case 8:
+
+                InvoiceStep.bindEvents();
+
+                break;
+
+            case 9:
 
                 break;
 
