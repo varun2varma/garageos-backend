@@ -1,9 +1,11 @@
 package com.garageos.modules.jobcard.dto.response;
 
+import com.garageos.modules.complaint.dto.response.ComplaintResponse;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Builder
@@ -34,6 +36,8 @@ public class JobCardResponse {
     private Long odometerReading;
 
     private LocalDate estimatedDeliveryDate;
+
+    private List<ComplaintResponse> complaints;
 
     private String remarks;
 }

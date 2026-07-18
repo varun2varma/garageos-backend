@@ -5,6 +5,9 @@ import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.JobCardNumberGenerator;
+import com.garageos.modules.complaint.dto.response.ComplaintResponse;
+import com.garageos.modules.complaint.entity.Complaint;
+import com.garageos.modules.complaint.mapper.ComplaintMapper;
 import com.garageos.modules.complaint.service.ComplaintService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,6 +37,7 @@ public class JobCardServiceImpl implements JobCardService {
     private final JobCardMapper jobCardMapper;
     private final JobCardStatusValidator statusValidator;
     private final ComplaintService complaintService;
+    private final ComplaintMapper complaintMapper;
     @Override
     public JobCardResponse createJobCard(CreateJobCardRequest request) {
 
@@ -58,9 +63,22 @@ public class JobCardServiceImpl implements JobCardService {
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
         jobCard.setStatus(JobCardStatus.OPEN);
+        List<Complaint> complaints = complaintMapper.toEntity(request.getComplaints());
+        JobCard finalJobCard = jobCard;
+        complaints.forEach(complaint -> {
+            complaint.setJobCard(finalJobCard);
+            complaint.setStatus(ComplaintStatus.OPEN);
+        });
+        jobCard.setComplaints(complaints);
         jobCard = jobCardRepository.save(jobCard);
-        complaintService.createComplaintList(jobCard.getId(),request.getComplaints());
+//        List<ComplaintResponse> complaintResponseList = complaintService.createComplaintList(jobCard.getId(),request.getComplaints());
+//        List<Complaint> complaints =
+//                complaintService.createJobWorkComplaintList(
+//                        jobCard,
+//                        request.getComplaints()
+//                );
 
+//        jobCard.setComplaints(complaints);
         return jobCardMapper.toResponse(jobCard);
     }
 

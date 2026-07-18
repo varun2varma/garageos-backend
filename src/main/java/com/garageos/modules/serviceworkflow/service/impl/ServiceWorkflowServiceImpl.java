@@ -28,16 +28,35 @@ public class ServiceWorkflowServiceImpl
     private final InvoiceService invoiceService;
 
 
+//    @Override
+//    public WorkflowResponse createJob(CreateJobCardRequest request) {
+//
+//        JobCardResponse response =
+//                jobCardService.createJobCard(request);
+//
+//        return WorkflowResponse.builder()
+//                .data(response)
+//                .message("Job created successfully.")
+//                .build();
+//    }
+
     @Override
     public WorkflowResponse createJob(CreateJobCardRequest request) {
 
         JobCardResponse response =
                 jobCardService.createJobCard(request);
 
-        return WorkflowResponse.builder()
-                .data(response)
-                .message("Job created successfully.")
-                .build();
+        System.out.println(response.getComplaints());
+
+        WorkflowResponse workflowResponse =
+                WorkflowResponse.builder()
+                        .data(response)
+                        .message("Job created successfully.")
+                        .build();
+
+        System.out.println(((JobCardResponse) workflowResponse.getData()).getComplaints());
+
+        return workflowResponse;
     }
 
     @Override

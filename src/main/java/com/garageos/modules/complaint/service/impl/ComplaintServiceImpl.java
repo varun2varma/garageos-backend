@@ -13,6 +13,7 @@ import com.garageos.modules.jobcard.repository.JobCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -65,6 +66,25 @@ public class ComplaintServiceImpl implements ComplaintService {
 
 
         return mapper.toResponse(complaints);
+    }
+
+    @Override
+    public List<Complaint> createJobWorkComplaintList(
+            JobCard jobCard,
+            List<CreateComplaintRequest> request) {
+//
+//        JobCard jobCard = jobCardRepository.findById(jobCardId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException(
+//                                "Job Card not found with id : " + jobCardId));
+
+        List<Complaint> complaints = mapper.toEntity(request);
+
+        complaints.forEach(complaint -> {
+            complaint.setJobCard(jobCard);
+            complaint.setStatus(ComplaintStatus.OPEN);
+        });
+        return repository.saveAll(complaints);
     }
 
     @Override

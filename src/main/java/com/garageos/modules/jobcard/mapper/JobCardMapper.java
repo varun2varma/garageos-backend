@@ -1,5 +1,6 @@
 package com.garageos.modules.jobcard.mapper;
 
+import com.garageos.modules.complaint.mapper.ComplaintMapper;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -10,7 +11,8 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(
         componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.ERROR
+        unmappedTargetPolicy = ReportingPolicy.ERROR,
+        uses = ComplaintMapper.class
 )
 public interface JobCardMapper {
 
@@ -36,6 +38,7 @@ public interface JobCardMapper {
     @Mapping(source = "vehicle.registrationNumber", target = "registrationNumber")
     @Mapping(source = "vehicle.brand", target = "brand")
     @Mapping(source = "vehicle.model", target = "model")
+    @Mapping(source = "complaints", target = "complaints")
     JobCardResponse toResponse(JobCard jobCard);
 
     @Mapping(target = "id", ignore = true)

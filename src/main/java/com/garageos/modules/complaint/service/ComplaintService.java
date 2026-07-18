@@ -2,6 +2,8 @@ package com.garageos.modules.complaint.service;
 
 import com.garageos.modules.complaint.dto.request.CreateComplaintRequest;
 import com.garageos.modules.complaint.dto.response.ComplaintResponse;
+import com.garageos.modules.complaint.entity.Complaint;
+import com.garageos.modules.jobcard.entity.JobCard;
 
 import java.util.List;
 
@@ -13,6 +15,9 @@ public interface ComplaintService {
 
     List<ComplaintResponse> createComplaintList(
             Long jobCardId,
+            List<CreateComplaintRequest> request);
+    List<Complaint> createJobWorkComplaintList(
+            JobCard jobCard,
             List<CreateComplaintRequest> request);
     ComplaintResponse getComplaint(Long id);
 

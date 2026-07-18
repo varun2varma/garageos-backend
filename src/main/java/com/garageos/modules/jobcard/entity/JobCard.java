@@ -2,6 +2,7 @@ package com.garageos.modules.jobcard.entity;
 
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.JobCardStatus;
+import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.vehicle.entity.Vehicle;
 import jakarta.persistence.*;
@@ -12,6 +13,8 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -43,6 +46,13 @@ public class JobCard extends BaseEntity {
     Long odometerReading;
 
     LocalDate estimatedDeliveryDate;
+
+    @OneToMany(
+            mappedBy = "jobCard",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    List<Complaint> complaints = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     String remarks;
