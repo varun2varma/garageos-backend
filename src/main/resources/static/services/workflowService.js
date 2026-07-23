@@ -152,15 +152,13 @@ window.WorkflowService = {
 
     },
 
-    async approveEstimate() {
+    async approveEstimate(jobCardNumber) {
 
         try {
 
             const response =
                 await EstimateService.approveEstimate(
-
-                    WorkflowHelper.state.estimateId
-
+                    jobCardNumber
                 );
 
             WorkflowHelper.state.estimate = response;
@@ -340,5 +338,30 @@ window.WorkflowService = {
         return Promise.resolve();
 
     },
+
+    async finishEstimate(estimateId) {
+
+        const request = {
+            jobCardId: WorkflowHelper.state.jobCardId,
+            remarks: WorkflowHelper.state.estimateRemarks
+        };
+
+        const response = await fetch(
+            `/api/v1/estimates/${estimateId}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(request)
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to finish estimate.");
+        }
+
+        return response.json();
+    }
 
 };

@@ -535,7 +535,7 @@ class="btn btn-success"
 
     },
 
-    nextComplaint() {
+    async nextComplaint() {
 
         const inspections =
             WorkflowHelper.state.inspections || [];
@@ -556,8 +556,20 @@ class="btn btn-success"
 
         }
 
+        try {
+
+                const estimateId = WorkflowHelper.state.estimate.id;
+
+                await WorkflowService.finishEstimate(estimateId);
+
+                Workflow.nextStep();
+
+            } catch (e) {
+                console.error(e);
+                alert("Unable to finish estimate.");
+            }
 //        this.showEstimateSummary();
-        Workflow.nextStep();
+//        Workflow.nextStep();
     },
 
     refresh() {

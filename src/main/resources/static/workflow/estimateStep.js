@@ -285,6 +285,11 @@ window.EstimateStep = {
 
             );
 
+        WorkflowHelper.state.estimate = response;
+
+        WorkflowHelper.state.estimateRemarks =
+            document.getElementById("estimateRemarks").value.trim();
+
         console.log(
             "Estimate Created",
             response

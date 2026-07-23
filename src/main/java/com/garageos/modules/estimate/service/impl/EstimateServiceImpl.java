@@ -108,6 +108,7 @@ public class EstimateServiceImpl implements EstimateService {
                                 "Job Card not found with id : "
                                         + request.getJobCardId()));
 
+        jobCard.setStatus(JobCardStatus.WAITING_FOR_APPROVAL);
         estimateMapper.updateEntity(request, estimate);
 
         estimate.setJobCard(jobCard);

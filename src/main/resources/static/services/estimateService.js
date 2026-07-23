@@ -25,6 +25,23 @@ window.EstimateService = {
 
         );
 
-    }
+    },
+
+    async finishEstimate(estimateId, payload) {
+
+        return await Api.put(
+            `/estimates/${estimateId}`,
+            payload
+        );
+
+    },
+
+    async approveEstimate(jobCardNumber) {
+
+        return await Api.post(
+            `/workflow/${jobCardNumber}/estimate/approve`
+        );
+
+    },
 
 };

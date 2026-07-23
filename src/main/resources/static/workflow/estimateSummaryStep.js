@@ -61,9 +61,7 @@ Customer
 </label>
 
 <p>
-
-${customer.name}
-
+    ${customer?.customerName ?? "-"}
 </p>
 
 </div>
@@ -472,9 +470,30 @@ Complaint Total :
 
                 "click",
 
-                () => this.generateInvoice()
+                () => this.approveEstimate()
 
             );
+
+    },
+
+    async approveEstimate() {
+
+        try {
+
+            await WorkflowService.approveEstimate(
+                WorkflowHelper.state.jobCardNumber
+            );
+
+            WorkflowHelper.state.job.status =
+                "ESTIMATE_APPROVED";
+
+            this.generateInvoice();
+
+        } catch (e) {
+
+            alert(e.message);
+
+        }
 
     },
 
