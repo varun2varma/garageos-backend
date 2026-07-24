@@ -9,12 +9,16 @@ import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.InvoiceNumberGenerator;
 import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.repository.EstimateRepository;
+import com.garageos.modules.estimateitem.entity.EstimateItem;
+import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
 import com.garageos.modules.invoice.dto.request.CreateInvoiceRequest;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.invoice.entity.Invoice;
 import com.garageos.modules.invoice.mapper.InvoiceMapper;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.invoice.service.InvoiceService;
+import com.garageos.modules.invoiceitem.entity.InvoiceItem;
+import com.garageos.modules.invoiceitem.repository.InvoiceItemRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import jakarta.transaction.Transactional;
@@ -22,6 +26,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,6 +39,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final EstimateRepository estimateRepository;
     private final InvoiceMapper invoiceMapper;
     private final JobCardRepository jobCardRepository;
+    private final InvoiceItemRepository invoiceItemRepository;
+    private final EstimateItemRepository estimateItemRepository;
 
     @Override
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
@@ -198,10 +207,116 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGst(estimate.getGst());
 
         invoice.setGrandTotal(estimate.getGrandTotal());
-
+        invoice.setGeneratedAt(LocalDateTime.now());
         invoice = invoiceRepository.save(invoice);
 
         return invoiceMapper.toResponse(invoice);
+    }
+
+    @Override
+    @Transactional
+    public InvoiceResponse generateInvoiceByEstimateId(Long estimateId) {
+
+        Estimate estimate = estimateRepository.findById(estimateId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate not found"));
+
+        if (estimate.getStatus() != EstimateStatus.APPROVED) {
+
+            throw new BusinessException(
+                    "Only approved estimates can generate invoices.");
+
+        }
+
+        if (invoiceRepository.existsByEstimateId(estimateId)) {
+
+            throw new BusinessException(
+                    "Invoice already generated.");
+
+        }
+
+        Invoice invoice = new Invoice();
+
+        invoice.setInvoiceNumber(generateInvoiceNumber());
+
+        invoice.setEstimate(estimate);
+
+//        invoice.setJobCard(estimate.getJobCard());
+
+        invoice.setInvoiceStatus(InvoiceStatus.DRAFT);
+
+        invoice.setPaymentStatus(PaymentStatus.PENDING);
+
+        invoice.setSubtotal(estimate.getSubtotal());
+
+        invoice.setDiscount(estimate.getDiscount());
+
+        invoice.setGst(estimate.getGst());
+
+        invoice.setGrandTotal(estimate.getGrandTotal());
+
+        invoice.setRemarks(estimate.getRemarks());
+
+        invoice = invoiceRepository.save(invoice);
+
+        copyEstimateItems(invoice, estimate);
+
+        JobCard jobCard = estimate.getJobCard();
+
+        jobCard.setStatus(JobCardStatus.INVOICED);
+
+        jobCardRepository.save(jobCard);
+
+        return invoiceMapper.toResponse(invoice);
+
+    }
+
+    private String generateInvoiceNumber() {
+
+        long count = invoiceRepository.count() + 1;
+
+        return String.format(
+                "INV-%d-%06d",
+                java.time.Year.now().getValue(),
+                count
+        );
+    }
+
+    private void copyEstimateItems(
+            Invoice invoice,
+            Estimate estimate) {
+
+        List<EstimateItem> estimateItems =
+                estimateItemRepository.findByEstimateId(estimate.getId());
+
+        List<InvoiceItem> invoiceItems = new ArrayList<>();
+
+        for (EstimateItem estimateItem : estimateItems) {
+
+            InvoiceItem invoiceItem = new InvoiceItem();
+
+            invoiceItem.setInvoice(invoice);
+
+            invoiceItem.setComplaint(estimateItem.getComplaint());
+
+//            invoiceItem.setInspectionFinding(
+//                    estimateItem.getInspectionFinding());
+
+            invoiceItem.setItemType(estimateItem.getItemType());
+
+            invoiceItem.setDescription(estimateItem.getDescription());
+
+            invoiceItem.setQuantity(estimateItem.getQuantity());
+
+            invoiceItem.setUnitPrice(estimateItem.getUnitPrice());
+
+            invoiceItem.setTotalPrice(estimateItem.getTotalPrice());
+
+            invoiceItems.add(invoiceItem);
+        }
+
+        invoiceItemRepository.saveAll(invoiceItems);
     }
 
     @Override

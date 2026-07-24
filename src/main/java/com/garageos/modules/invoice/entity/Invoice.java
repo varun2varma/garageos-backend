@@ -5,13 +5,11 @@ import com.garageos.core.enums.InvoiceStatus;
 import com.garageos.core.enums.PaymentStatus;
 import com.garageos.modules.estimate.entity.Estimate;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -50,4 +48,7 @@ public class Invoice extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String remarks;
+
+    @Column(nullable = false)
+    private LocalDateTime generatedAt;
 }

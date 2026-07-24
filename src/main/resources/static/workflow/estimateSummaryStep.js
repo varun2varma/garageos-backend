@@ -221,14 +221,10 @@ class="btn btn-secondary"
 </button>
 
 <button
+    id="approvalBtn"
+    class="btn btn-success">
 
-id="generateInvoiceBtn"
-
-class="btn btn-success"
-
->
-
-Generate Invoice →
+    Proceed For Approval →
 
 </button>
 
@@ -457,39 +453,38 @@ Complaint Total :
         document
             .getElementById("summaryBackBtn")
             ?.addEventListener(
-
                 "click",
-
                 () => Workflow.previousStep()
-
             );
 
         document
-            .getElementById("generateInvoiceBtn")
+            .getElementById("approvalBtn")
             ?.addEventListener(
-
                 "click",
-
-                () => this.approveEstimate()
-
+                () => this.proceedForApproval()
             );
 
     },
 
-    async approveEstimate() {
+    async proceedForApproval() {
 
         try {
 
-            await WorkflowService.approveEstimate(
-                WorkflowHelper.state.jobCardNumber
+            const response = await EstimateService.updateEstimate(
+                WorkflowHelper.state.estimateId,
+                {
+                    jobCardId: WorkflowHelper.state.estimate.jobCardId,
+                    remarks: WorkflowHelper.state.estimate.remarks
+                }
             );
 
-            WorkflowHelper.state.job.status =
-                "ESTIMATE_APPROVED";
+            WorkflowHelper.state.estimate = response.data;
 
-            this.generateInvoice();
+            Workflow.nextStep();
 
         } catch (e) {
+
+            console.error(e);
 
             alert(e.message);
 
@@ -497,38 +492,60 @@ Complaint Total :
 
     },
 
-    async generateInvoice() {
+//    async approveEstimate() {
+//
+//        try {
+//
+//            await WorkflowService.approveEstimate(
+//                WorkflowHelper.state.jobCardNumber
+//            );
+//
+//            WorkflowHelper.state.job.status =
+//                "ESTIMATE_APPROVED";
+//
+//            this.generateInvoice();
+//
+//        } catch (e) {
+//
+//            alert(e.message);
+//
+//        }
+//
+//    },
 
-        try {
-
-            const response =
-                await InvoiceService.createInvoice({
-
-                    estimateId:
-                        WorkflowHelper.state.estimateId
-
-                });
-
-            WorkflowHelper.state.invoice =
-                response.data;
-
-            WorkflowHelper.state.invoiceId =
-                response.data.id;
-
-            console.log("Invoice", response.data);
-
-            Workflow.nextStep();
-
-        }
-
-        catch (e) {
-
-            console.error(e);
-
-            alert("Unable to generate invoice.");
-
-        }
-
-    }
+//    async generateInvoice() {
+//
+//        try {
+//
+//            const response = await WorkflowService.generateWorkflowInvoice();
+//
+////                await InvoiceService.createInvoice({
+////
+////                    estimateId:
+////                        WorkflowHelper.state.estimateId
+////
+////                });
+//
+//            WorkflowHelper.state.invoice =
+//                response.data;
+//
+//            WorkflowHelper.state.invoiceId =
+//                response.data.id;
+//
+//            console.log("Invoice", response.data);
+//
+//            Workflow.nextStep();
+//
+//        }
+//
+//        catch (e) {
+//
+//            console.error(e);
+//
+//            alert("Unable to generate invoice.");
+//
+//        }
+//
+//    }
 
 };

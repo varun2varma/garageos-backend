@@ -1,0 +1,2 @@
+ALTER TABLE invoice_item
+ALTER COLUMN quantity TYPE NUMERIC(12,2);

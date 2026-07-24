@@ -9,6 +9,7 @@ import com.garageos.modules.complaint.dto.response.ComplaintResponse;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.complaint.mapper.ComplaintMapper;
 import com.garageos.modules.complaint.service.ComplaintService;
+import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -38,6 +39,7 @@ public class JobCardServiceImpl implements JobCardService {
     private final JobCardStatusValidator statusValidator;
     private final ComplaintService complaintService;
     private final ComplaintMapper complaintMapper;
+    private final InspectionFindingService inspectionFindingService;
     @Override
     public JobCardResponse createJobCard(CreateJobCardRequest request) {
 
@@ -164,7 +166,7 @@ public class JobCardServiceImpl implements JobCardService {
         jobCard.setStatus(JobCardStatus.INSPECTION_PENDING);
 
         jobCardRepository.save(jobCard);
-
+        inspectionFindingService.loadInspectionTemplate(jobCard.getId());
         return jobCardMapper.toResponse(jobCard);
     }
     @Override
@@ -207,12 +209,12 @@ public class JobCardServiceImpl implements JobCardService {
 
         JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
 
-        statusValidator.validate(
-                jobCard.getStatus(),
-                JobCardStatus.ESTIMATE_APPROVED
-        );
+//        statusValidator.validate(
+//                jobCard.getStatus(),
+//                JobCardStatus.ESTIMATE_APPROVED
+//        );
 
-        jobCard.setStatus(JobCardStatus.ESTIMATE_APPROVED);
+        jobCard.setStatus(JobCardStatus.REPAIR_PENDING);
 
         jobCardRepository.save(jobCard);
 
@@ -258,12 +260,12 @@ public class JobCardServiceImpl implements JobCardService {
 
         JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
 
-        statusValidator.validate(
-                jobCard.getStatus(),
-                JobCardStatus.QUALITY_CHECK
-        );
+//        statusValidator.validate(
+//                jobCard.getStatus(),
+//                JobCardStatus.QUALITY_CHECK
+//        );
 
-        jobCard.setStatus(JobCardStatus.QUALITY_CHECK);
+        jobCard.setStatus(JobCardStatus.READY_FOR_INVOICE);
 
         jobCardRepository.save(jobCard);
 

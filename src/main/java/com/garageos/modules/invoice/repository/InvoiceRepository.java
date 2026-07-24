@@ -11,7 +11,7 @@ public interface InvoiceRepository
     Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
 
     Optional<Invoice> findTopByOrderByIdDesc();
-
+    Optional<Invoice> findByEstimateId(Long estimateId);
     boolean existsByEstimateId(Long estimateId);
     Optional<Invoice> findByEstimateJobCardId(Long jobCardId);
 

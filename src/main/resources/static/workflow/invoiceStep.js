@@ -2,31 +2,174 @@ window.InvoiceStep = {
 
     render() {
 
-        const invoice =
-            WorkflowHelper.state.invoice;
+        if (!WorkflowHelper.state.invoice) {
+            return this.renderGenerateInvoice();
+        }
 
-        const customer =
-            WorkflowHelper.state.customer;
+        return this.renderInvoice();
 
-        const vehicle =
-            WorkflowHelper.state.vehicle;
+    },
 
-        const items =
-            WorkflowHelper.state.estimateItems || [];
+    renderGenerateInvoice() {
 
-        if (!invoice) {
+        const estimate = WorkflowHelper.state.estimate;
+        const customer = WorkflowHelper.state.customer;
+        const vehicle = WorkflowHelper.state.vehicle;
 
-            return `
+        return `
 
-<div class="alert alert-danger">
+<div class="card shadow">
 
-Invoice not available.
+    <div class="card-header bg-primary text-white">
+
+        <h3 class="mb-0">
+
+            Generate Invoice
+
+        </h3>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+
+                <label class="fw-bold">
+
+                    Customer
+
+                </label>
+
+                <p>
+
+                    ${customer.customerName}
+
+                </p>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <label class="fw-bold">
+
+                    Vehicle
+
+                </label>
+
+                <p>
+
+                    ${vehicle.registrationNumber}
+
+                </p>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <label class="fw-bold">
+
+                    Estimate
+
+                </label>
+
+                <p>
+
+                    ${estimate.estimateNumber}
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="row">
+
+            <div class="col-md-3">
+
+                <h6>Subtotal</h6>
+
+                <h4>
+
+                    ₹ ${estimate.subtotal}
+
+                </h4>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <h6>GST</h6>
+
+                <h4>
+
+                    ₹ ${estimate.gst}
+
+                </h4>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <h6>Discount</h6>
+
+                <h4>
+
+                    ₹ ${estimate.discount}
+
+                </h4>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <h6 class="text-success">
+
+                    Grand Total
+
+                </h6>
+
+                <h3 class="text-success">
+
+                    ₹ ${estimate.grandTotal}
+
+                </h3>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="text-end">
+
+            <button
+                id="generateInvoiceBtn"
+                class="btn btn-success">
+
+                Generate Invoice
+
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
 `;
 
-        }
+    },
+
+    renderInvoice() {
+
+        const invoice = WorkflowHelper.state.invoice;
+        const customer = WorkflowHelper.state.customer;
+        const vehicle = WorkflowHelper.state.vehicle;
+        const items = WorkflowHelper.state.estimateItems || [];
 
         let rows = "";
 
@@ -96,7 +239,7 @@ Customer
 
 <p>
 
-${customer.firstName}
+${customer.customerName}
 
 </p>
 
@@ -122,7 +265,7 @@ ${vehicle.registrationNumber}
 
 <label class="fw-bold">
 
-Status
+Payment Status
 
 </label>
 
@@ -176,11 +319,7 @@ ${rows}
 
 <div class="col-md-3">
 
-<h6>
-
-Subtotal
-
-</h6>
+<h6>Subtotal</h6>
 
 <h4>
 
@@ -192,11 +331,7 @@ Subtotal
 
 <div class="col-md-3">
 
-<h6>
-
-GST
-
-</h6>
+<h6>GST</h6>
 
 <h4>
 
@@ -208,11 +343,7 @@ GST
 
 <div class="col-md-3">
 
-<h6>
-
-Discount
-
-</h6>
+<h6>Discount</h6>
 
 <h4>
 
@@ -245,24 +376,16 @@ Grand Total
 <div class="d-flex justify-content-between">
 
 <button
-
 id="printInvoiceBtn"
-
-class="btn btn-outline-primary"
-
->
+class="btn btn-outline-primary">
 
 🖨 Print Invoice
 
 </button>
 
 <button
-
 id="paymentBtn"
-
-class="btn btn-success"
-
->
+class="btn btn-success">
 
 Proceed To Payment →
 
@@ -280,12 +403,18 @@ Proceed To Payment →
 
     bindEvents() {
 
-        document
-            .getElementById("paymentBtn")
-            ?.addEventListener(
-                "click",
-                () => Workflow.nextStep()
-            );
+        if (!WorkflowHelper.state.invoice) {
+
+            document
+                .getElementById("generateInvoiceBtn")
+                ?.addEventListener(
+                    "click",
+                    () => this.generateInvoice()
+                );
+
+            return;
+
+        }
 
         document
             .getElementById("printInvoiceBtn")
@@ -293,6 +422,38 @@ Proceed To Payment →
                 "click",
                 () => window.print()
             );
+
+        document
+            .getElementById("paymentBtn")
+            ?.addEventListener(
+                "click",
+                () => Workflow.nextStep()
+            );
+
+    },
+
+    async generateInvoice() {
+
+        try {
+
+            const response =
+                await WorkflowService.generateWorkflowInvoice();
+
+            WorkflowHelper.state.invoice =
+                response.data;
+
+            WorkflowHelper.state.invoiceId =
+                response.data.id;
+
+            await Workflow.renderStep();
+
+        } catch (e) {
+
+            console.error(e);
+
+            alert(e.message);
+
+        }
 
     }
 

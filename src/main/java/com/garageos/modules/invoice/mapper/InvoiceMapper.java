@@ -25,6 +25,7 @@ public interface InvoiceMapper {
     @Mapping(target = "grandTotal", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "generatedAt", ignore = true)
     Invoice toEntity(CreateInvoiceRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
@@ -45,6 +46,7 @@ public interface InvoiceMapper {
     @Mapping(target = "grandTotal", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "generatedAt", ignore = true)
     void updateEntity(
             CreateInvoiceRequest request,
             @MappingTarget Invoice invoice);

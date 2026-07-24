@@ -8,8 +8,12 @@ window.Stepper = {
         "Estimate",
         "Estimate Items",
         "Estimate Summary",
+        "Approval",
+        "Repair",
+        "Quality Check",
         "Invoice",
-        "Payment"
+        "Payment",
+        "Delivery"
     ],
 
     render(currentStep, totalSteps) {

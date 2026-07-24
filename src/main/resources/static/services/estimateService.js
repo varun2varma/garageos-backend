@@ -43,5 +43,20 @@ window.EstimateService = {
         );
 
     },
+    async updateEstimate(id, request) {
 
+        return await Api.put(
+            `/estimates/${id}`,
+            request
+        );
+
+    },
+
+//    async getEstimate(id) {
+//        return await Api.get(`/estimates/${id}`);
+//    }
+//
+//    async rejectEstimate(id) {
+//        return await Api.put(`/estimates/${id}/reject`);
+//    }
 };

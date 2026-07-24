@@ -161,7 +161,7 @@ window.WorkflowService = {
                     jobCardNumber
                 );
 
-            WorkflowHelper.state.estimate = response;
+            WorkflowHelper.state.estimate = response.data;
 
             return response;
 
@@ -362,6 +362,203 @@ window.WorkflowService = {
         }
 
         return response.json();
-    }
+    },
+
+
+    async startRepair() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/start`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async completeRepair() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/complete`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async performQualityCheck() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/quality-check`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async generateWorkflowInvoice() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/invoice`
+                );
+
+            WorkflowHelper.state.invoice = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async receivePayment() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/payment`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async readyForDelivery() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/delivery`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async closeJob() {
+
+        try {
+
+            const response =
+                await Api.post(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/close`
+                );
+
+            WorkflowHelper.state.job = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+
+    async loadRepairTasks() {
+
+        try {
+
+            const response =
+                await Api.get(
+                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair-tasks`
+                );
+
+            WorkflowHelper.state.repairTasks = response.data;
+
+            return response.data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async getWorkflowStatus() {
+
+        const response =
+            await Api.get(
+                `/workflow/${WorkflowHelper.state.jobCardNumber}/status`
+            );
+
+        return response.data;
+
+    },
 
 };

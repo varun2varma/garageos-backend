@@ -1,8 +1,6 @@
 package com.garageos.modules.estimate.service.impl;
 
-import com.garageos.core.enums.EstimateStatus;
-import com.garageos.core.enums.InspectionStatus;
-import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.enums.*;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.EstimateNumberGenerator;
@@ -12,13 +10,16 @@ import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.mapper.EstimateMapper;
 import com.garageos.modules.estimate.repository.EstimateRepository;
 import com.garageos.modules.estimate.service.EstimateService;
-import com.garageos.core.enums.EstimateItemType;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
 import com.garageos.modules.inspection.entity.Inspection;
 import com.garageos.modules.inspection.repository.InspectionRepository;
+import com.garageos.modules.inspectionfinding.entity.InspectionFinding;
+import com.garageos.modules.inspectionfinding.repository.InspectionFindingRepository;
+import com.garageos.modules.inspectionmaster.entity.InspectionMasterItem;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.repairtask.service.RepairTaskService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,8 @@ public class EstimateServiceImpl implements EstimateService {
     private final EstimateMapper estimateMapper;
     private final InspectionRepository inspectionRepository;
     private final EstimateItemRepository estimateItemRepository;
+    private final InspectionFindingRepository inspectionFindingRepository;
+    private final RepairTaskService repairTaskService;
 
     @Override
     public EstimateResponse createEstimate(CreateEstimateRequest request) {
@@ -144,6 +147,8 @@ public class EstimateServiceImpl implements EstimateService {
 
         estimate.setStatus(EstimateStatus.APPROVED);
 
+        repairTaskService.createRepairTasks(estimate);
+
         JobCard jobCard = estimate.getJobCard();
 
         jobCard.setStatus(JobCardStatus.ESTIMATE_APPROVED);
@@ -233,46 +238,117 @@ public class EstimateServiceImpl implements EstimateService {
 
         estimate = estimateRepository.save(estimate);
 
-        createEstimateItems(estimate, inspections);
+        createEstimateItems(estimate);
 
         return estimateMapper.toResponse(estimate);
     }
 
-    private void createEstimateItems(
-            Estimate estimate,
-            List<Inspection> inspections) {
+    private void createEstimateItems(Estimate estimate) {
+
+        List<InspectionFinding> findings =
+                inspectionFindingRepository.findByJobCardIdAndStatusIn(
+                        estimate.getJobCard().getId(),
+                        List.of(
+                                InspectionFindingStatus.FAIL,
+                                InspectionFindingStatus.REPAIR_REQUIRED
+                        ));
 
         List<EstimateItem> items = new ArrayList<>();
 
-        for (Inspection inspection : inspections) {
+        BigDecimal subtotal = BigDecimal.ZERO;
 
-            if (inspection.getRecommendedWork() == null
-                    || inspection.getRecommendedWork().isBlank()) {
-                continue;
-            }
+        for (InspectionFinding finding : findings) {
+
+            InspectionMasterItem masterItem =
+                    finding.getInspectionMasterItem();
+
+            BigDecimal labour =
+                    masterItem.getLabourCost() == null
+                            ? BigDecimal.ZERO
+                            : masterItem.getLabourCost();
+
+            BigDecimal parts =
+                    masterItem.getPartCost() == null
+                            ? BigDecimal.ZERO
+                            : masterItem.getPartCost();
+
+            BigDecimal total = labour.add(parts);
 
             EstimateItem item = new EstimateItem();
 
             item.setEstimate(estimate);
 
-            item.setComplaint(inspection.getComplaint());
+            // ✅ Keep complaint traceability
+            item.setComplaint(finding.getComplaint());
+
+            // ✅ Keep inspection traceability
+            item.setInspectionFinding(finding);
 
             item.setItemType(EstimateItemType.LABOUR);
 
-            item.setDescription(
-                    inspection.getRecommendedWork());
+            item.setDescription(masterItem.getServiceName());
 
             item.setQuantity(BigDecimal.ONE);
 
-            item.setUnitPrice(BigDecimal.ZERO);
+            item.setUnitPrice(total);
 
-            item.setTotalPrice(BigDecimal.ZERO);
+            item.setTotalPrice(total);
 
             items.add(item);
+
+            subtotal = subtotal.add(total);
         }
 
         estimateItemRepository.saveAll(items);
+
+        estimate.setSubtotal(subtotal);
+
+        estimate.setDiscount(BigDecimal.ZERO);
+
+        BigDecimal gst = subtotal.multiply(new BigDecimal("0.18"));
+
+        estimate.setGst(gst);
+
+        estimate.setGrandTotal(subtotal.add(gst));
+
+        estimateRepository.save(estimate);
     }
+
+//    private void createEstimateItems(
+//            Estimate estimate,
+//            List<Inspection> inspections) {
+//
+//        List<EstimateItem> items = new ArrayList<>();
+//
+//        for (Inspection inspection : inspections) {
+//
+//            if (inspection.getRecommendedWork() == null
+//                    || inspection.getRecommendedWork().isBlank()) {
+//                continue;
+//            }
+//
+//            EstimateItem item = new EstimateItem();
+//
+//            item.setEstimate(estimate);
+//
+//            item.setComplaint(inspection.getComplaint());
+//
+//            item.setItemType(EstimateItemType.LABOUR);
+//
+//            item.setDescription(
+//                    inspection.getRecommendedWork());
+//
+//            item.setQuantity(BigDecimal.ONE);
+//
+//            item.setUnitPrice(BigDecimal.ZERO);
+//
+//            item.setTotalPrice(BigDecimal.ZERO);
+//
+//            items.add(item);
+//        }
+//
+//        estimateItemRepository.saveAll(items);
+//    }
 
     @Override
     @Transactional
@@ -297,6 +373,8 @@ public class EstimateServiceImpl implements EstimateService {
         }
 
         estimate.setStatus(EstimateStatus.APPROVED);
+
+        repairTaskService.createRepairTasks(estimate);
 
         estimate = estimateRepository.save(estimate);
 

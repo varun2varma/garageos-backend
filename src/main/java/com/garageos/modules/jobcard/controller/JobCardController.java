@@ -5,6 +5,10 @@ import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.service.JobCardService;
+import com.garageos.modules.qualitycheck.dto.request.CreateQualityCheckRequest;
+import com.garageos.modules.qualitycheck.dto.response.QualityCheckResponse;
+import com.garageos.modules.qualitycheck.service.QualityCheckService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class JobCardController {
 
     private final JobCardService jobCardService;
+    private final QualityCheckService qualityCheckService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<JobCardResponse>> createJobCard(
@@ -162,4 +167,47 @@ public class JobCardController {
 
         return ResponseEntity.ok(jobCardService.performQualityCheck(jobCardNumber));
     }
+
+    @PostMapping("/{jobCardNumber}/quality-check/pass")
+    @Operation(summary = "Pass Quality Check")
+    public ResponseEntity<ApiResponse<QualityCheckResponse>> passQualityCheck(
+            @PathVariable String jobCardNumber,
+            @Valid @RequestBody CreateQualityCheckRequest request) {
+
+        QualityCheckResponse response =
+                qualityCheckService.passQualityCheck(jobCardNumber, request);
+
+        return ApiResponseUtil.success(
+                "Quality Check passed successfully.",
+                response);
+    }
+
+    @PostMapping("/{jobCardNumber}/quality-check/fail")
+    @Operation(summary = "Fail Quality Check")
+    public ResponseEntity<ApiResponse<QualityCheckResponse>> failQualityCheck(
+            @PathVariable String jobCardNumber,
+            @Valid @RequestBody CreateQualityCheckRequest request) {
+
+        QualityCheckResponse response =
+                qualityCheckService.failQualityCheck(jobCardNumber, request);
+
+        return ApiResponseUtil.success(
+                "Quality Check failed.",
+                response);
+    }
+
+    @GetMapping("/{jobCardNumber}/quality-check")
+    @Operation(summary = "Get Quality Check")
+    public ResponseEntity<ApiResponse<QualityCheckResponse>> getQualityCheck(
+            @PathVariable String jobCardNumber) {
+
+        QualityCheckResponse response =
+                qualityCheckService.getQualityCheck(jobCardNumber);
+
+        return ApiResponseUtil.success(
+                "Quality Check fetched successfully.",
+                response);
+    }
+
+
 }

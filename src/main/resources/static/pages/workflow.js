@@ -2,35 +2,54 @@ window.Workflow = {
 
     currentStep: 1,
 
-    totalSteps: 9,
+    totalSteps: 13,
 
     render() {
 
         return `
 
-<div class="fade-in">
+    <div class="fade-in">
 
-    <div class="container-fluid">
+        <div class="container-fluid">
 
-        <div id="workflowStepper"></div>
+            <div id="workflowHeader"></div>
 
-        <div id="workflowContent" class="mt-4"></div>
+            <div id="workflowStepper" class="mt-3"></div>
+
+            <div id="workflowContent" class="mt-4"></div>
+
+        </div>
 
     </div>
 
-</div>
-
-`;
+    `;
 
     },
 
-    bindEvents() {
+    async bindEvents() {
 
-        this.renderStep();
+        await this.renderStep();
 
     },
 
-    renderStep() {
+//    renderStep() {
+//
+//        document.getElementById("workflowStepper").innerHTML =
+//            Stepper.render(
+//                this.currentStep,
+//                this.totalSteps
+//            );
+//
+//        document.getElementById("workflowContent").innerHTML =
+//            this.getStepContent();
+//
+//        this.bindStepEvents();
+//
+//    },
+
+    async renderStep() {
+
+        await this.renderHeader();
 
         document.getElementById("workflowStepper").innerHTML =
             Stepper.render(
@@ -42,6 +61,72 @@ window.Workflow = {
             this.getStepContent();
 
         this.bindStepEvents();
+
+    },
+
+
+    async renderHeader() {
+
+        if (!WorkflowHelper.state.jobCardNumber) {
+
+            document.getElementById("workflowHeader").innerHTML = "";
+
+            return;
+
+        }
+
+        const workflow =
+            await WorkflowService.getWorkflowStatus();
+
+        document.getElementById("workflowHeader").innerHTML = `
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between">
+
+                <div>
+
+                    <h5 class="mb-1">
+
+                        Job Card :
+                        ${workflow.jobCardNumber}
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Current Status :
+                        ${workflow.status}
+
+                    </small>
+
+                </div>
+
+                <h4>
+
+                    ${workflow.progress}%
+
+                </h4>
+
+            </div>
+
+            <div class="progress mt-3">
+
+                <div
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    style="width:${workflow.progress}%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
 
     },
 
@@ -71,10 +156,22 @@ window.Workflow = {
                 return EstimateSummaryStep.render();
 
             case 8:
-                return InvoiceStep.render();
+                return ApprovalStep.render();
 
             case 9:
-                return this.paymentStep();
+                return RepairStep.render();
+
+            case 10:
+                return QualityCheckStep.render();
+
+            case 11:
+                return InvoiceStep.render();
+
+            case 12:
+                return PaymentStep.render();
+
+            case 13:
+                return DeliveryStep.render();
 
             default:
                 return "";
@@ -191,12 +288,30 @@ window.Workflow = {
                 break;
 
             case 8:
-
-                InvoiceStep.bindEvents();
-
+                ApprovalStep.bindEvents();
                 break;
 
             case 9:
+                RepairStep.bindEvents();
+                break;
+
+            case 10:
+                QualityCheckStep.bindEvents();
+                break;
+
+            case 11:
+                InvoiceStep.bindEvents();
+                break;
+
+            case 12:
+                PaymentStep.bindEvents();
+                break;
+
+            case 13:
+                DeliveryStep.bindEvents();
+                break;
+
+            case 14:
 
                 break;
 
@@ -204,31 +319,31 @@ window.Workflow = {
 
     },
 
-    nextStep() {
+    async nextStep() {
 
         if (this.currentStep < this.totalSteps) {
 
             this.currentStep++;
 
-            this.renderStep();
+            await this.renderStep();
 
         }
 
     },
 
-    previousStep() {
+    async previousStep() {
 
         if (this.currentStep > 1) {
 
             this.currentStep--;
 
-            this.renderStep();
+            await this.renderStep();
 
         }
 
     },
 
-    goToStep(step) {
+    async goToStep(step) {
 
         if (step < 1 || step > this.totalSteps) {
 
@@ -238,17 +353,17 @@ window.Workflow = {
 
         this.currentStep = step;
 
-        this.renderStep();
+        await this.renderStep();
 
     },
 
-    reset() {
+    async reset() {
 
         this.currentStep = 1;
 
         WorkflowHelper.reset();
 
-        this.renderStep();
+        await this.renderStep();
 
     }
 

@@ -21,6 +21,7 @@ public interface EstimateItemMapper {
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "inspectionFinding", ignore = true)
     EstimateItem toEntity(CreateEstimateItemRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
@@ -36,6 +37,7 @@ public interface EstimateItemMapper {
     @Mapping(target = "totalPrice", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "inspectionFinding", ignore = true)
     void updateEntity(
             CreateEstimateItemRequest request,
             @MappingTarget EstimateItem item);

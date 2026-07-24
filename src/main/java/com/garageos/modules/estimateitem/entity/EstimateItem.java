@@ -4,6 +4,7 @@ import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.EstimateItemType;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.estimate.entity.Estimate;
+import com.garageos.modules.inspectionfinding.entity.InspectionFinding;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,6 +29,10 @@ public class EstimateItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id")
     Complaint complaint;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inspection_finding_id")
+    InspectionFinding inspectionFinding;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
