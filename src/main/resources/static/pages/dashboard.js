@@ -4,77 +4,83 @@ window.Dashboard = {
 
         return `
 
-<div class="fade-in">
+    <div class="fade-in">
 
-    <div class="container-fluid">
+        <div class="container-fluid">
 
-        <!-- Welcome -->
+            <!-- Welcome -->
 
-        <div class="row mb-4">
+            <div class="row mb-4">
 
-            <div class="col">
+                <div class="col">
 
-                <h2 class="fw-bold">
-                    Welcome Back 👋
-                </h2>
+                    <h2 class="fw-bold">
 
-                <p class="text-secondary">
-                    Manage today's garage operations from one place.
-                </p>
+                        Welcome Back 👋
+
+                    </h2>
+
+                    <p class="text-secondary">
+
+                        Manage today's garage operations from one place.
+
+                    </p>
+
+                </div>
 
             </div>
 
-        </div>
+            <!-- Hero Card -->
 
-        <!-- Hero Card -->
+            <div class="row mb-4">
 
-        <div class="row mb-4">
+                <div class="col">
 
-            <div class="col">
+                    <div class="card shadow-sm border-0">
 
-                <div class="card shadow-sm border-0">
+                        <div class="card-body p-5">
 
-                    <div class="card-body p-5">
+                            <div class="row align-items-center">
 
-                        <div class="row align-items-center">
+                                <div class="col-lg-8">
 
-                            <div class="col-lg-8">
+                                    <h3 class="fw-bold mb-3">
 
-                                <h3 class="fw-bold mb-3">
+                                        🚗 Start New Service
 
-                                    🚗 Start New Service
+                                    </h3>
 
-                                </h3>
+                                    <p class="text-secondary mb-4">
 
-                                <p class="text-secondary mb-4">
+                                        Receive a vehicle,
+                                        inspect it,
+                                        prepare estimate,
+                                        generate invoice and
+                                        complete delivery.
 
-                                    Receive a vehicle, inspect it,
-                                    prepare estimate, generate invoice
-                                    and complete delivery.
+                                    </p>
 
-                                </p>
+                                    <button
+                                        id="startServiceBtn"
+                                        class="btn btn-primary btn-lg">
 
-                                <button
-                                    id="startServiceBtn"
-                                    class="btn btn-primary btn-lg">
+                                        Start Service
 
-                                    Start Service
+                                    </button>
 
-                                </button>
+                                </div>
 
-                            </div>
+                                <div class="col-lg-4 text-center">
 
-                            <div
-                                class="col-lg-4 text-center">
+                                    <i
+                                        class="bi bi-car-front-fill"
+                                        style="
+                                            font-size:120px;
+                                            color:#2563EB;
+                                        ">
+                                    </i>
 
-                                <i
-                                    class="bi bi-car-front-fill"
-                                    style="
-                                        font-size:120px;
-                                        color:#2563EB;
-                                    ">
-
-                                </i>
+                                </div>
 
                             </div>
 
@@ -86,29 +92,251 @@ window.Dashboard = {
 
             </div>
 
-        </div>
+            <!-- KPI Cards -->
 
-        <!-- Statistics -->
+            <div class="row g-4 mb-4">
 
-        <div class="row g-4 mb-4">
+                <div class="col-lg-2">
 
-            <div class="col-lg-3">
+                    <div class="card shadow-sm border-0 h-100">
 
-                <div class="card">
+                        <div class="card-body">
 
-                    <div class="card-body">
+                            <div class="d-flex justify-content-between">
 
-                        <h6 class="text-secondary">
+                                <div>
 
-                            Active Jobs
+                                    <small class="text-secondary">
 
-                        </h6>
+                                        Active Jobs
 
-                        <h2>
+                                    </small>
 
-                            18
+                                    <h2
+                                        id="activeJobs"
+                                        class="fw-bold">
 
-                        </h2>
+                                        0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-primary bg-opacity-10 p-3">
+
+                                    <i class="bi bi-car-front-fill text-primary fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <small class="text-secondary">
+
+                                        Pending Estimates
+
+                                    </small>
+
+                                    <h2
+                                        id="pendingEstimates"
+                                        class="fw-bold">
+
+                                        0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-warning bg-opacity-10 p-3">
+
+                                    <i class="bi bi-file-earmark-text text-warning fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <small class="text-secondary">
+
+                                        Ready Delivery
+
+                                    </small>
+
+                                    <h2
+                                        id="readyDelivery"
+                                        class="fw-bold">
+
+                                        0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-success bg-opacity-10 p-3">
+
+                                    <i class="bi bi-check-circle-fill text-success fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <small class="text-secondary">
+
+                                        Completed Today
+
+                                    </small>
+
+                                    <h2
+                                        id="completedToday"
+                                        class="fw-bold">
+
+                                        0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-info bg-opacity-10 p-3">
+
+                                    <i class="bi bi-trophy-fill text-info fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <small class="text-secondary">
+
+                                        Revenue Today
+
+                                    </small>
+
+                                    <h2
+                                        id="todayRevenue"
+                                        class="fw-bold">
+
+                                        ₹0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-success bg-opacity-10 p-3">
+
+                                    <i class="bi bi-currency-rupee text-success fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <small class="text-secondary">
+
+                                        Vehicles
+
+                                    </small>
+
+                                    <h2
+                                        id="totalVehicles"
+                                        class="fw-bold">
+
+                                        0
+
+                                    </h2>
+
+                                </div>
+
+                                <div
+                                    class="rounded-circle bg-dark bg-opacity-10 p-3">
+
+                                    <i class="bi bi-truck text-dark fs-4"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -116,202 +344,438 @@ window.Dashboard = {
 
             </div>
 
-            <div class="col-lg-3">
+            <!-- Workflow Summary -->
 
-                <div class="card">
+            <div class="row mb-4">
 
-                    <div class="card-body">
+                <div class="col-lg-4">
 
-                        <h6 class="text-secondary">
+                    <div class="card shadow-sm border-0 h-100">
 
-                            Pending Estimates
+                        <div class="card-header bg-white">
 
-                        </h6>
+                            <h5 class="mb-0">
 
-                        <h2>
+                                Today's Workflow
 
-                            5
+                            </h5>
 
-                        </h2>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Inspection</span>
+
+                                <strong id="inspectionJobs">0</strong>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Estimate</span>
+
+                                <strong id="estimateJobs">0</strong>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Repair</span>
+
+                                <strong id="repairJobs">0</strong>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Quality Check</span>
+
+                                <strong id="qualityCheckJobs">0</strong>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Ready For Invoice</span>
+
+                                <strong id="readyForInvoiceJobs">0</strong>
+
+                            </div>
+
+                            <div class="d-flex justify-content-between py-2">
+
+                                <span>Payment Pending</span>
+
+                                <strong id="paymentPendingJobs">0</strong>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+                            <div class="col-lg-8">
 
-            <div class="col-lg-3">
+                                <div class="card shadow-sm border-0 h-100">
 
-                <div class="card">
+                                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
 
-                    <div class="card-body">
+                                        <h5 class="mb-0">
 
-                        <h6 class="text-secondary">
+                                            Recent Jobs
 
-                            Ready Delivery
+                                        </h5>
 
-                        </h6>
+                                        <span
+                                            class="badge bg-primary"
+                                            id="recentJobCount">
 
-                        <h2>
+                                            0
 
-                            3
+                                        </span>
 
-                        </h2>
+                                    </div>
+
+                                    <div class="table-responsive">
+
+                                        <table class="table table-hover align-middle mb-0">
+
+                                            <thead class="table-light">
+
+                                                <tr>
+
+                                                    <th>Job Card</th>
+
+                                                    <th>Customer</th>
+
+                                                    <th>Vehicle</th>
+
+                                                    <th>Status</th>
+
+                                                    <th>ETA</th>
+
+                                                    <th width="110">
+
+                                                        Action
+
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+                                            <tbody id="recentJobsTable">
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+                `;
 
-            <div class="col-lg-3">
+                },
 
-                <div class="card">
+        async loadData() {
 
-                    <div class="card-body">
+            try {
 
-                        <h6 class="text-secondary">
+                const summary =
+                    await DashboardService.getSummary();
 
-                            Completed Today
+                this.renderSummary(summary);
 
-                        </h6>
+                const jobs =
+                    await DashboardService.getRecentJobs();
 
-                        <h2>
+                this.renderRecentJobs(jobs);
 
-                            12
+            } catch (error) {
 
-                        </h2>
+                console.error(
+                    "Failed to load dashboard",
+                    error
+                );
 
-                    </div>
+            }
 
-                </div>
+        },
 
-            </div>
+        renderSummary(summary) {
 
-        </div>
+            document.getElementById("activeJobs").textContent =
+                summary.activeJobs;
 
-        <!-- Recent Jobs -->
+            document.getElementById("pendingEstimates").textContent =
+                summary.pendingEstimates;
 
-        <div class="card">
+            document.getElementById("readyDelivery").textContent =
+                summary.readyForDelivery;
 
-            <div class="card-header bg-white">
+            document.getElementById("completedToday").textContent =
+                summary.completedToday;
 
-                <h5 class="mb-0">
+            document.getElementById("todayRevenue").textContent =
+                "₹ " + Number(summary.todayRevenue ?? 0)
+                    .toLocaleString("en-IN", {
 
-                    Recent Jobs
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
 
-                </h5>
+                    });
 
-            </div>
+            document.getElementById("totalVehicles").textContent =
+                summary.totalVehicles;
 
-            <div class="table-responsive">
+            document.getElementById("inspectionJobs").textContent =
+                summary.inspectionJobs;
 
-                <table class="table table-hover mb-0">
+            document.getElementById("estimateJobs").textContent =
+                summary.estimateJobs;
 
-                    <thead>
+            document.getElementById("repairJobs").textContent =
+                summary.repairJobs;
 
-                    <tr>
+            document.getElementById("qualityCheckJobs").textContent =
+                summary.qualityCheckJobs;
 
-                        <th>Job Card</th>
+            document.getElementById("readyForInvoiceJobs").textContent =
+                summary.readyForInvoiceJobs;
 
-                        <th>Customer</th>
+            document.getElementById("paymentPendingJobs").textContent =
+                summary.paymentPendingJobs;
 
-                        <th>Vehicle</th>
+        },
 
-                        <th>Status</th>
+        renderRecentJobs(jobs) {
 
-                    </tr>
+            const tbody =
+                document.getElementById("recentJobsTable");
 
-                    </thead>
+            tbody.innerHTML = "";
 
-                    <tbody>
+            document.getElementById("recentJobCount")
+                .textContent = jobs.length;
 
-                    <tr>
+            jobs.forEach(job => {
 
-                        <td>JC000101</td>
+                tbody.innerHTML += `
 
-                        <td>Rahul</td>
+    <tr>
 
-                        <td>Hyundai i20</td>
+        <td>
 
-                        <td>
+            <strong>
 
-                            <span class="badge bg-warning">
+                ${job.jobCardNumber}
 
-                                Inspection
+            </strong>
 
-                            </span>
+        </td>
 
-                        </td>
+        <td>
 
-                    </tr>
+            <div>
 
-                    <tr>
-
-                        <td>JC000102</td>
-
-                        <td>Suresh</td>
-
-                        <td>Honda City</td>
-
-                        <td>
-
-                            <span class="badge bg-info">
-
-                                Estimate
-
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>JC000103</td>
-
-                        <td>Ajay</td>
-
-                        <td>Creta</td>
-
-                        <td>
-
-                            <span class="badge bg-success">
-
-                                Ready
-
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-                    </tbody>
-
-                </table>
+                ${job.customerName}
 
             </div>
 
-        </div>
+            <small class="text-secondary">
 
-    </div>
+                ${job.mobileNumber}
 
-</div>
+            </small>
 
-`;
+        </td>
 
-    },
+        <td>
 
-    bindEvents() {
+            <div>
 
-        document
-            .getElementById("startServiceBtn")
-            ?.addEventListener("click", () => {
+                ${job.vehicleName}
 
-                Router.navigate("workflow");
+            </div>
+
+            <small class="text-secondary">
+
+                ${job.registrationNumber}
+
+            </small>
+
+        </td>
+
+        <td>
+
+            <span class="${this.getStatusBadge(job.status)}">
+
+                ${this.formatStatus(job.status)}
+
+            </span>
+
+        </td>
+
+        <td>
+
+            ${job.estimatedDeliveryDate ?? "-"}
+
+        </td>
+
+        <td>
+
+            <button
+
+                class="btn btn-sm btn-outline-primary continue-job"
+
+                data-job="${job.jobCardNumber}">
+
+                Continue
+
+            </button>
+
+        </td>
+
+    </tr>
+
+    `;
 
             });
 
-    }
+        },
 
-};
+        getStatusBadge(status) {
+
+            switch (status) {
+
+                case "OPEN":
+                    return "badge bg-dark";
+
+                case "INSPECTION_PENDING":
+                    return "badge bg-warning text-dark";
+
+                case "INSPECTION_COMPLETED":
+                    return "badge bg-info";
+
+                case "ESTIMATE_PENDING":
+                    return "badge bg-info";
+
+                case "WAITING_FOR_APPROVAL":
+                    return "badge bg-primary";
+
+                case "ESTIMATE_APPROVED":
+                    return "badge bg-success";
+
+                case "REPAIR_PENDING":
+                    return "badge bg-secondary";
+
+                case "REPAIR_IN_PROGRESS":
+                    return "badge bg-primary";
+
+                case "REPAIR_COMPLETED":
+                    return "badge bg-success";
+
+                case "QUALITY_CHECK":
+                    return "badge bg-warning text-dark";
+
+                case "READY_FOR_INVOICE":
+                    return "badge bg-info";
+
+                case "INVOICE_GENERATED":
+                    return "badge bg-success";
+
+                case "PAYMENT_PENDING":
+                    return "badge bg-danger";
+
+                case "PAYMENT_COMPLETED":
+                    return "badge bg-success";
+
+                case "READY_FOR_DELIVERY":
+                    return "badge bg-success";
+
+                case "DELIVERED":
+                    return "badge bg-success";
+
+                case "WORK_COMPLETED":
+                    return "badge bg-success";
+
+                case "CLOSED":
+                    return "badge bg-dark";
+
+                case "CANCELLED":
+                    return "badge bg-danger";
+
+                default:
+                    return "badge bg-secondary";
+
+            }
+
+        },
+
+        formatStatus(status) {
+
+            return status
+
+                .replaceAll("_", " ")
+
+                .toLowerCase()
+
+                .replace(/\b\w/g, c => c.toUpperCase());
+
+        },
+
+        bindEvents() {
+
+            document
+
+                .getElementById("startServiceBtn")
+
+                ?.addEventListener("click", () => {
+
+                    Router.navigate("workflow");
+
+                });
+
+            document
+
+                .addEventListener("click", (event) => {
+
+                    const button =
+                        event.target.closest(".continue-job");
+
+                    if (!button) {
+
+                        return;
+
+                    }
+
+                    const jobCardNumber =
+                        button.dataset.job;
+
+                    console.log(
+                        "Continue Job:",
+                        jobCardNumber
+                    );
+
+                    Router.navigate("workflow");
+
+                });
+
+            this.loadData();
+
+        }
+
+    };

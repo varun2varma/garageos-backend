@@ -2,6 +2,9 @@ window.QualityCheckStep = {
 
     render() {
 
+    console.log("QC Step");
+    console.log(WorkflowHelper.state.estimate);
+
         return `
 
 <div class="card shadow-sm">

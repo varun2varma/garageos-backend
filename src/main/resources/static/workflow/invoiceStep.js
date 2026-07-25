@@ -12,7 +12,12 @@ window.InvoiceStep = {
 
     renderGenerateInvoice() {
 
-        const estimate = WorkflowHelper.state.estimate;
+        console.log("========== INVOICE STEP ==========");
+        console.log("Estimate :", WorkflowHelper.state.estimate.data);
+        console.log("Workflow State :", WorkflowHelper.state);
+        console.log("==================================");
+
+        const estimate = WorkflowHelper.state.estimate.data;
         const customer = WorkflowHelper.state.customer;
         const vehicle = WorkflowHelper.state.vehicle;
 
@@ -44,7 +49,7 @@ window.InvoiceStep = {
 
                 <p>
 
-                    ${customer.customerName}
+                    ${customer.firstName}
 
                 </p>
 
@@ -166,7 +171,7 @@ window.InvoiceStep = {
 
     renderInvoice() {
 
-        const invoice = WorkflowHelper.state.invoice;
+        const invoice = WorkflowHelper.state.invoice.data;
         const customer = WorkflowHelper.state.customer;
         const vehicle = WorkflowHelper.state.vehicle;
         const items = WorkflowHelper.state.estimateItems || [];
@@ -238,9 +243,7 @@ Customer
 </label>
 
 <p>
-
-${customer.customerName}
-
+${customer.firstName} ${customer.lastName}
 </p>
 
 </div>
@@ -440,10 +443,10 @@ Proceed To Payment →
                 await WorkflowService.generateWorkflowInvoice();
 
             WorkflowHelper.state.invoice =
-                response.data;
+                response;
 
             WorkflowHelper.state.invoiceId =
-                response.data.id;
+                response.id;
 
             await Workflow.renderStep();
 

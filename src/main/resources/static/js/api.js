@@ -16,7 +16,10 @@ window.Api = {
 
         }
 
-        return await response.json();
+        const result = await response.json();
+        return result.data ?? result;
+
+//        return await response.json();
 
     },
 
@@ -46,7 +49,9 @@ window.Api = {
 
         }
 
-        return await response.json();
+//        return await response.json();
+        const result = await response.json();
+        return result.data ?? result;
 
     },
 
@@ -76,7 +81,9 @@ window.Api = {
 
         }
 
-        return await response.json();
+//        return await response.json();
+        const result = await response.json();
+        return result.data ?? result;
 
     }
 

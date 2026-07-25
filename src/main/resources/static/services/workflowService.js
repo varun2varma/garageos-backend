@@ -26,10 +26,8 @@ window.WorkflowService = {
 
         try {
 
-            const response =
+            const vehicle =
                 await VehicleService.createVehicle(request);
-
-            const vehicle = response.data;
 
             WorkflowHelper.state.vehicle = vehicle;
             WorkflowHelper.state.vehicleId = vehicle.id;
@@ -50,10 +48,8 @@ window.WorkflowService = {
 
         try {
 
-            const response =
+            const job =
                 await JobCardService.createJob(request);
-
-            const job = response.data;
 
             WorkflowHelper.state.job = job;
             WorkflowHelper.state.jobCardId = job.id;
@@ -78,12 +74,11 @@ window.WorkflowService = {
 
         try {
 
-            const responseDump =
-                await InspectionService.createInspection(
+            const inspection = await InspectionService.createInspection(
                     complaintId,
                     request
                 );
-              const response = responseDump.data
+
             if (!WorkflowHelper.state.inspections) {
 
                 WorkflowHelper.state.inspections = [];
@@ -94,24 +89,24 @@ window.WorkflowService = {
                 WorkflowHelper.state.inspections.findIndex(
 
                     inspection =>
-                        inspection.id === response.id
+                        inspection.id === inspection.id
 
                 );
 
             if (index >= 0) {
 
                 WorkflowHelper.state.inspections[index] =
-                    response;
+                    inspection;
 
             }
 
             else {
 
-                WorkflowHelper.state.inspections.push(response);
+                WorkflowHelper.state.inspections.push(inspection);
 
             }
 
-            return response;
+            return inspection;
 
         } catch (e) {
 
@@ -127,10 +122,8 @@ window.WorkflowService = {
 
         try {
 
-            const response =
+            const estimate =
                 await EstimateService.createEstimate(request);
-
-            const estimate = response.data;
 
             WorkflowHelper.state.estimate = estimate;
             WorkflowHelper.state.estimateId = estimate.id;
@@ -156,14 +149,12 @@ window.WorkflowService = {
 
         try {
 
-            const response =
-                await EstimateService.approveEstimate(
-                    jobCardNumber
-                );
+            const estimate =
+                await EstimateService.approveEstimate(jobCardNumber);
 
-            WorkflowHelper.state.estimate = response.data;
+            WorkflowHelper.state.estimate = estimate;
 
-            return response;
+            return estimate;
 
         } catch (e) {
 
@@ -204,7 +195,7 @@ window.WorkflowService = {
 
         try {
 
-            const response =
+            const item =
                 await EstimateItemService.addItem(
 
                     WorkflowHelper.state.estimateId,
@@ -212,8 +203,6 @@ window.WorkflowService = {
                     request
 
                 );
-
-            const item = response.data;
 
             if (!WorkflowHelper.state.estimateItems) {
 
@@ -246,9 +235,9 @@ window.WorkflowService = {
 
                 );
 
-            WorkflowHelper.state.estimateItems = response.data;
+            WorkflowHelper.state.estimateItems = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -374,9 +363,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/start`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -397,9 +386,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/complete`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -420,9 +409,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/quality-check`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -443,9 +432,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/invoice`
                 );
 
-            WorkflowHelper.state.invoice = response.data;
+            WorkflowHelper.state.invoice = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -466,9 +455,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/payment`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -489,9 +478,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/delivery`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -512,9 +501,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/close`
                 );
 
-            WorkflowHelper.state.job = response.data;
+            WorkflowHelper.state.job = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -536,9 +525,9 @@ window.WorkflowService = {
                     `/workflow/${WorkflowHelper.state.jobCardNumber}/repair-tasks`
                 );
 
-            WorkflowHelper.state.repairTasks = response.data;
+            WorkflowHelper.state.repairTasks = response;
 
-            return response.data;
+            return response;
 
         } catch (e) {
 
@@ -557,7 +546,7 @@ window.WorkflowService = {
                 `/workflow/${WorkflowHelper.state.jobCardNumber}/status`
             );
 
-        return response.data;
+        return response;
 
     },
 

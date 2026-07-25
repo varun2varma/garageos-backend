@@ -61,7 +61,7 @@ Customer
 </label>
 
 <p>
-    ${customer?.customerName ?? "-"}
+${customer.firstName} ${customer.lastName}
 </p>
 
 </div>
@@ -478,7 +478,7 @@ Complaint Total :
                 }
             );
 
-            WorkflowHelper.state.estimate = response.data;
+            WorkflowHelper.state.estimate = response;
 
             Workflow.nextStep();
 
@@ -527,12 +527,12 @@ Complaint Total :
 ////                });
 //
 //            WorkflowHelper.state.invoice =
-//                response.data;
+//                response;
 //
 //            WorkflowHelper.state.invoiceId =
-//                response.data.id;
+//                response.id;
 //
-//            console.log("Invoice", response.data);
+//            console.log("Invoice", response);
 //
 //            Workflow.nextStep();
 //

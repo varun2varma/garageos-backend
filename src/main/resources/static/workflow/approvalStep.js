@@ -173,6 +173,9 @@ No Estimate Items
                         "Estimate Approved Successfully."
                     );
 
+                    console.log("After Approval");
+                    console.log(WorkflowHelper.state.estimate);
+
                     Workflow.nextStep();
 
                 });

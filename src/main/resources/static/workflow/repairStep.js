@@ -2,6 +2,9 @@ window.RepairStep = {
 
     render() {
 
+    console.log("Repair Step");
+    console.log(WorkflowHelper.state.estimate);
+
         return `
 
 <div class="card shadow-sm">

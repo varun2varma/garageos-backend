@@ -250,7 +250,7 @@ window.VehicleStep = {
 
                     );
 
-                vehicle = response.data;
+                vehicle = response;
 
             }
 
@@ -265,7 +265,7 @@ window.VehicleStep = {
 
                         );
 
-                    vehicle = response.data;
+                    vehicle = response;
 
                     console.log("Existing vehicle found.");
 
@@ -277,10 +277,12 @@ window.VehicleStep = {
 
                         console.log("Vehicle not found. Creating new vehicle.");
 
+                        console.log("Vehicle Request", request);
+                        console.log("Workflow State", WorkflowHelper.state);
                         const response =
                             await VehicleService.createVehicle(request);
 
-                        vehicle = response.data;
+                        vehicle = response;
 
                     } else {
 

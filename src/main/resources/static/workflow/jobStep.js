@@ -348,7 +348,7 @@ window.JobStep = {
 
                         );
 
-                    job = response.data;
+                    job = response;
 
                 }
 

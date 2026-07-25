@@ -14,12 +14,11 @@ window.CustomerService = {
 
     async findByMobile(mobileNumber) {
 
+        console.log("Searching Mobile:", mobileNumber);
+
         return await Api.get(
-
             "/customers/search?mobileNumber=" + encodeURIComponent(mobileNumber)
-
         );
-
     }
 
 };

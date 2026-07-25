@@ -48,6 +48,9 @@ window.CustomerStep = {
                 <input
                     id="customerMobile"
                     class="form-control"
+                    maxlength="10"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     value="${customer.mobileNumber || ''}">
 
             </div>
@@ -124,37 +127,23 @@ window.CustomerStep = {
 
     collectData() {
 
-        return {
+        const request = {
 
-            firstName:
-                document.getElementById("customerName").value.trim(),
-
-            lastName:
-                WorkflowHelper.state.customer?.lastName || "",
-
-            mobileNumber:
-                document.getElementById("customerMobile").value.trim(),
-
-            email:
-                document.getElementById("customerEmail").value.trim(),
-
-            address:
-                document.getElementById("customerAddress").value.trim(),
-
-            city:
-                WorkflowHelper.state.customer?.city || "",
-
-            state:
-                WorkflowHelper.state.customer?.state || "",
-
-            pincode:
-                WorkflowHelper.state.customer?.pincode || "",
-
-            remarks:
-                WorkflowHelper.state.customer?.remarks || ""
+            firstName: document.getElementById("customerName").value.trim(),
+            lastName: WorkflowHelper.state.customer?.lastName || "",
+            mobileNumber: document.getElementById("customerMobile").value.trim(),
+            email: document.getElementById("customerEmail").value.trim(),
+            address: document.getElementById("customerAddress").value.trim(),
+            city: WorkflowHelper.state.customer?.city || "",
+            state: WorkflowHelper.state.customer?.state || "",
+            pincode: WorkflowHelper.state.customer?.pincode || "",
+            remarks: WorkflowHelper.state.customer?.remarks || ""
 
         };
 
+        console.log("Customer Request:", request);
+
+        return request;
     },
 
     validate(request) {
@@ -173,6 +162,11 @@ window.CustomerStep = {
 
             return false;
 
+        }
+
+        if (!/^[6-9]\d{9}$/.test(request.mobileNumber)) {
+            alert("Please enter a valid 10-digit mobile number.");
+            return false;
         }
 
         return true;
@@ -205,34 +199,36 @@ window.CustomerStep = {
 
                 try {
 
-                    // Try finding existing customer first
-                    response = await CustomerService.findByMobile(
-                        request.mobileNumber
-                    );
+                    response = await CustomerService.findByMobile(request.mobileNumber);
+                    console.log("Existing Customer:", response);
+                    console.log("Customer API Response:", response);
+                    console.log("Customer ID:", response?.id);
+                    WorkflowHelper.state.customer = response;
+                    WorkflowHelper.state.customerId = response.id;
 
                 } catch (e) {
 
-                    // If search returns 404 (or your API's "not found" response),
-                    // create a new customer instead.
-                    response = null;
-                }
+                    const error = JSON.parse(e.message);
 
-                if (response && response.id) {
+                    if (error.message?.includes("Customer not found")) {
 
-                    console.log("Existing customer found", response);
+                        response = await CustomerService.createCustomer(request);
+                        console.log("Customer Response:", response);
+                        console.log("Customer API Response:", response);
+                        console.log("Customer ID:", response?.id);
+                        WorkflowHelper.state.customer = response;
+                        WorkflowHelper.state.customerId = response.id;
 
-                } else {
+                    } else {
 
-                    response = await CustomerService.createCustomer(request);
+                        throw e;
 
-                    console.log("New customer created", response);
+                    }
 
                 }
 
             }
 
-            WorkflowHelper.state.customer = response;
-            WorkflowHelper.state.customerId = response.id;
 
             return true;
 
