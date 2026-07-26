@@ -1,7 +1,9 @@
 package com.garageos.modules.inspectionfinding.service;
 
 import com.garageos.modules.inspectionfinding.dto.request.CreateInspectionFindingRequest;
+import com.garageos.modules.inspectionfinding.dto.request.RecommendationRequest;
 import com.garageos.modules.inspectionfinding.dto.response.InspectionFindingResponse;
+import com.garageos.modules.inspectionmaster.dto.response.InspectionMasterItemResponse;
 
 import java.util.List;
 
@@ -28,4 +30,8 @@ public interface InspectionFindingService {
             Long inspectionId);
 
     void completeInspection(Long jobCardId);
+
+    List<InspectionMasterItemResponse> getRecommendations(
+            RecommendationRequest request
+    );
 }

@@ -5,6 +5,7 @@ import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.inspectionmaster.entity.InspectionMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -24,10 +25,7 @@ public interface InspectionMasterRepository
     FROM InspectionMaster im
     WHERE LOWER(im.make) = LOWER(:make)
       AND LOWER(im.model) = LOWER(:model)
-      AND (
-            (im.variant IS NULL AND :variant IS NULL)
-            OR LOWER(im.variant) = LOWER(:variant)
-      )
+      AND (:variant IS NULL OR LOWER(im.variant) = LOWER(:variant))
       AND im.fuelType = :fuelType
       AND im.transmissionType = :transmissionType
       AND :year BETWEEN im.minYear AND im.maxYear
@@ -35,13 +33,13 @@ public interface InspectionMasterRepository
       AND im.active = true
     """)
     Optional<InspectionMaster> findApplicableInspectionMaster(
-            String make,
-            String model,
-            String variant,
-            FuelType fuelType,
-            TransmissionType transmissionType,
-            Integer year,
-            Integer odometer
+            @Param("make") String make,
+            @Param("model") String model,
+            @Param("variant") String variant,
+            @Param("fuelType") FuelType fuelType,
+            @Param("transmissionType") TransmissionType transmissionType,
+            @Param("year") Integer year,
+            @Param("odometer") Integer odometer
     );
 
 }

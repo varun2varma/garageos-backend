@@ -121,6 +121,69 @@ window.VehicleStep = {
 
             </div>
 
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+
+                    Transmission
+
+                </label>
+
+                <select
+                    id="transmission"
+                    class="form-select">
+
+                    <option value="">Select Transmission</option>
+
+                    <option value="MANUAL"
+                        ${vehicle.transmission === "MANUAL" ? "selected" : ""}>
+                        MANUAL
+                    </option>
+
+                    <option value="AUTOMATIC"
+                        ${vehicle.transmission === "AUTOMATIC" ? "selected" : ""}>
+                        AUTOMATIC
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+
+                    Variant
+
+                </label>
+
+                <input
+                    id="variant"
+                    class="form-control"
+                    value="${vehicle.variant || ''}">
+
+            </div>
+
+            <div class="col-md-6 mb-3">
+
+                <label class="form-label">
+
+                    Manufacturing Year
+
+                </label>
+
+                <input
+                    id="manufacturingYear"
+                    type="number"
+                    min="1990"
+                    max="2035"
+                    class="form-control"
+                    value="${vehicle.manufacturingYear || ''}">
+
+            </div>
+
+
+
         </div>
 
         <div class="d-flex justify-content-between">
@@ -173,8 +236,7 @@ window.VehicleStep = {
 
         return {
 
-            customerId:
-                WorkflowHelper.state.customerId,
+            customerId: WorkflowHelper.state.customerId,
 
             registrationNumber:
                 document.getElementById("registrationNumber").value.trim(),
@@ -185,8 +247,17 @@ window.VehicleStep = {
             model:
                 document.getElementById("model").value.trim(),
 
+            variant:
+                document.getElementById("variant").value.trim(),
+
             fuelType:
                 document.getElementById("fuelType").value,
+
+            transmission:
+                document.getElementById("transmission").value,
+
+            manufacturingYear:
+                Number(document.getElementById("manufacturingYear").value),
 
             odometer:
                 Number(document.getElementById("odometer").value)
@@ -216,6 +287,22 @@ window.VehicleStep = {
         if (!request.model) {
 
             alert("Model is mandatory.");
+
+            return false;
+
+        }
+
+        if (!request.transmission) {
+
+            alert("Transmission is mandatory.");
+
+            return false;
+
+        }
+
+        if (!request.manufacturingYear) {
+
+            alert("Manufacturing Year is mandatory.");
 
             return false;
 
@@ -296,6 +383,18 @@ window.VehicleStep = {
 
             WorkflowHelper.state.vehicle = vehicle;
             WorkflowHelper.state.vehicleId = vehicle.id;
+
+            const recommendations =
+                await InspectionFindingService.loadRecommendations(
+
+                    WorkflowHelper.state.vehicle.id,
+
+                    request.odometer
+
+                );
+
+            WorkflowHelper.state.recommendedInspectionItems =
+                recommendations;
 
             console.log("Vehicle Saved", vehicle);
 

@@ -4,18 +4,22 @@ import com.garageos.core.enums.InspectionFindingStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.inspectionfinding.dto.request.CreateInspectionFindingRequest;
+import com.garageos.modules.inspectionfinding.dto.request.RecommendationRequest;
 import com.garageos.modules.inspectionfinding.dto.response.InspectionFindingResponse;
 import com.garageos.modules.inspectionfinding.entity.InspectionFinding;
 import com.garageos.modules.inspectionfinding.mapper.InspectionFindingMapper;
 import com.garageos.modules.inspectionfinding.repository.InspectionFindingRepository;
 import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
+import com.garageos.modules.inspectionmaster.dto.response.InspectionMasterItemResponse;
 import com.garageos.modules.inspectionmaster.entity.InspectionMaster;
 import com.garageos.modules.inspectionmaster.entity.InspectionMasterItem;
+import com.garageos.modules.inspectionmaster.mapper.InspectionMasterItemMapper;
 import com.garageos.modules.inspectionmaster.repository.InspectionMasterItemRepository;
 import com.garageos.modules.inspectionmaster.repository.InspectionMasterRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.vehicle.entity.Vehicle;
+import com.garageos.modules.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +40,10 @@ public class InspectionFindingServiceImpl
     private final InspectionMasterRepository inspectionMasterRepository;
 
     private final InspectionMasterItemRepository inspectionMasterItemRepository;
+
+    private final VehicleRepository vehicleRepository;
+
+    private final InspectionMasterItemMapper inspectionMasterItemMapper;
 
     @Override
     public InspectionFindingResponse createInspectionFinding(
@@ -138,6 +146,15 @@ public class InspectionFindingServiceImpl
 
         Vehicle vehicle = jobCard.getVehicle();
 
+        System.out.println("Make        : " + vehicle.getBrand() + " (" + vehicle.getBrand().getClass() + ")");
+        System.out.println("Model       : " + vehicle.getModel() + " (" + vehicle.getModel().getClass() + ")");
+        System.out.println("Variant     : " + vehicle.getVariant() + " (" +
+                (vehicle.getVariant() == null ? "null" : vehicle.getVariant().getClass()) + ")");
+        System.out.println("FuelType    : " + vehicle.getFuelType());
+        System.out.println("Transmission: " + vehicle.getTransmission());
+        System.out.println("Year        : " + vehicle.getManufacturingYear());
+        System.out.println("Odometer    : " + jobCard.getOdometerReading().intValue());
+
         InspectionMaster master =
                 inspectionMasterRepository
                         .findApplicableInspectionMaster(
@@ -208,6 +225,51 @@ public class InspectionFindingServiceImpl
             throw new BusinessException(
                     "Complete all inspection items before finishing inspection.");
         }
+
+    }
+
+    @Override
+    public List<InspectionMasterItemResponse> getRecommendations(
+            RecommendationRequest request) {
+
+        Vehicle vehicle =
+                vehicleRepository.findById(request.getVehicleId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Vehicle not found"));
+        System.out.println("==============================");
+        System.out.println("Make        : " + vehicle.getBrand());
+        System.out.println("Model       : " + vehicle.getModel());
+        System.out.println("Variant     : " + vehicle.getVariant());
+        System.out.println("FuelType    : " + vehicle.getFuelType());
+        System.out.println("Transmission: " + vehicle.getTransmission());
+        System.out.println("Year        : " + vehicle.getManufacturingYear());
+        System.out.println("Odometer    : " + request.getOdometer());
+        System.out.println("==============================");
+
+        InspectionMaster master =
+                inspectionMasterRepository.findApplicableInspectionMaster(
+
+                        vehicle.getBrand(),
+
+                        vehicle.getModel(),
+
+                        vehicle.getVariant(),
+
+                        vehicle.getFuelType(),
+
+                        vehicle.getTransmission(),
+
+                        vehicle.getManufacturingYear(),
+
+                        request.getOdometer()
+
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException("Inspection Master not found"));
+
+        return master.getItems()
+                .stream()
+                .map(inspectionMasterItemMapper::toResponse)
+                .toList();
 
     }
 }

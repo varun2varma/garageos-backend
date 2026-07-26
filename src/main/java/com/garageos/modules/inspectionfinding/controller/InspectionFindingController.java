@@ -3,8 +3,10 @@ package com.garageos.modules.inspectionfinding.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.inspectionfinding.dto.request.CreateInspectionFindingRequest;
+import com.garageos.modules.inspectionfinding.dto.request.RecommendationRequest;
 import com.garageos.modules.inspectionfinding.dto.response.InspectionFindingResponse;
 import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
+import com.garageos.modules.inspectionmaster.dto.response.InspectionMasterItemResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -77,4 +79,13 @@ public class InspectionFindingController {
                 "Inspection Finding deleted successfully.");
     }
 
+    @PostMapping("/recommendations")
+    public ResponseEntity<ApiResponse<List<InspectionMasterItemResponse>>> getRecommendations(
+            @RequestBody RecommendationRequest request) {
+
+        return ApiResponseUtil.success(
+                "Recommendations fetched successfully.",
+                service.getRecommendations(request)
+        );
+    }
 }

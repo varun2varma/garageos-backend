@@ -22,7 +22,9 @@ window.WorkflowHelper = {
         estimateItems: [],
 
         invoiceId: null,
-        invoice: null
+        invoice: null,
+
+        recommendedInspectionItems: []
 
     },
 

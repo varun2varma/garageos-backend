@@ -26,6 +26,8 @@ window.JobStep = {
 
         </div>
 
+        <div id="recommendedInspectionContainer" class="mb-3"></div>
+
         <button
             id="addComplaintBtn"
             class="btn btn-outline-primary mb-4">
@@ -166,7 +168,63 @@ window.JobStep = {
 
     },
 
+    renderRecommendations() {
+
+        const container =
+            document.getElementById("recommendedInspectionContainer");
+
+        if (!container) return;
+
+        const items =
+            WorkflowHelper.state.recommendedInspectionItems || [];
+
+        container.innerHTML = "";
+
+        if (items.length === 0) return;
+
+        container.innerHTML =
+            `<label class="form-label">Recommended Inspection Items</label>`;
+
+        items.forEach(item => {
+
+            container.innerHTML += `
+                <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                    <span>${item.checkItem}</span>
+
+                    <button
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="JobStep.addRecommendation('${item.checkItem}')">
+                        +
+                    </button>
+                </div>
+            `;
+        });
+
+    },
+
+    addRecommendation(name) {
+
+        const exists = [...document.querySelectorAll(".complaint-input")]
+            .some(input => input.value.trim() === name);
+
+        if (exists) {
+            return;
+        }
+
+        document
+            .getElementById("complaintsContainer")
+            .insertAdjacentHTML(
+                "beforeend",
+                this.complaintRow(name)
+            );
+
+        this.bindRemoveButtons();
+
+    },
+
     bindEvents() {
+
+        this.renderRecommendations();
 
         document
             .getElementById("previousBtn")
