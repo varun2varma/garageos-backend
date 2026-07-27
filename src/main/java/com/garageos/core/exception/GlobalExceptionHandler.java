@@ -1,6 +1,8 @@
 package com.garageos.core.exception;
 
 import com.garageos.core.api.error.ApiError;
+import com.garageos.core.api.response.ApiResponse;
+import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.core.util.RequestContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,11 +54,33 @@ public class GlobalExceptionHandler {
                 .body(buildError(ex.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleException(Exception ex) {
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ApiError> handleException(Exception ex) {
+//
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(buildError("Something went wrong."));
+//    }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(buildError("Something went wrong."));
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException ex) {
+
+        return ApiResponseUtil.badRequest(ex.getMessage());
+    }
+
+//    @ExceptionHandler(ResourceNotFoundException.class)
+//    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(
+//            ResourceNotFoundException ex) {
+//
+//        return ApiResponseUtil.notFound(ex.getMessage());
+//    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
+
+        return ApiResponseUtil.internalServerError(
+                "Something went wrong."
+        );
     }
 
     private ApiError buildError(String message) {

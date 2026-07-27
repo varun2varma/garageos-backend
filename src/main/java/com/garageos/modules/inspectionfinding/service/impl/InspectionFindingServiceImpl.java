@@ -19,10 +19,13 @@ import com.garageos.modules.inspectionmaster.repository.InspectionMasterReposito
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.vehicle.entity.Vehicle;
+import com.garageos.core.enums.FuelType;
+import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -232,39 +235,44 @@ public class InspectionFindingServiceImpl
     public List<InspectionMasterItemResponse> getRecommendations(
             RecommendationRequest request) {
 
-        Vehicle vehicle =
-                vehicleRepository.findById(request.getVehicleId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException("Vehicle not found"));
+//        String brand = request.getBrand();
+//        String model = request.getModel();
+//        String variant = request.getVariant();
+//        FuelType fuelType = request.getFuelType();
+//        TransmissionType transmission = request.getTransmission();
+//        Integer manufacturingYear = request.getManufacturingYear();
+//        Integer odometer = request.getOdometer();
+
+        // existing recommendation logic
         System.out.println("==============================");
-        System.out.println("Make        : " + vehicle.getBrand());
-        System.out.println("Model       : " + vehicle.getModel());
-        System.out.println("Variant     : " + vehicle.getVariant());
-        System.out.println("FuelType    : " + vehicle.getFuelType());
-        System.out.println("Transmission: " + vehicle.getTransmission());
-        System.out.println("Year        : " + vehicle.getManufacturingYear());
+        System.out.println("Request        : " + request.toString());
+        System.out.println("Make        : " + request.getBrand());
+        System.out.println("Model       : " + request.getModel());
+        System.out.println("Variant     : " + request.getVariant());
+        System.out.println("FuelType    : " + request.getFuelType());
+        System.out.println("Transmission: " + request.getTransmission());
+        System.out.println("Year        : " + request.getManufacturingYear());
         System.out.println("Odometer    : " + request.getOdometer());
         System.out.println("==============================");
 
         InspectionMaster master =
                 inspectionMasterRepository.findApplicableInspectionMaster(
 
-                        vehicle.getBrand(),
+                        request.getBrand(),
 
-                        vehicle.getModel(),
+                        request.getModel(),
 
-                        vehicle.getVariant(),
+                        request.getVariant(),
 
-                        vehicle.getFuelType(),
+                        request.getFuelType(),
 
-                        vehicle.getTransmission(),
+                        request.getTransmission(),
 
-                        vehicle.getManufacturingYear(),
+                        request.getManufacturingYear(),
 
                         request.getOdometer()
 
-                ).orElseThrow(() ->
-                        new ResourceNotFoundException("Inspection Master not found"));
+                ).orElse(new InspectionMaster());
 
         return master.getItems()
                 .stream()

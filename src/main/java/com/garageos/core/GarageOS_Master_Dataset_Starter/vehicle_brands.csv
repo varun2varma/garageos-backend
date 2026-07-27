@@ -1,0 +1,74 @@
+name,country,active
+Maruti Suzuki,India,true
+Hyundai,South Korea,true
+Tata,India,true
+Mahindra,India,true
+Toyota,Japan,true
+Honda,Japan,true
+Kia,South Korea,true
+MG,United Kingdom,true
+Renault,France,true
+Nissan,Japan,true
+Skoda,Czech Republic,true
+Volkswagen,Germany,true
+Ford,United States,true
+Chevrolet,United States,true
+Fiat,Italy,true
+Jeep,United States,true
+Citroen,France,true
+BYD,China,true
+Isuzu,Japan,true
+Force Motors,India,true
+BMW,Germany,true
+Mercedes-Benz,Germany,true
+Audi,Germany,true
+Volvo,Sweden,true
+Lexus,Japan,true
+Mini,United Kingdom,true
+Jaguar,United Kingdom,true
+Land Rover,United Kingdom,true
+Porsche,Germany,true
+Tesla,United States,true
+Mitsubishi,Japan,true
+Mazda,Japan,true
+Subaru,Japan,true
+Peugeot,France,true
+Suzuki,Japan,true
+Datsun,Japan,false
+Opel,Germany,false
+SsangYong,South Korea,false
+Chrysler,United States,false
+Dodge,United States,false
+Ram,United States,true
+GMC,United States,true
+Cadillac,United States,true
+Lincoln,United States,true
+Infiniti,Japan,true
+Acura,Japan,true
+Genesis,South Korea,true
+Changan,China,true
+Geely,China,true
+Great Wall Motors,China,true
+Haval,China,true
+Chery,China,true
+BAIC,China,true
+Dongfeng,China,true
+FAW,China,true
+Aston Martin,United Kingdom,true
+Bentley,United Kingdom,true
+Ferrari,Italy,true
+Lamborghini,Italy,true
+Maserati,Italy,true
+McLaren,United Kingdom,true
+Rolls-Royce,United Kingdom,true
+Bugatti,France,true
+Alfa Romeo,Italy,true
+Cupra,Spain,true
+SEAT,Spain,true
+Smart,Germany,true
+Lucid,United States,true
+Rivian,United States,true
+Polestar,Sweden,true
+VinFast,Vietnam,true
+Proton,Malaysia,true
+Perodua,Malaysia,true

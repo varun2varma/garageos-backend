@@ -1,0 +1,8 @@
+make,model,variant,minOdometer,maxOdometer,category,checkItem,description,priority,mandatory,displayOrder,serviceName,serviceDescription,labourCost,partCost,estimatedLabourHours
+Maruti Suzuki,Swift,VXi,0,10000,ENGINE,Engine Oil,Replace engine oil,HIGH,true,1,Engine Oil Replacement,Replace engine oil with OEM grade,400,1800,0.50
+Maruti Suzuki,Swift,VXi,0,10000,FILTERS,Oil Filter,Replace oil filter,HIGH,true,2,Oil Filter Replacement,Replace oil filter,150,300,0.25
+Maruti Suzuki,Swift,VXi,0,10000,BRAKES,Brake Inspection,Inspect brake pads,MEDIUM,false,3,Brake Inspection,Inspect front and rear brakes,250,0,0.30
+Maruti Suzuki,Swift,VXi,10001,20000,ENGINE,Engine Oil,Replace engine oil,HIGH,true,1,Engine Oil Replacement,Replace engine oil with OEM grade,400,1800,0.50
+Maruti Suzuki,Swift,VXi,10001,20000,FILTERS,Air Filter,Replace air filter,MEDIUM,true,2,Air Filter Replacement,Replace air filter,200,450,0.25
+Hyundai,Creta,SX,0,10000,ENGINE,Engine Oil,Replace engine oil,HIGH,true,1,Engine Oil Replacement,Replace engine oil,450,2200,0.50
+Tata,Nexon,Fearless,0,10000,ENGINE,Engine Oil,Replace engine oil,HIGH,true,1,Engine Oil Replacement,Replace engine oil,450,2100,0.50

@@ -7,6 +7,9 @@ public enum FuelType {
     CNG,
     LPG,
     ELECTRIC,
-    HYBRID
+    HYBRID,
+    EV,
+    STRONG_HYBRID,
+    PLUG_IN_HYBRID
 
 }

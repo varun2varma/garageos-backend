@@ -1,0 +1,122 @@
+brand,name,bodyType,seatingCapacity
+Maruti Suzuki,800,HATCHBACK,5
+Maruti Suzuki,Alto,HATCHBACK,5
+Maruti Suzuki,Alto K10,HATCHBACK,5
+Maruti Suzuki,S-Presso,HATCHBACK,5
+Maruti Suzuki,Celerio,HATCHBACK,5
+Maruti Suzuki,WagonR,HATCHBACK,5
+Maruti Suzuki,Swift,HATCHBACK,5
+Maruti Suzuki,Baleno,HATCHBACK,5
+Maruti Suzuki,Ignis,HATCHBACK,5
+Maruti Suzuki,Fronx,SUV,5
+Maruti Suzuki,Dzire,SEDAN,5
+Maruti Suzuki,Ciaz,SEDAN,5
+Maruti Suzuki,Brezza,SUV,5
+Maruti Suzuki,Grand Vitara,SUV,5
+Maruti Suzuki,S-Cross,SUV,5
+Maruti Suzuki,Ertiga,MPV,7
+Maruti Suzuki,XL6,MPV,6
+Maruti Suzuki,Eeco,VAN,7
+Maruti Suzuki,Omni,VAN,8
+Maruti Suzuki,Zen,HATCHBACK,5
+Maruti Suzuki,Zen Estilo,HATCHBACK,5
+Maruti Suzuki,A-Star,HATCHBACK,5
+Maruti Suzuki,Ritz,HATCHBACK,5
+Maruti Suzuki,Kizashi,SEDAN,5
+Maruti Suzuki,Esteem,SEDAN,5
+Maruti Suzuki,Baleno Altura,WAGON,5
+Maruti Suzuki,Versa,VAN,8
+Maruti Suzuki,Gypsy,SUV,5
+
+Hyundai,Eon,HATCHBACK,5
+Hyundai,Santro,HATCHBACK,5
+Hyundai,Grand i10,HATCHBACK,5
+Hyundai,Grand i10 Nios,HATCHBACK,5
+Hyundai,i10,HATCHBACK,5
+Hyundai,i20,HATCHBACK,5
+Hyundai,Elite i20,HATCHBACK,5
+Hyundai,i20 N Line,HATCHBACK,5
+Hyundai,Getz,HATCHBACK,5
+Hyundai,Accent,SEDAN,5
+Hyundai,Verna,SEDAN,5
+Hyundai,Aura,SEDAN,5
+Hyundai,Xcent,SEDAN,5
+Hyundai,Exter,SUV,5
+Hyundai,Venue,SUV,5
+Hyundai,Venue N Line,SUV,5
+Hyundai,Creta,SUV,5
+Hyundai,Creta N Line,SUV,5
+Hyundai,Alcazar,SUV,7
+Hyundai,Tucson,SUV,5
+Hyundai,Santa Fe,SUV,7
+Hyundai,Kona Electric,SUV,5
+Hyundai,Ioniq 5,SUV,5
+
+Tata,Indica,HATCHBACK,5
+Tata,Indica Vista,HATCHBACK,5
+Tata,Bolt,HATCHBACK,5
+Tata,Tiago,HATCHBACK,5
+Tata,Tiago NRG,HATCHBACK,5
+Tata,Altroz,HATCHBACK,5
+Tata,Altroz Racer,HATCHBACK,5
+Tata,Indigo,SEDAN,5
+Tata,Tigor,SEDAN,5
+Tata,Tigor EV,SEDAN,5
+Tata,Zest,SEDAN,5
+Tata,Nano,HATCHBACK,4
+Tata,Punch,SUV,5
+Tata,Punch EV,SUV,5
+Tata,Nexon,SUV,5
+Tata,Nexon EV,SUV,5
+Tata,Harrier,SUV,5
+Tata,Safari,SUV,7
+Tata,Hexa,SUV,7
+Tata,Sumo,SUV,9
+Tata,Sumo Gold,SUV,9
+Tata,Aria,MPV,7
+Tata,Curvv,SUV,5
+Tata,Curvv EV,SUV,5
+
+Mahindra,Bolero,SUV,7
+Mahindra,Bolero Neo,SUV,7
+Mahindra,Bolero Camper,PICKUP,5
+Mahindra,Scorpio,SUV,7
+Mahindra,Scorpio N,SUV,7
+Mahindra,XUV300,SUV,5
+Mahindra,XUV 3XO,SUV,5
+Mahindra,XUV500,SUV,7
+Mahindra,XUV700,SUV,7
+Mahindra,XUV400 EV,SUV,5
+Mahindra,Thar,SUV,4
+Mahindra,Thar Roxx,SUV,5
+Mahindra,Marazzo,MPV,8
+Mahindra,KUV100,HATCHBACK,6
+Mahindra,TUV300,SUV,7
+Mahindra,Quanto,SUV,7
+Mahindra,Verito,SEDAN,5
+Mahindra,Verito Vibe,HATCHBACK,5
+Mahindra,Xylo,MPV,8
+Mahindra,Alturas G4,SUV,7
+Mahindra,BE 6,SUV,5
+Mahindra,XEV 9e,SUV,5
+
+Toyota,Glanza,HATCHBACK,5
+Toyota,Etios,SEDAN,5
+Toyota,Etios Liva,HATCHBACK,5
+Toyota,Yaris,SEDAN,5
+Toyota,Urban Cruiser,SUV,5
+Toyota,Taisor,SUV,5
+Toyota,Urban Cruiser Hyryder,SUV,5
+Toyota,Corolla Altis,SEDAN,5
+Toyota,Camry,SEDAN,5
+Toyota,Innova,MPV,8
+Toyota,Innova Crysta,MPV,8
+Toyota,Innova Hycross,MPV,7
+Toyota,Fortuner,SUV,7
+Toyota,Fortuner Legender,SUV,7
+Toyota,Hilux,PICKUP,5
+Toyota,Land Cruiser Prado,SUV,7
+Toyota,Land Cruiser 300,SUV,7
+Toyota,Vellfire,MPV,7
+Toyota,Prius,SEDAN,5
+Toyota,bZ4X,SUV,5

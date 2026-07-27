@@ -11,9 +11,7 @@ window.VehicleStep = {
     <div class="card-header">
 
         <h4 class="mb-0">
-
             Vehicle Information
-
         </h4>
 
     </div>
@@ -25,9 +23,7 @@ window.VehicleStep = {
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Registration Number *
-
                 </label>
 
                 <input
@@ -40,39 +36,39 @@ window.VehicleStep = {
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Brand *
-
                 </label>
 
-                <input
+                <select
                     id="brand"
-                    class="form-control"
-                    value="${vehicle.brand || ''}">
+                    class="form-select">
+
+                    <option value="">Select Brand</option>
+
+                </select>
 
             </div>
 
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Model *
-
                 </label>
 
-                <input
+                <select
                     id="model"
-                    class="form-control"
-                    value="${vehicle.model || ''}">
+                    class="form-select">
+
+                    <option value="">Select Model</option>
+
+                </select>
 
             </div>
 
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Fuel Type
-
                 </label>
 
                 <select
@@ -108,9 +104,7 @@ window.VehicleStep = {
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Odometer
-
                 </label>
 
                 <input
@@ -124,9 +118,7 @@ window.VehicleStep = {
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Transmission
-
                 </label>
 
                 <select
@@ -152,24 +144,23 @@ window.VehicleStep = {
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Variant
-
                 </label>
 
-                <input
+                <select
                     id="variant"
-                    class="form-control"
-                    value="${vehicle.variant || ''}">
+                    class="form-select">
+
+                    <option value="">Select Variant</option>
+
+                </select>
 
             </div>
 
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-
                     Manufacturing Year
-
                 </label>
 
                 <input
@@ -181,8 +172,6 @@ window.VehicleStep = {
                     value="${vehicle.manufacturingYear || ''}">
 
             </div>
-
-
 
         </div>
 
@@ -216,6 +205,27 @@ window.VehicleStep = {
 
     bindEvents() {
 
+        this.initializeDropdowns();
+
+        document
+            .getElementById("brand")
+            ?.addEventListener("change", async (e) => {
+
+                await this.loadModels(e.target.value);
+
+                document.getElementById("variant").innerHTML =
+                    '<option value="">Select Variant</option>';
+
+            });
+
+        document
+            .getElementById("model")
+            ?.addEventListener("change", async (e) => {
+
+                await this.loadVariants(e.target.value);
+
+            });
+
         document
             .getElementById("nextBtn")
             ?.addEventListener("click", async () => {
@@ -232,183 +242,474 @@ window.VehicleStep = {
 
     },
 
-    collectData() {
+    async initializeDropdowns() {
 
-        return {
+//        await this.loadBrands();
 
-            customerId: WorkflowHelper.state.customerId,
+        await Promise.all([
+            this.loadBrands(),
+            this.loadMetadata()
+        ]);
 
-            registrationNumber:
-                document.getElementById("registrationNumber").value.trim(),
+        const vehicle = WorkflowHelper.state.vehicle;
 
-            brand:
-                document.getElementById("brand").value.trim(),
+        if (!vehicle) {
 
-            model:
-                document.getElementById("model").value.trim(),
+            return;
 
-            variant:
-                document.getElementById("variant").value.trim(),
+        }
 
-            fuelType:
-                document.getElementById("fuelType").value,
+        const brandSelect =
+            document.getElementById("brand");
 
-            transmission:
-                document.getElementById("transmission").value,
+        const brandOption =
+            [...brandSelect.options]
+                .find(option => option.text === vehicle.brand);
 
-            manufacturingYear:
-                Number(document.getElementById("manufacturingYear").value),
+        if (!brandOption) {
 
-            odometer:
-                Number(document.getElementById("odometer").value)
+            return;
 
-        };
+        }
+
+        brandSelect.value = brandOption.value;
+
+        await this.loadModels(brandOption.value);
+
+        const modelSelect =
+            document.getElementById("model");
+
+        const modelOption =
+            [...modelSelect.options]
+                .find(option => option.text === vehicle.model);
+
+        if (!modelOption) {
+
+            return;
+
+        }
+
+        modelSelect.value = modelOption.value;
+
+        await this.loadVariants(modelOption.value);
+
+        const variantSelect =
+            document.getElementById("variant");
+
+        const variantOption =
+            [...variantSelect.options]
+                .find(option => option.text === vehicle.variant);
+
+        if (variantOption) {
+
+            variantSelect.value = variantOption.value;
+
+        }
 
     },
 
-    validate(request) {
+        async loadBrands() {
 
-        if (!request.registrationNumber) {
+            try {
 
-            alert("Registration Number is mandatory.");
+                const brands =
+                    await VehicleMasterService.getBrands();
 
-            return false;
+                const brandSelect =
+                    document.getElementById("brand");
 
-        }
+                brandSelect.innerHTML =
+                    '<option value="">Select Brand</option>';
 
-        if (!request.brand) {
+                brands.forEach(brand => {
 
-            alert("Brand is mandatory.");
+                    brandSelect.innerHTML += `
+                        <option value="${brand.id}">
+                            ${brand.name}
+                        </option>`;
 
-            return false;
+                });
 
-        }
+            }
 
-        if (!request.model) {
+            catch (e) {
 
-            alert("Model is mandatory.");
+                console.error("Unable to load brands.", e);
 
-            return false;
+            }
 
-        }
+        },
 
-        if (!request.transmission) {
+        async loadModels(brandId) {
 
-            alert("Transmission is mandatory.");
+            const modelSelect =
+                document.getElementById("model");
 
-            return false;
+            modelSelect.innerHTML =
+                '<option value="">Select Model</option>';
 
-        }
+            if (!brandId) {
 
-        if (!request.manufacturingYear) {
+                return;
 
-            alert("Manufacturing Year is mandatory.");
+            }
 
-            return false;
+            try {
 
-        }
+                const models =
+                    await VehicleMasterService.getModels(brandId);
 
-        return true;
+                models.forEach(model => {
 
-    },
+                    modelSelect.innerHTML += `
+                        <option value="${model.id}">
+                            ${model.name}
+                        </option>`;
 
-    async save() {
+                });
 
-        const request = this.collectData();
+            }
+
+            catch (e) {
+
+                console.error("Unable to load models.", e);
+
+            }
+
+        },
+
+        async loadVariants(modelId) {
+
+            const variantSelect =
+                document.getElementById("variant");
+
+            variantSelect.innerHTML =
+                '<option value="">Select Variant</option>';
+
+            if (!modelId) {
+
+                return;
+
+            }
+
+            try {
+
+                const variants =
+                    await VehicleMasterService.getVariants(modelId);
+
+                variants.forEach(variant => {
+
+                    variantSelect.innerHTML += `
+                        <option value="${variant.id}">
+                            ${variant.name}
+                        </option>`;
+
+                });
+
+            }
+
+            catch (e) {
+
+                console.error("Unable to load variants.", e);
+
+            }
+
+        },
+
+        collectData() {
+
+            const brandSelect =
+                document.getElementById("brand");
+
+            const modelSelect =
+                document.getElementById("model");
+
+            const variantSelect =
+                document.getElementById("variant");
+
+            return {
+
+                customerId: WorkflowHelper.state.customerId,
+
+                registrationNumber:
+                    document.getElementById("registrationNumber").value.trim(),
+
+                brand:
+                    brandSelect.options[
+                        brandSelect.selectedIndex
+                    ]?.text || "",
+
+                model:
+                    modelSelect.options[
+                        modelSelect.selectedIndex
+                    ]?.text || "",
+
+                variant:
+                    variantSelect.options[
+                        variantSelect.selectedIndex
+                    ]?.text || "",
+
+                fuelType:
+                    document.getElementById("fuelType").value,
+
+                transmission:
+                    document.getElementById("transmission").value,
+
+                manufacturingYear:
+                    Number(document.getElementById("manufacturingYear").value),
+
+                odometer:
+                    Number(document.getElementById("odometer").value)
+
+            };
+
+        },
+
+        validate(request) {
+
+            if (!request.registrationNumber) {
+
+                alert("Registration Number is mandatory.");
+
+                return false;
+
+            }
+
+            if (!request.brand) {
+
+                alert("Brand is mandatory.");
+
+                return false;
+
+            }
+
+            if (!request.model) {
+
+                alert("Model is mandatory.");
+
+                return false;
+
+            }
+
+            if (!request.transmission) {
+
+                alert("Transmission is mandatory.");
+
+                return false;
+
+            }
+
+            if (!request.manufacturingYear) {
+
+                alert("Manufacturing Year is mandatory.");
+
+                return false;
+
+            }
+
+            return true;
+
+        },
+
+        async loadMetadata() {
+
+            const response = await VehicleMasterService.getMetadata();
+
+            if (!response.success) {
+                return;
+            }
+
+            const metadata = response.data;
+
+            this.populateFuelTypes(metadata.fuelTypes);
+            this.populateTransmissionTypes(metadata.transmissionTypes);
+        //    this.populateBodyTypes(metadata.bodyTypes);
+
+        },
+
+        populateFuelTypes(fuelTypes) {
+
+            const vehicle = WorkflowHelper.state.vehicle || {};
+
+            const select = document.getElementById("fuelType");
+
+            select.innerHTML =
+                '<option value="">Select Fuel Type</option>';
+
+            fuelTypes.forEach(fuel => {
+
+                select.innerHTML += `
+                    <option value="${fuel}"
+                        ${vehicle.fuelType === fuel ? "selected" : ""}>
+                        ${this.formatEnum(fuel)}
+                    </option>
+                `;
+
+            });
+
+        },
+
+        populateBodyTypes(bodyTypes) {
+
+            const select = document.getElementById("bodyType");
+
+            select.innerHTML = '<option value="">Select Body Type</option>';
+
+            bodyTypes.forEach(type => {
+
+                select.innerHTML += `
+                    <option value="${type}">
+                        ${formatEnum(type)}
+                    </option>
+                `;
+            });
+        },
+
+        populateTransmissionTypes(transmissionTypes) {
+
+            const vehicle = WorkflowHelper.state.vehicle || {};
+
+            const select =
+                document.getElementById("transmission");
+
+            select.innerHTML =
+                '<option value="">Select Transmission</option>';
+
+            transmissionTypes.forEach(type => {
+
+                select.innerHTML += `
+                    <option value="${type}"
+                        ${vehicle.transmission === type ? "selected" : ""}>
+                        ${this.formatEnum(type)}
+                    </option>
+                `;
+
+            });
+
+        },
+
+        formatEnum(value) {
+            return value
+                .toLowerCase()
+                .split("_")
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ");
+
+        },
+
+        async save() {
+                    const request = this.collectData();
 
         if (!this.validate(request)) {
 
-            return false;
+                        return false;
 
         }
 
         try {
 
-            let vehicle;
+                        let vehicle;
 
-            if (WorkflowHelper.state.vehicleId) {
+                        if (WorkflowHelper.state.vehicleId) {
 
-                const response =
-                    await VehicleService.updateVehicle(
+                            const response =
+                                await VehicleService.updateVehicle(
 
-                        WorkflowHelper.state.vehicleId,
+                                    WorkflowHelper.state.vehicleId,
 
-                        request
+                                    request
 
-                    );
+                                );
 
-                vehicle = response;
+                            vehicle = response;
 
-            }
+                        }
 
-            else {
+                        else {
 
-                try {
+                            try {
 
-                    const response =
-                        await VehicleService.searchByRegistrationNumber(
+                                const response =
+                                    await VehicleService.searchByRegistrationNumber(
 
-                            request.registrationNumber
+                                        request.registrationNumber
 
-                        );
+                                    );
 
-                    vehicle = response;
+                                vehicle = response;
 
-                    console.log("Existing vehicle found.");
+                                console.log("Existing vehicle found.");
 
-                }
+                            }
 
-                catch (e) {
+                            catch (e) {
 
-                    if (e.status === 404 || e.response?.status === 404) {
+                                if (e.status === 404 || e.response?.status === 404) {
 
-                        console.log("Vehicle not found. Creating new vehicle.");
+                                    console.log("Vehicle not found. Creating new vehicle.");
 
-                        console.log("Vehicle Request", request);
-                        console.log("Workflow State", WorkflowHelper.state);
-                        const response =
-                            await VehicleService.createVehicle(request);
+                                    console.log("Vehicle Request", request);
 
-                        vehicle = response;
+                                    console.log("Workflow State", WorkflowHelper.state);
 
-                    } else {
+                                    const response =
+                                        await VehicleService.createVehicle(request);
 
-                        throw e;
+                                    vehicle = response;
 
-                    }
+                                }
 
-                }
+                                else {
 
-            }
+                                    throw e;
 
-            WorkflowHelper.state.vehicle = vehicle;
-            WorkflowHelper.state.vehicleId = vehicle.id;
+                                }
 
-            const recommendations =
-                await InspectionFindingService.loadRecommendations(
+                            }
 
-                    WorkflowHelper.state.vehicle.id,
+                        }
 
-                    request.odometer
+                        WorkflowHelper.state.vehicle = vehicle;
 
-                );
+                        WorkflowHelper.state.vehicleId = vehicle.id;
 
-            WorkflowHelper.state.recommendedInspectionItems =
-                recommendations;
+                        console.log(WorkflowHelper);
 
-            console.log("Vehicle Saved", vehicle);
+                        const recommendations =
+                            await InspectionFindingService.loadRecommendations({
 
-            return true;
+                                brand: WorkflowHelper.state.vehicle.brand,
+
+                                model: WorkflowHelper.state.vehicle.model,
+
+                                variant: WorkflowHelper.state.vehicle.variant,
+
+                                fuelType: WorkflowHelper.state.vehicle.fuelType,
+
+                                transmission: WorkflowHelper.state.vehicle.transmission,
+
+                                manufacturingYear: WorkflowHelper.state.vehicle.manufacturingYear,
+
+                                odometer: request.odometer
+
+                            });
+
+                        WorkflowHelper.state.recommendedInspectionItems =
+                            recommendations;
+
+                        console.log("Vehicle Saved", vehicle);
+
+                        return true;
 
         }
 
         catch (e) {
 
-            console.error(e);
+                        console.error(e);
 
-            alert(e.message || "Unable to save vehicle.");
+                        alert(e.message || "Unable to save vehicle.");
 
-            return false;
+                        return false;
 
         }
 

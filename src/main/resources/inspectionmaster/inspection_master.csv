@@ -1,0 +1,5 @@
+make,model,variant,fuelType,transmissionType,minYear,maxYear,minOdometer,maxOdometer
+Maruti Suzuki,Swift,VXi,PETROL,MANUAL,2020,2035,0,10000
+Maruti Suzuki,Swift,VXi,PETROL,MANUAL,2020,2035,10001,20000
+Hyundai,Creta,SX,PETROL,MANUAL,2020,2035,0,10000
+Tata,Nexon,Fearless,DIESEL,MANUAL,2020,2035,0,10000

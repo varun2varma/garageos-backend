@@ -1,15 +1,12 @@
 const InspectionFindingService = {
 
-    async loadRecommendations(vehicleId, odometer) {
+    async loadRecommendations(request) {
 
         return await Api.post(
 
             "/inspection-findings/recommendations",
 
-            {
-                vehicleId,
-                odometer
-            }
+            request
 
         );
 

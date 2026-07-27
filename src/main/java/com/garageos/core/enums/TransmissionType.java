@@ -6,6 +6,9 @@ public enum TransmissionType {
     AUTOMATIC,
     AMT,
     CVT,
-    DCT
+    DCT,
+    AT,
+    IMT,
+    ECVT
 
 }
