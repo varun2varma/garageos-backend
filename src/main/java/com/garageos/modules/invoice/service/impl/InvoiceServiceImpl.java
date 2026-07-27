@@ -21,7 +21,7 @@ import com.garageos.modules.invoiceitem.entity.InvoiceItem;
 import com.garageos.modules.invoiceitem.repository.InvoiceItemRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -346,6 +346,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice = invoiceRepository.save(invoice);
 
         return invoiceMapper.toResponse(invoice);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InvoiceResponse getInvoiceByJobCard(Long jobCardId) {
+
+        return invoiceRepository
+                .findByEstimateJobCardId(jobCardId)
+                .map(invoiceMapper::toResponse)
+                .orElse(null);
     }
 
 }

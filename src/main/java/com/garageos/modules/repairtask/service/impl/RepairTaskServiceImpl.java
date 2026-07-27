@@ -77,6 +77,10 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                                 "Repair Task not found with id : "
                                         + repairTaskId));
 
+        if (technicianName == null || technicianName.isBlank()) {
+            throw new BusinessException(
+                    "Technician name is required.");
+        }
         task.setTechnicianName(technicianName);
         task.setAssignedAt(LocalDateTime.now());
         task.setStatus(RepairStatus.ASSIGNED);

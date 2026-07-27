@@ -23,7 +23,8 @@ window.Sidebar = {
                 </a>
 
                 <a class="menu-item"
-                   href="#">
+                   href="#"
+                   data-page="activeJobs">
 
                     <i class="bi bi-list-task"></i>
 
@@ -32,7 +33,8 @@ window.Sidebar = {
                 </a>
 
                 <a class="menu-item"
-                   href="#">
+                   href="#"
+                   data-page="customers">
 
                     <i class="bi bi-people"></i>
 
@@ -41,7 +43,8 @@ window.Sidebar = {
                 </a>
 
                 <a class="menu-item"
-                   href="#">
+                   href="#"
+                   data-page="vehicles">
 
                     <i class="bi bi-car-front"></i>
 

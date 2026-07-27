@@ -24,4 +24,5 @@ public interface EstimateService {
     EstimateResponse rejectEstimate(Long id);
     EstimateResponse createEstimate(String jobCardNumber);
     EstimateResponse approveEstimate(String jobCardNumber);
+    EstimateResponse getEstimateByJobCard(Long jobCardId);
 }

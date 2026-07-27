@@ -12,9 +12,10 @@ import com.garageos.modules.inspection.repository.InspectionRepository;
 import com.garageos.modules.inspection.service.InspectionService;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,5 +226,17 @@ public class InspectionServiceImpl implements InspectionService {
 //
 //        return inspectionMapper.toResponse(inspection);
 //    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InspectionResponse> getInspectionsByJobCard(Long jobCardId) {
+
+        return inspectionRepository
+                .findByComplaintJobCardId(jobCardId)
+                .stream()
+                .map(inspectionMapper::toResponse)
+                .toList();
+    }
 
 }

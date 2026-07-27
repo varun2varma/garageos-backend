@@ -20,9 +20,10 @@ import com.garageos.modules.inspectionmaster.entity.InspectionMasterItem;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.repairtask.service.RepairTaskService;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -379,5 +380,15 @@ public class EstimateServiceImpl implements EstimateService {
         estimate = estimateRepository.save(estimate);
 
         return estimateMapper.toResponse(estimate);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EstimateResponse getEstimateByJobCard(Long jobCardId) {
+
+        return estimateRepository
+                .findByJobCardId(jobCardId)
+                .map(estimateMapper::toResponse)
+                .orElse(null);
     }
 }

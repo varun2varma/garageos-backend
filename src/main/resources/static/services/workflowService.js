@@ -54,6 +54,7 @@ window.WorkflowService = {
             WorkflowHelper.state.job = job;
             WorkflowHelper.state.jobCardId = job.id;
             WorkflowHelper.state.jobCardNumber = job.jobCardNumber;
+            await this.refreshWorkflowStatus();
 
             return job;
 
@@ -87,10 +88,7 @@ window.WorkflowService = {
 
             const index =
                 WorkflowHelper.state.inspections.findIndex(
-
-                    inspection =>
-                        inspection.id === inspection.id
-
+                    existing => existing.id === inspection.id
                 );
 
             if (index >= 0) {
@@ -105,6 +103,7 @@ window.WorkflowService = {
                 WorkflowHelper.state.inspections.push(inspection);
 
             }
+            await this.refreshWorkflowStatus();
 
             return inspection;
 
@@ -132,6 +131,7 @@ window.WorkflowService = {
                 "Estimate Saved",
                 estimate
             );
+            await this.refreshWorkflowStatus();
 
             return estimate;
 
@@ -153,6 +153,9 @@ window.WorkflowService = {
                 await EstimateService.approveEstimate(jobCardNumber);
 
             WorkflowHelper.state.estimate = estimate;
+            await this.refreshWorkflowStatus();
+
+            await this.loadRepairTasks();
 
             return estimate;
 
@@ -178,6 +181,7 @@ window.WorkflowService = {
                 );
 
             WorkflowHelper.state.estimate = response;
+            await this.refreshWorkflowStatus();
 
             return response;
 
@@ -209,6 +213,7 @@ window.WorkflowService = {
                 WorkflowHelper.state.estimateItems = [];
 
             }
+            await this.refreshWorkflowStatus();
 
             await this.loadEstimateItems();
 
@@ -234,6 +239,8 @@ window.WorkflowService = {
                     WorkflowHelper.state.estimateId
 
                 );
+
+            await this.refreshWorkflowStatus();
 
             WorkflowHelper.state.estimateItems = response;
 
@@ -279,6 +286,7 @@ window.WorkflowService = {
         try {
 
             await EstimateItemService.deleteItem(itemId);
+            await this.refreshWorkflowStatus();
 
             await this.loadEstimateItems();
 //            WorkflowHelper.state.estimateItems =
@@ -304,6 +312,7 @@ window.WorkflowService = {
 
             const response =
                 await InvoiceService.createInvoice(request);
+                await this.refreshWorkflowStatus();
 
             WorkflowHelper.state.invoice = response;
             WorkflowHelper.state.invoiceId = response.id;
@@ -323,6 +332,7 @@ window.WorkflowService = {
     async generateInvoice() {
 
         console.log("Generating Invoice...");
+        await this.refreshWorkflowStatus();
 
         return Promise.resolve();
 
@@ -350,20 +360,82 @@ window.WorkflowService = {
             throw new Error("Failed to finish estimate.");
         }
 
+        await this.refreshWorkflowStatus();
+
         return response.json();
     },
 
 
-    async startRepair() {
+//    async startRepair() {
+//
+//        try {
+//
+//            const response =
+//                await Api.post(
+//                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/start`
+//                );
+//
+//            WorkflowHelper.state.job = response;
+//
+//            return response;
+//
+//        } catch (e) {
+//
+//            console.error(e);
+//
+//            throw e;
+//
+//        }
+//
+//    },
+
+//    async completeRepair() {
+//
+//        try {
+//
+//            const response =
+//                await Api.post(
+//                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/complete`
+//                );
+//
+//            WorkflowHelper.state.job = response;
+//
+//            return response;
+//
+//        } catch (e) {
+//
+//            console.error(e);
+//
+//            throw e;
+//
+//        }
+//
+//    },
+
+    async startRepair(repairTaskId) {
 
         try {
 
             const response =
-                await Api.post(
-                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/start`
+                await Api.put(
+                    `/repair-tasks/${repairTaskId}/start`
                 );
+console.log("API Response", response);
+            const index =
+                WorkflowHelper.state.repairTasks.findIndex(
+                    task => task.id === response.id
+                );
+console.log("Index", index);
+            if (index >= 0) {
 
-            WorkflowHelper.state.job = response;
+                WorkflowHelper.state.repairTasks[index] =
+                    response;
+
+            }
+            console.log(
+                WorkflowHelper.state.repairTasks);
+
+                await this.refreshWorkflowStatus();
 
             return response;
 
@@ -377,17 +449,33 @@ window.WorkflowService = {
 
     },
 
-    async completeRepair() {
+    async completeRepair(repairTaskId) {
 
         try {
 
             const response =
-                await Api.post(
-                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/complete`
+                await Api.put(
+                    `/repair-tasks/${repairTaskId}/complete`
                 );
 
-            WorkflowHelper.state.job = response;
+                console.log("API Response", response);
 
+            const index =
+                WorkflowHelper.state.repairTasks.findIndex(
+                    task => task.id === response.id
+                );
+console.log("Index", index);
+await this.refreshWorkflowStatus();
+
+            if (index >= 0) {
+
+                WorkflowHelper.state.repairTasks[index] =
+                    response;
+
+            }
+
+            console.log(
+                WorkflowHelper.state.repairTasks);
             return response;
 
         } catch (e) {
@@ -410,6 +498,7 @@ window.WorkflowService = {
                 );
 
             WorkflowHelper.state.job = response;
+            await this.refreshWorkflowStatus();
 
             return response;
 
@@ -433,6 +522,7 @@ window.WorkflowService = {
                 );
 
             WorkflowHelper.state.invoice = response;
+            await this.refreshWorkflowStatus();
 
             return response;
 
@@ -456,6 +546,7 @@ window.WorkflowService = {
                 );
 
             WorkflowHelper.state.job = response;
+            await this.refreshWorkflowStatus();
 
             return response;
 
@@ -479,6 +570,7 @@ window.WorkflowService = {
                 );
 
             WorkflowHelper.state.job = response;
+            await this.refreshWorkflowStatus();
 
             return response;
 
@@ -487,6 +579,91 @@ window.WorkflowService = {
             console.error(e);
 
             throw e;
+
+        }
+
+    },
+
+    async refreshWorkflowStatus() {
+
+        WorkflowHelper.state.workflowStatus =
+            await this.getWorkflowStatus();
+
+    },
+
+    syncWorkflowState(data) {
+
+        if (!data) {
+
+            return;
+
+        }
+
+        if (data.workflowStatus !== undefined) {
+
+            WorkflowHelper.state.workflowStatus =
+                data.workflowStatus;
+
+        }
+
+        if (data.customer !== undefined) {
+
+            WorkflowHelper.state.customer = data.customer;
+            WorkflowHelper.state.customerId = data.customer?.id ?? null;
+
+        }
+
+        if (data.vehicle !== undefined) {
+
+            WorkflowHelper.state.vehicle = data.vehicle;
+            WorkflowHelper.state.vehicleId = data.vehicle?.id ?? null;
+
+        }
+
+        if (data.job !== undefined) {
+
+            WorkflowHelper.state.job = data.job;
+            WorkflowHelper.state.jobCardId = data.job?.id ?? null;
+            WorkflowHelper.state.jobCardNumber =
+                data.job?.jobCardNumber ?? null;
+
+        }
+
+        if (data.complaints !== undefined) {
+
+            WorkflowHelper.state.complaints = data.complaints;
+
+        }
+
+        if (data.inspections !== undefined) {
+
+            WorkflowHelper.state.inspections = data.inspections;
+
+        }
+
+        if (data.estimate !== undefined) {
+
+            WorkflowHelper.state.estimate = data.estimate;
+            WorkflowHelper.state.estimateId = data.estimate?.id ?? null;
+
+        }
+
+        if (data.estimateItems !== undefined) {
+
+            WorkflowHelper.state.estimateItems = data.estimateItems;
+
+        }
+
+        if (data.repairTasks !== undefined) {
+
+            WorkflowHelper.state.repairTasks = data.repairTasks;
+
+        }
+
+        if (data.invoice !== undefined) {
+
+            WorkflowHelper.state.invoice = data.invoice;
+            WorkflowHelper.state.invoiceId = data.invoice?.id ?? null;
 
         }
 
@@ -516,13 +693,107 @@ window.WorkflowService = {
     },
 
 
+//    async loadRepairTasks() {
+//
+//        try {
+//
+//            const response =
+//                await Api.get(
+//                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair-tasks`
+//                );
+//
+//            WorkflowHelper.state.repairTasks = response;
+//
+//            return response;
+//
+//        } catch (e) {
+//
+//            console.error(e);
+//
+//            throw e;
+//
+//        }
+//
+//    },
+
+    async getWorkflowStatus() {
+
+        const response =
+            await Api.get(
+                `/workflow/${WorkflowHelper.state.jobCardNumber}/status`
+            );
+
+        return response;
+
+    },
+
+    async resumeWorkflow(jobCardNumber) {
+
+        try {
+
+            const data =
+                await Api.get(`/workflow/${jobCardNumber}/resume`);
+
+            this.syncWorkflowState(data);
+
+            return data;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
+    async assignTechnician(
+        repairTaskId,
+        technicianName
+    ) {
+
+        try {
+
+            const response =
+                await Api.put(
+                    `/repair-tasks/${repairTaskId}/assign`,
+                    {
+                        technicianName
+                    }
+                );
+
+            const index =
+                WorkflowHelper.state.repairTasks.findIndex(
+                    task => task.id === response.id
+                );
+
+            if (index >= 0) {
+
+                WorkflowHelper.state.repairTasks[index] =
+                    response;
+
+            }
+
+            return response;
+
+        } catch (e) {
+
+            console.error(e);
+
+            throw e;
+
+        }
+
+    },
+
     async loadRepairTasks() {
 
         try {
 
             const response =
                 await Api.get(
-                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair-tasks`
+                    `/repair-tasks/jobcards/${WorkflowHelper.state.jobCardId}`
                 );
 
             WorkflowHelper.state.repairTasks = response;
@@ -539,15 +810,6 @@ window.WorkflowService = {
 
     },
 
-    async getWorkflowStatus() {
 
-        const response =
-            await Api.get(
-                `/workflow/${WorkflowHelper.state.jobCardNumber}/status`
-            );
-
-        return response;
-
-    },
 
 };

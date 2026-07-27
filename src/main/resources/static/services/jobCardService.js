@@ -16,6 +16,14 @@ window.JobCardService = {
             request
         );
 
-    }
+    },
+
+    async getAll(page = 0, size = 10) {
+
+        return await Api.get(
+            `/jobcards?page=${page}&size=${size}`
+        );
+
+    },
 
 };

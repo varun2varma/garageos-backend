@@ -6,6 +6,7 @@ import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
+import com.garageos.modules.serviceworkflow.dto.response.WorkflowResumeResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowStatusResponse;
 import com.garageos.modules.serviceworkflow.service.ServiceWorkflowService;
 import jakarta.validation.Valid;
@@ -147,6 +148,18 @@ public class ServiceWorkflowController {
         return ApiResponseUtil.success(
                 "Workflow status fetched successfully.",
                 workflowService.getWorkflowStatus(jobCardNumber));
+
+    }
+
+    @GetMapping("/{jobCardNumber}/resume")
+    public ResponseEntity<ApiResponse<WorkflowResumeResponse>>
+    resumeWorkflow(
+            @PathVariable String jobCardNumber) {
+
+        return ApiResponseUtil.success(
+                "Workflow resumed successfully.",
+                workflowService.resumeWorkflow(jobCardNumber)
+        );
 
     }
 }

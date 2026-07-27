@@ -25,4 +25,6 @@ public interface InspectionService {
     List<InspectionResponse> completeInspection(
             String jobCardNumber,
             List<CreateInspectionRequest> request);
+
+    List<InspectionResponse> getInspectionsByJobCard(Long jobCardId);
 }

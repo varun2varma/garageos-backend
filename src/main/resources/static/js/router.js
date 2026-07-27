@@ -4,7 +4,10 @@ window.Router = {
 
     pages: {
         dashboard: () => Dashboard.render(),
-        workflow: () => Workflow.render()
+        workflow: () => Workflow.render(),
+        activeJobs: () => ActiveJobs.render(),
+        customers: () => Customers.render(),
+        vehicles: () => Vehicles.render()
     },
 
     render(page) {
@@ -32,6 +35,18 @@ window.Router = {
 
             case "workflow":
                 Workflow.bindEvents();
+                break;
+
+            case "activeJobs":
+                ActiveJobs.bindEvents();
+                break;
+
+            case "customers":
+                Customers.bindEvents();
+                break;
+
+            case "vehicles":
+                Vehicles.bindEvents();
                 break;
 
         }

@@ -28,6 +28,17 @@ window.Workflow = {
 
     async bindEvents() {
 
+        if (WorkflowHelper.state.workflowStatus) {
+
+            this.currentStep =
+                WorkflowHelper.state.workflowStatus.nextStep;
+
+        } else {
+
+            this.currentStep = 1;
+
+        }
+
         await this.renderStep();
 
     },
@@ -75,8 +86,11 @@ window.Workflow = {
 
         }
 
+//        const workflow =
+//            await WorkflowService.getWorkflowStatus();
+
         const workflow =
-            await WorkflowService.getWorkflowStatus();
+            WorkflowHelper.state.workflowStatus;
 
         document.getElementById("workflowHeader").innerHTML = `
 
@@ -271,15 +285,22 @@ window.Workflow = {
 
             case 6:
 
-                WorkflowService
-                    .loadEstimateItems()
-                    .then(() => {
-
-                        EstimateItemStep.refresh();
-
-                    });
+                EstimateItemStep.refresh();
 
                 break;
+
+//            case 6:
+//
+//                WorkflowService
+//                    .loadEstimateItems()
+//                    .then(() => {
+//
+//                        EstimateItemStep.refresh();
+//
+//                    });
+//
+//                break;
+
 
             case 7:
 
@@ -292,6 +313,7 @@ window.Workflow = {
                 break;
 
             case 9:
+                WorkflowService.loadRepairTasks();
                 RepairStep.bindEvents();
                 break;
 

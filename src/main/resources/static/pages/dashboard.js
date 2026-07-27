@@ -749,30 +749,62 @@ window.Dashboard = {
 
                 });
 
-            document
+            document.addEventListener("click", async (e) => {
 
-                .addEventListener("click", (event) => {
+                const btn = e.target.closest(".continue-job");
 
-                    const button =
-                        event.target.closest(".continue-job");
+                if (!btn) {
+                    return;
+                }
 
-                    if (!button) {
+//                try {
+//
+//                    const response = await Api.get(
+//                        "/jobcards/search?jobCardNumber=" +
+//                        encodeURIComponent(btn.dataset.job)
+//                    );
+//
+//                    WorkflowHelper.reset();
+//
+//                    WorkflowHelper.state.job = response;
+//
+//                    WorkflowHelper.state.jobCardNumber =
+//                        response.jobCardNumber;
+//
+//                    WorkflowHelper.state.jobId =
+//                        response.id;
+//
+//                    Router.navigate("workflow");
+//
+//                }
+//                catch (err) {
+//
+//                    console.error(err);
+//
+//                    Toast.error("Unable to load job.");
+//
+//                }
 
-                        return;
+                    try {
+
+                        WorkflowHelper.reset();
+
+                        const workflow =
+                            await WorkflowService.resumeWorkflow(
+                                btn.dataset.job
+                            );
+
+                        Router.navigate("workflow");
+
+                    } catch (err) {
+
+                        console.error(err);
+
+                        Toast.error("Unable to resume workflow.");
 
                     }
 
-                    const jobCardNumber =
-                        button.dataset.job;
-
-                    console.log(
-                        "Continue Job:",
-                        jobCardNumber
-                    );
-
-                    Router.navigate("workflow");
-
-                });
+            });
 
             this.loadData();
 

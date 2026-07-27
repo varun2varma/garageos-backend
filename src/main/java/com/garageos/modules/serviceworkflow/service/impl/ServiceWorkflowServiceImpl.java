@@ -2,8 +2,14 @@ package com.garageos.modules.serviceworkflow.service.impl;
 
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.complaint.dto.response.ComplaintResponse;
+import com.garageos.modules.complaint.service.ComplaintService;
+import com.garageos.modules.customer.dto.response.CustomerResponse;
+import com.garageos.modules.customer.service.CustomerService;
 import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.estimate.service.EstimateService;
+import com.garageos.modules.estimateitem.dto.response.EstimateItemResponse;
+import com.garageos.modules.estimateitem.service.EstimateItemService;
 import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
 import com.garageos.modules.inspection.dto.response.InspectionResponse;
 import com.garageos.modules.inspection.service.InspectionService;
@@ -17,8 +23,11 @@ import com.garageos.modules.jobcard.service.JobCardService;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.repairtask.service.RepairTaskService;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
+import com.garageos.modules.serviceworkflow.dto.response.WorkflowResumeResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowStatusResponse;
 import com.garageos.modules.serviceworkflow.service.ServiceWorkflowService;
+import com.garageos.modules.vehicle.dto.response.VehicleResponse;
+import com.garageos.modules.vehicle.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +46,13 @@ public class ServiceWorkflowServiceImpl
     private final InvoiceService invoiceService;
     private final RepairTaskService repairTaskService;
     private final JobCardRepository jobCardRepository;
+    private final CustomerService customerService;
 
+    private final VehicleService vehicleService;
+
+    private final ComplaintService complaintService;
+
+    private final EstimateItemService estimateItemService;
 
 //    @Override
 //    public WorkflowResponse createJob(CreateJobCardRequest request) {
@@ -429,6 +444,70 @@ public class ServiceWorkflowServiceImpl
         }
 
         return steps;
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public WorkflowResumeResponse resumeWorkflow(
+            String jobCardNumber) {
+
+        JobCard jobCard = getJobCard(jobCardNumber);
+
+        JobCardResponse job =
+                jobCardService.getJobCardByNumber(jobCardNumber);
+
+        CustomerResponse customer =
+                customerService.getCustomer(jobCard.getCustomer().getId());
+
+        VehicleResponse vehicle =
+                vehicleService.getVehicle(jobCard.getVehicle().getId());
+
+        List<ComplaintResponse> complaints =
+                complaintService.getComplaints(jobCard.getId());
+
+        List<InspectionResponse> inspections =
+                inspectionService.getInspectionsByJobCard(jobCard.getId());
+
+        EstimateResponse estimate = null;
+        List<EstimateItemResponse> estimateItems = List.of();
+
+        try {
+
+            estimate =
+                    estimateService.getEstimateByJobCard(jobCard.getId());
+
+            estimateItems =
+                    estimateItemService.getItems(estimate.getId());
+
+        } catch (Exception ignored) {
+        }
+
+        List<RepairTaskResponse> repairTasks =
+                repairTaskService.getRepairTasks(jobCard.getId());
+
+        InvoiceResponse invoice = null;
+
+        try {
+
+            invoice =
+                    invoiceService.getInvoiceByJobCard(jobCard.getId());
+
+        } catch (Exception ignored) {
+        }
+
+        return WorkflowResumeResponse.builder()
+                .workflowStatus(getWorkflowStatus(jobCardNumber))
+                .customer(customer)
+                .vehicle(vehicle)
+                .job(job)
+                .complaints(complaints)
+                .inspections(inspections)
+                .estimate(estimate)
+                .estimateItems(estimateItems)
+                .repairTasks(repairTasks)
+                .invoice(invoice)
+                .build();
     }
 
 }

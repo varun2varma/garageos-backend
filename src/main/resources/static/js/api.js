@@ -85,6 +85,31 @@ window.Api = {
         const result = await response.json();
         return result.data ?? result;
 
+    },
+
+
+    async delete(url) {
+
+        const response = await fetch(this.BASE_URL + url, {
+
+            method: "DELETE"
+
+        });
+
+        if (!response.ok) {
+
+            const error = new Error(await response.text());
+
+            error.status = response.status;
+
+            throw error;
+
+        }
+
+        const result = await response.json();
+
+        return result.data ?? result;
+
     }
 
 };

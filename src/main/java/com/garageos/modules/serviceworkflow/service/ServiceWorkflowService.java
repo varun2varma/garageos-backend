@@ -4,6 +4,7 @@ import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
+import com.garageos.modules.serviceworkflow.dto.response.WorkflowResumeResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowStatusResponse;
 
 import java.util.List;
@@ -37,5 +38,7 @@ public interface ServiceWorkflowService {
     WorkflowResponse receivePayment(String jobCardNumber);
     List<RepairTaskResponse> getRepairTasks(String jobCardNumber);
     WorkflowStatusResponse getWorkflowStatus(
+            String jobCardNumber);
+    WorkflowResumeResponse resumeWorkflow(
             String jobCardNumber);
 }

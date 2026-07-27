@@ -25,6 +25,30 @@ window.VehicleService = {
             encodeURIComponent(registrationNumber)
         );
 
-    }
+    },
+
+    async getAll(page = 0, size = 10) {
+
+        return await Api.get(
+            `/vehicles?page=${page}&size=${size}`
+        );
+
+    },
+
+    async getById(id) {
+
+            return await Api.get(
+                `/vehicles/${id}`
+            );
+
+        },
+
+        async delete(id) {
+
+            return await Api.delete(
+                `/vehicles/${id}`
+            );
+
+        },
 
 };

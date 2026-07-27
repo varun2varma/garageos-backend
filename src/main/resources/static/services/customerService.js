@@ -19,6 +19,30 @@ window.CustomerService = {
         return await Api.get(
             "/customers/search?mobileNumber=" + encodeURIComponent(mobileNumber)
         );
-    }
+    },
+
+    async getAll(page = 0, size = 10) {
+
+        return await Api.get(
+            `/customers?page=${page}&size=${size}`
+        );
+
+    },
+
+    async getById(id) {
+
+            return await Api.get(
+                `/customers/${id}`
+            );
+
+        },
+
+        async delete(id) {
+
+            return await Api.delete(
+                `/customers/${id}`
+            );
+
+        },
 
 };
