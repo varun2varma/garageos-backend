@@ -287,7 +287,7 @@ window.GarageRegistration = {
                     await GarageService.createGarage(this.data);
 
                 window.location.href =
-                    "../dashboard/index.html";
+                    "../index.html";
 
             } catch (e) {
 

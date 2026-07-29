@@ -59,13 +59,14 @@ window.CustomerStep = {
 
                 <label class="form-label">
 
-                    Email
+                    Email *
 
                 </label>
 
                 <input
                     id="customerEmail"
                     class="form-control"
+             
                     value="${customer.email || ''}">
 
             </div>
@@ -169,6 +170,11 @@ window.CustomerStep = {
             return false;
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.email)) {
+            alert("Please enter a valid email address.");
+            return false;
+        }
+
         return true;
 
     },
@@ -208,9 +214,9 @@ window.CustomerStep = {
 
                 } catch (e) {
 
-                    const error = JSON.parse(e.message);
+                    const error = e.message;
 
-                    if (error.message?.includes("Customer not found")) {
+                    if (error?.startsWith("Customer not found")) {
 
                         response = await CustomerService.createCustomer(request);
                         console.log("Customer Response:", response);

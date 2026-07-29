@@ -151,7 +151,7 @@ window.VehicleStep = {
                     id="variant"
                     class="form-select">
 
-                    <option value="">Select Variant</option>
+                    <option value=""> Select Variant</option>
 
                 </select>
 
@@ -167,7 +167,7 @@ window.VehicleStep = {
                     id="manufacturingYear"
                     type="number"
                     min="1990"
-                    max="2035"
+                    max="9999"
                     class="form-control"
                     value="${vehicle.manufacturingYear || ''}">
 
@@ -475,6 +475,26 @@ window.VehicleStep = {
 
             }
 
+            const patterns = [
+                /^[A-Z]{2}(0[1-9]|[1-9][0-9])[A-Z]{1,3}(000[1-9]|00[1-9]\d|0[1-9]\d{2}|[1-9]\d{3})$/,      // State
+                /^\d{2}BH\d{4}[A-Z]{2}$/,                  // Bharat Series
+                /^CD\d{1,3}[A-Z]\d{1,4}$/,                 // Diplomatic
+                /^CC\d{1,3}\d{1,4}$/,                      // Consular
+                /^TR\d{1,6}$/,                            // Temporary
+                /^TEMP\d{1,6}$/,                          // Temporary
+                /^[A-Z]{2}\d{6}[A-Z]?$/                   // Military
+            ];
+
+            const regNo = request.registrationNumber
+                .trim()
+                .replace(/[-\s]/g, "")
+                .toUpperCase();
+
+            if (!statePlateRegex.test(regNo)) {
+                alert("Please enter a valid Indian vehicle registration number.");
+                return false;
+            }
+
             if (!request.brand) {
 
                 alert("Brand is mandatory.");
@@ -505,6 +525,17 @@ window.VehicleStep = {
 
                 return false;
 
+            }
+
+            const currentYear = new Date().getFullYear();
+
+            if (
+                !/^\d{4}$/.test(request.manufacturingYear) ||
+                request.manufacturingYear < 1990 ||
+                request.manufacturingYear > currentYear
+            ) {
+                alert(`Please enter a valid manufacturing year.`);
+                return false;
             }
 
             return true;

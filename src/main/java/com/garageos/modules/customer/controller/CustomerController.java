@@ -22,7 +22,7 @@ public class CustomerController {
     private final CustomerService service;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CUSTOMER_CREATE')")
+//    @PreAuthorize("hasAuthority('CUSTOMER_CREATE')")
     public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(
             @Valid @RequestBody CreateCustomerRequest request) {
 
