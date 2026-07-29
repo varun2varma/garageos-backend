@@ -4,110 +4,146 @@ window.Api = {
 
     async get(url) {
 
-        const response = await fetch(this.BASE_URL + url);
+        return this.request(url, {
 
-        if (!response.ok) {
+            method: "GET"
 
-            const error = new Error(await response.text());
-
-            error.status = response.status;
-
-            throw error;
-
-        }
-
-        const result = await response.json();
-        return result.data ?? result;
-
-//        return await response.json();
+        });
 
     },
 
     async post(url, body) {
 
-        const response = await fetch(this.BASE_URL + url, {
+        return this.request(url, {
 
             method: "POST",
-
-            headers: {
-
-                "Content-Type": "application/json"
-
-            },
 
             body: JSON.stringify(body)
 
         });
-
-        if (!response.ok) {
-
-            const error = new Error(await response.text());
-
-            error.status = response.status;
-
-            throw error;
-
-        }
-
-//        return await response.json();
-        const result = await response.json();
-        return result.data ?? result;
 
     },
 
     async put(url, body) {
 
-        const response = await fetch(this.BASE_URL + url, {
+        return this.request(url, {
 
             method: "PUT",
-
-            headers: {
-
-                "Content-Type": "application/json"
-
-            },
 
             body: JSON.stringify(body)
 
         });
 
-        if (!response.ok) {
-
-            const error = new Error(await response.text());
-
-            error.status = response.status;
-
-            throw error;
-
-        }
-
-//        return await response.json();
-        const result = await response.json();
-        return result.data ?? result;
-
     },
-
 
     async delete(url) {
 
-        const response = await fetch(this.BASE_URL + url, {
+        return this.request(url, {
 
             method: "DELETE"
 
         });
 
-        if (!response.ok) {
+    },
 
-            const error = new Error(await response.text());
+    async request(url, options = {}) {
 
-            error.status = response.status;
+        const headers = {
 
-            throw error;
+            "Content-Type": "application/json",
+
+            ...(options.headers || {})
+
+        };
+
+        // Attach JWT automatically
+        if (window.Auth) {
+
+            const token = Auth.getAccessToken();
+
+            if (token) {
+
+                headers.Authorization = `Bearer ${token}`;
+
+            }
 
         }
 
-        const result = await response.json();
+        const response = await fetch(
 
+            this.BASE_URL + url,
+
+            {
+
+                ...options,
+
+                headers
+
+            }
+
+        );
+
+        // Unauthorized
+//        if (response.status === 401) {
+//
+//            if (window.Auth) {
+//
+//                Auth.logout();
+//
+//            }
+//
+//            throw new Error("Session expired. Please login again.");
+//
+//        }
+
+        // Other Errors
+        if (!response.ok) {
+
+            let message = "Something went wrong.";
+
+            try {
+
+                const error = await response.json();
+
+                message =
+                    error.message ??
+                    error.error ??
+                    error.data?.message ??
+                    message;
+
+            } catch (e) {
+
+                message = await response.text();
+
+            }
+
+            const err = new Error(message);
+
+            err.status = response.status;
+
+            throw err;
+
+        }
+
+        // No Content
+        if (response.status === 204) {
+
+            return null;
+
+        }
+
+        // Some DELETE APIs may return empty body
+        const text = await response.text();
+
+        if (!text) {
+
+            return null;
+
+        }
+
+        const result = JSON.parse(text);
+
+        // Keep GarageOS API wrapper behavior
         return result.data ?? result;
 
     }

@@ -1,0 +1,2 @@
+ALTER TABLE garage
+ALTER COLUMN garage_code DROP NOT NULL;

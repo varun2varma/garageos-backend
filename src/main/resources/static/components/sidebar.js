@@ -72,6 +72,21 @@ window.Sidebar = {
 
             });
 
+        const logoutButton =
+            document.getElementById("logoutBtn");
+
+        if (logoutButton) {
+
+            logoutButton.addEventListener("click", async (e) => {
+
+                e.preventDefault();
+
+                await Auth.logout();
+
+            });
+
+        }
+
     }
 };
 

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1">
+
+    <title>
+
+        GarageOS | Register Garage
+
+    </title>
+
+    <!-- ==========================================================
+         Bootstrap
+         ========================================================== -->
+
+    <link
+
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+
+            rel="stylesheet">
+
+    <!-- ==========================================================
+         Bootstrap Icons
+         ========================================================== -->
+
+    <link
+
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css"
+
+            rel="stylesheet">
+
+    <!-- ==========================================================
+         Shared Theme
+         ========================================================== -->
+
+    <link
+
+            rel="stylesheet"
+
+            href="../auth/login.css">
+
+    <!-- ==========================================================
+         Page Styles
+         ========================================================== -->
+
+    <link
+
+            rel="stylesheet"
+
+            href="register-garage.css">
+
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<div class="login-wrapper">
+
+    <div class="login-card wizard-card">
+
+        <!-- ==========================================================
+             Logo
+             ========================================================== -->
+
+        <div class="logo-section">
+
+            <div class="logo-circle">
+
+                <i class="bi bi-building"></i>
+
+            </div>
+
+            <h1>
+
+                Register Your Garage
+
+            </h1>
+
+            <p>
+
+                Let's set up your garage in just a few steps.
+
+            </p>
+
+        </div>
+
+        <!-- ==========================================================
+             Progress
+             ========================================================== -->
+
+        <div class="wizard-progress">
+
+            <div class="progress">
+
+                <div
+
+                        id="progressBar"
+
+                        class="progress-bar"
+
+                        style="width:33%;">
+
+                </div>
+
+            </div>
+
+            <div class="step-text">
+
+                Step
+
+                <span id="currentStep">
+
+                    1
+
+                </span>
+
+                of
+
+                <span id="totalSteps">
+
+                    3
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- ==========================================================
+             Error
+             ========================================================== -->
+
+        <div
+
+                id="errorMessage"
+
+                class="alert alert-danger d-none">
+
+        </div>
+
+        <!-- ==========================================================
+             Wizard
+             ========================================================== -->
+
+        <form
+
+                id="garageForm"
+
+                autocomplete="off">
+
+            <div
+
+                    id="wizardContainer"
+
+                    class="wizard-step">
+
+            </div>
+
+            <!-- ======================================================
+                 Navigation
+                 ====================================================== -->
+
+            <div class="wizard-footer">
+
+                <button
+
+                        id="wizardBackButton"
+
+                        type="button"
+
+                        class="btn btn-secondary"
+
+                        style="visibility:hidden;">
+
+                    <i class="bi bi-arrow-left me-2"></i>
+
+                    Back
+
+                </button>
+
+                <button
+
+                        id="wizardNextButton"
+
+                        type="button"
+
+                        class="btn btn-primary login-btn">
+
+                    <span id="wizardButtonText">
+
+                        Next
+
+                    </span>
+
+                    <span
+
+                            id="wizardSpinner"
+
+                            class="spinner-border spinner-border-sm ms-2 d-none">
+
+                    </span>
+
+                    <i
+
+                            id="wizardButtonIcon"
+
+                            class="bi bi-arrow-right ms-2">
+
+                    </i>
+
+                </button>
+
+            </div>
+
+        </form>
+
+        <!-- ==========================================================
+     Footer
+     ========================================================== -->
+
+        <div class="footer">
+
+            <div>
+
+                GarageOS v1.0
+
+            </div>
+
+            <small>
+
+                © 2026 GarageOS Technologies
+
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+     Bootstrap
+     ========================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ==========================================================
+     Core
+     ========================================================== -->
+
+<script src="../js/api.js"></script>
+
+<script src="../js/auth.js"></script>
+
+<!-- ==========================================================
+     Wizard Steps
+     ========================================================== -->
+
+<script src="garageService.js"></script>
+
+<script src="steps/garage-step.js"></script>
+
+<script src="steps/address-step.js"></script>
+
+<script src="steps/business-step.js"></script>
+
+<script src="steps/review-step.js"></script>
+
+<!-- ==========================================================
+     Page
+     ========================================================== -->
+
+<script src="register-garage.js"></script>
+
+</body>
+
+</html>

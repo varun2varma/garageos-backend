@@ -1,0 +1,88 @@
+/* ==========================================================
+   GarageOS Register
+   ========================================================== */
+
+/*
+    Imports the complete Login theme.
+    This file only overrides the differences.
+*/
+
+/* ==========================================================
+   Card
+   ========================================================== */
+
+.register-card{
+
+    max-width:640px;
+
+}
+
+/* ==========================================================
+   Register Footer
+   ========================================================== */
+
+.register-footer{
+
+    margin-top:30px;
+
+    text-align:center;
+
+}
+
+.register-footer p{
+
+    margin:0;
+
+    color:var(--text-muted);
+
+}
+
+.register-footer a{
+
+    color:#60a5fa;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+}
+
+.register-footer a:hover{
+
+    color:white;
+
+}
+
+/* ==========================================================
+   Button
+   ========================================================== */
+
+#registerButton{
+
+    margin-top:8px;
+
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media(max-width:768px){
+
+    .register-card{
+
+        max-width:100%;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .register-card{
+
+        padding:32px 22px;
+
+    }
+
+}
