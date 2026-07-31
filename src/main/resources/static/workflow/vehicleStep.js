@@ -475,25 +475,25 @@ window.VehicleStep = {
 
             }
 
-            const patterns = [
-                /^[A-Z]{2}(0[1-9]|[1-9][0-9])[A-Z]{1,3}(000[1-9]|00[1-9]\d|0[1-9]\d{2}|[1-9]\d{3})$/,      // State
-                /^\d{2}BH\d{4}[A-Z]{2}$/,                  // Bharat Series
-                /^CD\d{1,3}[A-Z]\d{1,4}$/,                 // Diplomatic
-                /^CC\d{1,3}\d{1,4}$/,                      // Consular
-                /^TR\d{1,6}$/,                            // Temporary
-                /^TEMP\d{1,6}$/,                          // Temporary
-                /^[A-Z]{2}\d{6}[A-Z]?$/                   // Military
-            ];
-
-            const regNo = request.registrationNumber
-                .trim()
-                .replace(/[-\s]/g, "")
-                .toUpperCase();
-
-            if (!statePlateRegex.test(regNo)) {
-                alert("Please enter a valid Indian vehicle registration number.");
-                return false;
-            }
+//            const patterns = [
+//                /^[A-Z]{2}(0[1-9]|[1-9][0-9])[A-Z]{1,3}(000[1-9]|00[1-9]\d|0[1-9]\d{2}|[1-9]\d{3})$/,      // State
+//                /^\d{2}BH\d{4}[A-Z]{2}$/,                  // Bharat Series
+//                /^CD\d{1,3}[A-Z]\d{1,4}$/,                 // Diplomatic
+//                /^CC\d{1,3}\d{1,4}$/,                      // Consular
+//                /^TR\d{1,6}$/,                            // Temporary
+//                /^TEMP\d{1,6}$/,                          // Temporary
+//                /^[A-Z]{2}\d{6}[A-Z]?$/                   // Military
+//            ];
+//
+//            const regNo = request.registrationNumber
+//                .trim()
+//                .replace(/[-\s]/g, "")
+//                .toUpperCase();
+//
+//            if (!statePlateRegex.test(regNo)) {
+//                alert("Please enter a valid Indian vehicle registration number.");
+//                return false;
+//            }
 
             if (!request.brand) {
 

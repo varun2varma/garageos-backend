@@ -345,24 +345,14 @@ window.WorkflowService = {
             remarks: WorkflowHelper.state.estimateRemarks
         };
 
-        const response = await fetch(
-            `/api/v1/estimates/${estimateId}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(request)
-            }
+        const response = await Api.put(
+            `/estimates/${estimateId}`,
+            request
         );
-
-        if (!response.ok) {
-            throw new Error("Failed to finish estimate.");
-        }
 
         await this.refreshWorkflowStatus();
 
-        return response.json();
+        return response;
     },
 
 
