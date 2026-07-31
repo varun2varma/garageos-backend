@@ -5,11 +5,13 @@ import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.customer.dto.request.CreateCustomerRequest;
 import com.garageos.modules.customer.dto.response.CustomerResponse;
 import com.garageos.modules.customer.service.CustomerService;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,6 +84,17 @@ public class CustomerController {
                 "Customers fetched successfully.",
                 service.getAllCustomers(page, size, sortBy, direction)
         );
+    }
+
+    @PostMapping("/activate")
+    public ResponseEntity<ApiResponse<CustomerResponse>> activateCustomer(
+            @AuthenticationPrincipal GarageUserPrincipal user) {
+
+        return ApiResponseUtil.created(
+                "Customer activated successfully.",
+                service.activateCustomer(user.getId())
+        );
+
     }
 
 

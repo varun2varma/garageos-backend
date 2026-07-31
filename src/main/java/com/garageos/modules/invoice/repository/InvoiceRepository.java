@@ -1,11 +1,13 @@
 package com.garageos.modules.invoice.repository;
 
+import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.invoice.entity.Invoice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
@@ -26,5 +28,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             WHERE i.generatedAt >= :start
             """)
     BigDecimal getTodayRevenue(LocalDateTime start);
+
+    List<Invoice> findByEstimateJobCardCustomer(Customer customer);
+
+    long countByEstimateJobCardCustomer(Customer customer);
 
 }

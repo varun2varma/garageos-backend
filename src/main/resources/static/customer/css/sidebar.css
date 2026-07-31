@@ -1,0 +1,247 @@
+/* ==========================================================
+   Sidebar
+   ========================================================== */
+
+.sidebar {
+
+    display: flex;
+
+    flex-direction: column;
+
+    height: 100%;
+
+    background: #0f172a;
+
+    color: white;
+
+}
+
+/* ==========================================================
+   Logo
+   ========================================================== */
+
+.sidebar-logo {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 28px 24px;
+
+    border-bottom: 1px solid rgba(255,255,255,.08);
+
+}
+
+.logo-icon {
+
+    width: 52px;
+
+    height: 52px;
+
+    border-radius: 14px;
+
+    background: linear-gradient(
+            135deg,
+            #2563eb,
+            #3b82f6
+    );
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 24px;
+
+}
+
+.logo-text h4 {
+
+    margin: 0;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+}
+
+.logo-text small {
+
+    color: #94a3b8;
+
+}
+
+/* ==========================================================
+   Menu
+   ========================================================== */
+
+.sidebar-menu {
+
+    flex: 1;
+
+    padding: 24px 16px;
+
+}
+
+.sidebar-title {
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 12px;
+
+    padding-left: 12px;
+
+}
+
+.sidebar-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px 16px;
+
+    margin-bottom: 6px;
+
+    border-radius: 14px;
+
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    transition: .25s;
+
+    cursor: pointer;
+
+}
+
+.sidebar-item i {
+
+    font-size: 18px;
+
+    width: 22px;
+
+    text-align: center;
+
+}
+
+.sidebar-item:hover {
+
+    background: rgba(37,99,235,.15);
+
+    color: white;
+
+}
+
+.sidebar-item.active {
+
+    background: #2563eb;
+
+    color: white;
+
+    box-shadow: 0 8px 20px rgba(37,99,235,.30);
+
+}
+
+/* ==========================================================
+   Footer
+   ========================================================== */
+
+.sidebar-footer {
+
+    padding: 20px;
+
+    border-top: 1px solid rgba(255,255,255,.08);
+
+}
+
+.logout-button {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 12px;
+
+    background: rgba(239,68,68,.12);
+
+    color: #f87171;
+
+    transition: .25s;
+
+}
+
+.logout-button:hover {
+
+    background: #dc2626;
+
+    color: white;
+
+}
+
+/* ==========================================================
+   Customer Info
+   ========================================================== */
+
+.customer-summary {
+
+    margin-top: 18px;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background: rgba(255,255,255,.05);
+
+}
+
+.customer-summary h6 {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+}
+
+.customer-summary small {
+
+    color: #94a3b8;
+
+}
+
+/* ==========================================================
+   Mobile
+   ========================================================== */
+
+@media (max-width:992px){
+
+    .sidebar{
+
+        width:270px;
+
+    }
+
+}

@@ -70,10 +70,21 @@ async function joinGarage() {
 
 async function customerPortal() {
 
-    await completeOnboarding();
+    try {
 
-    window.location.href =
-        "../customer/customer-home.html";
+        await Api.post(
+            "/customers/activate",
+            {}
+        );
+
+        window.location.href =
+            "../customer/index.html";
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
 
 }
 

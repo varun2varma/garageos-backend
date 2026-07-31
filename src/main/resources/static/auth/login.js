@@ -78,16 +78,37 @@ async function login(event) {
 
         rememberUsername(username);
 
+        const roles = response.user.roles || [];
+
         if (response.firstLogin) {
 
             window.location.href =
                 "../onboarding/welcome.html";
 
         }
-        else {
+        else if (roles.includes("OWNER")) {
 
             window.location.href =
                 "../index.html";
+
+        }
+        else if (roles.includes("CUSTOMER")) {
+
+            window.location.href =
+                "../customer/index.html";
+
+        }
+        else if (roles.includes("SERVICE_ADVISOR")
+              || roles.includes("TECHNICIAN")) {
+
+            window.location.href =
+                "../index.html";
+
+        }
+        else {
+
+            window.location.href =
+                "../onboarding/welcome.html";
 
         }
 

@@ -76,6 +76,7 @@ public class SecurityConfig {
                                 "/garage/**",
                                 "/auth/**",
                                 "/onboarding/**",
+                                "/customer/**",
 
                                 "/favicon.ico",
 

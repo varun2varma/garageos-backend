@@ -1,9 +1,11 @@
 package com.garageos.modules.estimate.repository;
 
 import com.garageos.core.enums.EstimateStatus;
+import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.estimate.entity.Estimate;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface EstimateRepository extends JpaRepository<Estimate, Long> {
@@ -17,5 +19,9 @@ public interface EstimateRepository extends JpaRepository<Estimate, Long> {
     Optional<Estimate> findByJobCardId(Long jobCardId);
 
     long countByStatus(EstimateStatus status);
+
+    List<Estimate> findByJobCardCustomer(Customer customer);
+
+    long countByJobCardCustomer(Customer customer);
 
 }

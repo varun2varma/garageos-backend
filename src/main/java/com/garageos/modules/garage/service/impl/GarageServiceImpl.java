@@ -112,9 +112,33 @@ public class GarageServiceImpl implements GarageService {
         garageRepository.delete(garage);
     }
 
+//    private void assignOwnerRole(User user) {
+//
+//        userRoleRepository.deleteByUserId(user.getId());
+//
+//        Role ownerRole = roleRepository.findByCode(RoleCode.OWNER)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException("OWNER role not found."));
+//
+//        UserRole userRole = UserRole.builder()
+//                .user(user)
+//                .role(ownerRole)
+//                .build();
+//
+//        userRoleRepository.save(userRole);
+//    }
+
     private void assignOwnerRole(User user) {
 
-        userRoleRepository.deleteByUserId(user.getId());
+        boolean alreadyAssigned =
+                userRoleRepository.existsByUserIdAndRoleCode(
+                        user.getId(),
+                        RoleCode.OWNER
+                );
+
+        if (alreadyAssigned) {
+            return;
+        }
 
         Role ownerRole = roleRepository.findByCode(RoleCode.OWNER)
                 .orElseThrow(() ->

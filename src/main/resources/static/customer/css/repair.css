@@ -1,0 +1,155 @@
+/* ==========================================================
+   Repair Card
+   ========================================================== */
+
+.repair-card {
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    border: 1px solid #e5e7eb;
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.05);
+
+}
+
+/* ==========================================================
+   Vehicle Header
+   ========================================================== */
+
+.repair-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 24px;
+
+}
+
+.repair-header h4 {
+
+    margin: 0;
+
+    font-weight: 700;
+
+}
+
+.repair-header small {
+
+    color: #6b7280;
+
+}
+
+/* ==========================================================
+   Timeline
+   ========================================================== */
+
+.timeline {
+
+    position: relative;
+
+    margin-left: 20px;
+
+    border-left: 2px solid #dbeafe;
+
+}
+
+.timeline-item {
+
+    position: relative;
+
+    padding: 0 0 28px 32px;
+
+}
+
+.timeline-item:last-child {
+
+    padding-bottom: 0;
+
+}
+
+.timeline-dot {
+
+    position: absolute;
+
+    left: -11px;
+
+    width: 20px;
+
+    height: 20px;
+
+    border-radius: 50%;
+
+    background: #d1d5db;
+
+}
+
+.timeline-item.completed .timeline-dot {
+
+    background: #22c55e;
+
+}
+
+.timeline-item.active .timeline-dot {
+
+    background: #2563eb;
+
+}
+
+.timeline-title {
+
+    font-weight: 600;
+
+    color: #111827;
+
+}
+
+.timeline-description {
+
+    color: #6b7280;
+
+    margin-top: 4px;
+
+}
+
+.timeline-date {
+
+    font-size: 13px;
+
+    color: #9ca3af;
+
+    margin-top: 6px;
+
+}
+
+/* ==========================================================
+   Empty
+   ========================================================== */
+
+.empty-repair {
+
+    text-align: center;
+
+    padding: 80px 20px;
+
+    color: #6b7280;
+
+}
+
+.empty-repair i {
+
+    font-size: 60px;
+
+    margin-bottom: 16px;
+
+    color: #cbd5e1;
+
+}

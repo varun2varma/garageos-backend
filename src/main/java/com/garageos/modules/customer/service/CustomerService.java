@@ -20,4 +20,7 @@ public interface CustomerService {
             int page,
             int size,
             String sortBy,
-            String direction);}
+            String direction);
+    CustomerResponse activateCustomer(Long userId);
+
+}

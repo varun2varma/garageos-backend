@@ -1,0 +1,111 @@
+/* ==========================================================
+   Vehicle Card
+   ========================================================== */
+
+.vehicle-card {
+
+    height: 100%;
+
+    border-radius: 18px;
+
+    background: white;
+
+    border: 1px solid #edf2f7;
+
+    transition: .25s;
+
+    overflow: hidden;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.05);
+
+}
+
+.vehicle-card:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: 0 14px 34px rgba(0,0,0,.08);
+
+}
+
+.vehicle-header {
+
+    background: linear-gradient(
+            135deg,
+            #2563eb,
+            #3b82f6
+    );
+
+    color: white;
+
+    padding: 22px;
+
+}
+
+.vehicle-registration {
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+}
+
+.vehicle-body {
+
+    padding: 22px;
+
+}
+
+.vehicle-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #eef2f7;
+
+}
+
+.vehicle-row:last-child {
+
+    border-bottom: none;
+
+}
+
+.vehicle-label {
+
+    color: #6b7280;
+
+    font-weight: 600;
+
+}
+
+.vehicle-value {
+
+    color: #111827;
+
+    font-weight: 500;
+
+}
+
+.empty-vehicle {
+
+    padding: 80px 20px;
+
+    text-align: center;
+
+    color: #6b7280;
+
+}
+
+.empty-vehicle i {
+
+    font-size: 64px;
+
+    margin-bottom: 20px;
+
+    color: #cbd5e1;
+
+}

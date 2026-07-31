@@ -1,0 +1,27 @@
+/* ==========================================================
+   Profile
+   ========================================================== */
+
+.form-label {
+
+    font-weight: 600;
+
+    color: #374151;
+
+}
+
+.form-control[readonly] {
+
+    background: #f9fafb;
+
+    border-color: #e5e7eb;
+
+    color: #111827;
+
+}
+
+textarea.form-control {
+
+    resize: none;
+
+}

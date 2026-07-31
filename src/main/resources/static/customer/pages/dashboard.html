@@ -1,0 +1,225 @@
+<div class="container-fluid">
+
+    <div class="row g-4">
+
+        <!-- ======================================================
+             Welcome
+             ====================================================== -->
+
+        <div class="col-12">
+
+            <div class="customer-card">
+
+                <h2
+                        id="dashboardCustomerName"
+                        class="page-title">
+
+                    Welcome
+
+                </h2>
+
+                <p class="page-subtitle mb-0">
+
+                    Track your vehicles, repairs, estimates and invoices from one place.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- ======================================================
+             Statistics
+             ====================================================== -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="customer-card dashboard-stat">
+
+                <div class="stat-icon bg-primary">
+
+                    <i class="bi bi-car-front"></i>
+
+                </div>
+
+                <div class="stat-content">
+
+                    <h3 id="vehicleCount">
+
+                        0
+
+                    </h3>
+
+                    <span>
+
+                        Vehicles
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="customer-card dashboard-stat">
+
+                <div class="stat-icon bg-warning">
+
+                    <i class="bi bi-tools"></i>
+
+                </div>
+
+                <div class="stat-content">
+
+                    <h3 id="repairCount">
+
+                        0
+
+                    </h3>
+
+                    <span>
+
+                        Active Repairs
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="customer-card dashboard-stat">
+
+                <div class="stat-icon bg-success">
+
+                    <i class="bi bi-receipt"></i>
+
+                </div>
+
+                <div class="stat-content">
+
+                    <h3 id="estimateCount">
+
+                        0
+
+                    </h3>
+
+                    <span>
+
+                        Pending Estimates
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="customer-card dashboard-stat">
+
+                <div class="stat-icon bg-danger">
+
+                    <i class="bi bi-file-earmark-text"></i>
+
+                </div>
+
+                <div class="stat-content">
+
+                    <h3 id="invoiceCount">
+
+                        0
+
+                    </h3>
+
+                    <span>
+
+                        Unpaid Invoices
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ======================================================
+             Recent Repairs
+             ====================================================== -->
+
+        <div class="col-lg-8">
+
+            <div class="customer-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <h5 class="mb-0">
+
+                        Recent Repairs
+
+                    </h5>
+
+                    <button
+                            class="btn btn-sm btn-primary"
+                            onclick="CustomerRouter.navigate('repair')">
+
+                        View All
+
+                    </button>
+
+                </div>
+
+                <div id="recentRepairs">
+
+                    <div class="text-center text-muted py-5">
+
+                        No repair jobs available.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ======================================================
+             Recent Vehicles
+             ====================================================== -->
+
+        <div class="col-lg-4">
+
+            <div class="customer-card">
+
+                <h5 class="mb-4">
+
+                    My Vehicles
+
+                </h5>
+
+                <div id="vehicleList">
+
+                    <div class="text-center text-muted py-5">
+
+                        No vehicles found.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,6 +1,7 @@
 package com.garageos.modules.jobcard.repository;
 
 import com.garageos.core.enums.JobCardStatus;
+import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.jobcard.entity.JobCard;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,5 +26,9 @@ public interface JobCardRepository extends JpaRepository<JobCard, Long> {
     long countByServiceDate(LocalDate serviceDate);
 
     List<JobCard> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    List<JobCard> findByCustomer(Customer customer);
+
+    long countByCustomer(Customer customer);
 
 }
