@@ -1,134 +1,165 @@
 package com.garageos.modules.inspectionmaster.importer;
 
-import com.garageos.core.loader.CsvLoader;
 import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
+import com.garageos.core.loader.AbstractImporter;
+import com.garageos.core.loader.CsvLoader;
 import com.garageos.modules.inspectionmaster.entity.InspectionMaster;
 import com.garageos.modules.inspectionmaster.repository.InspectionMasterRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class InspectionMasterImporterImpl implements InspectionMasterImporter {
+public class InspectionMasterImporterImpl
+        extends AbstractImporter<InspectionMaster>
+        implements InspectionMasterImporter {
 
-    private final CsvLoader loader;
     private final InspectionMasterRepository repository;
 
+    public InspectionMasterImporterImpl(
+            CsvLoader csvLoader,
+            EntityManager entityManager,
+            InspectionMasterRepository repository) {
+
+        super(
+                csvLoader,
+                entityManager,
+                repository,
+                "Inspection Master");
+
+        this.repository = repository;
+    }
+
     @Override
+    @Transactional
     public void importMasters() {
 
         log.info("Starting Inspection Master Import...");
-
-        List<String[]> rows =
-                loader.read("inspectionmaster/inspection_master.csv");
 
         Map<String, InspectionMaster> existingMasters =
                 repository.findAll()
                         .stream()
                         .collect(Collectors.toMap(
 
-                                master -> (
-                                        master.getMake()
-                                                + ":"
-                                                + master.getModel()
-                                                + ":"
-                                                + master.getVariant()
-                                                + ":"
-                                                + master.getFuelType()
-                                                + ":"
-                                                + master.getTransmissionType()
-                                                + ":"
-                                                + master.getMinYear()
-                                                + ":"
-                                                + master.getMaxYear()
-                                                + ":"
-                                                + master.getMinOdometer()
-                                                + ":"
-                                                + master.getMaxOdometer()
+                                master ->
+                                        (
+                                                master.getMake()
+                                                        + ":"
+                                                        + master.getModel()
+                                                        + ":"
+                                                        + master.getVariant()
+                                                        + ":"
+                                                        + master.getFuelType()
+                                                        + ":"
+                                                        + master.getTransmissionType()
+                                                        + ":"
+                                                        + master.getMinYear()
+                                                        + ":"
+                                                        + master.getMaxYear()
+                                                        + ":"
+                                                        + master.getMinOdometer()
+                                                        + ":"
+                                                        + master.getMaxOdometer()
 
-                                ).toLowerCase(),
+                                        ).toLowerCase(),
 
                                 Function.identity()
+
                         ));
 
-        List<InspectionMaster> mastersToSave = new ArrayList<>();
+        csvLoader.read(
+                "inspectionmaster/inspection_master.csv",
+                row -> {
 
-        for (String[] row : rows) {
+                    rowRead();
 
-            String key = (
+                    String key =
+                            (
+                                    row.string("make")
+                                            + ":"
+                                            + row.string("model")
+                                            + ":"
+                                            + row.string("variant")
+                                            + ":"
+                                            + row.enumValue(
+                                            FuelType.class,
+                                            "fuelType")
+                                            + ":"
+                                            + row.enumValue(
+                                            TransmissionType.class,
+                                            "transmissionType")
+                                            + ":"
+                                            + row.integer("minYear")
+                                            + ":"
+                                            + row.integer("maxYear")
+                                            + ":"
+                                            + row.integer("minOdometer")
+                                            + ":"
+                                            + row.integer("maxOdometer")
+                            ).toLowerCase();
 
-                    row[0].trim()
-                            + ":"
-                            + row[1].trim()
-                            + ":"
-                            + row[2].trim()
-                            + ":"
-                            + row[3].trim()
-                            + ":"
-                            + row[4].trim()
-                            + ":"
-                            + row[5].trim()
-                            + ":"
-                            + row[6].trim()
-                            + ":"
-                            + row[7].trim()
-                            + ":"
-                            + row[8].trim()
+                    if (existingMasters.containsKey(key)) {
 
-            ).toLowerCase();
+                        skip();
 
-            if (existingMasters.containsKey(key)) {
-                continue;
-            }
+                        return;
+                    }
 
-            InspectionMaster master = new InspectionMaster();
+                    InspectionMaster master =
+                            new InspectionMaster();
 
-            master.setMake(row[0].trim());
-            master.setModel(row[1].trim());
-            master.setVariant(row[2].trim());
+                    master.setMake(
+                            row.string("make"));
 
-            master.setFuelType(
-                    FuelType.valueOf(row[3].trim()));
+                    master.setModel(
+                            row.string("model"));
 
-            master.setTransmissionType(
-                    TransmissionType.valueOf(row[4].trim()));
+                    master.setVariant(
+                            row.string("variant"));
 
-            master.setMinYear(
-                    Integer.parseInt(row[5]));
+                    master.setFuelType(
+                            row.enumValue(
+                                    FuelType.class,
+                                    "fuelType"));
 
-            master.setMaxYear(
-                    Integer.parseInt(row[6]));
+                    master.setTransmissionType(
+                            row.enumValue(
+                                    TransmissionType.class,
+                                    "transmissionType"));
 
-            master.setMinOdometer(
-                    Integer.parseInt(row[7]));
+                    master.setMinYear(
+                            row.integer("minYear"));
 
-            master.setMaxOdometer(
-                    Integer.parseInt(row[8]));
+                    master.setMaxYear(
+                            row.integer("maxYear"));
 
-            master.setActive(true);
+                    master.setMinOdometer(
+                            row.integer("minOdometer"));
 
-            mastersToSave.add(master);
+                    master.setMaxOdometer(
+                            row.integer("maxOdometer"));
 
-            existingMasters.put(key, master);
-        }
+                    master.setActive(true);
 
-        if (!mastersToSave.isEmpty()) {
+                    write(master);
 
-            repository.saveAll(mastersToSave);
+                    existingMasters.put(
+                            key,
+                            master);
 
-            log.info("{} Inspection Masters Imported.",
-                    mastersToSave.size());
+                });
 
-        } else {
+        finish();
 
-            log.info("No Inspection Masters to import.");
-        }
+        log.info("Inspection Master Import Completed.");
+
     }
+
 }

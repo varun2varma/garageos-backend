@@ -1,52 +1,146 @@
 package com.garageos.modules.vehiclemaster.importer;
 
+import com.garageos.core.loader.AbstractImporter;
+import com.garageos.core.loader.CsvLoader;
 import com.garageos.modules.vehiclemaster.entity.VehicleBrand;
 import com.garageos.modules.vehiclemaster.entity.VehicleModel;
-import com.garageos.core.loader.CsvLoader;
 import com.garageos.modules.vehiclemaster.enums.BodyType;
 import com.garageos.modules.vehiclemaster.repository.VehicleBrandRepository;
 import com.garageos.modules.vehiclemaster.repository.VehicleModelRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class ModelImporterImpl implements ModelImporter {
+public class ModelImporterImpl
+        extends AbstractImporter<VehicleModel>
+        implements ModelImporter {
 
-    private final CsvLoader loader;
     private final VehicleBrandRepository brandRepository;
     private final VehicleModelRepository modelRepository;
+
+    public ModelImporterImpl(
+            CsvLoader csvLoader,
+            EntityManager entityManager,
+            VehicleBrandRepository brandRepository,
+            VehicleModelRepository repository) {
+
+        super(
+                csvLoader,
+                entityManager,
+                repository,
+                "Vehicle Model");
+
+        this.brandRepository = brandRepository;
+        this.modelRepository = repository;
+    }
 
     @Override
     public void importModels() {
 
-        var rows = loader.read("vehiclemaster/models.csv");
+//        Map<String, VehicleBrand> brands =
+//                brandRepository.findAll()
+//                        .stream()
+//                        .collect(Collectors.toMap(
+//                                b -> b.getName().toLowerCase(),
+//                                Function.identity()
+//                        ));
+//
+//        Set<String> existingModels =
+//                brandRepository.findAll()
+//                        .stream()
+//                        .flatMap(b -> b.getModels().stream())
+//                        .map(m -> (
+//                                m.getBrand().getName()
+//                                        + ":"
+//                                        + m.getName()
+//                        ).toLowerCase())
+//                        .collect(Collectors.toSet());
 
-        for (String[] row : rows) {
+        Map<String, VehicleBrand> brands =
+                brandRepository.findAll()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                b -> b.getName().toLowerCase(),
+                                Function.identity()
+                        ));
 
-            VehicleBrand brand = brandRepository
-                    .findByNameIgnoreCase(row[0])
-                    .orElseThrow();
+        Set<String> existingModels =
+                modelRepository.findAllWithBrand()
+                        .stream()
+                        .map(m ->
+                                (m.getBrand().getName() + ":" + m.getName())
+                                        .toLowerCase())
+                        .collect(Collectors.toSet());
 
-            if (modelRepository.existsByBrandAndNameIgnoreCase(
-                    brand,
-                    row[1])) {
+        csvLoader.read(
+                "vehiclemaster/models.csv",
+                row -> {
 
-                continue;
-            }
+                    rowRead();
 
-            VehicleModel model = new VehicleModel();
+                    String brandName =
+                            row.string("brand");
 
-            model.setBrand(brand);
-            model.setName(row[1]);
-            model.setBodyType(BodyType.valueOf(row[2]));
-            model.setSeatingCapacity(Integer.parseInt(row[3]));
+                    VehicleBrand brand =
+                            brands.get(
+                                    brandName.toLowerCase());
 
-            modelRepository.save(model);
-        }
+                    if (brand == null) {
 
-        log.info("Vehicle Models Imported");
+                        fail();
+
+                        log.warn(
+                                "Brand not found : {}",
+                                brandName);
+
+                        return;
+
+                    }
+
+                    String key =
+                            (
+                                    brandName
+                                            + ":"
+                                            + row.string("name")
+                            ).toLowerCase();
+
+                    if (existingModels.contains(key)) {
+
+                        skip();
+
+                        return;
+
+                    }
+
+                    VehicleModel model =
+                            new VehicleModel();
+
+                    model.setBrand(brand);
+                    model.setName(row.string("name"));
+                    model.setBodyType(
+                            row.enumValue(
+                                    BodyType.class,
+                                    "bodyType"));
+
+                    model.setSeatingCapacity(
+                            row.integer(
+                                    "seatingCapacity"));
+
+                    write(model);
+
+                    existingModels.add(key);
+
+                });
+
+        finish();
+
     }
+
 }

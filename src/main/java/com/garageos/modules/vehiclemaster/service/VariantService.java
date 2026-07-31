@@ -1,5 +1,7 @@
 package com.garageos.modules.vehiclemaster.service;
 
+import com.garageos.core.enums.EnumDropdownResponse;
+import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.vehiclemaster.dto.request.CreateVehicleVariantRequest;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleDropdownResponse;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleMasterMetadataResponse;
@@ -23,4 +25,10 @@ public interface VariantService {
     List<VehicleDropdownResponse> getVariantsByModel(Long modelId);
 
     VehicleMasterMetadataResponse getMetadata();
+
+    List<EnumDropdownResponse> getTransmissionDropdown(Long modelId);
+
+    List<EnumDropdownResponse> getFuelTypeDropdown(
+            Long modelId,
+            TransmissionType transmissionType);
 }

@@ -1,166 +1,185 @@
 package com.garageos.modules.inspectionmaster.importer;
 
-import com.garageos.core.loader.CsvLoader;
 import com.garageos.core.enums.InspectionPriority;
+import com.garageos.core.loader.AbstractImporter;
+import com.garageos.core.loader.CsvLoader;
 import com.garageos.modules.inspectionmaster.entity.InspectionMaster;
 import com.garageos.modules.inspectionmaster.entity.InspectionMasterItem;
 import com.garageos.modules.inspectionmaster.repository.InspectionMasterItemRepository;
 import com.garageos.modules.inspectionmaster.repository.InspectionMasterRepository;
-import lombok.RequiredArgsConstructor;
+import com.garageos.modules.inspectionmaster.repository.projection.InspectionMasterItemKey;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class InspectionMasterItemImporterImpl
+        extends AbstractImporter<InspectionMasterItem>
         implements InspectionMasterItemImporter {
 
-    private final CsvLoader loader;
-
     private final InspectionMasterRepository masterRepository;
-
     private final InspectionMasterItemRepository itemRepository;
 
+    public InspectionMasterItemImporterImpl(
+            CsvLoader csvLoader,
+            EntityManager entityManager,
+            InspectionMasterRepository masterRepository,
+            InspectionMasterItemRepository itemRepository) {
+
+        super(
+                csvLoader,
+                entityManager,
+                itemRepository,
+                "Inspection Master Item");
+
+        this.masterRepository = masterRepository;
+        this.itemRepository = itemRepository;
+    }
+
     @Override
+//    @Transactional
     public void importItems() {
 
         log.info("Starting Inspection Master Item Import...");
-
-        List<String[]> rows =
-                loader.read("inspectionmaster/inspection_master_items.csv");
 
         Map<String, InspectionMaster> masterMap =
                 masterRepository.findAll()
                         .stream()
                         .collect(Collectors.toMap(
 
-                                master -> (
+                                master ->
+                                        (
+                                                master.getMake()
+                                                        + ":"
+                                                        + master.getModel()
+                                                        + ":"
+                                                        + master.getVariant()
+                                                        + ":"
+                                                        + master.getMinOdometer()
+                                                        + ":"
+                                                        + master.getMaxOdometer()
 
-                                        master.getMake()
-                                                + ":"
-                                                + master.getModel()
-                                                + ":"
-                                                + master.getVariant()
-                                                + ":"
-                                                + master.getMinOdometer()
-                                                + ":"
-                                                + master.getMaxOdometer()
-
-                                ).toLowerCase(),
+                                        ).toLowerCase(),
 
                                 Function.identity()
+
                         ));
 
-        Set<String> existingItems =
-                itemRepository.findAll()
-                        .stream()
-                        .map(item -> (
+//        Set<String> existingItems =
+//                itemRepository.findAllKeys()
+//                        .stream()
+//                        .map(key ->
+//                                (
+//                                        key.getInspectionMasterId()
+//                                                + ":"
+//                                                + key.getCheckItem()
+//                                ).toLowerCase())
+//                        .collect(Collectors.toSet());
 
-                                item.getInspectionMaster().getId()
-                                        + ":"
-                                        + item.getCheckItem()
+        csvLoader.read(
+                "inspectionmaster/inspection_master_items.csv",
+                row -> {
 
-                        ).toLowerCase())
-                        .collect(Collectors.toSet());
+                    rowRead();
 
-        List<InspectionMasterItem> itemsToSave =
-                new ArrayList<>();
+                    String masterKey =
+                            (
+                                    row.string("make")
+                                            + ":"
+                                            + row.string("model")
+                                            + ":"
+                                            + row.string("variant")
+                                            + ":"
+                                            + row.integer("minOdometer")
+                                            + ":"
+                                            + row.integer("maxOdometer")
+                            ).toLowerCase();
 
-        for (String[] row : rows) {
+                    InspectionMaster master =
+                            masterMap.get(masterKey);
 
-            String masterKey = (
+                    if (master == null) {
 
-                    row[0].trim()
-                            + ":"
-                            + row[1].trim()
-                            + ":"
-                            + row[2].trim()
-                            + ":"
-                            + row[3].trim()
-                            + ":"
-                            + row[4].trim()
+                        fail();
 
-            ).toLowerCase();
+                        log.warn(
+                                "Master not found : {}",
+                                masterKey);
 
-            InspectionMaster master =
-                    masterMap.get(masterKey);
+                        return;
+                    }
 
-            if (master == null) {
+                    String duplicateKey =
+                            (
+                                    master.getId()
+                                            + ":"
+                                            + row.string("checkItem")
+                            ).toLowerCase();
 
-                log.warn("Master not found : {}", masterKey);
+//                    if (existingItems.contains(duplicateKey)) {
+//
+//                        skip();
+//
+//                        return;
+//                    }
 
-                continue;
-            }
+                    InspectionMasterItem item =
+                            new InspectionMasterItem();
 
-            String duplicateKey =
-                    (
-                            master.getId()
-                                    + ":"
-                                    + row[6].trim()
-                    ).toLowerCase();
+                    item.setInspectionMaster(master);
 
-            if (existingItems.contains(duplicateKey)) {
-                continue;
-            }
+                    item.setCategory(
+                            row.string("category"));
 
-            InspectionMasterItem item =
-                    new InspectionMasterItem();
+                    item.setCheckItem(
+                            row.string("checkItem"));
 
-            item.setInspectionMaster(master);
+                    item.setDescription(
+                            row.string("description"));
 
-            item.setCategory(row[5].trim());
+                    item.setPriority(
+                            row.enumValue(
+                                    InspectionPriority.class,
+                                    "priority"));
 
-            item.setCheckItem(row[6].trim());
+                    item.setMandatory(
+                            row.bool("mandatory"));
 
-            item.setDescription(row[7].trim());
+                    item.setDisplayOrder(
+                            row.integer("displayOrder"));
 
-            item.setPriority(
-                    InspectionPriority.valueOf(row[8].trim()));
+                    item.setServiceName(
+                            row.string("serviceName"));
 
-            item.setMandatory(
-                    Boolean.parseBoolean(row[9].trim()));
+                    item.setServiceDescription(
+                            row.string("serviceDescription"));
 
-            item.setDisplayOrder(
-                    Integer.parseInt(row[10].trim()));
+                    item.setLabourCost(
+                            row.decimal("labourCost"));
 
-            item.setServiceName(
-                    row[11].trim());
+                    item.setPartCost(
+                            row.decimal("partCost"));
 
-            item.setServiceDescription(
-                    row[12].trim());
+                    item.setEstimatedLabourHours(
+                            row.decimal("estimatedLabourHours"));
 
-            item.setLabourCost(
-                    new BigDecimal(row[13].trim()));
+                    write(item);
 
-            item.setPartCost(
-                    new BigDecimal(row[14].trim()));
+//                    existingItems.add(duplicateKey);
 
-            item.setEstimatedLabourHours(
-                    new BigDecimal(row[15].trim()));
+                });
 
-            itemsToSave.add(item);
-
-            existingItems.add(duplicateKey);
-        }
-
-        if (!itemsToSave.isEmpty()) {
-
-            itemRepository.saveAll(itemsToSave);
-
-            log.info("{} Inspection Master Items Imported.",
-                    itemsToSave.size());
-
-        } else {
-
-            log.info("No Inspection Master Items to import.");
-        }
+        finish();
 
         log.info("Inspection Master Item Import Completed.");
+
     }
+
 }
