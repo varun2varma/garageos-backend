@@ -12,5 +12,6 @@ public enum BodyType {
     COUPE,
     CONVERTIBLE,
     PICKUP,
-    VAN
+    VAN,
+    TRUCK
 }

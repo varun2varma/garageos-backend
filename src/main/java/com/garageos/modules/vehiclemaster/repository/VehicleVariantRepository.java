@@ -39,4 +39,23 @@ public interface VehicleVariantRepository extends JpaRepository<VehicleVariant, 
         """)
     List<TransmissionType> findDistinctTransmissionTypes();
 
+    @Query("""
+    select distinct v.transmissionType
+    from VehicleVariant v
+    where v.model.id = :modelId
+    order by v.transmissionType
+    """)
+    List<TransmissionType> findDistinctTransmissionTypesByModelId(Long modelId);
+
+    @Query("""
+    select distinct v.fuelType
+    from VehicleVariant v
+    where v.model.id = :modelId
+      and v.transmissionType = :transmissionType
+    order by v.fuelType
+    """)
+    List<FuelType> findDistinctFuelTypesByModelIdAndTransmissionType(
+            Long modelId,
+            TransmissionType transmissionType);
+
 }

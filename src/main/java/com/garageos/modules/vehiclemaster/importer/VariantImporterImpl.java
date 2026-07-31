@@ -2,187 +2,179 @@ package com.garageos.modules.vehiclemaster.importer;
 
 import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
-import com.garageos.modules.vehiclemaster.entity.VehicleBrand;
+import com.garageos.core.loader.AbstractImporter;
+import com.garageos.core.loader.CsvLoader;
 import com.garageos.modules.vehiclemaster.entity.VehicleModel;
 import com.garageos.modules.vehiclemaster.entity.VehicleVariant;
-import com.garageos.core.loader.CsvLoader;
-import com.garageos.modules.vehiclemaster.repository.VehicleBrandRepository;
 import com.garageos.modules.vehiclemaster.repository.VehicleModelRepository;
 import com.garageos.modules.vehiclemaster.repository.VehicleVariantRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class VariantImporterImpl implements VariantImporter {
+public class VariantImporterImpl
+        extends AbstractImporter<VehicleVariant>
+        implements VariantImporter {
 
-    private final CsvLoader loader;
-//    private final VehicleBrandRepository brandRepository;
     private final VehicleModelRepository modelRepository;
     private final VehicleVariantRepository variantRepository;
+
+    public VariantImporterImpl(
+            CsvLoader csvLoader,
+            EntityManager entityManager,
+            VehicleModelRepository modelRepository,
+            VehicleVariantRepository variantRepository) {
+
+        super(
+                csvLoader,
+                entityManager,
+                variantRepository,
+                "Vehicle Variant");
+
+        this.modelRepository = modelRepository;
+        this.variantRepository = variantRepository;
+    }
 
     @Override
     @Transactional
     public void importVariants() {
 
-        log.info("Starting Variant Import...");
-
-        List<String[]> rows = loader.read("vehiclemaster/variants.csv");
-
-        // ----------------------------
-        // Load Brands into Memory
-        // ----------------------------
-
-//        Map<String, VehicleBrand> brandMap =
-//                brandRepository.findAll()
-//                        .stream()
-//                        .collect(Collectors.toMap(
-//                                b -> b.getName().toLowerCase(),
-//                                Function.identity()
-//                        ));
-
-        // ----------------------------
-        // Load Models into Memory
-        // ----------------------------
+        log.info("Starting Vehicle Variant Import...");
 
         Map<String, VehicleModel> modelMap =
                 modelRepository.findAllWithBrand()
                         .stream()
                         .collect(Collectors.toMap(
-                                m -> (m.getBrand().getName() + ":" + m.getName()).toLowerCase(),
+                                model ->
+                                        (
+                                                model.getBrand().getName()
+                                                        + ":"
+                                                        + model.getName()
+                                        ).toLowerCase(),
                                 Function.identity()
                         ));
-
-        // ----------------------------
-        // Load Existing Variants
-        // ----------------------------
 
         Map<String, VehicleVariant> variantMap =
                 variantRepository.findAll()
                         .stream()
                         .collect(Collectors.toMap(
-                                v -> (
-                                        v.getModel().getId()
-                                                + ":"
-                                                + v.getVariantName()
-                                                + ":"
-                                                + v.getFuelType()
-                                                + ":"
-                                                + v.getTransmissionType()
-                                ).toLowerCase(),
+                                variant ->
+                                        (
+                                                variant.getModel().getId()
+                                                        + ":"
+                                                        + variant.getVariantName()
+                                                        + ":"
+                                                        + variant.getFuelType()
+                                                        + ":"
+                                                        + variant.getTransmissionType()
+                                        ).toLowerCase(),
                                 Function.identity()
                         ));
 
-        List<VehicleVariant> variantsToSave = new ArrayList<>();
+        csvLoader.read(
+                "vehiclemaster/variants.csv",
+                row -> {
 
-        // ----------------------------
-        // Import
-        // ----------------------------
+                    rowRead();
 
-        for (String[] row : rows) {
+                    String modelKey =
+                            (
+                                    row.string("brand")
+                                            + ":"
+                                            + row.string("model")
+                            ).toLowerCase();
 
-            if (row.length < 12) {
-                log.warn("Skipping invalid row: {}", Arrays.toString(row));
-                continue;
-            }
+                    VehicleModel model =
+                            modelMap.get(modelKey);
 
-            String brandName = row[0].trim();
-            String modelName = row[1].trim();
+                    if (model == null) {
 
-            String modelKey =
-                    (brandName + ":" + modelName).toLowerCase();
+                        fail();
 
-            VehicleModel model = modelMap.get(modelKey);
+                        log.warn(
+                                "Model not found : {}",
+                                modelKey);
 
-            if (model == null) {
+                        return;
+                    }
 
-                log.warn("Skipping row. Model not found : {}", modelKey);
+                    FuelType fuelType =
+                            row.enumValue(
+                                    FuelType.class,
+                                    "fuel");
 
-                continue;
-            }
+                    TransmissionType transmissionType =
+                            row.enumValue(
+                                    TransmissionType.class,
+                                    "transmission");
 
-            FuelType fuelType = FuelType.valueOf(row[3].trim());
-            TransmissionType transmissionType =
-                    TransmissionType.valueOf(row[4].trim());
+                    String variantKey =
+                            (
+                                    model.getId()
+                                            + ":"
+                                            + row.string("variant")
+                                            + ":"
+                                            + fuelType
+                                            + ":"
+                                            + transmissionType
+                            ).toLowerCase();
 
-            String variantKey =
-                    (
-                            model.getId()
-                                    + ":"
-                                    + row[2].trim()
-                                    + ":"
-                                    + fuelType
-                                    + ":"
-                                    + transmissionType
-                    ).toLowerCase();
+                    if (variantMap.containsKey(variantKey)) {
 
-            if (variantMap.containsKey(variantKey)) {
+                        skip();
 
-                log.debug("Variant already exists : {}", variantKey);
+                        return;
+                    }
 
-                continue;
-            }
+                    VehicleVariant variant =
+                            new VehicleVariant();
 
-            VehicleVariant variant = new VehicleVariant();
+                    variant.setModel(model);
+                    variant.setVariantName(
+                            row.string("variant"));
+                    variant.setFuelType(fuelType);
+                    variant.setTransmissionType(transmissionType);
 
-            variant.setModel(model);
-            variant.setVariantName(row[2].trim());
-            variant.setFuelType(fuelType);
-            variant.setTransmissionType(transmissionType);
+                    variant.setEngineCc(
+                            row.integer("engineCc"));
 
-            variant.setEngineCc(parseInteger(row[5]));
-            variant.setHorsepower(parseDouble(row[6]));
-            variant.setTorqueNm(parseDouble(row[7]));
-            variant.setLaunchYear(parseInteger(row[8]));
-            variant.setDiscontinuedYear(parseInteger(row[9]));
-            variant.setServiceIntervalKm(parseInteger(row[10]));
-            variant.setServiceIntervalMonths(parseInteger(row[11]));
+                    variant.setHorsepower(
+                            row.doubleValue("hp"));
 
-            variantsToSave.add(variant);
+                    variant.setTorqueNm(
+                            row.doubleValue("torque"));
 
-            variantMap.put(variantKey, variant);
-        }
+                    variant.setLaunchYear(
+                            row.integer("launchYear"));
 
-        if (!variantsToSave.isEmpty()) {
+                    variant.setDiscontinuedYear(
+                            row.integer("discontinuedYear"));
 
-            variantRepository.saveAll(variantsToSave);
+                    variant.setServiceIntervalKm(
+                            row.integer("serviceKm"));
 
-            log.info("{} variants imported successfully.",
-                    variantsToSave.size());
+                    variant.setServiceIntervalMonths(
+                            row.integer("serviceMonths"));
 
-        } else {
+                    write(variant);
 
-            log.info("No new variants found.");
-        }
+                    variantMap.put(
+                            variantKey,
+                            variant);
 
-        log.info("Variant Import Completed.");
+                });
+
+        finish();
+
+        log.info("Vehicle Variant Import Completed.");
+
     }
 
-    private Integer parseInteger(String value) {
-
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-
-        return Integer.parseInt(value.trim());
-    }
-
-    private Double parseDouble(String value) {
-
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-
-        return Double.parseDouble(value.trim());
-    }
 }

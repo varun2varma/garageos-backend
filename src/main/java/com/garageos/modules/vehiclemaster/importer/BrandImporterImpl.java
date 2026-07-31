@@ -1,42 +1,76 @@
 package com.garageos.modules.vehiclemaster.importer;
 
-import com.garageos.modules.vehiclemaster.entity.VehicleBrand;
+import com.garageos.core.loader.AbstractImporter;
 import com.garageos.core.loader.CsvLoader;
+import com.garageos.modules.vehiclemaster.entity.VehicleBrand;
 import com.garageos.modules.vehiclemaster.repository.VehicleBrandRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class BrandImporterImpl implements BrandImporter {
+public class BrandImporterImpl extends AbstractImporter<VehicleBrand>
+        implements BrandImporter {
 
-    private final CsvLoader loader;
     private final VehicleBrandRepository repository;
+
+    public BrandImporterImpl(
+            CsvLoader csvLoader,
+            EntityManager entityManager,
+            VehicleBrandRepository repository) {
+
+        super(
+                csvLoader,
+                entityManager,
+                repository,
+                "Vehicle Brand");
+
+        this.repository = repository;
+    }
 
     @Override
     public void importBrands() {
 
-        var rows = loader.read("vehiclemaster/brands.csv");
+        Set<String> existingBrands =
+                repository.findAll()
+                        .stream()
+                        .map(VehicleBrand::getName)
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toSet());
 
-        for (String[] row : rows) {
+        csvLoader.read(
+                "vehiclemaster/brands.csv",
+                row -> {
 
-            String name = row[0];
-            String country = row[1];
+                    rowRead();
 
-            if (repository.existsByNameIgnoreCase(name)) {
-                continue;
-            }
+                    String name = row.string("name");
 
-            VehicleBrand brand = new VehicleBrand();
+                    if (existingBrands.contains(name.toLowerCase())) {
 
-            brand.setName(name);
-            brand.setCountry(country);
+                        skip();
 
-            repository.save(brand);
-        }
+                        return;
 
-        log.info("Vehicle brands imported.");
+                    }
+
+                    VehicleBrand brand = new VehicleBrand();
+
+                    brand.setName(name);
+                    brand.setCountry(row.string("country"));
+
+                    write(brand);
+
+                    existingBrands.add(name.toLowerCase());
+
+                });
+
+        finish();
+
     }
+
 }

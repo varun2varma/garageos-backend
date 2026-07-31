@@ -1,5 +1,7 @@
 package com.garageos.modules.vehiclemaster.service.impl;
 
+import com.garageos.core.enums.EnumDropdownResponse;
+import com.garageos.core.enums.TransmissionType;
 import com.garageos.core.exception.ResourceAlreadyExistsException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.vehiclemaster.dto.request.CreateVehicleVariantRequest;
@@ -125,5 +127,37 @@ public class VariantServiceImpl implements VariantService {
                 .transmissionTypes(variantRepository.findDistinctTransmissionTypes())
                 .bodyTypes(modelRepository.findDistinctBodyTypes())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EnumDropdownResponse> getTransmissionDropdown(Long modelId) {
+
+        return variantRepository
+                .findDistinctTransmissionTypesByModelId(modelId)
+                .stream()
+                .map(type -> EnumDropdownResponse.builder()
+                        .id(type.name())
+                        .name(type.name())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EnumDropdownResponse> getFuelTypeDropdown(
+            Long modelId,
+            TransmissionType transmissionType) {
+
+        return variantRepository
+                .findDistinctFuelTypesByModelIdAndTransmissionType(
+                        modelId,
+                        transmissionType)
+                .stream()
+                .map(type -> EnumDropdownResponse.builder()
+                        .id(type.name())
+                        .name(type.name())
+                        .build())
+                .toList();
     }
 }

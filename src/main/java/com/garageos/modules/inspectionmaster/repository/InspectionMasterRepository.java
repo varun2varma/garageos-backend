@@ -3,10 +3,12 @@ package com.garageos.modules.inspectionmaster.repository;
 import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.inspectionmaster.entity.InspectionMaster;
+import com.garageos.modules.inspectionmaster.repository.projection.InspectionMasterLookup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InspectionMasterRepository
@@ -41,5 +43,21 @@ public interface InspectionMasterRepository
             @Param("year") Integer year,
             @Param("odometer") Integer odometer
     );
+
+    @Query("""
+    SELECT
+        m.id AS id,
+        m.make AS make,
+        m.model AS model,
+        m.variant AS variant,
+        m.fuelType AS fuelType,
+        m.transmissionType AS transmissionType,
+        m.minYear AS minYear,
+        m.maxYear AS maxYear,
+        m.minOdometer AS minOdometer,
+        m.maxOdometer AS maxOdometer
+    FROM InspectionMaster m
+    """)
+    List<InspectionMasterLookup> findAllLookup();
 
 }

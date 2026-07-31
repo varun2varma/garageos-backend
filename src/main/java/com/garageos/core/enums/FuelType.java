@@ -10,6 +10,8 @@ public enum FuelType {
     HYBRID,
     EV,
     STRONG_HYBRID,
-    PLUG_IN_HYBRID
+    PLUG_IN_HYBRID,
+    PHEV,
+    HYDROGEN
 
 }

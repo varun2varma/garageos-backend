@@ -2,6 +2,8 @@ package com.garageos.modules.vehiclemaster.controller;
 
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
+import com.garageos.core.enums.EnumDropdownResponse;
+import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.vehiclemaster.dto.request.CreateVehicleVariantRequest;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleDropdownResponse;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleMasterMetadataResponse;
@@ -83,6 +85,16 @@ public class VariantController {
         );
     }
 
+    @GetMapping("/dropdown/model/{modelId}/transmissions")
+    public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getTransmissionDropdown(
+            @PathVariable Long modelId) {
+
+        return ApiResponseUtil.success(
+                "Transmission types fetched successfully.",
+                variantService.getTransmissionDropdown(modelId)
+        );
+    }
+
     @GetMapping("/metadata")
     public ResponseEntity<ApiResponse<VehicleMasterMetadataResponse>> getMetadata() {
 
@@ -98,6 +110,19 @@ public class VariantController {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @GetMapping("/dropdown/model/{modelId}/transmissions/{transmission}/fuel-types")
+    public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getFuelTypeDropdown(
+            @PathVariable Long modelId,
+            @PathVariable TransmissionType transmission) {
+
+        return ApiResponseUtil.success(
+                "Fuel types fetched successfully.",
+                variantService.getFuelTypeDropdown(
+                        modelId,
+                        transmission)
+        );
     }
 
 }
