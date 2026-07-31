@@ -1,8 +1,12 @@
-<div class="container-fluid">
+<div class="container-fluid customer-repair">
+
+    <!-- ==========================================
+         Header
+         ========================================== -->
 
     <div class="row mb-4">
 
-        <div class="col-md-8">
+        <div class="col-lg-8">
 
             <h2 class="page-title">
 
@@ -12,13 +16,13 @@
 
             <p class="page-subtitle">
 
-                Track the live progress of your vehicle repairs.
+                Track every stage of your vehicle repair in real time.
 
             </p>
 
         </div>
 
-        <div class="col-md-4 text-end">
+        <div class="col-lg-4 text-lg-end">
 
             <button
                     id="refreshRepairButton"
@@ -34,7 +38,130 @@
 
     </div>
 
-    <div id="repairTimeline">
+    <!-- ==========================================
+         Status Summary
+         ========================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-clipboard-check fs-1 text-primary"></i>
+
+                <h3
+                        id="jobCardCount"
+                        class="mt-3">
+
+                    0
+
+                </h3>
+
+                <p class="mb-0">
+
+                    Job Cards
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-tools fs-1 text-warning"></i>
+
+                <h3
+                        id="repairInProgressCount">
+
+                    0
+
+                </h3>
+
+                <p class="mb-0">
+
+                    In Progress
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+
+                <h3
+                        id="completedRepairCount">
+
+                    0
+
+                </h3>
+
+                <p class="mb-0">
+
+                    Delivered
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-clock-history fs-1 text-danger"></i>
+
+                <h3
+                        id="pendingRepairCount">
+
+                    0
+
+                </h3>
+
+                <p class="mb-0">
+
+                    Pending
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         Repair Timeline
+         ========================================== -->
+
+    <div
+            id="repairTimeline"
+            class="row g-4">
+
+        <div class="col-12">
+
+            <div class="customer-card text-center p-5">
+
+                <i class="bi bi-tools display-3 text-secondary"></i>
+
+                <h4 class="mt-3">
+
+                    Loading Repair Details...
+
+                </h4>
+
+            </div>
+
+        </div>
 
     </div>
 

@@ -1,8 +1,12 @@
-<div class="container-fluid">
+<div class="container-fluid customer-estimate">
+
+    <!-- ==========================================
+         Header
+         ========================================== -->
 
     <div class="row mb-4">
 
-        <div class="col-md-8">
+        <div class="col-lg-8">
 
             <h2 class="page-title">
 
@@ -12,13 +16,13 @@
 
             <p class="page-subtitle">
 
-                Review your service estimates before work begins.
+                Review every estimate prepared by your service advisor before repair work begins.
 
             </p>
 
         </div>
 
-        <div class="col-md-4 text-end">
+        <div class="col-lg-4 text-lg-end">
 
             <button
                     id="refreshEstimateButton"
@@ -34,7 +38,129 @@
 
     </div>
 
-    <div id="estimateContainer">
+    <!-- ==========================================
+         Statistics
+         ========================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-receipt-cutoff fs-1 text-primary"></i>
+
+                <h3
+                        id="estimateTotal">
+
+                    0
+
+                </h3>
+
+                <p>
+
+                    Total Estimates
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+
+                <h3
+                        id="estimatePending">
+
+                    0
+
+                </h3>
+
+                <p>
+
+                    Pending
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+
+                <h3
+                        id="estimateApproved">
+
+                    0
+
+                </h3>
+
+                <p>
+
+                    Approved
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="customer-card text-center">
+
+                <i class="bi bi-x-circle-fill fs-1 text-danger"></i>
+
+                <h3
+                        id="estimateRejected">
+
+                    0
+
+                </h3>
+
+                <p>
+
+                    Rejected
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         Estimate Cards
+         ========================================== -->
+
+    <div
+            id="estimateContainer"
+            class="row g-4">
+
+        <div class="col-12">
+
+            <div class="customer-card text-center p-5">
+
+                <i class="bi bi-receipt display-4"></i>
+
+                <h4 class="mt-3">
+
+                    Loading Estimates...
+
+                </h4>
+
+            </div>
+
+        </div>
 
     </div>
 

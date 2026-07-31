@@ -1,9 +1,15 @@
 window.CustomerInvoice = {
 
+    invoices: [],
+
     async init() {
 
         document
-            .getElementById("refreshInvoiceButton")
+
+            .getElementById(
+                "refreshInvoiceButton"
+            )
+
             ?.addEventListener(
 
                 "click",
@@ -22,24 +28,24 @@ window.CustomerInvoice = {
 
             CustomerApp.showLoading();
 
-            if (!InvoiceService.getMyInvoices) {
+            this.invoices =
 
-                this.render([]);
+                await CustomerPortalService
+                    .getInvoices();
 
-                return;
+            this.render();
 
-            }
+        }
 
-            const invoices =
-                await InvoiceService.getMyInvoices();
+        catch (error) {
 
-            this.render(invoices);
+            console.error(error);
 
-        } catch (e) {
+            this.renderEmpty();
 
-            console.error(e);
+        }
 
-        } finally {
+        finally {
 
             CustomerApp.hideLoading();
 
@@ -47,129 +53,238 @@ window.CustomerInvoice = {
 
     },
 
-    render(invoices) {
+    render() {
 
         const container =
+
             document.getElementById(
+
                 "invoiceContainer"
+
             );
 
-        if (!invoices.length) {
-
-            container.innerHTML = `
-
-                <div class="customer-card empty-state">
-
-                    <i class="bi bi-file-earmark-text"></i>
-
-                    <h5>
-
-                        No Invoices
-
-                    </h5>
-
-                    <p>
-
-                        No invoices available.
-
-                    </p>
-
-                </div>
-
-            `;
+        if (!container) {
 
             return;
 
         }
 
+        if (!this.invoices.length) {
+
+            this.renderEmpty();
+
+            return;
+
+        }
+
+        document.getElementById(
+
+            "invoiceTotal"
+
+        ).textContent =
+
+            this.invoices.length;
+
+        document.getElementById(
+
+            "invoicePaid"
+
+        ).textContent =
+
+            this.invoices.filter(
+
+                invoice =>
+
+                    invoice.paymentStatus ===
+                    "PAID"
+
+            ).length;
+
+        document.getElementById(
+
+            "invoicePending"
+
+        ).textContent =
+
+            this.invoices.filter(
+
+                invoice =>
+
+                    invoice.paymentStatus !==
+                    "PAID"
+
+            ).length;
+
+        const total =
+
+            this.invoices.reduce(
+
+                (sum, invoice) =>
+
+                    sum +
+                    Number(
+                        invoice.grandTotal
+                    ),
+
+                0
+
+            );
+
+        document.getElementById(
+
+            "invoiceAmount"
+
+        ).textContent =
+
+            this.formatCurrency(
+                total
+            );
+
         container.innerHTML =
-            invoices.map(invoice => `
 
-                <div class="invoice-card">
+            this.invoices.map(
 
-                    <div class="invoice-header">
+                invoice => `
 
-                        <div>
+            <div class="col-xl-6 col-lg-6">
 
-                            <div class="invoice-title">
+                <div class="customer-card invoice-card h-100">
 
-                                ${invoice.invoiceNumber}
+                    <div class="invoice-header d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="invoice-icon me-3">
+
+                                <i class="bi bi-file-earmark-text fs-2 text-primary"></i>
 
                             </div>
 
-                            <div class="invoice-subtitle">
+                            <div>
 
-                                ${invoice.vehicleRegistrationNumber}
+                                <h5 class="mb-1">
+
+                                    ${invoice.invoiceNumber}
+
+                                </h5>
+
+                                <small class="text-muted">
+
+                                    Estimate
+
+                                    ${invoice.estimateNumber}
+
+                                </small>
 
                             </div>
 
                         </div>
 
-                        <span class="status-badge status-${invoice.paymentStatus.toLowerCase()}">
+                        <div>
 
-                            ${invoice.paymentStatus}
+                            ${this.invoiceBadge(
+                                invoice.invoiceStatus
+                            )}
 
-                        </span>
-
-                    </div>
-
-                    <div class="invoice-row">
-
-                        <span class="invoice-label">
-
-                            Job Card
-
-                        </span>
-
-                        <span class="invoice-value">
-
-                            ${invoice.jobCardNumber}
-
-                        </span>
+                        </div>
 
                     </div>
 
-                    <div class="invoice-row">
+                    <hr>
 
-                        <span class="invoice-label">
+                    <div class="row">
 
-                            Invoice Date
+                        <div class="col-6">
 
-                        </span>
+                            <small class="text-muted">
 
-                        <span class="invoice-value">
+                                Invoice Status
 
-                            ${invoice.invoiceDate}
+                            </small>
 
-                        </span>
+                            <div class="fw-semibold">
+
+                                ${this.formatStatus(
+                                    invoice.invoiceStatus
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-6">
+
+                            <small class="text-muted">
+
+                                Payment Status
+
+                            </small>
+
+                            <div>
+
+                                ${this.paymentBadge(
+                                    invoice.paymentStatus
+                                )}
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                    <div class="invoice-row">
+                    <hr>
 
-                        <span class="invoice-label">
+                    <div class="row">
 
-                            Amount
+                        <div class="col-6">
 
-                        </span>
+                            <small class="text-muted">
 
-                        <span class="invoice-value">
+                                Generated
 
-                            ₹ ${invoice.totalAmount}
+                            </small>
 
-                        </span>
+                            <div>
+
+                                ${this.formatDate(
+                                    invoice.generatedAt
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-6 text-end">
+
+                            <small class="text-muted">
+
+                                Grand Total
+
+                            </small>
+
+                            <h4 class="text-success mb-0">
+
+                                ${this.formatCurrency(
+                                    invoice.grandTotal
+                                )}
+
+                            </h4>
+
+                        </div>
 
                     </div>
 
-                    <div class="invoice-footer">
+                    <div class="mt-4">
 
                         <button
-                                class="btn btn-outline-primary"
-                                onclick="CustomerInvoice.download(${invoice.id})">
+
+                            class="btn btn-outline-primary w-100"
+
+                            onclick="CustomerInvoice.download(${invoice.id})">
 
                             <i class="bi bi-download me-2"></i>
 
-                            Download
+                            Download Invoice
 
                         </button>
 
@@ -177,32 +292,237 @@ window.CustomerInvoice = {
 
                 </div>
 
-            `).join("");
+            </div>
 
-    },
+            `
 
-    async download(invoiceId) {
+                    )
 
-        try {
+                    .join("");
 
-            if (!InvoiceService.downloadInvoice) {
+            },
 
-                return;
+            renderEmpty() {
+
+                const container =
+                    document.getElementById(
+                        "invoiceContainer"
+                    );
+
+                if (!container) {
+
+                    return;
+
+                }
+
+                container.innerHTML = `
+
+                    <div class="col-12">
+
+                        <div class="customer-card text-center py-5">
+
+                            <i class="bi bi-wallet2 display-3 text-secondary"></i>
+
+                            <h3 class="mt-4">
+
+                                No Invoices Available
+
+                            </h3>
+
+                            <p class="text-muted">
+
+                                Your invoices will appear here once they are generated by the workshop.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            },
+
+            async download(id) {
+
+                try {
+
+                    if (
+                        InvoiceService &&
+                        typeof InvoiceService.downloadInvoice === "function"
+                    ) {
+
+                        await InvoiceService.downloadInvoice(id);
+
+                        return;
+
+                    }
+
+                    alert(
+                        "Invoice download is not available yet."
+                    );
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "Unable to download invoice."
+                    );
+
+                }
+
+            },
+
+            invoiceBadge(status) {
+
+                switch (status) {
+
+                    case "GENERATED":
+
+                        return `
+                            <span class="badge bg-success">
+                                Generated
+                            </span>
+                        `;
+
+                    case "DRAFT":
+
+                        return `
+                            <span class="badge bg-warning text-dark">
+                                Draft
+                            </span>
+                        `;
+
+                    case "CANCELLED":
+
+                        return `
+                            <span class="badge bg-danger">
+                                Cancelled
+                            </span>
+                        `;
+
+                    default:
+
+                        return `
+                            <span class="badge bg-secondary">
+                                ${this.formatStatus(status)}
+                            </span>
+                        `;
+
+                }
+
+            },
+
+            paymentBadge(status) {
+
+                switch (status) {
+
+                    case "PAID":
+
+                        return `
+                            <span class="badge bg-success">
+                                Paid
+                            </span>
+                        `;
+
+                    case "PENDING":
+
+                        return `
+                            <span class="badge bg-warning text-dark">
+                                Pending
+                            </span>
+                        `;
+
+                    case "PARTIAL":
+
+                        return `
+                            <span class="badge bg-info">
+                                Partial
+                            </span>
+                        `;
+
+                    default:
+
+                        return `
+                            <span class="badge bg-secondary">
+                                ${this.formatStatus(status)}
+                            </span>
+                        `;
+
+                }
+
+            },
+
+            formatStatus(status) {
+
+                if (!status) {
+
+                    return "-";
+
+                }
+
+                return status
+
+                    .replaceAll("_", " ")
+
+                    .toLowerCase()
+
+                    .replace(
+                        /\b\w/g,
+                        c => c.toUpperCase()
+                    );
+
+            },
+
+            formatCurrency(amount) {
+
+                return new Intl.NumberFormat(
+
+                    "en-IN",
+
+                    {
+
+                        style: "currency",
+
+                        currency: "INR",
+
+                        minimumFractionDigits: 2,
+
+                        maximumFractionDigits: 2
+
+                    }
+
+                ).format(amount ?? 0);
+
+            },
+
+            formatDate(date) {
+
+                if (!date) {
+
+                    return "-";
+
+                }
+
+                return new Date(date)
+                    .toLocaleString(
+                        "en-IN",
+                        {
+
+                            day: "2-digit",
+
+                            month: "short",
+
+                            year: "numeric",
+
+                            hour: "2-digit",
+
+                            minute: "2-digit"
+
+                        }
+                    );
 
             }
 
-            await InvoiceService.downloadInvoice(
-
-                invoiceId
-
-            );
-
-        } catch (e) {
-
-            console.error(e);
-
-        }
-
-    }
-
-};
+        };

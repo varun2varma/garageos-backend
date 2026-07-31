@@ -8,15 +8,11 @@ window.CustomerDashboard = {
 
             await Promise.all([
 
-                this.loadCustomer(),
+                this.loadProfile(),
 
-                this.loadVehicles(),
+                this.loadDashboard(),
 
-                this.loadRepairs(),
-
-                this.loadEstimates(),
-
-                this.loadInvoices()
+                this.loadVehicles()
 
             ]);
 
@@ -32,15 +28,9 @@ window.CustomerDashboard = {
 
     },
 
-    async loadCustomer() {
+    async loadProfile() {
 
         try {
-
-            if (!CustomerPortalService.getProfile) {
-
-                return;
-
-            }
 
             const customer =
                 await CustomerPortalService.getProfile();
@@ -64,79 +54,42 @@ window.CustomerDashboard = {
 
     },
 
-    async loadVehicles() {
+    async loadDashboard() {
 
         try {
 
-            if (!CustomerPortalService.getVehicles) {
-
-                return;
-
-            }
-
-            const vehicles =
-                await CustomerPortalService.getVehicles();
+            const dashboard =
+                await CustomerPortalService.getDashboard();
 
             document.getElementById(
                 "vehicleCount"
             ).textContent =
-                vehicles.length;
-
-            this.renderVehicles(vehicles);
-
-        } catch (e) {
-
-            console.error(e);
-
-        }
-
-    },
-
-    async loadRepairs() {
-
-        try {
-
-            if (!CustomerPortalService.getRepairTracking(jobCardNumber)) {
-
-                return;
-
-            }
-
-            const jobs =
-                await CustomerPortalService.getRepairTracking(jobCardNumber)();
+                dashboard.vehicleCount;
 
             document.getElementById(
                 "repairCount"
             ).textContent =
-                jobs.length;
-
-            this.renderRepairs(jobs);
-
-        } catch (e) {
-
-            console.error(e);
-
-        }
-
-    },
-
-    async loadEstimates() {
-
-        try {
-
-            if (!CustomerPortalService.getEstimates) {
-
-                return;
-
-            }
-
-            const estimates =
-                await CustomerPortalService.getEstimates();
+                dashboard.activeJobCount;
 
             document.getElementById(
                 "estimateCount"
             ).textContent =
-                estimates.length;
+                dashboard.pendingEstimateCount;
+
+            document.getElementById(
+                "invoiceCount"
+            ).textContent =
+                dashboard.pendingInvoiceCount;
+
+            document.getElementById(
+                "estimateCountFooter"
+            ).textContent =
+                dashboard.pendingEstimateCount;
+
+            document.getElementById(
+                "invoiceCountFooter"
+            ).textContent =
+                dashboard.pendingInvoiceCount;
 
         } catch (e) {
 
@@ -146,23 +99,14 @@ window.CustomerDashboard = {
 
     },
 
-    async loadInvoices() {
+    async loadVehicles() {
 
         try {
 
-            if (!CustomerPortalService.getEstimates) {
+            const vehicles =
+                await CustomerPortalService.getVehicles();
 
-                return;
-
-            }
-
-            const invoices =
-                await CustomerPortalService.getEstimates();
-
-            document.getElementById(
-                "invoiceCount"
-            ).textContent =
-                invoices.length;
+            this.renderVehicles(vehicles);
 
         } catch (e) {
 
@@ -179,6 +123,12 @@ window.CustomerDashboard = {
                 "vehicleList"
             );
 
+        if (!container) {
+
+            return;
+
+        }
+
         if (!vehicles.length) {
 
             container.innerHTML = `
@@ -187,17 +137,9 @@ window.CustomerDashboard = {
 
                     <i class="bi bi-car-front"></i>
 
-                    <h5>
+                    <h5>No Vehicles</h5>
 
-                        No Vehicles
-
-                    </h5>
-
-                    <p>
-
-                        No registered vehicles found.
-
-                    </p>
+                    <p>No vehicles found.</p>
 
                 </div>
 
@@ -208,15 +150,18 @@ window.CustomerDashboard = {
         }
 
         container.innerHTML =
+
             vehicles
+
                 .slice(0, 5)
+
                 .map(vehicle => `
 
                     <div class="vehicle-item">
 
                         <div class="vehicle-icon">
 
-                            <i class="bi bi-car-front"></i>
+                            <i class="bi bi-car-front-fill"></i>
 
                         </div>
 
@@ -230,8 +175,9 @@ window.CustomerDashboard = {
 
                             <small>
 
-                                ${vehicle.make}
+                                ${vehicle.brand}
                                 ${vehicle.model}
+                                ${vehicle.variant ?? ""}
 
                             </small>
 
@@ -240,91 +186,9 @@ window.CustomerDashboard = {
                     </div>
 
                 `)
-                .join("");
 
-    },
-
-    renderRepairs(jobs) {
-
-        const container =
-            document.getElementById(
-                "recentRepairs"
-            );
-
-        if (!jobs.length) {
-
-            container.innerHTML = `
-
-                <div class="empty-state">
-
-                    <i class="bi bi-tools"></i>
-
-                    <h5>
-
-                        No Active Repairs
-
-                    </h5>
-
-                    <p>
-
-                        Your repair jobs will appear here.
-
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-        container.innerHTML =
-            jobs
-                .slice(0, 5)
-                .map(job => `
-
-                    <div class="repair-item">
-
-                        <div class="repair-info">
-
-                            <h6>
-
-                                ${job.jobCardNumber}
-
-                            </h6>
-
-                            <small>
-
-                                ${job.vehicleRegistrationNumber}
-
-                            </small>
-
-                        </div>
-
-                        <span class="status-badge status-${job.status.toLowerCase()}">
-
-                            ${job.status}
-
-                        </span>
-
-                    </div>
-
-                `)
                 .join("");
 
     }
 
 };
-
-//document.addEventListener(
-//
-//    "DOMContentLoaded",
-//
-//    () => {
-//
-//        CustomerDashboard.init();
-//
-//    }
-//
-//);

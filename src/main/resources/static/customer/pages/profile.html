@@ -1,8 +1,12 @@
-<div class="container-fluid">
+<div class="container-fluid customer-profile">
+
+    <!-- ==========================================
+         Header
+         ========================================== -->
 
     <div class="row mb-4">
 
-        <div class="col-md-8">
+        <div class="col-lg-8">
 
             <h2 class="page-title">
 
@@ -12,13 +16,13 @@
 
             <p class="page-subtitle">
 
-                View your account information.
+                View your registered customer information.
 
             </p>
 
         </div>
 
-        <div class="col-md-4 text-end">
+        <div class="col-lg-4 text-lg-end">
 
             <button
                     id="refreshProfileButton"
@@ -34,83 +38,129 @@
 
     </div>
 
-    <div class="customer-card">
+    <!-- ==========================================
+         Profile Card
+         ========================================== -->
 
-        <div class="row g-4">
+    <div class="customer-card mb-4">
 
-            <div class="col-md-6">
+        <div class="row align-items-center">
 
-                <label class="form-label">
+            <div class="col-lg-2 text-center">
 
-                    Customer Name
+                <div class="profile-avatar">
 
-                </label>
+                    <i class="bi bi-person-circle display-1 text-primary"></i>
 
-                <input
-                        id="customerName"
-                        class="form-control"
-                        readonly>
-
-            </div>
-
-            <div class="col-md-6">
-
-                <label class="form-label">
-
-                    Mobile Number
-
-                </label>
-
-                <input
-                        id="customerMobile"
-                        class="form-control"
-                        readonly>
+                </div>
 
             </div>
 
-            <div class="col-md-6">
+            <div class="col-lg-10">
 
-                <label class="form-label">
+                <h3 id="profileHeadingName">
 
-                    Email
+                    Customer
 
-                </label>
+                </h3>
 
-                <input
-                        id="customerEmail"
-                        class="form-control"
-                        readonly>
+                <p class="text-muted mb-0">
 
-            </div>
+                    GarageOS Customer Portal
 
-            <div class="col-md-6">
-
-                <label class="form-label">
-
-                    GST Number
-
-                </label>
-
-                <input
-                        id="customerGst"
-                        class="form-control"
-                        readonly>
+                </p>
 
             </div>
 
-            <div class="col-12">
+        </div>
 
-                <label class="form-label">
+    </div>
 
-                    Address
+    <!-- ==========================================
+         Profile Information
+         ========================================== -->
 
-                </label>
+    <div id="profileContainer">
 
-                <textarea
-                        id="customerAddress"
-                        rows="3"
-                        class="form-control"
-                        readonly></textarea>
+        <div class="customer-card">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Full Name
+
+                    </label>
+
+                    <input
+                            id="customerName"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Mobile Number
+
+                    </label>
+
+                    <input
+                            id="customerMobile"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Email Address
+
+                    </label>
+
+                    <input
+                            id="customerEmail"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+
+                        Customer ID
+
+                    </label>
+
+                    <input
+                            id="customerId"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="col-12">
+
+                    <label class="form-label">
+
+                        Address
+
+                    </label>
+
+                    <textarea
+                            id="customerAddress"
+                            rows="4"
+                            class="form-control"
+                            readonly></textarea>
+
+                </div>
 
             </div>
 

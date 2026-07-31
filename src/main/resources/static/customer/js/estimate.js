@@ -1,15 +1,16 @@
 window.CustomerEstimate = {
 
+    estimates: [],
+
     async init() {
 
         document
-            .getElementById("refreshEstimateButton")
+            .getElementById(
+                "refreshEstimateButton"
+            )
             ?.addEventListener(
-
                 "click",
-
                 () => this.load()
-
             );
 
         await this.load();
@@ -22,22 +23,17 @@ window.CustomerEstimate = {
 
             CustomerApp.showLoading();
 
-            if (!EstimateService.getPendingEstimates) {
+            this.estimates =
+                await CustomerPortalService
+                    .getEstimates();
 
-                this.render([]);
+            this.render();
 
-                return;
+        } catch (error) {
 
-            }
+            console.error(error);
 
-            const estimates =
-                await EstimateService.getPendingEstimates();
-
-            this.render(estimates);
-
-        } catch (e) {
-
-            console.error(e);
+            this.renderEmpty();
 
         } finally {
 
@@ -47,186 +43,439 @@ window.CustomerEstimate = {
 
     },
 
-    render(estimates) {
+    render() {
 
         const container =
-            document.getElementById("estimateContainer");
+            document.getElementById(
+                "estimateContainer"
+            );
 
-        if (!estimates.length) {
-
-            container.innerHTML = `
-
-                <div class="customer-card empty-state">
-
-                    <i class="bi bi-receipt"></i>
-
-                    <h5>
-
-                        No Pending Estimates
-
-                    </h5>
-
-                    <p>
-
-                        You don't have any estimates awaiting approval.
-
-                    </p>
-
-                </div>
-
-            `;
+        if (!container) {
 
             return;
 
         }
 
+        if (!this.estimates.length) {
+
+            this.renderEmpty();
+
+            return;
+
+        }
+
+        document.getElementById(
+            "estimateTotal"
+        ).textContent =
+            this.estimates.length;
+
+        document.getElementById(
+            "estimatePending"
+        ).textContent =
+            this.estimates.filter(
+
+                estimate =>
+                    estimate.status ===
+                    "PENDING"
+
+            ).length;
+
+        document.getElementById(
+            "estimateApproved"
+        ).textContent =
+            this.estimates.filter(
+
+                estimate =>
+                    estimate.status ===
+                    "APPROVED"
+
+            ).length;
+
+        document.getElementById(
+            "estimateRejected"
+        ).textContent =
+            this.estimates.filter(
+
+                estimate =>
+                    estimate.status ===
+                    "REJECTED"
+
+            ).length;
+
         container.innerHTML =
-            estimates.map(estimate => `
 
-                <div class="estimate-card">
+            this.estimates
 
-                    <div class="estimate-header">
+                .map(
 
-                        <h5>
+                    estimate => `
 
-                            ${estimate.jobCardNumber}
+            <div class="col-xl-6 col-lg-6">
 
-                        </h5>
+                <div class="customer-card estimate-card h-100">
 
-                        <small>
+                    <div class="estimate-header d-flex justify-content-between align-items-center">
 
-                            ${estimate.vehicleRegistrationNumber}
+                        <div class="d-flex align-items-center">
 
-                        </small>
+                            <div class="estimate-icon me-3">
+
+                                <i class="bi bi-receipt-cutoff fs-2 text-primary"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h5 class="mb-1">
+
+                                    ${estimate.estimateNumber}
+
+                                </h5>
+
+                                <small class="text-muted">
+
+                                    Job Card
+
+                                    ${estimate.jobCardNumber}
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div>
+
+                            ${this.statusBadge(
+                                estimate.status
+                            )}
+
+                        </div>
 
                     </div>
 
-                    <div class="estimate-body">
+                    <hr>
 
-                        ${estimate.items.map(item => `
+                    <div class="row">
 
-                            <div class="estimate-item">
+                        <div class="col-md-6">
 
-                                <div>
+                            <div class="estimate-info">
 
-                                    <div class="estimate-item-name">
+                                <small class="text-muted">
 
-                                        ${item.name}
+                                    Estimate Number
 
-                                    </div>
+                                </small>
 
-                                    <div class="estimate-item-description">
+                                <div class="fw-semibold">
 
-                                        Qty : ${item.quantity}
-
-                                    </div>
-
-                                </div>
-
-                                <div class="estimate-price">
-
-                                    ₹ ${item.totalPrice}
+                                    ${estimate.estimateNumber}
 
                                 </div>
 
                             </div>
 
-                        `).join("")}
-
-                        <div class="estimate-total">
-
-                            <span>
-
-                                Total
-
-                            </span>
-
-                            <span>
-
-                                ₹ ${estimate.totalAmount}
-
-                            </span>
-
                         </div>
 
-                        <div class="estimate-actions">
+                        <div class="col-md-6">
 
-                            <button
-                                    class="btn btn-outline-danger"
-                                    onclick="CustomerEstimate.reject(${estimate.id})">
+                            <div class="estimate-info">
 
-                                Reject
+                                <small class="text-muted">
 
-                            </button>
+                                    Job Card Number
 
-                            <button
-                                    class="btn btn-primary"
-                                    onclick="CustomerEstimate.approve(${estimate.id})">
+                                </small>
 
-                                Approve
+                                <div class="fw-semibold">
 
-                            </button>
+                                    ${estimate.jobCardNumber}
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
+                    <div class="mt-4">
+
+                        <div class="estimate-total-card">
+
+                            <small class="text-muted">
+
+                                Grand Total
+
+                            </small>
+
+                            <h2 class="text-success mt-2 mb-0">
+
+                                ${this.formatCurrency(
+                                    estimate.grandTotal
+                                )}
+
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        ${
+                            estimate.status === "PENDING"
+
+                            ?
+
+                            `
+
+                            <div class="row g-2">
+
+                                <div class="col-6">
+
+                                    <button
+
+                                        class="btn btn-success w-100"
+
+                                        onclick="CustomerEstimate.approve(${estimate.id})">
+
+                                        <i class="bi bi-check-circle me-2"></i>
+
+                                        Approve
+
+                                    </button>
+
+                                </div>
+
+                                <div class="col-6">
+
+                                    <button
+
+                                        class="btn btn-danger w-100"
+
+                                        onclick="CustomerEstimate.reject(${estimate.id})">
+
+                                        <i class="bi bi-x-circle me-2"></i>
+
+                                        Reject
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            `
+
+                            :
+
+                            `
+
+                            <div class="alert alert-light text-center mb-0">
+
+                                Estimate already
+
+                                <strong>
+
+                                    ${this.formatStatus(
+                                        estimate.status
+                                    )}
+
+                                </strong>
+
+                            </div>
+
+                            `
+
+                        }
+
+                    </div>
+
                 </div>
 
-            `).join("");
+            </div>
 
-    },
+            `
 
-    async approve(id) {
+                            )
 
-        try {
+                            .join("");
 
-            CustomerApp.showLoading();
+                },
 
-            if (EstimateService.approveEstimate) {
+                renderEmpty() {
 
-                await EstimateService.approveEstimate(id);
+                    const container =
+                        document.getElementById(
+                            "estimateContainer"
+                        );
 
-            }
+                    if (!container) {
 
-            await this.load();
+                        return;
 
-        } catch (e) {
+                    }
 
-            console.error(e);
+                    container.innerHTML = `
 
-        } finally {
+                        <div class="col-12">
 
-            CustomerApp.hideLoading();
+                            <div class="customer-card text-center py-5">
 
-        }
+                                <i class="bi bi-patch-check-fill display-3 text-success"></i>
 
-    },
+                                <h3 class="mt-4">
 
-    async reject(id) {
+                                    You're All Caught Up!
 
-        try {
+                                </h3>
 
-            CustomerApp.showLoading();
+                                <p class="text-muted">
 
-            if (EstimateService.rejectEstimate) {
+                                    No estimates are currently awaiting your approval.
 
-                await EstimateService.rejectEstimate(id);
+                                </p>
 
-            }
+                            </div>
 
-            await this.load();
+                        </div>
 
-        } catch (e) {
+                    `;
 
-            console.error(e);
+                },
 
-        } finally {
+                async approve(id) {
 
-            CustomerApp.hideLoading();
+                    try {
 
-        }
+                        CustomerApp.showLoading();
 
-    }
+                        await EstimateService
+                            .approveEstimate(id);
 
-};
+                        await this.load();
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        alert(
+                            "Unable to approve estimate."
+                        );
+
+                    } finally {
+
+                        CustomerApp.hideLoading();
+
+                    }
+
+                },
+
+                async reject(id) {
+
+                    try {
+
+                        CustomerApp.showLoading();
+
+                        await EstimateService
+                            .rejectEstimate(id);
+
+                        await this.load();
+
+                    } catch (error) {
+
+                        console.error(error);
+
+                        alert(
+                            "Unable to reject estimate."
+                        );
+
+                    } finally {
+
+                        CustomerApp.hideLoading();
+
+                    }
+
+                },
+
+                statusBadge(status) {
+
+                    switch (status) {
+
+                        case "APPROVED":
+
+                            return `
+                                <span class="badge bg-success">
+                                    Approved
+                                </span>
+                            `;
+
+                        case "REJECTED":
+
+                            return `
+                                <span class="badge bg-danger">
+                                    Rejected
+                                </span>
+                            `;
+
+                        case "PENDING":
+
+                            return `
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+                            `;
+
+                        default:
+
+                            return `
+                                <span class="badge bg-secondary">
+                                    ${this.formatStatus(status)}
+                                </span>
+                            `;
+
+                    }
+
+                },
+
+                formatStatus(status) {
+
+                    if (!status) {
+
+                        return "-";
+
+                    }
+
+                    return status
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, c => c.toUpperCase());
+
+                },
+
+                formatCurrency(amount) {
+
+                    return new Intl.NumberFormat(
+
+                        "en-IN",
+
+                        {
+
+                            style: "currency",
+
+                            currency: "INR",
+
+                            minimumFractionDigits: 2,
+
+                            maximumFractionDigits: 2
+
+                        }
+
+                    ).format(amount ?? 0);
+
+                }
+
+            };
+

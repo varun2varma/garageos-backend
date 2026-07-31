@@ -7,11 +7,8 @@ window.CustomerVehicle = {
         document
             .getElementById("refreshVehiclesButton")
             ?.addEventListener(
-
                 "click",
-
                 () => this.loadVehicles()
-
             );
 
         await this.loadVehicles();
@@ -24,22 +21,16 @@ window.CustomerVehicle = {
 
             CustomerApp.showLoading();
 
-            if (!VehicleService.getMyVehicles) {
-
-                this.render([]);
-
-                return;
-
-            }
-
             this.vehicles =
-                await VehicleService.getMyVehicles();
+                await CustomerPortalService.getVehicles();
 
             this.render(this.vehicles);
 
         } catch (e) {
 
             console.error(e);
+
+            this.render([]);
 
         } finally {
 
@@ -56,23 +47,63 @@ window.CustomerVehicle = {
                 "vehicleGrid"
             );
 
+        if (!grid) {
+
+            return;
+
+        }
+
         if (!vehicles.length) {
+
+
+            document.getElementById(
+                "totalVehicleCount"
+            ).textContent =
+                vehicles.length;
+
+            const petrolDiesel =
+                vehicles.filter(v =>
+
+                    v.fuelType === "PETROL"
+                    ||
+                    v.fuelType === "DIESEL"
+
+                ).length;
+
+            const electricHybrid =
+                vehicles.filter(v =>
+
+                    v.fuelType === "ELECTRIC"
+                    ||
+                    v.fuelType === "HYBRID"
+
+                ).length;
+
+            document.getElementById(
+                "petrolVehicleCount"
+            ).textContent =
+                petrolDiesel;
+
+            document.getElementById(
+                "electricVehicleCount"
+            ).textContent =
+                electricHybrid;
 
             grid.innerHTML = `
 
                 <div class="col-12">
 
-                    <div class="customer-card empty-vehicle">
+                    <div class="customer-card empty-state text-center p-5">
 
-                        <i class="bi bi-car-front"></i>
+                        <i class="bi bi-car-front display-3 text-secondary"></i>
 
-                        <h4>
+                        <h4 class="mt-3">
 
                             No Vehicles Found
 
                         </h4>
 
-                        <p>
+                        <p class="text-muted">
 
                             You haven't registered any vehicles yet.
 
@@ -88,103 +119,181 @@ window.CustomerVehicle = {
 
         }
 
-        grid.innerHTML =
-            vehicles.map(vehicle => `
+        grid.innerHTML = vehicles
+            .map(vehicle => this.buildCard(vehicle))
+            .join("");
 
-                <div class="col-lg-4 col-md-6">
+    },
 
-                    <div class="vehicle-card">
+    buildCard(vehicle) {
 
-                        <div class="vehicle-header">
+        return `
 
-                            <div class="vehicle-registration">
+        <div class="col-xl-4 col-lg-6">
 
-                                ${vehicle.registrationNumber}
+            <div class="customer-card vehicle-card h-100">
 
-                            </div>
+                <div class="vehicle-banner">
 
-                            <div>
-
-                                ${vehicle.make}
-                                ${vehicle.model}
-
-                            </div>
-
-                        </div>
-
-                        <div class="vehicle-body">
-
-                            <div class="vehicle-row">
-
-                                <span class="vehicle-label">
-
-                                    Fuel
-
-                                </span>
-
-                                <span class="vehicle-value">
-
-                                    ${vehicle.fuelType || "-"}
-
-                                </span>
-
-                            </div>
-
-                            <div class="vehicle-row">
-
-                                <span class="vehicle-label">
-
-                                    Transmission
-
-                                </span>
-
-                                <span class="vehicle-value">
-
-                                    ${vehicle.transmission || "-"}
-
-                                </span>
-
-                            </div>
-
-                            <div class="vehicle-row">
-
-                                <span class="vehicle-label">
-
-                                    Year
-
-                                </span>
-
-                                <span class="vehicle-value">
-
-                                    ${vehicle.manufacturingYear || "-"}
-
-                                </span>
-
-                            </div>
-
-                            <div class="vehicle-row">
-
-                                <span class="vehicle-label">
-
-                                    Odometer
-
-                                </span>
-
-                                <span class="vehicle-value">
-
-                                    ${vehicle.odometerReading || 0} km
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
+                    <i class="bi bi-car-front-fill"></i>
 
                 </div>
 
-            `).join("");
+                <div class="vehicle-content">
+
+                    <div class="text-center">
+
+                        <h4>
+
+                            ${vehicle.registrationNumber}
+
+                        </h4>
+
+                        <div class="text-muted">
+
+                            ${vehicle.brand}
+
+                            ${vehicle.model}
+
+                        </div>
+
+                        <span class="badge bg-primary mt-2">
+
+                            ${vehicle.variant ?? "-"}
+
+                        </span>
+
+                    </div>
+
+                    <hr>
+
+                    ${this.row(
+                        "Manufacturing Year",
+                        vehicle.manufacturingYear
+                    )}
+
+                    ${this.row(
+                        "Fuel Type",
+                        this.getFuel(vehicle.fuelType)
+                    )}
+
+                    ${this.row(
+                        "Transmission",
+                        this.getTransmission(vehicle.transmission)
+                    )}
+
+                    ${this.row(
+                        "Color",
+                        vehicle.color
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        `;
+
+    },
+
+    row(label, value) {
+
+        return `
+
+            <div class="d-flex justify-content-between py-2 border-bottom">
+
+                <span class="text-muted">
+
+                    ${label}
+
+                </span>
+
+                <strong>
+
+                    ${value ?? "-"}
+
+                </strong>
+
+            </div>
+
+        `;
+
+    },
+
+    getFuel(fuel) {
+
+        if (!fuel) {
+
+            return "-";
+
+        }
+
+        switch (fuel) {
+
+            case "PETROL":
+
+                return "⛽ Petrol";
+
+            case "DIESEL":
+
+                return "🛢 Diesel";
+
+            case "CNG":
+
+                return "🔥 CNG";
+
+            case "ELECTRIC":
+
+                return "⚡ Electric";
+
+            case "HYBRID":
+
+                return "🔋 Hybrid";
+
+            default:
+
+                return fuel;
+
+        }
+
+    },
+
+    getTransmission(type) {
+
+        if (!type) {
+
+            return "-";
+
+        }
+
+        switch (type) {
+
+            case "MANUAL":
+
+                return "Manual";
+
+            case "AUTOMATIC":
+
+                return "Automatic";
+
+            case "AMT":
+
+                return "AMT";
+
+            case "CVT":
+
+                return "CVT";
+
+            case "DCT":
+
+                return "DCT";
+
+            default:
+
+                return type;
+
+        }
 
     }
 
