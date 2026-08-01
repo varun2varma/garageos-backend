@@ -72,7 +72,7 @@ window.CustomerProfile = {
             customer.id ?? "";
 
         document.getElementById(
-            "customerName"
+            "customerProfileName"
         ).value =
             customer.name ?? "";
 
