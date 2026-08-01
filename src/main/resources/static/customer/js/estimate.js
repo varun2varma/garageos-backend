@@ -24,18 +24,60 @@ window.CustomerEstimate = {
             CustomerApp.showLoading();
 
             this.estimates =
+
                 await CustomerPortalService
                     .getEstimates();
 
-            this.render();
+            this.loadStatistics();
 
-        } catch (error) {
+            this.renderEstimateList(
+                this.estimates
+            );
+
+            const selectedJobCard =
+
+                sessionStorage.getItem(
+                    "selectedJobCard"
+                );
+
+            if (selectedJobCard) {
+
+                sessionStorage.removeItem(
+                    "selectedJobCard"
+                );
+
+                const estimate =
+
+                    this.estimates.find(
+
+                        estimate =>
+
+                            estimate.jobCardNumber ===
+                            selectedJobCard
+
+                    );
+
+                if (estimate) {
+
+                    await this.viewEstimate(
+                        estimate.id
+                    );
+
+                }
+
+            }
+
+        }
+
+        catch (error) {
 
             console.error(error);
 
             this.renderEmpty();
 
-        } finally {
+        }
+
+        finally {
 
             CustomerApp.hideLoading();
 
@@ -43,38 +85,22 @@ window.CustomerEstimate = {
 
     },
 
-    render() {
-
-        const container =
-            document.getElementById(
-                "estimateContainer"
-            );
-
-        if (!container) {
-
-            return;
-
-        }
-
-        if (!this.estimates.length) {
-
-            this.renderEmpty();
-
-            return;
-
-        }
+    loadStatistics() {
 
         document.getElementById(
             "estimateTotal"
         ).textContent =
+
             this.estimates.length;
 
         document.getElementById(
             "estimatePending"
         ).textContent =
+
             this.estimates.filter(
 
                 estimate =>
+
                     estimate.status ===
                     "PENDING"
 
@@ -83,9 +109,11 @@ window.CustomerEstimate = {
         document.getElementById(
             "estimateApproved"
         ).textContent =
+
             this.estimates.filter(
 
                 estimate =>
+
                     estimate.status ===
                     "APPROVED"
 
@@ -94,73 +122,137 @@ window.CustomerEstimate = {
         document.getElementById(
             "estimateRejected"
         ).textContent =
+
             this.estimates.filter(
 
                 estimate =>
+
                     estimate.status ===
                     "REJECTED"
 
             ).length;
 
+    },
+
+    renderEmpty() {
+
+        const container =
+
+            document.getElementById(
+                "estimateListContainer"
+            );
+
+        if (!container) {
+
+            return;
+
+        }
+
+        container.innerHTML = `
+
+            <div class="col-12">
+
+                <div class="customer-card text-center py-5">
+
+                    <i class="bi bi-patch-check-fill display-3 text-success"></i>
+
+                    <h3 class="mt-4">
+
+                        You're All Caught Up!
+
+                    </h3>
+
+                    <p class="text-muted">
+
+                        No estimates are currently available.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+    },
+
+    renderEstimateList(estimates) {
+
+        const container =
+
+            document.getElementById(
+                "estimateListContainer"
+            );
+
+        if (!container) {
+
+            return;
+
+        }
+
+        if (!estimates.length) {
+
+            this.renderEmpty();
+
+            return;
+
+        }
+
         container.innerHTML =
 
-            this.estimates
+            estimates.map(
 
-                .map(
+                estimate => `
 
-                    estimate => `
+                <div class="col-xl-6 col-lg-6">
 
-            <div class="col-xl-6 col-lg-6">
+                    <div class="customer-card estimate-card h-100">
 
-                <div class="customer-card estimate-card h-100">
+                        <div class="estimate-header d-flex justify-content-between align-items-center">
 
-                    <div class="estimate-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
 
-                        <div class="d-flex align-items-center">
+                                <div class="estimate-icon me-3">
 
-                            <div class="estimate-icon me-3">
+                                    <i class="bi bi-receipt-cutoff fs-2 text-primary"></i>
 
-                                <i class="bi bi-receipt-cutoff fs-2 text-primary"></i>
+                                </div>
+
+                                <div>
+
+                                    <h5 class="mb-1">
+
+                                        ${estimate.estimateNumber}
+
+                                    </h5>
+
+                                    <small class="text-muted">
+
+                                        Job Card
+
+                                        ${estimate.jobCardNumber}
+
+                                    </small>
+
+                                </div>
 
                             </div>
 
                             <div>
 
-                                <h5 class="mb-1">
-
-                                    ${estimate.estimateNumber}
-
-                                </h5>
-
-                                <small class="text-muted">
-
-                                    Job Card
-
-                                    ${estimate.jobCardNumber}
-
-                                </small>
+                                ${this.statusBadge(
+                                    estimate.status
+                                )}
 
                             </div>
 
                         </div>
 
-                        <div>
+                        <hr>
 
-                            ${this.statusBadge(
-                                estimate.status
-                            )}
+                        <div class="row">
 
-                        </div>
-
-                    </div>
-
-                    <hr>
-
-                    <div class="row">
-
-                        <div class="col-md-6">
-
-                            <div class="estimate-info">
+                            <div class="col-6">
 
                                 <small class="text-muted">
 
@@ -176,306 +268,492 @@ window.CustomerEstimate = {
 
                             </div>
 
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <div class="estimate-info">
+                            <div class="col-6">
 
                                 <small class="text-muted">
 
-                                    Job Card Number
+                                    Grand Total
 
                                 </small>
 
-                                <div class="fw-semibold">
+                                <div class="fw-bold text-success">
 
-                                    ${estimate.jobCardNumber}
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4">
-
-                        <div class="estimate-total-card">
-
-                            <small class="text-muted">
-
-                                Grand Total
-
-                            </small>
-
-                            <h2 class="text-success mt-2 mb-0">
-
-                                ${this.formatCurrency(
-                                    estimate.grandTotal
-                                )}
-
-                            </h2>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4">
-
-                        ${
-                            estimate.status === "PENDING"
-
-                            ?
-
-                            `
-
-                            <div class="row g-2">
-
-                                <div class="col-6">
-
-                                    <button
-
-                                        class="btn btn-success w-100"
-
-                                        onclick="CustomerEstimate.approve(${estimate.id})">
-
-                                        <i class="bi bi-check-circle me-2"></i>
-
-                                        Approve
-
-                                    </button>
-
-                                </div>
-
-                                <div class="col-6">
-
-                                    <button
-
-                                        class="btn btn-danger w-100"
-
-                                        onclick="CustomerEstimate.reject(${estimate.id})">
-
-                                        <i class="bi bi-x-circle me-2"></i>
-
-                                        Reject
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-                            `
-
-                            :
-
-                            `
-
-                            <div class="alert alert-light text-center mb-0">
-
-                                Estimate already
-
-                                <strong>
-
-                                    ${this.formatStatus(
-                                        estimate.status
+                                    ${this.formatCurrency(
+                                        estimate.grandTotal
                                     )}
 
-                                </strong>
+                                </div>
 
                             </div>
 
-                            `
+                        </div>
 
-                        }
+                        <div class="mt-4">
+
+                            <button
+
+                                class="btn btn-primary w-100"
+
+                                onclick="CustomerEstimate.viewEstimate(${estimate.id})">
+
+                                <i class="bi bi-eye me-2"></i>
+
+                                View Estimate
+
+                            </button>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
+                `
 
-            `
+            ).join("");
 
-                            )
+        document
+            .getElementById(
+                "estimateListContainer"
+            )
+            .classList
+            .remove("d-none");
 
-                            .join("");
+        document
+            .getElementById(
+                "estimateDetailsContainer"
+            )
+            .classList
+            .add("d-none");
 
-                },
+    },
 
-                renderEmpty() {
+    showEstimateList() {
 
-                    const container =
-                        document.getElementById(
-                            "estimateContainer"
-                        );
+        document
+            .getElementById(
+                "estimateDetailsContainer"
+            )
+            .classList
+            .add("d-none");
 
-                    if (!container) {
+        document
+            .getElementById(
+                "estimateListContainer"
+            )
+            .classList
+            .remove("d-none");
 
-                        return;
+    },
+    async viewEstimate(estimateId) {
 
-                    }
+        try {
 
-                    container.innerHTML = `
+            CustomerApp.showLoading();
 
-                        <div class="col-12">
+            const estimate =
 
-                            <div class="customer-card text-center py-5">
+                this.estimates.find(
 
-                                <i class="bi bi-patch-check-fill display-3 text-success"></i>
+                    e =>
 
-                                <h3 class="mt-4">
+                        e.id === estimateId
 
-                                    You're All Caught Up!
+                );
 
-                                </h3>
+            if (!estimate) {
 
-                                <p class="text-muted">
+                return;
 
-                                    No estimates are currently awaiting your approval.
+            }
 
-                                </p>
+            document
+                .getElementById(
+                    "estimateListContainer"
+                )
+                .classList
+                .add("d-none");
+
+            document
+                .getElementById(
+                    "estimateDetailsContainer"
+                )
+                .classList
+                .remove("d-none");
+
+            const container =
+
+                document.getElementById(
+                    "estimateDetailsContent"
+                );
+
+            container.innerHTML = `
+
+                <div class="customer-card">
+
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+
+                        <div>
+
+                            <h3>
+
+                                ${estimate.estimateNumber}
+
+                            </h3>
+
+                            <div class="text-muted">
+
+                                ${estimate.jobCardNumber}
 
                             </div>
 
                         </div>
 
-                    `;
+                        ${this.statusBadge(
+                            estimate.status
+                        )}
 
-                },
+                    </div>
 
-                async approve(id) {
+                    <div class="row mb-4">
 
-                    try {
+                        <div class="col-md-4">
 
-                        CustomerApp.showLoading();
+                            <strong>
 
-                        await EstimateService
-                            .approveEstimate(id);
+                                Estimate Number
 
-                        await this.load();
+                            </strong>
 
-                    } catch (error) {
+                            <div>
 
-                        console.error(error);
+                                ${estimate.estimateNumber}
 
-                        alert(
-                            "Unable to approve estimate."
-                        );
+                            </div>
 
-                    } finally {
+                        </div>
 
-                        CustomerApp.hideLoading();
+                        <div class="col-md-4">
 
-                    }
+                            <strong>
 
-                },
+                                Job Card
 
-                async reject(id) {
+                            </strong>
 
-                    try {
+                            <div>
 
-                        CustomerApp.showLoading();
+                                ${estimate.jobCardNumber}
 
-                        await EstimateService
-                            .rejectEstimate(id);
+                            </div>
 
-                        await this.load();
+                        </div>
 
-                    } catch (error) {
+                        <div class="col-md-4">
 
-                        console.error(error);
+                            <strong>
 
-                        alert(
-                            "Unable to reject estimate."
-                        );
+                                Grand Total
 
-                    } finally {
+                            </strong>
 
-                        CustomerApp.hideLoading();
+                            <div class="fw-bold text-success">
 
-                    }
+                                ${this.formatCurrency(
+                                    estimate.grandTotal
+                                )}
 
-                },
+                            </div>
 
-                statusBadge(status) {
+                        </div>
 
-                    switch (status) {
+                    </div>
 
-                        case "APPROVED":
+                    <hr>
 
-                            return `
-                                <span class="badge bg-success">
-                                    Approved
-                                </span>
-                            `;
+                    <h5 class="mb-4">
 
-                        case "REJECTED":
+                        Estimate Summary
 
-                            return `
-                                <span class="badge bg-danger">
-                                    Rejected
-                                </span>
-                            `;
+                    </h5>
 
-                        case "PENDING":
+                    <table class="table">
 
-                            return `
-                                <span class="badge bg-warning text-dark">
-                                    Pending
-                                </span>
-                            `;
+                        <tbody>
 
-                        default:
+                            <tr>
 
-                            return `
-                                <span class="badge bg-secondary">
-                                    ${this.formatStatus(status)}
-                                </span>
-                            `;
+                                <th>
 
-                    }
+                                    Estimate Number
 
-                },
+                                </th>
 
-                formatStatus(status) {
+                                <td>
 
-                    if (!status) {
+                                    ${estimate.estimateNumber}
 
-                        return "-";
+                                </td>
 
-                    }
+                            </tr>
 
-                    return status
-                        .replaceAll("_", " ")
-                        .toLowerCase()
-                        .replace(/\b\w/g, c => c.toUpperCase());
+                            <tr>
 
-                },
+                                <th>
 
-                formatCurrency(amount) {
+                                    Job Card
 
-                    return new Intl.NumberFormat(
+                                </th>
 
-                        "en-IN",
+                                <td>
 
-                        {
+                                    ${estimate.jobCardNumber}
 
-                            style: "currency",
+                                </td>
 
-                            currency: "INR",
+                            </tr>
 
-                            minimumFractionDigits: 2,
+                            <tr>
 
-                            maximumFractionDigits: 2
+                                <th>
 
-                        }
+                                    Status
 
-                    ).format(amount ?? 0);
+                                </th>
 
-                }
+                                <td>
 
-            };
+                                    ${this.formatStatus(
+                                        estimate.status
+                                    )}
 
+                                </td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>
+
+                                    Grand Total
+
+                                </th>
+
+                                <td class="fw-bold text-success">
+
+                                    ${this.formatCurrency(
+                                        estimate.grandTotal
+                                    )}
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                    ${estimate.status === "WAITING_FOR_APPROVAL" ? `
+
+                        <div class="mt-4 d-flex gap-3">
+
+                            <button
+
+                                class="btn btn-success"
+
+                                onclick="CustomerEstimate.approveEstimate(${estimate.id})">
+
+                                <i class="bi bi-check-circle me-2"></i>
+
+                                Approve
+
+                            </button>
+
+                            <button
+
+                                class="btn btn-danger"
+
+                                onclick="CustomerEstimate.rejectEstimate(${estimate.id})">
+
+                                <i class="bi bi-x-circle me-2"></i>
+
+                                Reject
+
+                            </button>
+
+                        </div>
+
+                    ` : ""}
+
+                </div>
+
+            `;
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+        }
+
+        finally {
+
+            CustomerApp.hideLoading();
+
+        }
+
+    },
+    async approveEstimate(estimateId) {
+
+        try {
+
+            await CustomerPortalService
+                .approveEstimate(
+                    estimateId
+                );
+
+            await this.load();
+
+            await this.viewEstimate(
+                estimateId
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+        }
+
+    },
+
+    async rejectEstimate(estimateId) {
+
+        try {
+
+            await CustomerPortalService
+                .rejectEstimate(
+                    estimateId
+                );
+
+            await this.load();
+
+            await this.viewEstimate(
+                estimateId
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+        }
+
+    },
+
+    statusBadge(status) {
+
+        switch (status) {
+
+            case "WAITING_FOR_APPROVAL":
+
+                return `
+
+                    <span class="badge bg-warning text-dark">
+
+                        Waiting For Approval
+
+                    </span>
+
+                `;
+
+            case "APPROVED":
+
+                return `
+
+                    <span class="badge bg-success">
+
+                        Approved
+
+                    </span>
+
+                `;
+
+            case "REJECTED":
+
+                return `
+
+                    <span class="badge bg-danger">
+
+                        Rejected
+
+                    </span>
+
+                `;
+
+            default:
+
+                return `
+
+                    <span class="badge bg-secondary">
+
+                        ${this.formatStatus(status)}
+
+                    </span>
+
+                `;
+
+        }
+
+    },
+
+    formatCurrency(amount) {
+
+        return new Intl.NumberFormat(
+
+            "en-IN",
+
+            {
+
+                style: "currency",
+
+                currency: "INR"
+
+            }
+
+        ).format(
+
+            amount ?? 0
+
+        );
+
+    },
+
+    formatStatus(status) {
+
+        if (!status) {
+
+            return "-";
+
+        }
+
+        return status
+
+            .replaceAll("_", " ")
+
+            .toLowerCase()
+
+            .replace(
+
+                /\b\w/g,
+
+                c => c.toUpperCase()
+
+            );
+
+    }
+
+};

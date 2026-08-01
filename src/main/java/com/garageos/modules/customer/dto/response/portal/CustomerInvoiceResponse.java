@@ -18,6 +18,8 @@ public class CustomerInvoiceResponse {
 
     private String estimateNumber;
 
+    private String jobCardNumber;
+
     private InvoiceStatus invoiceStatus;
 
     private PaymentStatus paymentStatus;

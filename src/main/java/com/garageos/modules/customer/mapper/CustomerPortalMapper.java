@@ -31,6 +31,10 @@ public interface CustomerPortalMapper {
 
     @Mapping(target = "estimateNumber",
             source = "estimate.estimateNumber")
+    @Mapping(
+            target = "jobCardNumber",
+            source = "estimate.jobCard.jobCardNumber"
+    )
     CustomerInvoiceResponse toInvoice(Invoice invoice);
 
 }

@@ -2,10 +2,14 @@ window.CustomerRepair = {
 
     jobCards: [],
 
+    selectedJobCard: null,
+
     async init() {
 
         document
-            .getElementById("refreshRepairButton")
+            .getElementById(
+                "refreshRepairButton"
+            )
             ?.addEventListener(
                 "click",
                 () => this.loadJobCards()
@@ -24,27 +28,96 @@ window.CustomerRepair = {
             this.jobCards =
                 await CustomerPortalService.getJobCards();
 
-            this.renderJobCards();
+            this.loadStatistics();
 
-        } catch (e) {
+            this.renderJobCards(
+                this.jobCards
+            );
+
+            const selectedJobCard =
+                sessionStorage.getItem(
+                    "selectedJobCard"
+                );
+
+            if (selectedJobCard) {
+
+                sessionStorage.removeItem(
+                    "selectedJobCard"
+                );
+
+                await this.trackRepair(
+                    selectedJobCard
+                );
+
+            }
+
+        }
+        catch (e) {
 
             console.error(e);
 
             this.renderEmpty();
 
-        } finally {
+        }
+        finally {
 
             CustomerApp.hideLoading();
 
         }
+
+    },
+
+    loadStatistics() {
+
+        document.getElementById(
+            "jobCardCount"
+        ).textContent =
+            this.jobCards.length;
+
+        document.getElementById(
+            "repairInProgressCount"
+        ).textContent =
+
+            this.jobCards.filter(
+
+                job =>
+
+                    job.status !== "CLOSED"
+
+            ).length;
+
+        document.getElementById(
+            "completedRepairCount"
+        ).textContent =
+
+            this.jobCards.filter(
+
+                job =>
+
+                    job.status === "CLOSED"
+
+            ).length;
+
+        document.getElementById(
+            "pendingRepairCount"
+        ).textContent =
+
+            this.jobCards.filter(
+
+                job =>
+
+                    job.status === "OPEN"
+
+            ).length;
 
     },
 
     renderEmpty() {
 
         const container =
+
             document.getElementById(
-                "repairTimeline"
+                "repairListContainer"
             );
 
         if (!container) {
@@ -55,278 +128,23 @@ window.CustomerRepair = {
 
         container.innerHTML = `
 
-            <div class="customer-card text-center p-5">
+            <div class="col-12">
 
-                <i class="bi bi-tools display-4"></i>
+                <div class="customer-card text-center p-5">
 
-                <h4 class="mt-3">
+                    <i class="bi bi-tools display-3 text-secondary"></i>
 
-                    No Repair Jobs
+                    <h4 class="mt-3">
 
-                </h4>
+                        No Repair Jobs Found
 
-                <p>
+                    </h4>
 
-                    Repair tracking will appear here.
+                    <p class="text-muted">
 
-                </p>
+                        There are no repair jobs available.
 
-            </div>
-
-        `;
-
-    },
-
-    renderJobCards() {
-
-        const container =
-            document.getElementById(
-                "repairTimeline"
-            );
-
-        if (!container) {
-
-            return;
-
-        }
-
-        if (!this.jobCards.length) {
-
-            this.renderEmpty();
-
-            return;
-
-        }
-
-        document.getElementById("jobCardCount").textContent =
-            this.jobCards.length;
-
-        const delivered =
-            this.jobCards.filter(job =>
-                job.status === "DELIVERED"
-            ).length;
-
-        document.getElementById("completedRepairCount").textContent =
-            delivered;
-
-        const inProgress =
-            this.jobCards.filter(job =>
-                job.status !== "DELIVERED"
-            ).length;
-
-        document.getElementById("repairInProgressCount").textContent =
-            inProgress;
-
-        const pending =
-            this.jobCards.filter(job =>
-                job.status === "CREATED"
-            ).length;
-
-        document.getElementById("pendingRepairCount").textContent =
-            pending;
-
-        container.innerHTML =
-            this.jobCards
-                .map(job => `
-
-                   <div class="col-lg-6">
-
-                       <div class="customer-card h-100">
-
-                           <div class="d-flex justify-content-between align-items-start">
-
-                               <div>
-
-                                   <h5>
-
-                                       ${job.registrationNumber}
-
-                                   </h5>
-
-                                   <small class="text-muted">
-
-                                       ${job.jobCardNumber}
-
-                                   </small>
-
-                               </div>
-
-                               <span class="badge bg-primary">
-
-                                   ${this.format(job.status)}
-
-                               </span>
-
-                           </div>
-
-                           <hr>
-
-                           <div class="mb-2">
-
-                               <strong>Service Date</strong>
-
-                               <div>
-
-                                   ${job.serviceDate ?? "-"}
-
-                               </div>
-
-                           </div>
-
-                           <div class="mb-3">
-
-                               <strong>Estimated Delivery</strong>
-
-                               <div>
-
-                                   ${job.estimatedDeliveryDate ?? "-"}
-
-                               </div>
-
-                           </div>
-
-                           <button
-                               class="btn btn-primary w-100"
-
-                               onclick="CustomerRepair.viewRepair('${job.jobCardNumber}')">
-
-                               <i class="bi bi-search me-2"></i>
-
-                               Track Repair
-
-                           </button>
-
-                       </div>
-
-                   </div>
-
-                `)
-                .join("");
-
-    },
-
-    async viewRepair(jobCardNumber) {
-
-        try {
-
-            CustomerApp.showLoading();
-
-            const repair =
-                await CustomerPortalService
-                    .getRepairTracking(jobCardNumber);
-
-            this.renderTimeline(repair);
-
-        } catch (e) {
-
-            console.error(e);
-
-        } finally {
-
-            CustomerApp.hideLoading();
-
-        }
-
-    },
-
-    renderTimeline(repair) {
-
-        const container =
-            document.getElementById(
-                "repairTimeline"
-            );
-
-        container.innerHTML = `
-
-            <div class="customer-card">
-
-                <button
-                    class="btn btn-link mb-3"
-
-                    onclick="CustomerRepair.loadJobCards()">
-
-                    ← Back
-
-                </button>
-
-                <h4>
-
-                    ${repair.jobCardNumber}
-
-                </h4>
-
-                <div class="mb-3 text-muted">
-
-                    ${repair.registrationNumber}
-
-                </div>
-
-                ${this.step(
-                    "Inspection",
-                    repair.inspectionCompleted
-                )}
-
-                ${this.step(
-                    "Estimate Prepared",
-                    repair.estimatePrepared
-                )}
-
-                ${this.step(
-                    "Estimate Approved",
-                    repair.estimateApproved
-                )}
-
-                ${this.step(
-                    "Repair Completed",
-                    repair.repairCompleted
-                )}
-
-                ${this.step(
-                    "Quality Checked",
-                    repair.qualityChecked
-                )}
-
-                ${this.step(
-                    "Invoice Generated",
-                    repair.invoiceGenerated
-                )}
-
-                ${this.step(
-                    "Payment Completed",
-                    repair.paymentCompleted
-                )}
-
-                <hr>
-
-                <div class="d-flex justify-content-between">
-
-                    <span>
-
-                        Current Status
-
-                    </span>
-
-                    <strong>
-
-                        ${this.format(repair.status)}
-
-                    </strong>
-
-                </div>
-
-                <div class="d-flex justify-content-between mt-2">
-
-                    <span>
-
-                        Estimated Delivery
-
-                    </span>
-
-                    <strong>
-
-                        ${repair.estimatedDeliveryDate ?? "-"}
-
-                    </strong>
+                    </p>
 
                 </div>
 
@@ -336,39 +154,432 @@ window.CustomerRepair = {
 
     },
 
-    step(title, completed) {
+        renderJobCards(jobCards) {
 
-        return `
+            const container =
 
-            <div class="d-flex align-items-center mb-3">
+                document.getElementById(
+                    "repairListContainer"
+                );
 
-                <div class="me-3">
+            if (!container) {
 
-                    ${completed
-                        ? '<i class="bi bi-check-circle-fill text-success fs-5"></i>'
-                        : '<i class="bi bi-circle text-secondary fs-5"></i>'}
+                return;
+
+            }
+
+            if (!jobCards.length) {
+
+                this.renderEmpty();
+
+                return;
+
+            }
+
+            container.innerHTML =
+
+                jobCards
+                    .map(job =>
+
+                        this.buildRepairCard(job)
+
+                    )
+                    .join("");
+
+            document
+                .getElementById(
+                    "repairListContainer"
+                )
+                .classList
+                .remove("d-none");
+
+            document
+                .getElementById(
+                    "repairDetailsContainer"
+                )
+                .classList
+                .add("d-none");
+
+        },
+
+        buildRepairCard(job) {
+
+            return `
+
+                <div class="col-lg-6">
+
+                    <div class="customer-card h-100">
+
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+
+                                <h4 class="mb-1">
+
+                                    ${job.registrationNumber}
+
+                                </h4>
+
+                                <div class="text-muted">
+
+                                    ${job.jobCardNumber}
+
+                                </div>
+
+                            </div>
+
+                            <span class="badge bg-primary">
+
+                                ${this.formatStatus(job.status)}
+
+                            </span>
+
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+
+                            <div class="col-6">
+
+                                <strong>
+
+                                    Service Date
+
+                                </strong>
+
+                                <div>
+
+                                    ${job.serviceDate ?? "-"}
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-6">
+
+                                <strong>
+
+                                    Estimated Delivery
+
+                                </strong>
+
+                                <div>
+
+                                    ${job.estimatedDeliveryDate ?? "-"}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4">
+
+                            <button
+
+                                class="btn btn-primary w-100"
+
+                                onclick="CustomerRepair.trackRepair('${job.jobCardNumber}')">
+
+                                <i class="bi bi-search me-2"></i>
+
+                                Track Repair
+
+                            </button>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-                <div>
+            `;
 
-                    ${title}
+        },
 
-                </div>
+        showRepairList() {
 
-            </div>
+            document
+                .getElementById(
+                    "repairDetailsContainer"
+                )
+                .classList
+                .add("d-none");
 
-        `;
+            document
+                .getElementById(
+                    "repairListContainer"
+                )
+                .classList
+                .remove("d-none");
 
-    },
+        },
 
-    format(status) {
+            async trackRepair(jobCardNumber) {
 
-        return status
-            ?.replaceAll("_", " ")
-            .toLowerCase()
-            .replace(/\b\w/g, c => c.toUpperCase());
+                try {
 
-    }
+                    CustomerApp.showLoading();
 
-};
+                    const tracking =
+
+                        await CustomerPortalService
+                            .getRepairTracking(jobCardNumber);
+
+                    const job =
+
+                        this.jobCards.find(
+
+                            j =>
+
+                                j.jobCardNumber === jobCardNumber
+
+                        );
+
+                    if (!job) {
+
+                        return;
+
+                    }
+
+                    document
+                        .getElementById(
+                            "repairListContainer"
+                        )
+                        .classList
+                        .add("d-none");
+
+                    document
+                        .getElementById(
+                            "repairDetailsContainer"
+                        )
+                        .classList
+                        .remove("d-none");
+
+                    const details =
+
+                        document.getElementById(
+                            "repairDetailsContent"
+                        );
+
+                    details.innerHTML = `
+
+                        <div class="customer-card">
+
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+
+                                <div>
+
+                                    <h3>
+
+                                        ${job.registrationNumber}
+
+                                    </h3>
+
+                                    <div class="text-muted">
+
+                                        ${job.jobCardNumber}
+
+                                    </div>
+
+                                </div>
+
+                                <span class="badge bg-primary">
+
+                                    ${this.formatStatus(job.status)}
+
+                                </span>
+
+                            </div>
+
+                            <div class="row mb-4">
+
+                                <div class="col-md-4">
+
+                                    <strong>
+
+                                        Service Date
+
+                                    </strong>
+
+                                    <div>
+
+                                        ${job.serviceDate ?? "-"}
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <strong>
+
+                                        Estimated Delivery
+
+                                    </strong>
+
+                                    <div>
+
+                                        ${job.estimatedDeliveryDate ?? "-"}
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-4">
+
+                                    <strong>
+
+                                        Registration
+
+                                    </strong>
+
+                                    <div>
+
+                                        ${job.registrationNumber}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <hr>
+
+                            <h4 class="mb-4">
+
+                                Repair Progress
+
+                            </h4>
+
+                            ${this.buildStep(
+
+                                "Inspection Completed",
+
+                                tracking.inspectionCompleted
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Estimate Prepared",
+
+                                tracking.estimatePrepared
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Estimate Approved",
+
+                                tracking.estimateApproved
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Repair Completed",
+
+                                tracking.repairCompleted
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Quality Checked",
+
+                                tracking.qualityChecked
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Invoice Generated",
+
+                                tracking.invoiceGenerated
+
+                            )}
+
+                            ${this.buildStep(
+
+                                "Payment Completed",
+
+                                tracking.paymentCompleted
+
+                            )}
+
+                        </div>
+
+                    `;
+
+                }
+
+                catch (e) {
+
+                    console.error(e);
+
+                }
+
+                finally {
+
+                    CustomerApp.hideLoading();
+
+                }
+
+            },
+
+            buildStep(title, completed) {
+
+                return `
+
+                    <div class="d-flex align-items-center mb-3">
+
+                        <div class="me-3">
+
+                            <i class="bi ${
+
+                                completed
+
+                                    ? "bi-check-circle-fill text-success"
+
+                                    : "bi-circle text-secondary"
+
+                            } fs-4"></i>
+
+                        </div>
+
+                        <div>
+
+                            ${title}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            },
+
+                formatStatus(status) {
+
+                    if (!status) {
+
+                        return "-";
+
+                    }
+
+                    return status
+
+                        .replaceAll("_", " ")
+
+                        .toLowerCase()
+
+                        .replace(
+                            /\b\w/g,
+                            c => c.toUpperCase()
+                        );
+
+                }
+
+            };

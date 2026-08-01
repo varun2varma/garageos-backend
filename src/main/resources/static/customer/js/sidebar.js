@@ -21,13 +21,13 @@ window.CustomerSidebar = {
         },
 
         {
-            id: "estimates",
+            id: "estimate",
             title: "Estimate Approval",
             icon: "bi-receipt"
         },
 
         {
-            id: "invoices",
+            id: "invoice",
             title: "Invoices",
             icon: "bi-file-earmark-text"
         },
@@ -41,6 +41,8 @@ window.CustomerSidebar = {
     ],
 
     render(activePage = "dashboard") {
+
+    console.trace("Sidebar Active Page:", activePage);
 
         const sidebar =
             document.getElementById("customerSidebar");
@@ -86,6 +88,13 @@ window.CustomerSidebar = {
         `;
 
         this.menus.forEach(menu => {
+
+         console.log(
+                "Menu:",
+                menu.id,
+                "Active:",
+                activePage === menu.id
+            );
 
             html += `
 

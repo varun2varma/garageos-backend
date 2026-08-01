@@ -20,13 +20,13 @@ window.CustomerRouter = {
             page: "repair"
         },
 
-        estimates: {
+        estimate: {
             title: "Estimate Approval",
             subtitle: "Review and approve service estimates.",
             page: "estimate"
         },
 
-        invoices: {
+        invoice: {
             title: "Invoices",
             subtitle: "Download invoices and payment receipts.",
             page: "invoice"
@@ -44,10 +44,10 @@ window.CustomerRouter = {
 
     async navigate(page) {
 
+        console.trace("NAVIGATE ->", page);
+
         if (!this.routes[page]) {
-
             page = "dashboard";
-
         }
 
         this.currentPage = page;
@@ -71,6 +71,8 @@ window.CustomerRouter = {
             return;
 
         }
+
+        console.log("SIDEBAR ACTIVE PAGE =", page);
 
         CustomerSidebar.render(page);
 
@@ -224,11 +226,16 @@ window.CustomerRouter = {
 
         window.onpopstate = async (event) => {
 
+            console.log("POPSTATE EVENT", event);
+            console.log("POPSTATE STATE", event.state);
+
             const page =
                 event.state?.page ??
                 "dashboard";
 
-            await this.navigate(page);
+            console.log("POPSTATE PAGE", page);
+
+            await this.load(page);
 
         };
 
@@ -242,7 +249,8 @@ window.CustomerRouter = {
 
             await this.navigate(hash);
 
-        } else {
+        }
+        else {
 
             await this.navigate("dashboard");
 

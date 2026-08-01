@@ -10,6 +10,39 @@ window.CustomerVehicle = {
 
     selectedVehicle: null,
 
+    openRepair(jobCardNumber) {
+
+        sessionStorage.setItem(
+            "selectedJobCard",
+            jobCardNumber
+        );
+
+        CustomerRouter.navigate("repair");
+
+    },
+
+    openEstimate(jobCardNumber) {
+
+        sessionStorage.setItem(
+            "selectedJobCard",
+            jobCardNumber
+        );
+
+        CustomerRouter.navigate("estimate");
+
+    },
+
+    openInvoice(jobCardNumber) {
+
+        sessionStorage.setItem(
+            "selectedJobCard",
+            jobCardNumber
+        );
+
+        CustomerRouter.navigate("invoice");
+
+    },
+
     async init() {
 
         document
@@ -424,42 +457,11 @@ window.CustomerVehicle = {
 
                             jobCards.length;
 
-                        document.getElementById(
 
-                            "repairCount"
 
-                        ).textContent =
 
-                            jobCards.length;
 
-                        document.getElementById(
 
-                            "estimateCount"
-
-                        ).textContent =
-
-                            this.estimates.filter(
-
-                                estimate =>
-
-                                    jobCards.some(
-
-                                        job =>
-
-                                            job.jobCardNumber ===
-                                            estimate.jobCardNumber
-
-                                    )
-
-                            ).length;
-
-                        document.getElementById(
-
-                            "invoiceCount"
-
-                        ).textContent =
-
-                            this.invoices.length;
 
                         this.renderJobCards(
 
@@ -496,79 +498,112 @@ window.CustomerVehicle = {
 
                         }
 
+
+
                         container.innerHTML =
 
-                            jobCards.map(job => `
+                            jobCards.map(job => {
 
-                                <div class="card mb-3 border-0 shadow-sm">
+                                const estimate = this.estimates.find(
 
-                                    <div class="card-body">
+                                    estimate =>
 
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        estimate.jobCardNumber === job.jobCardNumber
 
-                                            <div>
+                                );
 
-                                                <h6 class="mb-1">
+                                const invoice = this.invoices.find(
 
-                                                    ${job.jobCardNumber}
+                                    invoice =>
 
-                                                </h6>
+                                        invoice.jobCardNumber === job.jobCardNumber
 
-                                                <small class="text-muted">
+                                );
 
-                                                    Service Date :
+                                return `
 
-                                                    ${job.serviceDate ?? "-"}
+                                    <div class="card mb-3 border-0 shadow-sm">
 
-                                                </small>
+                                        <div class="card-body">
 
-                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
 
-                                            <span class="badge bg-primary">
+                                                <div>
 
-                                                ${this.formatStatus(job.status)}
+                                                    <h6 class="mb-1">
 
-                                            </span>
+                                                        ${job.jobCardNumber}
 
-                                        </div>
+                                                    </h6>
 
-                                        <hr>
+                                                    <small class="text-muted">
 
-                                        <div class="row text-center">
+                                                        Service Date :
 
-                                            <div class="col">
+                                                        ${job.serviceDate ?? "-"}
 
-                                                <a href="#"
+                                                    </small>
 
-                                                   onclick="CustomerRouter.navigate('repair')">
+                                                </div>
 
-                                                    View Repair
+                                                <span class="badge bg-primary">
 
-                                                </a>
+                                                    ${this.formatStatus(job.status)}
 
-                                            </div>
-
-                                            <div class="col">
-
-                                                <a href="#"
-
-                                                   onclick="CustomerRouter.navigate('estimates')">
-
-                                                    View Estimate
-
-                                                </a>
+                                                </span>
 
                                             </div>
 
-                                            <div class="col">
+                                            <hr>
 
-                                                <a href="#"
+                                            <div class="row text-center">
 
-                                                   onclick="CustomerRouter.navigate('invoices')">
+                                                <div class="col">
 
-                                                    View Invoice
+                                                    <p
+                                                        class="text-primary"
+                                                        style="cursor:pointer"
+                                                        onclick="CustomerVehicle.openRepair('${job.jobCardNumber}')">
 
-                                                </a>
+                                                        View Repair
+
+                                                    </p>
+
+                                                </div>
+
+                                                <div class="col">
+
+                                                    ${estimate ? `
+
+                                                        <p
+                                                            class="text-primary"
+                                                            style="cursor:pointer"
+                                                            onclick="CustomerVehicle.openEstimate('${job.jobCardNumber}')">
+
+                                                            View Estimate
+
+                                                        </p>
+
+                                                    ` : ""}
+
+                                                </div>
+
+                                                <div class="col">
+
+                                                    ${invoice ? `
+
+                                                        <p
+                                                            class="text-primary"
+                                                            style="cursor:pointer"
+                                                            onclick="CustomerVehicle.openInvoice('${job.jobCardNumber}')">
+
+                                                            View Invoice
+
+                                                        </p>
+
+                                                    ` : ""}
+
+                                                </div>
 
                                             </div>
 
@@ -576,9 +611,9 @@ window.CustomerVehicle = {
 
                                     </div>
 
-                                </div>
+                                `;
 
-                            `).join("");
+                            }).join("");
 
                     },
 

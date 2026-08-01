@@ -50,8 +50,7 @@
 
                 <i class="bi bi-receipt-cutoff fs-1 text-primary"></i>
 
-                <h3
-                        id="estimateTotal">
+                <h3 id="estimateTotal">
 
                     0
 
@@ -73,8 +72,7 @@
 
                 <i class="bi bi-hourglass-split fs-1 text-warning"></i>
 
-                <h3
-                        id="estimatePending">
+                <h3 id="estimatePending">
 
                     0
 
@@ -96,8 +94,7 @@
 
                 <i class="bi bi-check-circle-fill fs-1 text-success"></i>
 
-                <h3
-                        id="estimateApproved">
+                <h3 id="estimateApproved">
 
                     0
 
@@ -119,8 +116,7 @@
 
                 <i class="bi bi-x-circle-fill fs-1 text-danger"></i>
 
-                <h3
-                        id="estimateRejected">
+                <h3 id="estimateRejected">
 
                     0
 
@@ -139,26 +135,51 @@
     </div>
 
     <!-- ==========================================
-         Estimate Cards
+         Estimate List
          ========================================== -->
 
     <div
-            id="estimateContainer"
+            id="estimateListContainer"
             class="row g-4">
 
         <div class="col-12">
 
             <div class="customer-card text-center p-5">
 
-                <i class="bi bi-receipt display-4"></i>
+                <div class="spinner-border text-primary mb-3"></div>
 
-                <h4 class="mt-3">
+                <h5>
 
                     Loading Estimates...
 
-                </h4>
+                </h5>
 
             </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         Estimate Details
+         ========================================== -->
+
+    <div
+            id="estimateDetailsContainer"
+            class="d-none">
+
+        <button
+                class="btn btn-outline-primary mb-4"
+                onclick="CustomerEstimate.showEstimateList()">
+
+            <i class="bi bi-arrow-left me-2"></i>
+
+            Back to All Estimates
+
+        </button>
+
+        <div
+                id="estimateDetailsContent">
 
         </div>
 

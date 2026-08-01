@@ -41,9 +41,24 @@ window.CustomerDashboard = {
 
             }
 
-            document.getElementById(
-                "dashboardCustomerName"
-            ).textContent =
+            if (CustomerRouter.currentPage !== "dashboard") {
+
+                return;
+
+            }
+
+            const element =
+                document.getElementById(
+                    "dashboardCustomerName"
+                );
+
+            if (!element) {
+
+                return;
+
+            }
+
+            element.textContent =
                 `Welcome, ${customer.name}`;
 
         } catch (e) {
@@ -61,35 +76,72 @@ window.CustomerDashboard = {
             const dashboard =
                 await CustomerPortalService.getDashboard();
 
-            document.getElementById(
-                "vehicleCount"
-            ).textContent =
-                dashboard.vehicleCount;
+            // User navigated to another page while API was loading
+            if (CustomerRouter.currentPage !== "dashboard") {
 
-            document.getElementById(
-                "repairCount"
-            ).textContent =
-                dashboard.activeJobCount;
+                return;
 
-            document.getElementById(
-                "estimateCount"
-            ).textContent =
-                dashboard.pendingEstimateCount;
+            }
 
-            document.getElementById(
-                "invoiceCount"
-            ).textContent =
-                dashboard.pendingInvoiceCount;
+            const vehicleCount =
+                document.getElementById("vehicleCount");
 
-            document.getElementById(
-                "estimateCountFooter"
-            ).textContent =
-                dashboard.pendingEstimateCount;
+            const repairCount =
+                document.getElementById("repairCount");
 
-            document.getElementById(
-                "invoiceCountFooter"
-            ).textContent =
-                dashboard.pendingInvoiceCount;
+            const estimateCount =
+                document.getElementById("estimateCount");
+
+            const invoiceCount =
+                document.getElementById("invoiceCount");
+
+            const estimateCountFooter =
+                document.getElementById("estimateCountFooter");
+
+            const invoiceCountFooter =
+                document.getElementById("invoiceCountFooter");
+
+            if (vehicleCount) {
+
+                vehicleCount.textContent =
+                    dashboard.vehicleCount;
+
+            }
+
+            if (repairCount) {
+
+                repairCount.textContent =
+                    dashboard.activeJobCount;
+
+            }
+
+            if (estimateCount) {
+
+                estimateCount.textContent =
+                    dashboard.pendingEstimateCount;
+
+            }
+
+            if (invoiceCount) {
+
+                invoiceCount.textContent =
+                    dashboard.pendingInvoiceCount;
+
+            }
+
+            if (estimateCountFooter) {
+
+                estimateCountFooter.textContent =
+                    dashboard.pendingEstimateCount;
+
+            }
+
+            if (invoiceCountFooter) {
+
+                invoiceCountFooter.textContent =
+                    dashboard.pendingInvoiceCount;
+
+            }
 
         } catch (e) {
 
