@@ -68,7 +68,7 @@ public class CustomerPortalServiceImpl
         Customer customer = getCurrentCustomer();
 
         return vehicleRepository
-                .findByCustomer(getCurrentCustomer())
+                .findByCustomer(customer)
                 .stream()
                 .map(mapper::toVehicle)
                 .toList();

@@ -24,7 +24,7 @@ window.CustomerApp = {
 
         this.validateSession();
 
-        CustomerRouter.initialize();
+        await CustomerRouter.initialize();
 
     },
 

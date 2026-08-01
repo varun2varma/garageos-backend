@@ -1,50 +1,12 @@
 <div class="container-fluid customer-vehicles">
 
-    <!-- ==========================================
-         Header
-         ========================================== -->
+    <!-- ===========================================================
+         Statistics
+         =========================================================== -->
 
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
 
-        <div class="col-lg-8">
-
-            <h2 class="page-title">
-
-                My Garage
-
-            </h2>
-
-            <p class="page-subtitle">
-
-                All vehicles registered with your GarageOS account.
-
-            </p>
-
-        </div>
-
-        <div class="col-lg-4 text-lg-end">
-
-            <button
-                    id="refreshVehiclesButton"
-                    class="btn btn-primary">
-
-                <i class="bi bi-arrow-clockwise me-2"></i>
-
-                Refresh
-
-            </button>
-
-        </div>
-
-    </div>
-
-    <!-- ==========================================
-         Vehicle Statistics
-         ========================================== -->
-
-    <div class="row mb-4">
-
-        <div class="col-md-4">
+        <div class="col-lg-3">
 
             <div class="customer-card stat-card">
 
@@ -64,7 +26,7 @@
 
                     <span>
 
-                        Registered Vehicles
+                        Total Vehicles
 
                     </span>
 
@@ -74,13 +36,13 @@
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-lg-3">
 
             <div class="customer-card stat-card">
 
                 <div class="stat-icon bg-success">
 
-                    <i class="bi bi-speedometer2"></i>
+                    <i class="bi bi-fuel-pump-fill"></i>
 
                 </div>
 
@@ -104,7 +66,7 @@
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-lg-3">
 
             <div class="customer-card stat-card">
 
@@ -134,27 +96,483 @@
 
         </div>
 
+        <div class="col-lg-3">
+
+            <div class="customer-card stat-card">
+
+                <div class="stat-icon bg-info">
+
+                    <i class="bi bi-tools"></i>
+
+                </div>
+
+                <div class="stat-details">
+
+                    <h3 id="activeRepairCount">
+
+                        0
+
+                    </h3>
+
+                    <span>
+
+                        Active Repairs
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- ==========================================
-         Vehicle Cards
-         ========================================== -->
+    <!-- ===========================================================
+     Vehicle Workspace
+     =========================================================== -->
 
-    <div
-            id="vehicleGrid"
-            class="row g-4">
+    <div class="row">
 
-        <div class="col-12">
+        <!-- ==========================================
+             Vehicle List
+             ========================================== -->
 
-            <div class="customer-card text-center p-5">
+        <div class="col-lg-5">
 
-                <i class="bi bi-car-front display-4 text-secondary"></i>
+            <div class="customer-card h-100">
 
-                <h4 class="mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
 
-                    Loading Vehicles...
+                    <div>
 
-                </h4>
+                        <h4 class="mb-1">
+
+                            Registered Vehicles
+
+                        </h4>
+
+                        <small class="text-muted">
+
+                            Select a vehicle to view complete service history.
+
+                        </small>
+
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+
+        <span
+                id="vehicleListCount"
+                class="badge bg-primary">
+
+            0
+
+        </span>
+
+                        <button
+                                id="refreshVehiclesButton"
+                                class="btn btn-sm btn-outline-primary">
+
+                            <i class="bi bi-arrow-clockwise"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <input
+                            id="vehicleSearch"
+                            type="text"
+                            class="form-control"
+                            placeholder="Search by Registration Number...">
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+
+                                Registration
+
+                            </th>
+
+                            <th>
+
+                                Brand
+
+                            </th>
+
+                            <th>
+
+                                Model
+
+                            </th>
+
+                            <th class="text-end">
+
+                                Action
+
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody
+                                id="vehicleTableBody">
+
+                        <tr>
+
+                            <td
+                                    colspan="4"
+                                    class="text-center py-5">
+
+                                <div class="spinner-border spinner-border-sm me-2"></div>
+
+                                Loading Vehicles...
+
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ==========================================
+             Vehicle Details
+             ========================================== -->
+
+        <div class="col-lg-7">
+
+            <div
+                    id="vehicleDetailsPanel"
+                    class="customer-card h-100">
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-car-front display-2 text-secondary"></i>
+
+                    <div id="vehicleDetailsContent">
+
+                        <div class="row mb-4">
+
+                            <div class="col-lg-8">
+
+                                <h3 id="vehicleRegistration">
+
+                                    --
+
+                                </h3>
+
+                                <div
+                                        id="vehicleTitle"
+                                        class="text-muted">
+
+                                    Select a vehicle
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-4 text-end">
+
+            <span
+                    id="vehicleStatus"
+                    class="badge bg-success">
+
+                Active
+
+            </span>
+
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <!-- ==========================================
+                             Vehicle Information
+                             ========================================== -->
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Brand
+
+                                </label>
+
+                                <div
+                                        id="detailBrand"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Model
+
+                                </label>
+
+                                <div
+                                        id="detailModel"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Variant
+
+                                </label>
+
+                                <div
+                                        id="detailVariant"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Manufacturing Year
+
+                                </label>
+
+                                <div
+                                        id="detailYear"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Fuel Type
+
+                                </label>
+
+                                <div
+                                        id="detailFuel"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Transmission
+
+                                </label>
+
+                                <div
+                                        id="detailTransmission"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label class="text-muted">
+
+                                    Color
+
+                                </label>
+
+                                <div
+                                        id="detailColor"
+                                        class="fw-semibold">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- ==========================================
+                             Job Cards
+                             ========================================== -->
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <h5>
+
+                                Service History
+
+                            </h5>
+
+                            <span
+                                    id="jobCardCount"
+                                    class="badge bg-primary">
+
+            0
+
+        </span>
+
+                        </div>
+
+                        <div
+                                id="jobCardHistory">
+
+                            <div class="text-muted">
+
+                                No Job Cards
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- ==========================================
+                             Quick Navigation
+                             ========================================== -->
+
+                        <div class="row text-center">
+
+                            <div class="col">
+
+                                <a
+                                        href="#"
+
+                                        onclick="CustomerRouter.navigate('repair')">
+
+                                    <i class="bi bi-tools d-block fs-3"></i>
+
+                                    Repairs
+
+                                </a>
+
+                                <div
+                                        id="repairCount"
+                                        class="fw-bold mt-2">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+                            <div class="col">
+
+                                <a
+                                        href="#"
+
+                                        onclick="CustomerRouter.navigate('estimates')">
+
+                                    <i class="bi bi-receipt d-block fs-3"></i>
+
+                                    Estimates
+
+                                </a>
+
+                                <div
+                                        id="estimateCount"
+                                        class="fw-bold mt-2">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+                            <div class="col">
+
+                                <a
+                                        href="#"
+
+                                        onclick="CustomerRouter.navigate('invoices')">
+
+                                    <i class="bi bi-file-earmark-text d-block fs-3"></i>
+
+                                    Invoices
+
+                                </a>
+
+                                <div
+                                        id="invoiceCount"
+                                        class="fw-bold mt-2">
+
+                                    0
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p class="text-muted">
+
+                        Click
+
+                        <strong>
+
+                            View
+
+                        </strong>
+
+                        from the vehicle list to see complete details,
+                        service history, estimates and invoices.
+
+                    </p>
+
+                </div>
 
             </div>
 

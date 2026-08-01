@@ -109,3 +109,97 @@
     color: #cbd5e1;
 
 }
+
+.vehicle-details{
+
+padding:10px;
+
+}
+
+.vehicle-details h3{
+
+font-weight:700;
+
+margin-bottom:5px;
+
+}
+
+.vehicle-details a{
+
+font-weight:600;
+
+text-decoration:none;
+
+}
+
+.vehicle-details a:hover{
+
+text-decoration:underline;
+
+}
+
+.vehicle-details table{
+
+margin-top:15px;
+
+}
+
+.vehicle-details .badge{
+
+font-size:.75rem;
+
+}
+
+.stat-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:18px 22px;
+
+    min-height:95px;
+
+    border-radius:16px;
+
+}
+
+.stat-icon{
+
+    width:60px;
+
+    height:60px;
+
+    border-radius:16px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:white;
+
+    font-size:24px;
+
+}
+
+.stat-details h3{
+
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+.stat-details span{
+
+    color:#6b7280;
+
+    font-size:14px;
+
+}

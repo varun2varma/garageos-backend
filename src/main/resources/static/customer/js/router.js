@@ -156,24 +156,37 @@ window.CustomerRouter = {
             script.src =
                 `js/${page}.js?v=${Date.now()}`;
 
-            script.onload = () => {
+            script.onload = async () => {
 
-                const objectName =
-                    this.getModuleName(page);
+                try {
 
-                const module =
-                    window[objectName];
+                    console.log("ROUTER 1", page);
 
-                if (
-                    module &&
-                    typeof module.init === "function"
-                ) {
+                        const objectName = this.getModuleName(page);
 
-                    module.init();
+                        console.log("ROUTER 2", objectName);
+
+                        const module = window[objectName];
+
+                        console.log("ROUTER 3", module);
+
+                        if (module) {
+
+                            console.log("ROUTER 4");
+
+                            await module.init();
+
+                            console.log("ROUTER 5");
+
+                        }
+
+                    resolve();
+
+                } catch (e) {
+
+                    reject(e);
 
                 }
-
-                resolve();
 
             };
 
@@ -191,13 +204,13 @@ window.CustomerRouter = {
 
             dashboard: "CustomerDashboard",
 
-            vehicles: "CustomerVehicle",
+            vehicle: "CustomerVehicle",
 
             repair: "CustomerRepair",
 
-            estimates: "CustomerEstimate",
+            estimate: "CustomerEstimate",
 
-            invoices: "CustomerInvoice",
+            invoice: "CustomerInvoice",
 
             profile: "CustomerProfile"
 
@@ -207,32 +220,31 @@ window.CustomerRouter = {
 
     },
 
-    initialize() {
+    async initialize() {
 
         window.onpopstate = async (event) => {
 
             const page =
-                event.state?.page ||
+                event.state?.page ??
                 "dashboard";
 
-            await this.load(page);
+            await this.navigate(page);
 
         };
 
         const hash =
-            window.location.hash
-                .replace("#", "");
+            window.location.hash.replace("#", "");
 
         if (
             hash &&
             this.routes[hash]
         ) {
 
-            this.load(hash);
+            await this.navigate(hash);
 
         } else {
 
-            this.load("dashboard");
+            await this.navigate("dashboard");
 
         }
 

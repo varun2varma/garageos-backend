@@ -2,37 +2,109 @@ window.CustomerVehicle = {
 
     vehicles: [],
 
+    jobCards: [],
+
+    estimates: [],
+
+    invoices: [],
+
+    selectedVehicle: null,
+
     async init() {
 
         document
-            .getElementById("refreshVehiclesButton")
+
+            .getElementById(
+                "refreshVehiclesButton"
+            )
+
             ?.addEventListener(
+
                 "click",
-                () => this.loadVehicles()
+
+                () => this.load()
+
             );
 
-        await this.loadVehicles();
+        document
+
+            .getElementById(
+                "vehicleSearch"
+            )
+
+            ?.addEventListener(
+
+                "keyup",
+
+                (event) =>
+
+                    this.filterVehicles(
+                        event.target.value
+                    )
+
+            );
+
+        await this.load();
 
     },
 
-    async loadVehicles() {
+    async load() {
 
         try {
 
+            console.log("STEP 1");
+
             CustomerApp.showLoading();
 
-            this.vehicles =
+            const vehicles =
                 await CustomerPortalService.getVehicles();
 
-            this.render(this.vehicles);
+            console.log("Vehicles", vehicles);
 
-        } catch (e) {
+            const jobCards =
+                await CustomerPortalService.getJobCards();
 
-            console.error(e);
+            console.log("JobCards", jobCards);
 
-            this.render([]);
+            const estimates =
+                await CustomerPortalService.getEstimates();
 
-        } finally {
+            console.log("Estimates", estimates);
+
+            const invoices =
+                await CustomerPortalService.getInvoices();
+
+            console.log("Invoices", invoices);
+
+            this.vehicles = vehicles;
+
+            console.log("STEP 2");
+
+            this.jobCards = jobCards;
+
+            this.estimates = estimates;
+
+            this.invoices = invoices;
+
+            console.log("STEP 3");
+
+            this.loadStatistics();
+
+            console.log("STEP 4");
+
+            this.renderVehicleTable(this.vehicles);
+
+            console.log("STEP 5");
+
+        }
+
+        catch(e){
+
+            console.error("LOAD ERROR", e);
+
+        }
+
+        finally{
 
             CustomerApp.hideLoading();
 
@@ -40,260 +112,560 @@ window.CustomerVehicle = {
 
     },
 
-    render(vehicles) {
-
-        const grid =
-            document.getElementById(
-                "vehicleGrid"
-            );
-
-        if (!grid) {
-
-            return;
-
-        }
-
-        if (!vehicles.length) {
-
+        loadStatistics() {
 
             document.getElementById(
+
                 "totalVehicleCount"
+
             ).textContent =
-                vehicles.length;
 
-            const petrolDiesel =
-                vehicles.filter(v =>
-
-                    v.fuelType === "PETROL"
-                    ||
-                    v.fuelType === "DIESEL"
-
-                ).length;
-
-            const electricHybrid =
-                vehicles.filter(v =>
-
-                    v.fuelType === "ELECTRIC"
-                    ||
-                    v.fuelType === "HYBRID"
-
-                ).length;
+                this.vehicles.length;
 
             document.getElementById(
+
+                "vehicleListCount"
+
+            ).textContent =
+
+                this.vehicles.length;
+
+            document.getElementById(
+
                 "petrolVehicleCount"
+
             ).textContent =
-                petrolDiesel;
+
+                this.vehicles.filter(vehicle =>
+
+                    vehicle.fuelType === "PETROL"
+
+                    ||
+
+                    vehicle.fuelType === "DIESEL"
+
+                ).length;
 
             document.getElementById(
+
                 "electricVehicleCount"
+
             ).textContent =
-                electricHybrid;
 
-            grid.innerHTML = `
+                this.vehicles.filter(vehicle =>
 
-                <div class="col-12">
+                    vehicle.fuelType === "ELECTRIC"
 
-                    <div class="customer-card empty-state text-center p-5">
+                    ||
 
-                        <i class="bi bi-car-front display-3 text-secondary"></i>
+                    vehicle.fuelType === "HYBRID"
 
-                        <h4 class="mt-3">
+                ).length;
 
-                            No Vehicles Found
+            document.getElementById(
 
-                        </h4>
+                "activeRepairCount"
 
-                        <p class="text-muted">
+            ).textContent =
 
-                            You haven't registered any vehicles yet.
+                this.jobCards.filter(job =>
 
-                        </p>
+                    job.status !== "DELIVERED"
 
-                    </div>
+                ).length;
 
-                </div>
+        },
 
-            `;
+            renderVehicleTable(vehicles) {
 
-            return;
+                const body =
 
-        }
+                    document.getElementById(
 
-        grid.innerHTML = vehicles
-            .map(vehicle => this.buildCard(vehicle))
-            .join("");
+                        "vehicleTableBody"
 
-    },
+                    );
 
-    buildCard(vehicle) {
+                if (!vehicles.length) {
 
-        return `
+                    body.innerHTML = `
 
-        <div class="col-xl-4 col-lg-6">
+        <tr>
 
-            <div class="customer-card vehicle-card h-100">
+        <td colspan="4"
 
-                <div class="vehicle-banner">
+        class="text-center py-5">
 
-                    <i class="bi bi-car-front-fill"></i>
+        No Vehicles Found
 
-                </div>
+        </td>
 
-                <div class="vehicle-content">
-
-                    <div class="text-center">
-
-                        <h4>
-
-                            ${vehicle.registrationNumber}
-
-                        </h4>
-
-                        <div class="text-muted">
-
-                            ${vehicle.brand}
-
-                            ${vehicle.model}
-
-                        </div>
-
-                        <span class="badge bg-primary mt-2">
-
-                            ${vehicle.variant ?? "-"}
-
-                        </span>
-
-                    </div>
-
-                    <hr>
-
-                    ${this.row(
-                        "Manufacturing Year",
-                        vehicle.manufacturingYear
-                    )}
-
-                    ${this.row(
-                        "Fuel Type",
-                        this.getFuel(vehicle.fuelType)
-                    )}
-
-                    ${this.row(
-                        "Transmission",
-                        this.getTransmission(vehicle.transmission)
-                    )}
-
-                    ${this.row(
-                        "Color",
-                        vehicle.color
-                    )}
-
-                </div>
-
-            </div>
-
-        </div>
+        </tr>
 
         `;
 
-    },
+                    return;
 
-    row(label, value) {
+                }
 
-        return `
+                body.innerHTML =
 
-            <div class="d-flex justify-content-between py-2 border-bottom">
+                    vehicles.map(
 
-                <span class="text-muted">
+                        vehicle => `
 
-                    ${label}
+        <tr>
 
-                </span>
+        <td>
 
-                <strong>
+        <strong>
 
-                    ${value ?? "-"}
+        ${vehicle.registrationNumber}
 
-                </strong>
+        </strong>
 
-            </div>
+        </td>
 
-        `;
+        <td>
 
-    },
+        ${vehicle.brand}
 
-    getFuel(fuel) {
+        </td>
 
-        if (!fuel) {
+        <td>
 
-            return "-";
+        ${vehicle.model}
 
-        }
+        </td>
 
-        switch (fuel) {
+        <td class="text-end">
 
-            case "PETROL":
+        <button
 
-                return "⛽ Petrol";
+        class="btn btn-sm btn-primary"
 
-            case "DIESEL":
+        onclick="CustomerVehicle.selectVehicle(${vehicle.id})">
 
-                return "🛢 Diesel";
+        View
 
-            case "CNG":
+        </button>
 
-                return "🔥 CNG";
+        </td>
 
-            case "ELECTRIC":
+        </tr>
 
-                return "⚡ Electric";
+        `
 
-            case "HYBRID":
+                    ).join("");
 
-                return "🔋 Hybrid";
+        },
 
-            default:
+            filterVehicles(searchText) {
 
-                return fuel;
+                const keyword =
 
-        }
+                    searchText
+                        .toLowerCase()
+                        .trim();
 
-    },
+                const filtered =
 
-    getTransmission(type) {
+                    this.vehicles.filter(vehicle =>
 
-        if (!type) {
+                        vehicle.registrationNumber
+                            .toLowerCase()
+                            .includes(keyword)
 
-            return "-";
+                        ||
 
-        }
+                        vehicle.brand
+                            .toLowerCase()
+                            .includes(keyword)
 
-        switch (type) {
+                        ||
 
-            case "MANUAL":
+                        vehicle.model
+                            .toLowerCase()
+                            .includes(keyword)
 
-                return "Manual";
+                    );
 
-            case "AUTOMATIC":
+                this.renderVehicleTable(filtered);
 
-                return "Automatic";
+            },
 
-            case "AMT":
+            selectVehicle(vehicleId) {
 
-                return "AMT";
+                this.selectedVehicle =
 
-            case "CVT":
+                    this.vehicles.find(
 
-                return "CVT";
+                        vehicle =>
 
-            case "DCT":
+                            vehicle.id === vehicleId
 
-                return "DCT";
+                    );
 
-            default:
+                if (!this.selectedVehicle) {
 
-                return type;
+                    return;
 
-        }
+                }
+
+                const jobCards =
+
+                    this.jobCards.filter(
+
+                        job =>
+
+                            job.registrationNumber ===
+                            this.selectedVehicle.registrationNumber
+
+                    );
+
+                this.renderVehicleDetails(
+
+                    this.selectedVehicle,
+
+                    jobCards
+
+                );
+
+            },
+
+            renderVehicleDetails(vehicle, jobCards) {
+
+                document.getElementById(
+
+                    "vehicleRegistration"
+
+                ).textContent =
+
+                    vehicle.registrationNumber;
+
+                document.getElementById(
+
+                    "vehicleTitle"
+
+                ).textContent =
+
+                    `${vehicle.brand} ${vehicle.model} ${vehicle.variant ?? ""}`;
+
+                document.getElementById(
+
+                    "detailBrand"
+
+                ).textContent =
+
+                    vehicle.brand;
+
+                document.getElementById(
+
+                    "detailModel"
+
+                ).textContent =
+
+                    vehicle.model;
+
+                document.getElementById(
+
+                    "detailVariant"
+
+                ).textContent =
+
+                    vehicle.variant ?? "-";
+
+                document.getElementById(
+
+                    "detailYear"
+
+                ).textContent =
+
+                    vehicle.manufacturingYear ?? "-";
+
+                document.getElementById(
+
+                    "detailFuel"
+
+                ).textContent =
+
+                    this.getFuel(
+
+                        vehicle.fuelType
+
+                    );
+
+                document.getElementById(
+
+                    "detailTransmission"
+
+                ).textContent =
+
+                    this.getTransmission(
+
+                        vehicle.transmission
+
+                    );
+
+                document.getElementById(
+
+                    "detailColor"
+
+                ).textContent =
+
+                    vehicle.color ?? "-";
+
+
+                        document.getElementById(
+
+                            "jobCardCount"
+
+                        ).textContent =
+
+                            jobCards.length;
+
+                        document.getElementById(
+
+                            "repairCount"
+
+                        ).textContent =
+
+                            jobCards.length;
+
+                        document.getElementById(
+
+                            "estimateCount"
+
+                        ).textContent =
+
+                            this.estimates.filter(
+
+                                estimate =>
+
+                                    jobCards.some(
+
+                                        job =>
+
+                                            job.jobCardNumber ===
+                                            estimate.jobCardNumber
+
+                                    )
+
+                            ).length;
+
+                        document.getElementById(
+
+                            "invoiceCount"
+
+                        ).textContent =
+
+                            this.invoices.length;
+
+                        this.renderJobCards(
+
+                            jobCards
+
+                        );
+
+                    },
+
+
+                    renderJobCards(jobCards) {
+
+                        const container =
+
+                            document.getElementById(
+
+                                "jobCardHistory"
+
+                            );
+
+                        if (!jobCards.length) {
+
+                            container.innerHTML = `
+
+                                <div class="alert alert-light text-center mb-0">
+
+                                    No service history available for this vehicle.
+
+                                </div>
+
+                            `;
+
+                            return;
+
+                        }
+
+                        container.innerHTML =
+
+                            jobCards.map(job => `
+
+                                <div class="card mb-3 border-0 shadow-sm">
+
+                                    <div class="card-body">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+
+                                            <div>
+
+                                                <h6 class="mb-1">
+
+                                                    ${job.jobCardNumber}
+
+                                                </h6>
+
+                                                <small class="text-muted">
+
+                                                    Service Date :
+
+                                                    ${job.serviceDate ?? "-"}
+
+                                                </small>
+
+                                            </div>
+
+                                            <span class="badge bg-primary">
+
+                                                ${this.formatStatus(job.status)}
+
+                                            </span>
+
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="row text-center">
+
+                                            <div class="col">
+
+                                                <a href="#"
+
+                                                   onclick="CustomerRouter.navigate('repair')">
+
+                                                    View Repair
+
+                                                </a>
+
+                                            </div>
+
+                                            <div class="col">
+
+                                                <a href="#"
+
+                                                   onclick="CustomerRouter.navigate('estimates')">
+
+                                                    View Estimate
+
+                                                </a>
+
+                                            </div>
+
+                                            <div class="col">
+
+                                                <a href="#"
+
+                                                   onclick="CustomerRouter.navigate('invoices')">
+
+                                                    View Invoice
+
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            `).join("");
+
+                    },
+
+        getFuel(fuel) {
+
+            switch (fuel) {
+
+                case "PETROL":
+
+                    return "Petrol";
+
+                case "DIESEL":
+
+                    return "Diesel";
+
+                case "CNG":
+
+                    return "CNG";
+
+                case "ELECTRIC":
+
+                    return "Electric";
+
+                case "HYBRID":
+
+                    return "Hybrid";
+
+                default:
+
+                    return "-";
+
+            }
+
+        },
+
+
+            getTransmission(type) {
+
+                switch (type) {
+
+                    case "MANUAL":
+
+                        return "Manual";
+
+                    case "AUTOMATIC":
+
+                        return "Automatic";
+
+                    case "AMT":
+
+                        return "AMT";
+
+                    case "CVT":
+
+                        return "CVT";
+
+                    case "DCT":
+
+                        return "DCT";
+
+                    default:
+
+                        return "-";
+
+                }
+
+            },
+
+
+                formatStatus(status) {
+
+                    if (!status) {
+
+                        return "-";
+
+                    }
+
+                    return status
+
+                        .replaceAll("_", " ")
+
+                        .toLowerCase()
+
+                        .replace(
+                            /\b\w/g,
+                            c => c.toUpperCase()
+                        );
 
     }
 

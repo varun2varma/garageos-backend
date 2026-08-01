@@ -129,8 +129,6 @@ window.CustomerRepair = {
             this.jobCards
                 .map(job => `
 
-                   `
-
                    <div class="col-lg-6">
 
                        <div class="customer-card h-100">
