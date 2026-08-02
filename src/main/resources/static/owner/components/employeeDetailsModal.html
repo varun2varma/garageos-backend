@@ -1,0 +1,144 @@
+<div class="modal fade"
+     id="employeeDetailsModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Employee Details
+
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Employee Name
+
+                        </label>
+
+                        <input
+                                id="detailEmployeeName"
+                                class="form-control"
+                                readonly>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Employee Code
+
+                        </label>
+
+                        <input
+                                id="detailEmployeeCode"
+                                class="form-control"
+                                readonly>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="row">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Mobile
+
+                        </label>
+
+                        <input
+                                id="detailEmployeeMobile"
+                                class="form-control"
+                                readonly>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            Email
+
+                        </label>
+
+                        <input
+                                id="detailEmployeeEmail"
+                                class="form-control"
+                                readonly>
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div>
+
+                    <label class="form-label">
+
+                        Role
+
+                    </label>
+
+                    <select
+                            id="detailRole"
+                            class="form-select">
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+
+                        class="btn btn-outline-secondary"
+
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+                <button
+
+                        class="btn btn-primary"
+
+                        onclick="OwnerEmployees.updateRole()">
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

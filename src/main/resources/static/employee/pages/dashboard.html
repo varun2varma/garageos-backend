@@ -1,0 +1,439 @@
+<div class="container-fluid">
+
+    <div class="mb-4">
+
+        <h2
+                class="fw-bold">
+
+            Welcome Back 👋
+
+        </h2>
+
+        <p
+                class="text-muted mb-0">
+
+            Manage today's garage operations from one place.
+
+        </p>
+
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body p-5">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <h2 class="fw-bold">
+
+                        🚗 Start New Service
+
+                    </h2>
+
+                    <p
+                            class="text-muted mt-3">
+
+                        Receive a vehicle, inspect it,
+                        prepare estimate, generate invoice
+                        and complete delivery.
+
+                    </p>
+
+                    <button
+                            id="startWorkflowBtn"
+                            class="btn btn-primary btn-lg mt-2">
+
+                        Start Service
+
+                    </button>
+
+                </div>
+
+                <div
+                        class="col-lg-4 text-center">
+
+                    <i
+                            class="bi bi-car-front-fill"
+                            style="
+                                font-size:110px;
+                                color:#2563eb;
+                            ">
+                    </i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Active Jobs
+
+                    </small>
+
+                    <h2 id="activeJobsCount">
+
+                        0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Pending Estimates
+
+                    </small>
+
+                    <h2 id="pendingEstimateCount">
+
+                        0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Ready Delivery
+
+                    </small>
+
+                    <h2 id="readyDeliveryCount">
+
+                        0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Completed Today
+
+                    </small>
+
+                    <h2 id="completedTodayCount">
+
+                        0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Revenue Today
+
+                    </small>
+
+                    <h2 id="revenueToday">
+
+                        ₹0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-2 col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+
+                        Vehicles
+
+                    </small>
+
+                    <h2 id="vehicleCount">
+
+                        0
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <!-- Today's Workflow -->
+
+        <div class="col-lg-4 mb-4">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="mb-0">
+
+                        Today's Workflow
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table mb-0">
+
+                        <tbody>
+
+                        <tr>
+
+                            <td>Inspection</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="inspectionCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Estimate</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="estimateCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Repair</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="repairCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Quality Check</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="qualityCheckCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Ready For Invoice</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="readyInvoiceCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Payment Pending</td>
+
+                            <td
+                                    class="text-end fw-bold"
+                                    id="paymentPendingCount">
+
+                                0
+
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Recent Jobs -->
+
+        <div class="col-lg-8 mb-4">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div
+                        class="card-header bg-white d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">
+
+                        Recent Jobs
+
+                    </h5>
+
+                    <span
+                            class="badge bg-primary"
+                            id="recentJobsBadge">
+
+                    0
+
+                </span>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table
+                            class="table align-middle mb-0">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+
+                                Job Card
+
+                            </th>
+
+                            <th>
+
+                                Customer
+
+                            </th>
+
+                            <th>
+
+                                Vehicle
+
+                            </th>
+
+                            <th>
+
+                                Status
+
+                            </th>
+
+                            <th>
+
+                                ETA
+
+                            </th>
+
+                            <th>
+
+                                Action
+
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody id="recentJobsTable">
+
+                        <tr>
+
+                            <td
+                                    colspan="6"
+                                    class="text-center py-5 text-muted">
+
+                                Loading...
+
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

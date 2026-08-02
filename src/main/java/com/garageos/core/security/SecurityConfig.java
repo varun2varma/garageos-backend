@@ -77,6 +77,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/onboarding/**",
                                 "/customer/**",
+                                "/owner/**",
+                                "/employee/**",
 
                                 "/favicon.ico",
 

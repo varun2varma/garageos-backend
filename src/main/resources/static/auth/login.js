@@ -78,33 +78,57 @@ async function login(event) {
 
         rememberUsername(username);
 
-        const roles = response.user.roles || [];
+        const user = response.user;
 
-        if (response.firstLogin) {
+        const roles = user.roles || [];
+
+        /*
+         * OWNER
+         */
+        if (roles.includes("OWNER")) {
 
             window.location.href =
-                "../onboarding/welcome.html";
+                "../owner/index.html";
 
         }
-        else if (roles.includes("OWNER")) {
 
-            window.location.href =
-                "../index.html";
-
-        }
+        /*
+         * CUSTOMER
+         */
         else if (roles.includes("CUSTOMER")) {
 
             window.location.href =
                 "../customer/index.html";
 
         }
-        else if (roles.includes("SERVICE_ADVISOR")
-              || roles.includes("TECHNICIAN")) {
+
+        /*
+         * EMPLOYEE
+         */
+        else if (
+
+            roles.includes("MANAGER") ||
+
+            roles.includes("SERVICE_ADVISOR") ||
+
+            roles.includes("TECHNICIAN") ||
+
+            roles.includes("INVENTORY_MANAGER") ||
+
+            roles.includes("ACCOUNTANT") ||
+
+            roles.includes("CASHIER")
+
+        ) {
 
             window.location.href =
-                "../index.html";
+                "../employee/index.html";
 
         }
+
+        /*
+         * NEW USER
+         */
         else {
 
             window.location.href =

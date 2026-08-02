@@ -1,0 +1,118 @@
+<div
+        class="modal fade"
+        id="approveEmployeeModal"
+        tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Approve Employee
+
+                </h5>
+
+                <button
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Employee Name
+
+                    </label>
+
+                    <input
+                            id="employeeName"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Mobile
+
+                    </label>
+
+                    <input
+                            id="employeeMobile"
+                            class="form-control"
+                            readonly>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Employee Code
+
+                    </label>
+
+                    <input
+                            id="employeeCode"
+                            class="form-control"
+                            placeholder="EMP0001">
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Roles
+
+                    </label>
+
+                    <div
+                            id="employeeRoles">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+
+                        class="btn btn-secondary"
+
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+
+                        class="btn btn-success"
+
+                        onclick="OwnerEmployees.confirmApproval()">
+
+                    Approve Employee
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

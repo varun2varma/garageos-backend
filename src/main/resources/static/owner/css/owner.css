@@ -1,0 +1,49 @@
+.owner-layout{
+
+    display:flex;
+
+    min-height:100vh;
+
+}
+
+.owner-sidebar{
+
+    width:280px;
+
+}
+
+.owner-main{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.owner-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:20px 30px;
+
+    background:#fff;
+
+    border-bottom:1px solid #ececec;
+
+}
+
+.owner-profile{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}

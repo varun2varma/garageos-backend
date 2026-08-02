@@ -1,0 +1,5 @@
+function logout() {
+
+    Auth.logout();
+
+}

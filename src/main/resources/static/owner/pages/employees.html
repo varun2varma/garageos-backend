@@ -1,0 +1,545 @@
+<div class="owner-page">
+
+    <!-- ==========================================================
+         Page Header
+         ========================================================== -->
+
+    <div class="row mb-4">
+
+        <div class="col-lg-8">
+
+            <div class="owner-card">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <h3 class="mb-2">
+
+                            Employee Management
+
+                        </h3>
+
+                        <p class="text-muted mb-0">
+
+                            Manage employee requests, assign roles and monitor your garage workforce.
+
+                        </p>
+
+                    </div>
+
+                    <button
+                            class="btn btn-primary"
+                            onclick="OwnerEmployees.refresh()">
+
+                        <i class="bi bi-arrow-clockwise"></i>
+
+                        Refresh
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="owner-card">
+
+                <label class="form-label">
+
+                    Search Employee
+
+                </label>
+
+                <input
+
+                        id="employeeSearch"
+
+                        class="form-control"
+
+                        placeholder="Search by name, mobile or employee code">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================================
+         Dashboard Cards
+         ========================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <h2 id="pendingCount">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Pending Requests
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <h2 id="employeeCount">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Active Employees
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <h2 id="managerCount">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Managers
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="dashboard-card">
+
+                <h2 id="technicianCount">
+
+                    0
+
+                </h2>
+
+                <p>
+
+                    Technicians
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================================
+         Tabs
+         ========================================================== -->
+
+    <ul
+            class="nav nav-tabs"
+            id="employeeTabs">
+
+        <li class="nav-item">
+
+            <button
+
+                    class="nav-link active"
+
+                    data-bs-toggle="tab"
+
+                    data-bs-target="#pendingTab">
+
+                <i class="bi bi-person-plus-fill"></i>
+
+                Pending Requests
+
+            </button>
+
+        </li>
+
+        <li class="nav-item">
+
+            <button
+
+                    class="nav-link"
+
+                    data-bs-toggle="tab"
+
+                    data-bs-target="#employeeTab">
+
+                <i class="bi bi-people-fill"></i>
+
+                Employees
+
+            </button>
+
+        </li>
+
+    </ul>
+
+    <!-- ==========================================================
+         Tab Content
+         ========================================================== -->
+
+    <div class="tab-content mt-4">
+
+        <!-- ======================================================
+             Pending Employees
+             ====================================================== -->
+
+        <div
+
+                class="tab-pane fade show active"
+
+                id="pendingTab">
+
+            <div class="owner-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <h5 class="mb-0">
+
+                        Pending Employee Requests
+
+                    </h5>
+
+                    <span
+
+                            id="pendingBadge"
+
+                            class="badge bg-warning">
+
+                        0
+
+                    </span>
+
+                </div>
+
+                <div id="pendingEmployees">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ======================================================
+             Employees
+             ====================================================== -->
+
+        <div
+
+                class="tab-pane fade"
+
+                id="employeeTab">
+
+            <div class="owner-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <h5 class="mb-0">
+
+                        Garage Employees
+
+                    </h5>
+
+                    <span
+
+                            id="employeeBadge"
+
+                            class="badge bg-primary">
+
+                        0
+
+                    </span>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+
+                                Employee
+
+                            </th>
+
+                            <th>
+
+                                Employee Code
+
+                            </th>
+
+                            <th>
+
+                                Contact
+
+                            </th>
+
+                            <th>
+
+                                Roles
+
+                            </th>
+
+                            <th>
+
+                                Status
+
+                            </th>
+
+                            <th width="180">
+
+                                Actions
+
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody id="employees">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+     Approval Modal
+     ========================================================== -->
+
+<div
+
+        class="modal fade"
+
+        id="approveEmployeeModal"
+
+        tabindex="-1">
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Approve Employee
+
+                </h5>
+
+                <button
+
+                        class="btn-close"
+
+                        data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Employee Code
+
+                        </label>
+
+                        <input
+
+                                id="employeeCode"
+
+                                class="form-control"
+
+                                placeholder="EMP0001">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Roles
+
+                        </label>
+
+                        <select
+
+                                id="employeeRoles"
+
+                                class="form-select"
+
+                                multiple>
+
+                        </select>
+
+                        <small class="text-muted">
+
+                            Hold Ctrl (Windows) or Cmd (Mac) to select multiple roles.
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+
+                        class="btn btn-light"
+
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+
+                        id="approveEmployeeBtn"
+
+                        class="btn btn-primary">
+
+                    Approve Employee
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+     Reject Modal
+     ========================================================== -->
+
+<div
+
+        class="modal fade"
+
+        id="rejectEmployeeModal"
+
+        tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Reject Employee
+
+                </h5>
+
+                <button
+
+                        class="btn-close"
+
+                        data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <label class="form-label">
+
+                    Remarks
+
+                </label>
+
+                <textarea
+
+                        id="rejectRemarks"
+
+                        class="form-control"
+
+                        rows="4"
+
+                        placeholder="Reason for rejection..."></textarea>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+
+                        class="btn btn-light"
+
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+
+                        id="rejectEmployeeBtn"
+
+                        class="btn btn-danger">
+
+                    Reject Employee
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
