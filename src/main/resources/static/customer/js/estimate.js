@@ -351,15 +351,16 @@ window.CustomerEstimate = {
 
             CustomerApp.showLoading();
 
-            const estimate =
-
-                this.estimates.find(
-
-                    e =>
-
-                        e.id === estimateId
-
+            const response =
+                await CustomerPortalService.getEstimate(
+                    estimateId
                 );
+
+            const estimate =
+                response.estimate;
+
+            const items =
+                response.items || [];
 
             if (!estimate) {
 
@@ -473,85 +474,139 @@ window.CustomerEstimate = {
 
                     <h5 class="mb-4">
 
-                        Estimate Summary
+                        Estimate Items
 
                     </h5>
 
-                    <table class="table">
+                    <table class="table table-bordered align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>#</th>
+
+                                <th>Description</th>
+
+                                <th>Qty</th>
+
+                                <th>Unit Price</th>
+
+                                <th>Total</th>
+
+                            </tr>
+
+                        </thead>
 
                         <tbody>
 
-                            <tr>
+                            ${items.map((item,index)=>`
 
-                                <th>
+                                <tr>
 
-                                    Estimate Number
+                                    <td>
 
-                                </th>
+                                        ${index+1}
 
-                                <td>
+                                    </td>
 
-                                    ${estimate.estimateNumber}
+                                    <td>
 
-                                </td>
+                                        ${item.description}
 
-                            </tr>
+                                    </td>
 
-                            <tr>
+                                    <td>
 
-                                <th>
+                                        ${item.quantity}
 
-                                    Job Card
+                                    </td>
 
-                                </th>
+                                    <td>
 
-                                <td>
+                                        ${this.formatCurrency(item.unitPrice)}
 
-                                    ${estimate.jobCardNumber}
+                                    </td>
 
-                                </td>
+                                    <td class="fw-bold">
 
-                            </tr>
+                                        ${this.formatCurrency(item.totalPrice)}
 
-                            <tr>
+                                    </td>
 
-                                <th>
+                                </tr>
 
-                                    Status
-
-                                </th>
-
-                                <td>
-
-                                    ${this.formatStatus(
-                                        estimate.status
-                                    )}
-
-                                </td>
-
-                            </tr>
-
-                            <tr>
-
-                                <th>
-
-                                    Grand Total
-
-                                </th>
-
-                                <td class="fw-bold text-success">
-
-                                    ${this.formatCurrency(
-                                        estimate.grandTotal
-                                    )}
-
-                                </td>
-
-                            </tr>
+                            `).join("")}
 
                         </tbody>
 
                     </table>
+
+                    <div class="row mt-4">
+
+                        <div class="col-md-5 ms-auto">
+
+                            <table class="table">
+
+                                <tr>
+
+                                    <th>
+
+                                        Subtotal
+
+                                    </th>
+
+                                    <td class="text-end">
+
+                                        ${this.formatCurrency(
+                                            estimate.subtotal
+                                        )}
+
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>
+
+                                        GST
+
+                                    </th>
+
+                                    <td class="text-end">
+
+                                        ${this.formatCurrency(
+                                            estimate.gst
+                                        )}
+
+                                    </td>
+
+                                </tr>
+
+                                <tr class="table-success">
+
+                                    <th>
+
+                                        Grand Total
+
+                                    </th>
+
+                                    <th class="text-end">
+
+                                        ${this.formatCurrency(
+                                            estimate.grandTotal
+                                        )}
+
+                                    </th>
+
+                                </tr>
+
+                            </table>
+
+                        </div>
+
+                    </div>
 
                     ${estimate.status === "WAITING_FOR_APPROVAL" ? `
 

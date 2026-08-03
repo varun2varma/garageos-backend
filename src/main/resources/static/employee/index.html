@@ -32,6 +32,8 @@
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="css/side-panel.css">
+    <link rel="stylesheet" href="css/workflowTimeline.css">
 
     <!-- ===================================================== -->
     <!-- Employee CSS -->
@@ -61,6 +63,8 @@
 <div id="toast-container"></div>
 
 <div id="modal-container"></div>
+
+<div id="side-panel-container"></div>
 
 <!-- ===================================================== -->
 <!-- Bootstrap -->
@@ -96,6 +100,9 @@
 
 <script src="../components/toast.js"></script>
 <script src="../components/modal.js"></script>
+<script src="components/common/sidePanel.js"></script>
+<script src="components/common/statusBadge.js"></script>
+<script src="components/common/workflowTimeline.js"></script>
 <!--<script src="../components/stepper.js"></script>-->
 
 <!-- ===================================================== -->
@@ -112,6 +119,7 @@
 <script src="services/invoiceService.js"></script>
 <script src="services/inspectionService.js"></script>
 <script src="services/inspectionFindingService.js"></script>
+<script src="../services/vehicleMasterService.js"></script>
 
 <!-- ===================================================== -->
 <!-- Employee Workflow -->
@@ -127,6 +135,7 @@
 <script src="workflow/estimateStep.js"></script>
 <script src="workflow/estimateItemStep.js"></script>
 <script src="workflow/estimateSummaryStep.js"></script>
+<script src="workflow/jobCreatedStep.js"></script>
 <script src="workflow/approvalStep.js"></script>
 <script src="workflow/repairStep.js"></script>
 <script src="workflow/qualityCheckStep.js"></script>

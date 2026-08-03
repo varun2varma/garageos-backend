@@ -582,19 +582,43 @@ window.CustomerInvoice = {
 
                     <hr>
 
-                    <div class="d-flex gap-3">
+                    <div class="d-flex gap-2">
 
                         <button
+                            id="downloadInvoiceBtn"
+                            class="btn btn-primary">
 
-                            class="btn btn-primary"
-
-                            onclick="CustomerInvoice.download(${invoice.id})">
-
-                            <i class="bi bi-download me-2"></i>
+                            <i class="bi bi-download"></i>
 
                             Download Invoice
 
                         </button>
+
+                        ${
+                            invoice.paymentStatus === "PENDING"
+                                ? `
+                                <button
+                                    class="btn btn-success"
+                                    onclick="CustomerInvoice.payNow('${invoice.jobCardNumber}')">
+
+                                    <i class="bi bi-credit-card"></i>
+
+                                    Pay Now
+
+                                </button>
+                                `
+                                : `
+                                <button
+                                    class="btn btn-success"
+                                    disabled>
+
+                                    <i class="bi bi-check-circle"></i>
+
+                                    Payment Completed
+
+                                </button>
+                                `
+                        }
 
                     </div>
 
@@ -613,6 +637,32 @@ window.CustomerInvoice = {
         finally {
 
             CustomerApp.hideLoading();
+
+        }
+
+    },
+
+    async payNow(jobCardNumber) {
+
+        try {
+
+            console.log("Paying Job Card :", jobCardNumber);
+
+            await CustomerPortalService.payInvoice(
+                jobCardNumber
+            );
+
+            alert("Payment completed successfully.");
+
+            await this.load();
+
+        }
+
+        catch (e) {
+
+            console.error(e);
+
+            alert(e.message);
 
         }
 

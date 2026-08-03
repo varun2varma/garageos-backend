@@ -64,7 +64,7 @@ public class JobCardServiceImpl implements JobCardService {
         jobCard.setVehicle(vehicle);
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
-        jobCard.setStatus(JobCardStatus.OPEN);
+        jobCard.setStatus(JobCardStatus.INSPECTION_PENDING);
         List<Complaint> complaints = complaintMapper.toEntity(request.getComplaints());
         JobCard finalJobCard = jobCard;
         complaints.forEach(complaint -> {

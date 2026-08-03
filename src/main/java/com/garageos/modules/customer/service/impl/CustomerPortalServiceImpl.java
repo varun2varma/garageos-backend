@@ -6,7 +6,11 @@ import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.mapper.CustomerPortalMapper;
 import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.modules.customer.service.CustomerPortalService;
+import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.estimate.repository.EstimateRepository;
+import com.garageos.modules.estimate.service.EstimateService;
+import com.garageos.modules.estimateitem.dto.response.EstimateItemResponse;
+import com.garageos.modules.estimateitem.service.EstimateItemService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -36,6 +40,10 @@ public class CustomerPortalServiceImpl
     private final InvoiceRepository invoiceRepository;
 
     private final CustomerPortalMapper mapper;
+
+    private final EstimateService estimateService;
+
+    private final EstimateItemService estimateItemService;
 
 
     @Override
@@ -172,6 +180,27 @@ public class CustomerPortalServiceImpl
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public CustomerEstimateDetailsResponse getEstimateDetails(
+            Long estimateId) {
+
+        EstimateResponse estimate =
+                estimateService.getEstimate(
+                        estimateId
+                );
+
+        List<EstimateItemResponse> items =
+                estimateItemService.getItems(
+                        estimateId
+                );
+
+        return CustomerEstimateDetailsResponse.builder()
+                .estimate(estimate)
+                .items(items)
+                .build();
+
+    }
 
 
 

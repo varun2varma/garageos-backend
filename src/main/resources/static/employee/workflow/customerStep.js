@@ -114,13 +114,18 @@ window.CustomerStep = {
             .getElementById("nextBtn")
             ?.addEventListener("click", async () => {
 
-                const success = await this.save();
+                const customer = await this.save();
 
-                if (success) {
-
-                    Workflow.nextStep();
-
+                if (!customer) {
+                    return;
                 }
+
+                SidePanel.close();
+
+                SearchStep.renderResult(
+                    WorkflowHelper.state.customer,
+                    WorkflowHelper.state.vehicle
+                );
 
             });
 
@@ -236,7 +241,7 @@ window.CustomerStep = {
             }
 
 
-            return true;
+            return response;
 
         } catch (e) {
 

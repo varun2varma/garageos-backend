@@ -2,69 +2,134 @@ window.PaymentStep = {
 
     render() {
 
+        const invoice = WorkflowHelper.state.invoice;
+
+        if (invoice?.paymentStatus === "PENDING") {
+
+            return `
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h4>
+
+                Waiting For Customer Payment
+
+            </h4>
+
+        </div>
+
+        <div class="card-body text-center">
+
+            <div class="mb-4">
+
+                <i class="bi bi-hourglass-split text-warning"
+                   style="font-size:60px;"></i>
+
+            </div>
+
+            <h5 class="text-warning">
+
+                Payment Pending
+
+            </h5>
+
+            <p class="text-muted">
+
+                Invoice has been shared with the customer.
+
+                <br>
+
+                Waiting for the customer to complete payment.
+
+            </p>
+
+            <hr>
+
+            <div class="d-flex justify-content-between">
+
+                <button
+                        id="refreshPaymentBtn"
+                        class="btn btn-primary">
+
+                        Refresh Payment Status
+
+                    </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+        }
+
+        return this.renderPaymentReceived();
+
+    },
+
+    renderPaymentReceived() {
+
+        const invoice = WorkflowHelper.state.invoice;
+
         return `
 
-<div class="card shadow-sm">
+    <div class="card shadow-sm">
 
-<div class="card-header">
+        <div class="card-header">
 
-<h4>
+            <h4>
 
-Receive Payment
+                Payment Received
 
-</h4>
+            </h4>
 
-</div>
+        </div>
 
-<div class="card-body">
+        <div class="card-body">
 
-<div class="mb-3">
+            <div class="alert alert-success">
 
-<label>
+                Customer payment received successfully.
 
-Payment Mode
+            </div>
 
-</label>
+            <div class="mb-3">
 
-<select
-id="paymentMode"
-class="form-select">
+                <strong>Payment Mode :</strong>
 
-<option value="CASH">Cash</option>
+                ${invoice.paymentMode}
 
-<option value="UPI">UPI</option>
+            </div>
 
-<option value="CARD">Card</option>
+            <div class="mb-3">
 
-</select>
+                <strong>Amount :</strong>
 
-</div>
+                ₹ ${invoice.grandTotal}
 
-<div class="d-flex justify-content-between">
+            </div>
 
-<button
-id="previousBtn"
-class="btn btn-outline-secondary">
+            <div class="text-end">
 
-Previous
+                <button
+                    id="deliveryBtn"
+                    class="btn btn-success">
 
-</button>
+                    Proceed To Delivery →
 
-<button
-id="paymentBtn"
-class="btn btn-success">
+                </button>
 
-Receive Payment
+            </div>
 
-</button>
+        </div>
 
-</div>
+    </div>
 
-</div>
-
-</div>
-
-`;
+    `;
 
     },
 
@@ -78,10 +143,7 @@ Receive Payment
 
                     try {
 
-                        const paymentMode =
-                            document.getElementById("paymentMode").value;
-
-                        await WorkflowService.receivePayment(paymentMode);
+                        await WorkflowService.receivePayment();
 
                         alert("Payment Received.");
 
@@ -90,6 +152,42 @@ Receive Payment
                     } catch (e) {
 
                         alert(e.message);
+
+                    }
+
+                });
+
+        document
+            .getElementById("refreshPaymentBtn")
+            ?.addEventListener(
+                "click",
+                async () => {
+
+                    try {
+
+                        const invoice =
+                            await WorkflowService.refreshInvoice();
+
+                        if (
+                            invoice.paymentStatus === "PAID"
+                        ) {
+
+                            await WorkflowService.refreshWorkflowStatus();
+
+                            Workflow.nextStep();
+
+                        }
+                        else {
+
+                            alert(
+                                "Customer has not completed payment yet."
+                            );
+
+                        }
+
+                    } catch (e) {
+
+                        console.error(e);
 
                     }
 

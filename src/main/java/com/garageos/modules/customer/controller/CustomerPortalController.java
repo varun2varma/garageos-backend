@@ -86,4 +86,18 @@ public class CustomerPortalController {
 
     }
 
+    @GetMapping("/estimates/{estimateId}")
+    public ResponseEntity<ApiResponse<CustomerEstimateDetailsResponse>>
+    getEstimateDetails(
+            @PathVariable Long estimateId) {
+
+        return ApiResponseUtil.success(
+                "Estimate fetched successfully.",
+                service.getEstimateDetails(
+                        estimateId
+                )
+        );
+
+    }
+
 }

@@ -217,7 +217,9 @@ public class ServiceWorkflowServiceImpl
         InvoiceResponse invoice =
                 invoiceService.receivePayment(jobCardNumber);
 
-        jobCardService.closeJobCard(jobCardNumber);
+//        jobCardService.closeJobCard(jobCardNumber);
+
+        jobCardService.readyForDelivery(jobCardNumber);
 
         return WorkflowResponse.builder()
                 .data(invoice)
@@ -260,57 +262,44 @@ public class ServiceWorkflowServiceImpl
 
     }
 
-    private int resolveStep(JobCardStatus status){
+    private int resolveStep(JobCardStatus status) {
 
-        return switch(status){
+        return switch (status) {
 
-            case OPEN -> 1;
+            case OPEN,
+                    INSPECTION_PENDING -> 3;   // Inspection
 
-            case INSPECTION_PENDING -> 4;
+            case INSPECTION_COMPLETED,
+                    ESTIMATE_PENDING -> 4;     // Estimate
 
-            case INSPECTION_COMPLETED -> 5;
+            case WAITING_FOR_APPROVAL -> 6; // Estimate Summary
 
-            case ESTIMATE_PENDING -> 5;
+            case ESTIMATE_APPROVED,
+                    REPAIR_PENDING,
+                    REPAIR_IN_PROGRESS -> 8;   // Repair
 
-            case WAITING_FOR_APPROVAL -> 8;
+            case REPAIR_COMPLETED -> 9;     // Quality Check
 
-            case ESTIMATE_APPROVED -> 9;
+            case QUALITY_CHECK,
+                    READY_FOR_INVOICE -> 10;   // Invoice
 
-            case REPAIR_PENDING -> 9;
+            case INVOICE_GENERATED,
+                    PAYMENT_PENDING -> 11;     // Payment
 
-            case REPAIR_IN_PROGRESS -> 9;
-
-            case REPAIR_COMPLETED -> 10;
-
-            case QUALITY_CHECK -> 11;
-
-            case READY_FOR_INVOICE -> 11;
-
-            case INVOICE_GENERATED -> 12;
-
-            case PAYMENT_PENDING -> 12;
-
-            case PAYMENT_COMPLETED -> 13;
-
-            case READY_FOR_DELIVERY -> 13;
-
-            case DELIVERED -> 13;
-
-            case CLOSED -> 13;
+            case PAYMENT_COMPLETED,
+                    READY_FOR_DELIVERY,
+                    DELIVERED,
+                    CLOSED -> 12;              // Delivery
 
             default -> 1;
-
         };
-
     }
 
     private int resolveProgress(JobCardStatus status){
 
         return switch(status){
 
-            case OPEN -> 5;
-
-            case INSPECTION_PENDING -> 15;
+            case OPEN, INSPECTION_PENDING -> 20;
 
             case INSPECTION_COMPLETED -> 25;
 
@@ -332,7 +321,8 @@ public class ServiceWorkflowServiceImpl
 
             case INVOICE_GENERATED -> 95;
 
-            case PAYMENT_COMPLETED -> 98;
+            case PAYMENT_COMPLETED,
+                    READY_FOR_DELIVERY -> 98;
 
             case CLOSED -> 100;
 

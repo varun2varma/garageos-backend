@@ -20,4 +20,6 @@ public interface CustomerPortalService {
 
     CustomerRepairTrackingResponse trackRepair(String jobCardNumber);
 
+    CustomerEstimateDetailsResponse getEstimateDetails(Long estimateId);
+
 }

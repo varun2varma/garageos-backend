@@ -20,6 +20,18 @@ window.CustomerPortalService = {
         return await Api.get("/customer/estimates");
     },
 
+    async getEstimate(estimateId) {
+        return await Api.get(`/customer/estimates/${estimateId}`);
+    },
+
+    async approveEstimate(estimateId) {
+        return await Api.put(`/estimates/${estimateId}/approve`);
+    },
+
+    async rejectEstimate(estimateId) {
+        return await Api.put(`/estimates/${estimateId}/reject`);
+    },
+
     async getInvoices() {
         return await Api.get("/customer/invoices");
     },
@@ -28,6 +40,10 @@ window.CustomerPortalService = {
         return await Api.get(
             `/customer/repair-tracking/${jobCardNumber}`
         );
+    },
+
+    async payInvoice(jobCardNumber) {
+        return await Api.post(`/workflow/${jobCardNumber}/payment`);
     }
 
 };

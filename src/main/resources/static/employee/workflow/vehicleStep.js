@@ -230,13 +230,18 @@ window.VehicleStep = {
             .getElementById("nextBtn")
             ?.addEventListener("click", async () => {
 
-                const success = await this.save();
+                const vehicle = await this.save();
 
-                if (success) {
-
-                    Workflow.nextStep();
-
+                if (!vehicle) {
+                    return;
                 }
+
+                SidePanel.close();
+
+                SearchStep.renderResult(
+                    WorkflowHelper.state.customer,
+                    WorkflowHelper.state.vehicle
+                );
 
             });
 
@@ -730,7 +735,7 @@ window.VehicleStep = {
 
                         console.log("Vehicle Saved", vehicle);
 
-                        return true;
+                        return vehicle;
 
         }
 

@@ -102,9 +102,12 @@ window.SearchStep = {
 
     renderResult(customer, vehicle) {
 
+        const customerFound = !!customer?.id;
+        const vehicleFound = !!vehicle?.id;
+
         document.getElementById("searchResult").innerHTML = `
 
-    <div class="card border-success shadow-sm">
+    <div class="card shadow-sm border-success">
 
         <div class="card-body">
 
@@ -118,34 +121,48 @@ window.SearchStep = {
 
                     </h5>
 
-                    <table class="table table-borderless mb-0">
+                    ${
+                        customerFound
+                        ?
 
-                        <tr>
+                        `
+                        <table class="table table-borderless">
 
-                            <td>Name</td>
+                            <tr>
+                                <td>Name</td>
+                                <td>${customer.firstName} ${customer.lastName ?? ""}</td>
+                            </tr>
 
-                            <td>
+                            <tr>
+                                <td>Mobile</td>
+                                <td>${customer.mobileNumber}</td>
+                            </tr>
 
-                                ${customer?.firstName ?? "-"}
-                                ${customer?.lastName ?? ""}
+                        </table>
+                        `
 
-                            </td>
+                        :
 
-                        </tr>
+                        `
+                        <div class="alert alert-warning">
 
-                        <tr>
+                            Customer not found.
 
-                            <td>Mobile</td>
+                            <div class="mt-3">
 
-                            <td>
+                                <button
+                                    id="registerCustomerBtn"
+                                    class="btn btn-outline-primary btn-sm">
 
-                                ${customer?.mobileNumber ?? customer?.mobile ?? "-"}
+                                    + Register Customer
 
-                            </td>
+                                </button>
 
-                        </tr>
+                            </div>
 
-                    </table>
+                        </div>
+                        `
+                    }
 
                 </div>
 
@@ -157,46 +174,60 @@ window.SearchStep = {
 
                     </h5>
 
-                    <table class="table table-borderless mb-0">
+                    ${
+                        vehicleFound
 
-                        <tr>
+                        ?
 
-                            <td>Registration</td>
+                        `
+                        <table class="table table-borderless">
 
-                            <td>
+                            <tr>
+                                <td>Registration</td>
+                                <td>${vehicle.registrationNumber}</td>
+                            </tr>
 
-                                ${vehicle?.registrationNumber ?? "-"}
+                            <tr>
+                                <td>Vehicle</td>
+                                <td>${vehicle.brand} ${vehicle.model}</td>
+                            </tr>
 
-                            </td>
+                        </table>
+                        `
 
-                        </tr>
+                        :
 
-                        <tr>
+                        `
+                        <div class="alert alert-warning">
 
-                            <td>Vehicle</td>
+                            Vehicle not found.
 
-                            <td>
+                            <div class="mt-3">
 
-                                ${vehicle?.brand ?? ""}
-                                ${vehicle?.model ?? ""}
+                                <button
+                                    id="registerVehicleBtn"
+                                    class="btn btn-outline-primary btn-sm">
 
-                            </td>
+                                    + Register Vehicle
 
-                        </tr>
+                                </button>
 
-                    </table>
+                            </div>
+
+                        </div>
+                        `
+                    }
 
                 </div>
 
             </div>
 
-            <div class="text-end mt-3">
+            <div class="text-end mt-4">
 
                 <button
-
                     id="continueBtn"
-
-                    class="btn btn-success">
+                    class="btn btn-success"
+                    ${customerFound && vehicleFound ? "" : "disabled"}>
 
                     Continue →
 
@@ -214,13 +245,24 @@ window.SearchStep = {
             .getElementById("continueBtn")
             .addEventListener("click", () => {
 
-                WorkflowHelper.state.customer = customer;
-
-                WorkflowHelper.state.vehicle = vehicle;
-
                 Workflow.nextStep();
 
             });
+
+
+        document
+            .getElementById("registerCustomerBtn")
+            ?.addEventListener(
+                "click",
+                () => this.openCustomerDrawer()
+            );
+
+        document
+            .getElementById("registerVehicleBtn")
+            ?.addEventListener(
+                "click",
+                () => this.openVehicleDrawer()
+            );
 
     },
 
@@ -242,85 +284,142 @@ window.SearchStep = {
 
     async search() {
 
-        try {
+        const mobile =
+            document
+                .getElementById("mobileNumber")
+                .value
+                .trim();
 
-            const mobile =
-                document
-                    .getElementById("mobileNumber")
-                    .value
-                    .trim();
+        const registration =
+            document
+                .getElementById("registrationNumber")
+                .value
+                .trim()
+                .toUpperCase();
 
-            const registration =
-                document
-                    .getElementById("registrationNumber")
-                    .value
-                    .trim();
+        if (!mobile && !registration) {
 
-            if (!mobile && !registration) {
+            alert("Enter Mobile Number or Registration Number.");
 
-                alert(
-                    "Enter Mobile Number or Registration Number."
-                );
+            return;
 
-                return;
+        }
 
-            }
+        document.getElementById("searchResult").innerHTML = `
 
-            document.getElementById("searchResult").innerHTML = `
+            <div class="text-center py-5">
 
-                <div class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
 
-                    <div class="spinner-border text-primary"></div>
+                <p class="mt-3">
 
-                    <p class="mt-3">
+                    Searching...
 
-                        Searching...
+                </p>
 
-                    </p>
+            </div>
 
-                </div>
+        `;
 
-            `;
+        let customer = null;
+        let vehicle = null;
 
-            let customer = null;
+        WorkflowHelper.state.customer = null;
+        WorkflowHelper.state.customerId = null;
+        WorkflowHelper.state.vehicle = null;
+        WorkflowHelper.state.vehicleId = null;
 
-            let vehicle = null;
+        if (mobile) {
 
-            if (mobile) {
+            try {
 
                 customer =
                     await CustomerService.findByMobile(mobile);
 
+                WorkflowHelper.state.customer = customer;
+                WorkflowHelper.state.customerId = customer.id;
+
             }
 
-            if (registration) {
+            catch (e) {
+
+                console.log("Customer not found.");
+
+                WorkflowHelper.state.customer = {
+
+                    firstName: "",
+                    lastName: "",
+                    mobileNumber: mobile,
+                    email: "",
+                    address: ""
+
+                };
+
+            }
+
+        }
+
+        if (registration) {
+
+            try {
 
                 vehicle =
                     await VehicleService.searchByRegistrationNumber(
                         registration
                     );
 
+                WorkflowHelper.state.vehicle = vehicle;
+                WorkflowHelper.state.vehicleId = vehicle.id;
+
             }
 
-            this.renderResult(customer, vehicle);
+            catch (e) {
+
+                console.log("Vehicle not found.");
+
+                WorkflowHelper.state.vehicle = {
+
+                    registrationNumber: registration
+
+                };
+
+            }
 
         }
 
-        catch (error) {
+        this.renderResult(
+            WorkflowHelper.state.customer,
+            WorkflowHelper.state.vehicle
+        );
 
-            console.error(error);
+    },
 
-            document.getElementById("searchResult").innerHTML = `
 
-                <div class="alert alert-danger">
+    openCustomerDrawer() {
 
-                    Customer / Vehicle not found.
+        SidePanel.open(
 
-                </div>
+            "Register Customer",
 
-            `;
+            CustomerStep.render()
 
-        }
+        );
+
+        CustomerStep.bindEvents();
+
+    },
+
+    openVehicleDrawer() {
+
+        SidePanel.open(
+
+            "Register Vehicle",
+
+            VehicleStep.render()
+
+        );
+
+        VehicleStep.bindEvents();
 
     }
 

@@ -71,12 +71,12 @@ window.ApprovalStep = {
 
             </h6>
 
-            <h6>
-
-                Discount :
-                ₹ ${estimate.discount ?? 0}
-
-            </h6>
+//            <h6>
+//
+//                Discount :
+//                ₹ ${estimate.discount ?? 0}
+//
+//            </h6>
 
             <h4 class="text-success">
 
@@ -84,6 +84,14 @@ window.ApprovalStep = {
                 ₹ ${estimate.grandTotal ?? 0}
 
             </h4>
+
+        </div>
+
+        <div class="alert alert-warning">
+
+            Waiting for customer approval.
+
+            A notification has been sent to the customer.
 
         </div>
 
@@ -99,13 +107,13 @@ window.ApprovalStep = {
 
             </button>
 
-            <button
-                id="approveEstimateBtn"
-                class="btn btn-success">
-
-                Approve Estimate
-
-            </button>
+//            <button
+//                id="approveEstimateBtn"
+//                class="btn btn-success">
+//
+//                Approve Estimate
+//
+//            </button>
 
         </div>
 

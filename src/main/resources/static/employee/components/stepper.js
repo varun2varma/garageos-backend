@@ -32,10 +32,22 @@ window.Stepper = {
             title: "Inspection",
             icon: "bi-clipboard-check",
             roles: [
-                "MANAGER",
-                "TECHNICIAN"
+                "MANAGER"
+//                ,
+//                "TECHNICIAN"
             ],
             component: "InspectionStep"
+        },
+
+
+        {
+            id: "completed",
+            title: "Completed",
+            icon: "bi-check-circle-fill",
+            roles: [
+                "SERVICE_ADVISOR"
+            ],
+            component: "JobCreatedStep"
         },
 
         {
@@ -43,8 +55,7 @@ window.Stepper = {
             title: "Estimate",
             icon: "bi-cash-stack",
             roles: [
-                "MANAGER",
-                "SERVICE_ADVISOR"
+                "MANAGER"
             ],
             component: "EstimateStep"
         },
@@ -54,8 +65,7 @@ window.Stepper = {
             title: "Estimate Items",
             icon: "bi-list-check",
             roles: [
-                "MANAGER",
-                "SERVICE_ADVISOR"
+                "MANAGER"
             ],
             component: "EstimateItemStep"
         },
@@ -65,8 +75,7 @@ window.Stepper = {
             title: "Estimate Summary",
             icon: "bi-file-earmark-text",
             roles: [
-                "MANAGER",
-                "SERVICE_ADVISOR"
+                "MANAGER"
             ],
             component: "EstimateSummaryStep"
         },
@@ -131,8 +140,7 @@ window.Stepper = {
             title: "Delivery",
             icon: "bi-truck",
             roles: [
-                "MANAGER",
-                "SERVICE_ADVISOR"
+                "MANAGER"
             ],
             component: "DeliveryStep"
         }

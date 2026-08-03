@@ -338,6 +338,26 @@ window.WorkflowService = {
 
     },
 
+    async refreshInvoice() {
+
+        if (!WorkflowHelper.state.invoiceId) {
+
+            return null;
+
+        }
+
+        const invoice =
+            await InvoiceService.getInvoice(
+                WorkflowHelper.state.invoiceId
+            );
+
+        WorkflowHelper.state.invoice =
+            invoice;
+
+        return invoice;
+
+    },
+
     async finishEstimate(estimateId) {
 
         const request = {
