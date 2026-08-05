@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -85,6 +87,19 @@ public class UserController {
                         direction
                 )
         );
+    }
+
+    @GetMapping("/technicians")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> technicians(){
+
+        return ApiResponseUtil.success(
+
+                "Technicians fetched successfully.",
+
+                service.getTechnicians()
+
+        );
+
     }
 
 }

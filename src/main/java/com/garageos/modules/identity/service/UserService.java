@@ -5,6 +5,8 @@ import com.garageos.modules.identity.dto.request.UpdateUserRequest;
 import com.garageos.modules.identity.dto.response.UserResponse;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface UserService {
 
     UserResponse createUser(CreateUserRequest request);
@@ -22,5 +24,7 @@ public interface UserService {
             String sortBy,
             String direction
     );
+
+    List<UserResponse> getTechnicians();
 
 }

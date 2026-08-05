@@ -226,5 +226,35 @@ public class UserServiceImpl implements UserService {
         return buildResponse(user);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getTechnicians() {
+
+        return userRepository
+                .findAll()
+                .stream()
+
+                .filter(user ->
+
+                        user.getUserRoles()
+
+                                .stream()
+
+                                .anyMatch(role ->
+
+                                        role.getRole()
+                                                .getCode()
+                                                .name()
+                                                .equals("TECHNICIAN")
+
+                                )
+                )
+
+                .map(this::buildResponse)
+
+                .toList();
+
+    }
+
 
 }

@@ -3,6 +3,7 @@ package com.garageos.modules.serviceworkflow.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.inspection.dto.request.CreateInspectionRequest;
+import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
@@ -113,7 +114,7 @@ public class ServiceWorkflowController {
     }
 
     @PostMapping("/{jobCardNumber}/invoice")
-    public ResponseEntity<ApiResponse<WorkflowResponse>>
+    public ResponseEntity<ApiResponse<InvoiceResponse>>
     generateInvoice(
             @PathVariable String jobCardNumber) {
 

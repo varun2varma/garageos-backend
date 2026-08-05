@@ -820,6 +820,20 @@ await this.refreshWorkflowStatus();
 
     },
 
+    async loadAssignments() {
+
+        const assignments =
+            await JobAssignmentService.getByJobCard(
+                WorkflowHelper.state.job.id
+            );
+
+        WorkflowHelper.state.assignments =
+            assignments;
+
+        return assignments;
+
+    },
+
 
 
 };

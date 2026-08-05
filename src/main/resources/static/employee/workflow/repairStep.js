@@ -22,7 +22,7 @@ window.RepairStep = {
 
                 <small class="text-muted">
 
-                    Complete all repair activities before Quality Check.
+                    Assign technicians and complete all repair activities before Quality Check.
 
                 </small>
 
@@ -42,8 +42,9 @@ window.RepairStep = {
 
         </div>
 
-        <div class="progress mt-3"
-             style="height:10px;">
+        <div
+            class="progress mt-3"
+            style="height:10px;">
 
             <div
                 id="repairProgressBar"
@@ -110,9 +111,25 @@ ${this.renderAssignModal()}
 
             return `
 
-<div class="alert alert-warning">
+<div class="text-center py-5">
 
-    No Repair Tasks Available.
+    <i
+        class="bi bi-tools"
+        style="font-size:60px;color:#9CA3AF;">
+
+    </i>
+
+    <h5 class="mt-3">
+
+        No Repair Tasks
+
+    </h5>
+
+    <p class="text-muted mb-0">
+
+        No approved estimate items are available.
+
+    </p>
 
 </div>
 
@@ -122,13 +139,13 @@ ${this.renderAssignModal()}
 
         return tasks.map(task => `
 
-<div class="card mb-3 shadow-sm">
+<div class="card mb-3 shadow-sm border-0">
 
     <div class="card-body">
 
-        <div class="d-flex justify-content-between">
+        <div class="row align-items-center">
 
-            <div>
+            <div class="col-lg-7">
 
                 <h5 class="mb-2">
 
@@ -151,6 +168,18 @@ ${this.renderAssignModal()}
                     ${task.technicianName || "Not Assigned"}
 
                 </div>
+
+                ${task.assignedAt ? `
+
+<div class="small text-muted">
+
+    <strong>Assigned :</strong>
+
+    ${WorkflowHelper.formatDateTime(task.assignedAt)}
+
+</div>
+
+` : ""}
 
                 ${task.startedAt ? `
 
@@ -178,7 +207,7 @@ ${this.renderAssignModal()}
 
             </div>
 
-            <div class="text-end">
+            <div class="col-lg-5 text-end">
 
                 ${this.renderActions(task)}
 
@@ -208,6 +237,10 @@ ${this.renderAssignModal()}
                 badge = "info";
                 break;
 
+            case "ACCEPTED":
+                badge = "primary";
+                break;
+
             case "IN_PROGRESS":
                 badge = "warning";
                 break;
@@ -229,7 +262,7 @@ ${this.renderAssignModal()}
 
 <span class="badge bg-${badge} fs-6">
 
-    ${status.replaceAll("_"," ")}
+    ${status.replaceAll("_", " ")}
 
 </span>
 
@@ -237,16 +270,20 @@ ${this.renderAssignModal()}
 
     },
 
-        renderActions(task) {
+    renderActions(task) {
 
-            switch (task.status) {
+        /*
+        -----------------------------------------
+        No Assignment Yet
+        -----------------------------------------
+        */
 
-                case "PENDING":
+        if (!task.assignmentId) {
 
-                    return `
+            return `
 
     <button
-        class="btn btn-sm btn-primary assign-btn"
+        class="btn btn-primary btn-sm assign-btn"
         data-id="${task.id}">
 
         <i class="bi bi-person-plus"></i>
@@ -257,53 +294,59 @@ ${this.renderAssignModal()}
 
     `;
 
-                case "ASSIGNED":
+        }
 
-                    return `
+        /*
+        -----------------------------------------
+        Already Assigned
+        -----------------------------------------
+        */
 
-    <div class="mb-2">
+        switch (task.status) {
+
+            case "ASSIGNED":
+
+                return `
 
     <button
-        class="btn btn-warning btn-sm start-btn"
+        class="btn btn-outline-primary btn-sm assign-btn"
         data-id="${task.id}">
 
-        <i class="bi bi-play-fill"></i>
-
-        Start Repair
+        Reassign
 
     </button>
 
-    </div>
+    `;
+
+            case "ACCEPTED":
+
+                return `
+
+    <span class="badge bg-primary">
+
+    Accepted By Technician
+
+    </span>
 
     `;
 
-                case "IN_PROGRESS":
+            case "IN_PROGRESS":
 
-                    return `
+                return `
 
-    <div class="mb-2">
+    <span class="badge bg-warning">
 
-    <button
-        class="btn btn-success btn-sm complete-btn"
-        data-id="${task.id}">
+    Repair In Progress
 
-        <i class="bi bi-check-circle"></i>
-
-        Complete Repair
-
-    </button>
-
-    </div>
+    </span>
 
     `;
 
-                case "COMPLETED":
+            case "COMPLETED":
 
-                    return `
+                return `
 
-    <span class="badge bg-success p-2">
-
-    <i class="bi bi-check-circle-fill"></i>
+    <span class="badge bg-success">
 
     Completed
 
@@ -311,76 +354,130 @@ ${this.renderAssignModal()}
 
     `;
 
-                default:
+            default:
 
-                    return "";
+                return "";
 
-            }
+        }
 
-        },
+    },
 
-        renderAssignModal() {
+    renderAssignModal() {
 
-            return `
+        return `
 
-    <div
-        class="modal fade"
-        id="assignTechnicianModal"
-        tabindex="-1">
+<div
+    class="modal fade"
+    id="assignTechnicianModal"
+    tabindex="-1">
 
-        <div class="modal-dialog">
+    <div class="modal-dialog">
 
-            <div class="modal-content">
+        <div class="modal-content">
 
-                <div class="modal-header">
+            <div class="modal-header">
 
-                    <h5 class="modal-title">
+                <h5 class="modal-title">
 
-                        Assign Technician
+                    <i class="bi bi-person-plus me-2"></i>
 
-                    </h5>
+                    Assign Technician
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
+                </h5>
 
-                    </button>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input
+                    id="repairTaskId"
+                    type="hidden">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Technician
+
+                    </label>
+
+                    <select
+                        id="technicianId"
+                        class="form-select">
+
+                        <option value="">
+
+                            Select Technician
+
+                        </option>
+
+                    </select>
 
                 </div>
 
-                <div class="modal-body">
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Estimated Hours
+
+                    </label>
 
                     <input
-                        id="technicianName"
+                        id="estimatedHours"
+                        type="number"
+                        step="0.5"
                         class="form-control"
-                        placeholder="Enter Technician Name"/>
-
-                    <input
-                        id="repairTaskId"
-                        type="hidden"/>
+                        placeholder="Estimated Hours">
 
                 </div>
 
-                <div class="modal-footer">
+                <div class="mb-3">
 
-                    <button
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
+                    <label class="form-label">
 
-                        Cancel
+                        Remarks
 
-                    </button>
+                    </label>
 
-                    <button
-                        id="saveTechnicianBtn"
-                        class="btn btn-primary">
+                    <textarea
+                        id="assignmentRemarks"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Optional Remarks">
 
-                        Assign
-
-                    </button>
+                    </textarea>
 
                 </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    id="saveTechnicianBtn"
+                    class="btn btn-primary">
+
+                    <i class="bi bi-check-circle me-1"></i>
+
+                    Assign Technician
+
+                </button>
 
             </div>
 
@@ -388,210 +485,454 @@ ${this.renderAssignModal()}
 
     </div>
 
-    `;
+</div>
 
-        },
+`;
 
-        async refresh() {
+    },
 
-        console.table(
-            WorkflowHelper.state.repairTasks.map(t => ({
-                id: t.id,
-                status: t.status
-            }))
+
+    async refresh() {
+
+        /*
+        -----------------------------------------
+        Load Existing Assignments
+        -----------------------------------------
+        */
+
+        const assignments =
+            await JobAssignmentService.getByJobCard(
+                WorkflowHelper.state.jobCardId
+            );
+
+        WorkflowHelper.state.assignments = assignments;
+
+        /*
+        -----------------------------------------
+        Merge Assignment Data Into Repair Tasks
+        -----------------------------------------
+        */
+
+        const tasks =
+            WorkflowHelper.state.repairTasks || [];
+
+        tasks.forEach(task => {
+
+            const assignment =
+                assignments.find(
+                    x => x.estimateItemId === task.id
+                );
+
+            if (!assignment) {
+                return;
+            }
+
+            task.assignmentId =
+                assignment.id;
+
+            task.status =
+                assignment.status;
+
+            task.technicianId =
+                assignment.employeeId;
+
+            task.technicianName =
+                assignment.employeeName;
+
+            task.assignedAt =
+                assignment.assignedAt;
+
+            task.startedAt =
+                assignment.startedAt;
+
+            task.completedAt =
+                assignment.completedAt;
+
+            task.estimatedHours =
+                assignment.estimatedHours;
+
+            task.remarks =
+                assignment.remarks;
+
+        });
+
+        /*
+        -----------------------------------------
+        Render Repair Tasks
+        -----------------------------------------
+        */
+
+        const container =
+            document.getElementById(
+                "repairTaskContainer"
+            );
+
+        if (container) {
+
+            container.innerHTML =
+                this.renderTasks();
+
+        }
+
+        /*
+        -----------------------------------------
+        Calculate Progress
+        -----------------------------------------
+        */
+
+        const total =
+            tasks.length;
+
+        const completed =
+            tasks.filter(
+                task =>
+                    task.status === "COMPLETED"
+            ).length;
+
+        const percentage =
+            total === 0
+                ? 0
+                : Math.round(
+                    (completed / total) * 100
+                );
+
+        /*
+        -----------------------------------------
+        Progress Bar
+        -----------------------------------------
+        */
+
+        const progressBar =
+            document.getElementById(
+                "repairProgressBar"
+            );
+
+        if (progressBar) {
+
+            progressBar.style.width =
+                percentage + "%";
+
+            progressBar.innerHTML =
+                percentage + "%";
+
+        }
+
+        /*
+        -----------------------------------------
+        Progress Text
+        -----------------------------------------
+        */
+
+        const progressText =
+            document.getElementById(
+                "repairProgressText"
+            );
+
+        if (progressText) {
+
+            progressText.innerHTML =
+                `${completed} / ${total} Completed`;
+
+        }
+
+        /*
+        -----------------------------------------
+        Enable Next Step
+        -----------------------------------------
+        */
+
+        const nextButton =
+            document.getElementById(
+                "nextRepairBtn"
+            );
+
+        if (nextButton) {
+
+            nextButton.disabled =
+                !(total > 0 && completed === total);
+
+        }
+
+    },
+
+    bindEvents() {
+
+        this.refresh();
+
+        /*
+        -----------------------------------------
+        Previous
+        -----------------------------------------
+        */
+
+        document
+            .getElementById("previousBtn")
+            ?.addEventListener(
+                "click",
+                () => Workflow.previousStep()
+            );
+
+        /*
+        -----------------------------------------
+        Next
+        -----------------------------------------
+        */
+
+        document
+            .getElementById("nextRepairBtn")
+            ?.addEventListener(
+                "click",
+                () => Workflow.nextStep()
+            );
+
+        /*
+        -----------------------------------------
+        Repair Actions
+        -----------------------------------------
+        */
+
+        document.addEventListener(
+
+            "click",
+
+            async (e) => {
+
+                /*
+                =============================
+                Assign Technician
+                =============================
+                */
+
+                const assignBtn =
+                    e.target.closest(".assign-btn");
+
+                if (assignBtn) {
+
+                    const repairTaskId =
+                        Number(assignBtn.dataset.id);
+
+                    document.getElementById(
+                        "repairTaskId"
+                    ).value = repairTaskId;
+
+                    const technicianSelect =
+                        document.getElementById(
+                            "technicianId"
+                        );
+
+                    technicianSelect.innerHTML = `
+
+<option value="">
+
+    Loading...
+
+</option>
+
+`;
+
+                    try {
+
+                        console.log("Loading technicians...");
+
+                        const response =
+                            await UserService.getTechnicians();
+
+                        console.log("Technician API Response:", response);
+
+                        const technicians =
+                            response.data || response;
+
+                        console.log("Technicians:", technicians);
+
+                        technicianSelect.innerHTML = `
+
+<option value="">
+
+    Select Technician
+
+</option>
+
+`;
+
+                        technicians.forEach(user => {
+
+                            technicianSelect.innerHTML += `
+
+<option value="${user.id}">
+
+    ${user.firstName} ${user.lastName}
+
+</option>
+
+`;
+
+                        });
+
+                    }
+                    catch (error) {
+
+                        console.error(error);
+
+                        alert(error.message);
+
+                        return;
+
+                    }
+
+                    document.getElementById(
+                        "estimatedHours"
+                    ).value = "";
+
+                    document.getElementById(
+                        "assignmentRemarks"
+                    ).value = "";
+
+                    new bootstrap.Modal(
+
+                        document.getElementById(
+                            "assignTechnicianModal"
+                        )
+
+                    ).show();
+
+                    return;
+
+                }
+
+                /*
+                =============================
+                Start Repair
+                =============================
+                */
+
+                const startBtn =
+                    e.target.closest(".start-btn");
+
+                if (startBtn) {
+
+                    try {
+
+                        const repairTaskId =
+                            Number(startBtn.dataset.id);
+
+                        await WorkflowService.startRepair(
+                            repairTaskId
+                        );
+
+                        const task =
+                            WorkflowHelper.state.repairTasks.find(
+                                x => x.id === repairTaskId
+                            );
+
+                        if (task) {
+
+                            task.status =
+                                "IN_PROGRESS";
+
+                            task.startedAt =
+                                new Date().toISOString();
+
+                        }
+
+                        await this.refresh();
+
+                        alert(
+                            "Repair started successfully."
+                        );
+
+                    }
+                    catch (error) {
+
+                        alert(
+
+                            error.message ||
+
+                            "Unable to start repair."
+
+                        );
+
+                    }
+
+                    return;
+
+                }
+
+                /*
+                =============================
+                Complete Repair
+                =============================
+                */
+
+                const completeBtn =
+                    e.target.closest(".complete-btn");
+
+                if (completeBtn) {
+
+                    try {
+
+                        const repairTaskId =
+                            Number(
+                                completeBtn.dataset.id
+                            );
+
+                        await WorkflowService.completeRepair(
+                            repairTaskId
+                        );
+
+                        const task =
+                            WorkflowHelper.state.repairTasks.find(
+                                x => x.id === repairTaskId
+                            );
+
+                        if (task) {
+
+                            task.status =
+                                "COMPLETED";
+
+                            task.completedAt =
+                                new Date().toISOString();
+
+                        }
+
+                        await this.refresh();
+
+                        alert(
+                            "Repair completed successfully."
+                        );
+
+                    }
+                    catch (error) {
+
+                        alert(
+
+                            error.message ||
+
+                            "Unable to complete repair."
+
+                        );
+
+                    }
+
+                    return;
+
+                }
+
+            }
+
         );
 
-            WorkflowHelper.state.repairTasks;
-
-//            await WorkflowService.loadRepairTasks();
-
-            const container =
-                document.getElementById(
-                    "repairTaskContainer");
-
-            if (container) {
-
-                container.innerHTML =
-                    this.renderTasks();
-
-            }
-
-            const tasks =
-                WorkflowHelper.state.repairTasks || [];
-
-            const total =
-                tasks.length;
-
-            const completed =
-                tasks.filter(
-                    x => x.status === "COMPLETED"
-                ).length;
-
-            const percent =
-                total === 0
-                    ? 0
-                    : Math.round(
-                        completed * 100 / total);
-
-            const progressBar =
-                document.getElementById(
-                    "repairProgressBar");
-
-            if (progressBar) {
-
-                progressBar.style.width =
-                    percent + "%";
-
-                progressBar.innerHTML =
-                    percent + "%";
-
-            }
-
-            const progressText =
-                document.getElementById(
-                    "repairProgressText");
-
-            if (progressText) {
-
-                progressText.innerHTML =
-                    `${completed} / ${total} Completed`;
-
-            }
-
-            const nextBtn =
-                document.getElementById(
-                    "nextRepairBtn");
-
-            if (nextBtn) {
-
-                nextBtn.disabled =
-                    !(total > 0 && completed === total);
-
-            }
-
-        },
-
-            bindEvents() {
-
-                this.refresh();
-
-                document
-                    .getElementById("previousBtn")
-                    ?.addEventListener(
-                        "click",
-                        () => Workflow.previousStep()
-                    );
-
-                document
-                    .getElementById("nextRepairBtn")
-                    ?.addEventListener(
-                        "click",
-                        () => Workflow.nextStep()
-                    );
-
-                document.addEventListener(
-                    "click",
-                    async (e) => {
-
-                        /*
-                         * Assign Technician
-                         */
-                        if (e.target.closest(".assign-btn")) {
-
-                            const btn =
-                                e.target.closest(".assign-btn");
-
-                            document.getElementById(
-                                "repairTaskId"
-                            ).value = btn.dataset.id;
-
-                            document.getElementById(
-                                "technicianName"
-                            ).value = "";
-
-                            const modal =
-                                new bootstrap.Modal(
-                                    document.getElementById(
-                                        "assignTechnicianModal"
-                                    )
-                                );
-
-                            modal.show();
-
-                            return;
-
-                        }
-
-                        /*
-                         * Start Repair
-                         */
-                        if (e.target.closest(".start-btn")) {
-
-                            try {
-
-                                const btn =
-                                    e.target.closest(".start-btn");
-
-                                await WorkflowService.startRepair(
-                                    Number(btn.dataset.id)
-                                );
-
-                                await this.refresh();
-
-                                alert(
-                                    "Repair started successfully."
-                                );
-
-                            } catch (error) {
-
-                                Toast.error(
-                                    error.message ||
-                                    "Unable to start repair."
-                                );
-
-                            }
-
-                            return;
-
-                        }
-
-                        /*
-                         * Complete Repair
-                         */
-                        if (e.target.closest(".complete-btn")) {
-
-                            try {
-
-                                const btn =
-                                    e.target.closest(".complete-btn");
-
-                                await WorkflowService.completeRepair(
-                                    Number(btn.dataset.id)
-                                );
-
-                                await this.refresh();
-
-                                alert(
-                                    "Repair completed successfully."
-                                );
-
-                            } catch (error) {
-
-                                Toast.error(
-                                    error.message ||
-                                    "Unable to complete repair."
-                                );
-
-                            }
-
-                        }
-
-                    });
+                /*
+                -----------------------------------------
+                Save Technician Assignment
+                -----------------------------------------
+                */
 
                 document
                     .getElementById("saveTechnicianBtn")
                     ?.addEventListener(
+
                         "click",
+
                         async () => {
 
                             const repairTaskId =
@@ -601,15 +942,30 @@ ${this.renderAssignModal()}
                                     ).value
                                 );
 
-                            const technicianName =
+                            const technicianId =
+                                Number(
+                                    document.getElementById(
+                                        "technicianId"
+                                    ).value
+                                );
+
+                            const estimatedHours =
+                                Number(
+                                    document.getElementById(
+                                        "estimatedHours"
+                                    ).value
+                                );
+
+                            const remarks =
                                 document.getElementById(
-                                    "technicianName"
-                                ).value
-                                .trim();
+                                    "assignmentRemarks"
+                                ).value;
 
-                            if (!technicianName) {
+                            if (!technicianId) {
 
-                                alert("Please enter technician name.");
+                                alert(
+                                    "Please select a technician."
+                                );
 
                                 return;
 
@@ -617,33 +973,93 @@ ${this.renderAssignModal()}
 
                             try {
 
-                                await WorkflowService.assignTechnician(
-                                    repairTaskId,
-                                    technicianName
-                                );
+                                /*
+                                -------------------------------------
+                                Save Job Assignment
+                                -------------------------------------
+                                */
+
+                                const task =
+                                    WorkflowHelper.state.repairTasks.find(
+                                        x => x.id === repairTaskId
+                                    );
+
+                                if (task.assignmentId) {
+
+                                    await JobAssignmentService.reassign(
+
+                                        task.assignmentId,
+
+                                        {
+                                            employeeId: technicianId,
+                                            estimatedHours,
+                                            remarks
+                                        }
+
+                                    );
+
+                                }
+                                else {
+
+                                    await JobAssignmentService.assign({
+
+                                        jobCardId:
+                                            WorkflowHelper.state.jobCardId,
+
+                                        estimateItemId:
+                                            repairTaskId,
+
+                                        employeeId:
+                                            technicianId,
+
+                                        estimatedHours,
+
+                                        remarks
+
+                                    });
+
+                                }
+
+                                /*
+                                -------------------------------------
+                                Update UI
+                                -------------------------------------
+                                */
 
                                 bootstrap.Modal
                                     .getInstance(
+
                                         document.getElementById(
                                             "assignTechnicianModal"
                                         )
+
                                     )
                                     ?.hide();
 
                                 await this.refresh();
 
-                                alert("Technician assigned successfully.");
+                                alert(
+                                    "Technician assigned successfully."
+                                );
 
-                            } catch (error) {
+                            }
+                            catch (error) {
+
+                                console.error(error);
 
                                 alert(
+
                                     error.message ||
+
                                     "Unable to assign technician."
+
                                 );
 
                             }
 
-                        });
+                        }
+
+                    );
 
             }
 

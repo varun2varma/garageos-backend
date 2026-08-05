@@ -2,8 +2,13 @@ window.InvoiceStep = {
 
     render() {
 
-        if (!WorkflowHelper.state.invoice) {
+        const status =
+            WorkflowHelper.state.workflowStatus?.status;
+
+        if (status === "READY_FOR_INVOICE") {
+
             return this.renderGenerateInvoice();
+
         }
 
         return this.renderInvoice();
@@ -191,30 +196,25 @@ window.InvoiceStep = {
 
             <hr>
 
-            <div class="d-flex justify-content-between align-items-center">
+            <hr>
+
+            <div class="d-flex justify-content-between">
 
                 <button
-                    id="printInvoiceBtn"
-                    class="btn btn-outline-primary">
+                    id="editEstimateBtn"
+                    class="btn btn-outline-secondary">
 
-                    🖨 Print Invoice
+                    ← Edit Estimate
 
                 </button>
 
-                <div class="text-end">
+                <button
+                    id="generateInvoiceBtn"
+                    class="btn btn-success">
 
-                    <span class="badge bg-warning fs-6 mb-2">
-                        Waiting For Customer Payment
-                    </span>
+                    Generate Invoice →
 
-                    <br>
-
-                    <small class="text-muted">
-                        Invoice has been generated successfully.
-                        Customer will complete the payment from the Customer Portal.
-                    </small>
-
-                </div>
+                </button>
 
             </div>
 
@@ -463,7 +463,10 @@ Proceed To Payment →
 
     bindEvents() {
 
-        if (!WorkflowHelper.state.invoice) {
+        const status =
+            WorkflowHelper.state.workflowStatus?.status;
+
+        if (status === "READY_FOR_INVOICE") {
 
             document
                 .getElementById("editEstimateBtn")
@@ -491,10 +494,10 @@ Proceed To Payment →
             );
 
         document
-            .getElementById("printInvoiceBtn")
+            .getElementById("paymentBtn")
             ?.addEventListener(
                 "click",
-                () => window.print()
+                () => Workflow.nextStep()
             );
 
     },

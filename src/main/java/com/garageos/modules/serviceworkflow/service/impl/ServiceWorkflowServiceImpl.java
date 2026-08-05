@@ -196,7 +196,7 @@ public class ServiceWorkflowServiceImpl
     }
 
     @Override
-    public WorkflowResponse generateInvoice(
+    public InvoiceResponse generateInvoice(
             String jobCardNumber) {
 
         InvoiceResponse invoice =
@@ -204,10 +204,7 @@ public class ServiceWorkflowServiceImpl
 
         jobCardService.invoiceGenerated(jobCardNumber);
 
-        return WorkflowResponse.builder()
-                .data(invoice)
-                .message("Invoice generated successfully.")
-                .build();
+        return invoice;
     }
 
     @Override
