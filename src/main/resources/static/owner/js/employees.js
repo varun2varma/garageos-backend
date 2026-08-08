@@ -574,7 +574,7 @@ window.OwnerEmployees = {
 
             if (!employeeCode) {
 
-                Toast.error(
+                alert(
                     "Employee Code is required."
                 );
 
@@ -599,7 +599,7 @@ window.OwnerEmployees = {
 
             if (!roles.length) {
 
-                Toast.error(
+                alert(
                     "Please select at least one role."
                 );
 
@@ -621,7 +621,7 @@ window.OwnerEmployees = {
 
             );
 
-            Toast.success(
+            alert(
                 "Employee approved successfully."
             );
 
@@ -643,7 +643,7 @@ window.OwnerEmployees = {
 
             console.error(e);
 
-            Toast.error(
+            alert(
 
                 e.message ??
 
@@ -682,7 +682,7 @@ window.OwnerEmployees = {
 
             if (!remarks) {
 
-                Toast.error(
+                alert(
                     "Remarks are required."
                 );
 
@@ -700,7 +700,7 @@ window.OwnerEmployees = {
 
             this.rejectModal.hide();
 
-            Toast.success(
+            alert(
                 "Employee rejected successfully."
             );
 
@@ -710,7 +710,7 @@ window.OwnerEmployees = {
 
             console.error(e);
 
-            Toast.error(
+            alert(
 
                 e.message ??
 
@@ -746,7 +746,7 @@ window.OwnerEmployees = {
 
             );
 
-            Toast.success(
+            alert(
                 "Employee removed successfully."
             );
 
@@ -756,7 +756,7 @@ window.OwnerEmployees = {
 
             console.error(e);
 
-            Toast.error(
+            alert(
 
                 e.message ??
 

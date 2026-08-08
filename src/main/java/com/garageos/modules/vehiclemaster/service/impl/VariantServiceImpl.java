@@ -17,6 +17,7 @@ import com.garageos.modules.vehiclemaster.service.VariantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.garageos.core.enums.FuelType;
 
 import java.util.List;
 
@@ -25,13 +26,22 @@ import java.util.List;
 public class VariantServiceImpl implements VariantService {
 
     private final VehicleModelRepository modelRepository;
+
     private final VehicleVariantRepository variantRepository;
+
     private final VehicleMasterMapper mapper;
 
-    @Override
-    public VehicleVariantResponse create(CreateVehicleVariantRequest request) {
 
-        VehicleModel model = findModel(request.getModelId());
+    // =========================================================
+    // CREATE
+    // =========================================================
+
+    @Override
+    public VehicleVariantResponse create(
+            CreateVehicleVariantRequest request) {
+
+        VehicleModel model =
+                findModel(request.getModelId());
 
         if (variantRepository
                 .findByModelAndVariantNameIgnoreCaseAndFuelTypeAndTransmissionType(
@@ -39,14 +49,17 @@ public class VariantServiceImpl implements VariantService {
                         request.getVariantName(),
                         request.getFuelType(),
                         request.getTransmissionType()
-                ).isPresent()) {
+                )
+                .isPresent()) {
 
             throw new ResourceAlreadyExistsException(
                     "Vehicle variant already exists."
             );
         }
 
-        VehicleVariant variant = mapper.toEntity(request);
+        VehicleVariant variant =
+                mapper.toEntity(request);
+
         variant.setModel(model);
 
         return mapper.toVariantResponse(
@@ -54,110 +67,205 @@ public class VariantServiceImpl implements VariantService {
         );
     }
 
-    @Override
-    public VehicleVariantResponse getById(Long id) {
 
-        return mapper.toVariantResponse(findVariant(id));
+    // =========================================================
+    // GET BY ID
+    // =========================================================
+
+    @Override
+    public VehicleVariantResponse getById(
+            Long id) {
+
+        return mapper.toVariantResponse(
+                findVariant(id)
+        );
     }
 
-    @Override
-    public List<VehicleVariantResponse> getByModel(Long modelId) {
 
-        VehicleModel model = findModel(modelId);
+    // =========================================================
+    // GET BY MODEL
+    // =========================================================
+
+    @Override
+    public List<VehicleVariantResponse> getByModel(
+            Long modelId) {
+
+        VehicleModel model =
+                findModel(modelId);
 
         return mapper.toVariantResponseList(
-                variantRepository.findByModelOrderByVariantNameAsc(model)
+                variantRepository
+                        .findByModelOrderByVariantNameAsc(model.getId())
         );
     }
 
+
+    // =========================================================
+    // UPDATE
+    // =========================================================
+
     @Override
-    public VehicleVariantResponse update(Long id,
-                                         CreateVehicleVariantRequest request) {
+    public VehicleVariantResponse update(
+            Long id,
+            CreateVehicleVariantRequest request) {
 
-        VehicleVariant variant = findVariant(id);
-        VehicleModel model = findModel(request.getModelId());
+        VehicleVariant variant =
+                findVariant(id);
 
-        mapper.updateVariant(request, variant);
+        VehicleModel model =
+                findModel(request.getModelId());
+
+        mapper.updateVariant(
+                request,
+                variant
+        );
+
         variant.setModel(model);
 
         return mapper.toVariantResponse(
                 variantRepository.save(variant)
         );
     }
+
+
+    // =========================================================
+    // DELETE
+    // =========================================================
 
     @Override
     public void delete(Long id) {
 
-        variantRepository.delete(findVariant(id));
+        variantRepository.delete(
+                findVariant(id)
+        );
     }
+
+
+    // =========================================================
+    // FIND MODEL
+    // =========================================================
 
     private VehicleModel findModel(Long id) {
 
         return modelRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle model not found."));
+                        new ResourceNotFoundException(
+                                "Vehicle model not found."
+                        )
+                );
     }
+
+
+    // =========================================================
+    // FIND VARIANT
+    // =========================================================
 
     private VehicleVariant findVariant(Long id) {
 
         return variantRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle variant not found."));
+                        new ResourceNotFoundException(
+                                "Vehicle variant not found."
+                        )
+                );
     }
+
+
+    // =========================================================
+    // VARIANT DROPDOWN
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
-    public List<VehicleDropdownResponse> getVariantsByModel(Long modelId) {
+    public List<VehicleDropdownResponse> getVariantsByModel(
+            Long modelId) {
 
-        return variantRepository.findByModelIdOrderByVariantNameAsc(modelId)
+        return variantRepository
+                .findByModelIdOrderByVariantNameAsc(modelId)
                 .stream()
-                .map(variant -> VehicleDropdownResponse.builder()
-                        .id(variant.getId())
-                        .name(variant.getVariantName())
-                        .build())
+                .map(variant ->
+                        VehicleDropdownResponse.builder()
+                                .id(variant.getId())
+                                .name(variant.getVariantName())
+                                .build()
+                )
                 .toList();
     }
+
+
+    // =========================================================
+    // METADATA
+    // =========================================================
 
     @Override
     @Transactional(readOnly = true)
     public VehicleMasterMetadataResponse getMetadata() {
 
         return VehicleMasterMetadataResponse.builder()
-                .fuelTypes(variantRepository.findDistinctFuelTypes())
-                .transmissionTypes(variantRepository.findDistinctTransmissionTypes())
-                .bodyTypes(modelRepository.findDistinctBodyTypes())
+                .fuelTypes(
+                        variantRepository
+                                .findDistinctFuelTypes()
+                )
+                .transmissionTypes(
+                        variantRepository
+                                .findDistinctTransmissionTypes()
+                )
+                .bodyTypes(
+                        modelRepository
+                                .findDistinctBodyTypes()
+                )
                 .build();
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<EnumDropdownResponse> getTransmissionDropdown(Long modelId) {
-
-        return variantRepository
-                .findDistinctTransmissionTypesByModelId(modelId)
-                .stream()
-                .map(type -> EnumDropdownResponse.builder()
-                        .id(type.name())
-                        .name(type.name())
-                        .build())
-                .toList();
-    }
+// =========================================================
+// MODEL + VARIANT → FUEL TYPE
+// =========================================================
 
     @Override
     @Transactional(readOnly = true)
     public List<EnumDropdownResponse> getFuelTypeDropdown(
             Long modelId,
-            TransmissionType transmissionType) {
+            Long variantId) {
 
         return variantRepository
-                .findDistinctFuelTypesByModelIdAndTransmissionType(
+                .findDistinctFuelTypesByModelIdAndVariantId(
                         modelId,
-                        transmissionType)
+                        variantId
+                )
                 .stream()
-                .map(type -> EnumDropdownResponse.builder()
-                        .id(type.name())
-                        .name(type.name())
-                        .build())
+                .map(type ->
+                        EnumDropdownResponse.builder()
+                                .id(type.name())
+                                .name(type.name())
+                                .build()
+                )
+                .toList();
+    }
+
+
+// =========================================================
+// MODEL + VARIANT + FUEL TYPE → TRANSMISSION
+// =========================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EnumDropdownResponse> getTransmissionDropdown(
+            Long modelId,
+            Long variantId,
+            FuelType fuelType) {
+
+        return variantRepository
+                .findDistinctTransmissionTypesByModelIdAndVariantIdAndFuelType(
+                        modelId,
+                        variantId,
+                        fuelType
+                )
+                .stream()
+                .map(type ->
+                        EnumDropdownResponse.builder()
+                                .id(type.name())
+                                .name(type.name())
+                                .build()
+                )
                 .toList();
     }
 }

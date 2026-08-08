@@ -1,6 +1,7 @@
 package com.garageos.modules.vehiclemaster.service;
 
 import com.garageos.core.enums.EnumDropdownResponse;
+import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.vehiclemaster.dto.request.CreateVehicleVariantRequest;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleDropdownResponse;
@@ -11,24 +12,43 @@ import java.util.List;
 
 public interface VariantService {
 
-    VehicleVariantResponse create(CreateVehicleVariantRequest request);
+    VehicleVariantResponse create(
+            CreateVehicleVariantRequest request
+    );
 
-    VehicleVariantResponse getById(Long id);
+    VehicleVariantResponse getById(
+            Long id
+    );
 
-    List<VehicleVariantResponse> getByModel(Long modelId);
+    List<VehicleVariantResponse> getByModel(
+            Long modelId
+    );
 
-    VehicleVariantResponse update(Long id,
-                                  CreateVehicleVariantRequest request);
+    VehicleVariantResponse update(
+            Long id,
+            CreateVehicleVariantRequest request
+    );
 
-    void delete(Long id);
+    void delete(
+            Long id
+    );
 
-    List<VehicleDropdownResponse> getVariantsByModel(Long modelId);
+    List<VehicleDropdownResponse> getVariantsByModel(
+            Long modelId
+    );
 
     VehicleMasterMetadataResponse getMetadata();
 
-    List<EnumDropdownResponse> getTransmissionDropdown(Long modelId);
-
+    // Model + Variant → Fuel Type
     List<EnumDropdownResponse> getFuelTypeDropdown(
             Long modelId,
-            TransmissionType transmissionType);
+            Long variantId
+    );
+
+    // Model + Variant + Fuel Type → Transmission
+    List<EnumDropdownResponse> getTransmissionDropdown(
+            Long modelId,
+            Long variantId,
+            FuelType fuelType
+    );
 }

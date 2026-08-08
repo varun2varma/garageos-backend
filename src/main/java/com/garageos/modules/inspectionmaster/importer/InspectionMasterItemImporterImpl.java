@@ -72,16 +72,16 @@ public class InspectionMasterItemImporterImpl
 
                         ));
 
-//        Set<String> existingItems =
-//                itemRepository.findAllKeys()
-//                        .stream()
-//                        .map(key ->
-//                                (
-//                                        key.getInspectionMasterId()
-//                                                + ":"
-//                                                + key.getCheckItem()
-//                                ).toLowerCase())
-//                        .collect(Collectors.toSet());
+        Set<String> existingItems =
+                itemRepository.findAllKeys()
+                        .stream()
+                        .map(key ->
+                                (
+                                        key.getInspectionMasterId()
+                                                + ":"
+                                                + key.getCheckItem()
+                                ).toLowerCase())
+                        .collect(Collectors.toSet());
 
         csvLoader.read(
                 "inspectionmaster/inspection_master_items.csv",
@@ -123,12 +123,12 @@ public class InspectionMasterItemImporterImpl
                                             + row.string("checkItem")
                             ).toLowerCase();
 
-//                    if (existingItems.contains(duplicateKey)) {
-//
-//                        skip();
-//
-//                        return;
-//                    }
+                    if (existingItems.contains(duplicateKey)) {
+
+                        skip();
+
+                        return;
+                    }
 
                     InspectionMasterItem item =
                             new InspectionMasterItem();
@@ -172,7 +172,7 @@ public class InspectionMasterItemImporterImpl
 
                     write(item);
 
-//                    existingItems.add(duplicateKey);
+                    existingItems.add(duplicateKey);
 
                 });
 

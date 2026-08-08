@@ -499,13 +499,13 @@ ${this.renderAssignModal()}
         Load Existing Assignments
         -----------------------------------------
         */
-
         const assignments =
             await JobAssignmentService.getByJobCard(
                 WorkflowHelper.state.jobCardId
             );
 
         WorkflowHelper.state.assignments = assignments;
+
 
         /*
         -----------------------------------------
@@ -520,7 +520,7 @@ ${this.renderAssignModal()}
 
             const assignment =
                 assignments.find(
-                    x => x.estimateItemId === task.id
+                    x => x.estimateItemId === task.estimateItemId
                 );
 
             if (!assignment) {
@@ -1002,22 +1002,18 @@ ${this.renderAssignModal()}
                                 else {
 
                                     await JobAssignmentService.assign({
-
                                         jobCardId:
-                                            WorkflowHelper.state.jobCardId,
+                                        WorkflowHelper.state.jobCardId,
 
                                         estimateItemId:
-                                            repairTaskId,
+                                        task.estimateItemId,
 
                                         employeeId:
-                                            technicianId,
+                                        technicianId,
 
                                         estimatedHours,
-
                                         remarks
-
                                     });
-
                                 }
 
                                 /*

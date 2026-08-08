@@ -4,477 +4,475 @@ window.ManagerDashboard = {
 
         return `
 
-    <div class="fade-in">
+<div class="fade-in">
 
-        <div class="container-fluid">
+    <div class="container-fluid">
 
-            <!-- Welcome -->
+        <!-- Welcome -->
 
-            <div class="row mb-4">
+        <div class="row mb-4">
 
-                <div class="col">
+            <div class="col">
 
-                    <h2 class="fw-bold">
+                <h2 class="fw-bold">
 
-                        Welcome Back 👋
+                    Welcome Back 👋
 
-                    </h2>
+                </h2>
 
-                    <p class="text-secondary">
+                <p class="text-secondary">
 
-                        Manage today's garage operations from one place.
+                    Manage today's garage operations from one place.
 
-                    </p>
-
-                </div>
+                </p>
 
             </div>
 
-            <!-- Hero Card -->
+        </div>
 
-            <div class="row mb-4">
+        <!-- Hero Card -->
 
-                <div class="col">
+        <div class="row mb-4">
 
-                    <div class="card shadow-sm border-0">
+            <div class="col">
 
-                        <div class="card-body p-5">
+                <div class="card shadow-sm border-0">
 
-                            <div class="row align-items-center">
+                    <div class="card-body p-5">
 
-                                <div class="col-lg-8">
-
-                                    <h3 class="fw-bold mb-3">
-
-                                        🚗 Start New Service
-
-                                    </h3>
-
-                                    <p class="text-secondary mb-4">
-
-                                        Receive a vehicle,
-                                        inspect it,
-                                        prepare estimate,
-                                        generate invoice and
-                                        complete delivery.
-
-                                    </p>
-
-                                    <button
-                                        id="startServiceBtn"
-                                        class="btn btn-primary btn-lg">
-
-                                        Start Service
-
-                                    </button>
-
-                                </div>
-
-                                <div class="col-lg-4 text-center">
-
-                                    <i
-                                        class="bi bi-car-front-fill"
-                                        style="
-                                            font-size:120px;
-                                            color:#2563EB;
-                                        ">
-                                    </i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- KPI Cards -->
-
-            <div class="row g-4 mb-4">
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Active Jobs
-
-                                    </small>
-
-                                    <h2
-                                        id="activeJobs"
-                                        class="fw-bold">
-
-                                        0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-primary bg-opacity-10 p-3">
-
-                                    <i class="bi bi-car-front-fill text-primary fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Pending Estimates
-
-                                    </small>
-
-                                    <h2
-                                        id="pendingEstimates"
-                                        class="fw-bold">
-
-                                        0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-warning bg-opacity-10 p-3">
-
-                                    <i class="bi bi-file-earmark-text text-warning fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Ready Delivery
-
-                                    </small>
-
-                                    <h2
-                                        id="readyDelivery"
-                                        class="fw-bold">
-
-                                        0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-success bg-opacity-10 p-3">
-
-                                    <i class="bi bi-check-circle-fill text-success fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Completed Today
-
-                                    </small>
-
-                                    <h2
-                                        id="completedToday"
-                                        class="fw-bold">
-
-                                        0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-info bg-opacity-10 p-3">
-
-                                    <i class="bi bi-trophy-fill text-info fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Revenue Today
-
-                                    </small>
-
-                                    <h2
-                                        id="todayRevenue"
-                                        class="fw-bold">
-
-                                        ₹0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-success bg-opacity-10 p-3">
-
-                                    <i class="bi bi-currency-rupee text-success fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-lg-2">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between">
-
-                                <div>
-
-                                    <small class="text-secondary">
-
-                                        Vehicles
-
-                                    </small>
-
-                                    <h2
-                                        id="totalVehicles"
-                                        class="fw-bold">
-
-                                        0
-
-                                    </h2>
-
-                                </div>
-
-                                <div
-                                    class="rounded-circle bg-dark bg-opacity-10 p-3">
-
-                                    <i class="bi bi-truck text-dark fs-4"></i>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- Workflow Summary -->
-
-            <div class="row mb-4">
-
-                <div class="col-lg-4">
-
-                    <div class="card shadow-sm border-0 h-100">
-
-                        <div class="card-header bg-white">
-
-                            <h5 class="mb-0">
-
-                                Today's Workflow
-
-                            </h5>
-
-                        </div>
-
-                        <div class="card-body">
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Inspection</span>
-
-                                <strong id="inspectionJobs">0</strong>
-
-                            </div>
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Estimate</span>
-
-                                <strong id="estimateJobs">0</strong>
-
-                            </div>
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Repair</span>
-
-                                <strong id="repairJobs">0</strong>
-
-                            </div>
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Quality Check</span>
-
-                                <strong id="qualityCheckJobs">0</strong>
-
-                            </div>
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Ready For Invoice</span>
-
-                                <strong id="readyForInvoiceJobs">0</strong>
-
-                            </div>
-
-                            <div class="d-flex justify-content-between py-2">
-
-                                <span>Payment Pending</span>
-
-                                <strong id="paymentPendingJobs">0</strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+                        <div class="row align-items-center">
 
                             <div class="col-lg-8">
 
-                                <div class="card shadow-sm border-0 h-100">
+                                <h3 class="fw-bold mb-3">
 
-                                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    🚗 Start New Service
 
-                                        <h5 class="mb-0">
+                                </h3>
 
-                                            Recent Jobs
+                                <p class="text-secondary mb-4">
 
-                                        </h5>
+                                    Receive a vehicle,
+                                    inspect it,
+                                    prepare estimate,
+                                    generate invoice and
+                                    complete delivery.
 
-                                        <span
-                                            class="badge bg-primary"
-                                            id="recentJobCount">
+                                </p>
 
-                                            0
+                                <button
+                                    id="startServiceBtn"
+                                    class="btn btn-primary btn-lg">
 
-                                        </span>
+                                    Start Service
 
-                                    </div>
+                                </button>
 
-                                    <div class="table-responsive">
+                            </div>
 
-                                        <table class="table table-hover align-middle mb-0">
+                            <div class="col-lg-4 text-center">
 
-                                            <thead class="table-light">
+                                <i
+                                    class="bi bi-car-front-fill"
+                                    style="
+                                        font-size:120px;
+                                        color:#2563EB;
+                                    ">
+                                </i>
 
-                                                <tr>
+                            </div>
 
-                                                    <th>Job Card</th>
+                        </div>
 
-                                                    <th>Customer</th>
+                    </div>
 
-                                                    <th>Vehicle</th>
+                </div>
 
-                                                    <th>Status</th>
+            </div>
 
-                                                    <th>ETA</th>
+        </div>
 
-                                                    <th width="110">
+        <!-- KPI Cards -->
 
-                                                        Action
+        <div class="row g-4 mb-4">
 
-                                                    </th>
+            <div class="col-lg-2">
 
-                                                </tr>
+                <div class="card shadow-sm border-0 h-100">
 
-                                            </thead>
+                    <div class="card-body">
 
-                                            <tbody id="recentJobsTable">
+                        <div class="d-flex justify-content-between">
 
-                                            </tbody>
+                            <div>
 
-                                        </table>
+                                <small class="text-secondary">
 
-                                    </div>
+                                    Active Jobs
+
+                                </small>
+
+                                <h2
+                                    id="activeJobs"
+                                    class="fw-bold">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-primary bg-opacity-10 p-3">
+
+                                <i class="bi bi-car-front-fill text-primary fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <small class="text-secondary">
+
+                                    Pending Estimates
+
+                                </small>
+
+                                <h2
+                                    id="pendingEstimates"
+                                    class="fw-bold">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-warning bg-opacity-10 p-3">
+
+                                <i class="bi bi-file-earmark-text text-warning fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <small class="text-secondary">
+
+                                    Ready Delivery
+
+                                </small>
+
+                                <h2
+                                    id="readyDelivery"
+                                    class="fw-bold">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-success bg-opacity-10 p-3">
+
+                                <i class="bi bi-check-circle-fill text-success fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <small class="text-secondary">
+
+                                    Completed Today
+
+                                </small>
+
+                                <h2
+                                    id="completedToday"
+                                    class="fw-bold">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-info bg-opacity-10 p-3">
+
+                                <i class="bi bi-trophy-fill text-info fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <small class="text-secondary">
+
+                                    Revenue Today
+
+                                </small>
+
+                                <h2
+                                    id="todayRevenue"
+                                    class="fw-bold">
+
+                                    ₹0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-success bg-opacity-10 p-3">
+
+                                <i class="bi bi-currency-rupee text-success fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-2">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+
+                                <small class="text-secondary">
+
+                                    Vehicles
+
+                                </small>
+
+                                <h2
+                                    id="totalVehicles"
+                                    class="fw-bold">
+
+                                    0
+
+                                </h2>
+
+                            </div>
+
+                            <div
+                                class="rounded-circle bg-dark bg-opacity-10 p-3">
+
+                                <i class="bi bi-truck text-dark fs-4"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Workflow Summary -->
+
+        <div class="row mb-4">
+
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm border-0 h-100">
+
+                    <div class="card-header bg-white">
+
+                        <h5 class="mb-0">
+
+                            Today's Workflow
+
+                        </h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Inspection</span>
+
+                            <strong id="inspectionJobs">0</strong>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Estimate</span>
+
+                            <strong id="estimateJobs">0</strong>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Repair</span>
+
+                            <strong id="repairJobs">0</strong>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Quality Check</span>
+
+                            <strong id="qualityCheckJobs">0</strong>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Ready For Invoice</span>
+
+                            <strong id="readyForInvoiceJobs">0</strong>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between py-2">
+
+                            <span>Payment Pending</span>
+
+                            <strong id="paymentPendingJobs">0</strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+                        <div class="col-lg-8">
+
+                            <div class="card shadow-sm border-0 h-100">
+
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+
+                                    <h5 class="mb-0">
+
+                                        Recent Jobs
+
+                                    </h5>
+
+                                    <span
+                                        class="badge bg-primary"
+                                        id="recentJobCount">
+
+                                        0
+
+                                    </span>
+
+                                </div>
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-hover align-middle mb-0">
+
+                                        <thead class="table-light">
+
+                                            <tr>
+
+                                                <th>Job Card</th>
+
+                                                <th>Customer</th>
+
+                                                <th>Vehicle</th>
+
+                                                <th>Status</th>
+
+                                                <th>ETA</th>
+
+                                                <th width="110">
+
+                                                    Action
+
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody id="recentJobsTable">
+
+                                        </tbody>
+
+                                    </table>
 
                                 </div>
 
@@ -486,82 +484,84 @@ window.ManagerDashboard = {
 
                 </div>
 
-        `;
+            </div>
+
+    `;
 
     },
 
     bindEvents() {
 
-                document
+        document
 
-                    .getElementById("startServiceBtn")
+            .getElementById("startServiceBtn")
 
-                    ?.addEventListener("click", () => {
+            ?.addEventListener("click", () => {
 
-                        Router.navigate("workflow");
+                Router.navigate("workflow");
 
-                    });
+            });
 
-                document.addEventListener("click", async (e) => {
+        document.addEventListener("click", async (e) => {
 
-                    const btn = e.target.closest(".continue-job");
+            const btn = e.target.closest(".continue-job");
 
-                    if (!btn) {
-                        return;
-                    }
+            if (!btn) {
+                return;
+            }
 
-    //                try {
-    //
-    //                    const response = await Api.get(
-    //                        "/jobcards/search?jobCardNumber=" +
-    //                        encodeURIComponent(btn.dataset.job)
-    //                    );
-    //
-    //                    WorkflowHelper.reset();
-    //
-    //                    WorkflowHelper.state.job = response;
-    //
-    //                    WorkflowHelper.state.jobCardNumber =
-    //                        response.jobCardNumber;
-    //
-    //                    WorkflowHelper.state.jobId =
-    //                        response.id;
-    //
-    //                    Router.navigate("workflow");
-    //
-    //                }
-    //                catch (err) {
-    //
-    //                    console.error(err);
-    //
-    //                    Toast.error("Unable to load job.");
-    //
-    //                }
+//                try {
+//
+//                    const response = await Api.get(
+//                        "/jobcards/search?jobCardNumber=" +
+//                        encodeURIComponent(btn.dataset.job)
+//                    );
+//
+//                    WorkflowHelper.reset();
+//
+//                    WorkflowHelper.state.job = response;
+//
+//                    WorkflowHelper.state.jobCardNumber =
+//                        response.jobCardNumber;
+//
+//                    WorkflowHelper.state.jobId =
+//                        response.id;
+//
+//                    Router.navigate("workflow");
+//
+//                }
+//                catch (err) {
+//
+//                    console.error(err);
+//
+//                    Toast.error("Unable to load job.");
+//
+//                }
 
-                        try {
+            try {
 
-                            WorkflowHelper.reset();
+                WorkflowHelper.reset();
 
-                            const workflow =
-                                await WorkflowService.resumeWorkflow(
-                                    btn.dataset.job
-                                );
+                const workflow =
+                    await WorkflowService.resumeWorkflow(
+                        btn.dataset.job
+                    );
 
-                            Router.navigate("workflow");
+                Router.navigate("workflow");
 
-                        } catch (err) {
+            } catch (err) {
 
-                            console.error(err);
+                console.error(err);
 
-                            Toast.error("Unable to resume workflow.");
+                Toast.error("Unable to resume workflow.");
 
-                        }
+            }
 
-                });
+        });
 
-                this.loadData();
+        this.loadData();
 
-            },
+    },
 
     async loadData() {
 
@@ -650,77 +650,77 @@ window.ManagerDashboard = {
 
 <tr>
 
-    <td>
+<td>
 
-        <strong>
+    <strong>
 
-            ${job.jobCardNumber}
+        ${job.jobCardNumber}
 
-        </strong>
+    </strong>
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        <div>
+    <div>
 
-            ${job.customerName}
+        ${job.customerName}
 
-        </div>
+    </div>
 
-        <small class="text-secondary">
+    <small class="text-secondary">
 
-            ${job.mobileNumber}
+        ${job.mobileNumber}
 
-        </small>
+    </small>
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        <div>
+    <div>
 
-            ${job.vehicleName}
+        ${job.vehicleName}
 
-        </div>
+    </div>
 
-        <small class="text-secondary">
+    <small class="text-secondary">
 
-            ${job.registrationNumber}
+        ${job.registrationNumber}
 
-        </small>
+    </small>
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        <span class="${Dashboard.getStatusBadge(job.status)}">
+    <span class="${Dashboard.getStatusBadge(job.status)}">
 
-            ${Dashboard.formatStatus(job.status)}
+        ${Dashboard.formatStatus(job.status)}
 
-        </span>
+    </span>
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        ${job.estimatedDeliveryDate ?? "-"}
+    ${job.estimatedDeliveryDate ?? "-"}
 
-    </td>
+</td>
 
-    <td>
+<td>
 
-        <button
+    <button
 
-            class="btn btn-sm btn-outline-primary continue-job"
+        class="btn btn-sm btn-outline-primary continue-job"
 
-            data-job="${job.jobCardNumber}">
+        data-job="${job.jobCardNumber}">
 
-            Continue
+        Continue
 
-        </button>
+    </button>
 
-    </td>
+</td>
 
 </tr>
 

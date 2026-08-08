@@ -3,6 +3,7 @@ package com.garageos.modules.vehiclemaster.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.core.enums.EnumDropdownResponse;
+import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
 import com.garageos.modules.vehiclemaster.dto.request.CreateVehicleVariantRequest;
 import com.garageos.modules.vehiclemaster.dto.response.VehicleDropdownResponse;
@@ -85,13 +86,19 @@ public class VariantController {
         );
     }
 
-    @GetMapping("/dropdown/model/{modelId}/transmissions")
+    @GetMapping("/{modelId}/variants/{variantId}/fuel-types/{fuelType}/transmissions")
     public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getTransmissionDropdown(
-            @PathVariable Long modelId) {
+            @PathVariable Long modelId,
+            @PathVariable Long variantId,
+            @PathVariable FuelType fuelType) {
 
         return ApiResponseUtil.success(
                 "Transmission types fetched successfully.",
-                variantService.getTransmissionDropdown(modelId)
+                variantService.getTransmissionDropdown(
+                        modelId,
+                        variantId,
+                        fuelType
+                )
         );
     }
 
@@ -112,16 +119,18 @@ public class VariantController {
         }
     }
 
-    @GetMapping("/dropdown/model/{modelId}/transmissions/{transmission}/fuel-types")
+    @GetMapping("/{modelId}/variants/{variantId}/fuel-types")
     public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getFuelTypeDropdown(
             @PathVariable Long modelId,
-            @PathVariable TransmissionType transmission) {
+            @PathVariable Long variantId) {
 
         return ApiResponseUtil.success(
                 "Fuel types fetched successfully.",
                 variantService.getFuelTypeDropdown(
                         modelId,
-                        transmission)
+                        variantId
+
+                )
         );
     }
 

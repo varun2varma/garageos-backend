@@ -13,7 +13,22 @@ window.VehicleMasterService = {
     },
 
     async getMetadata() {
-            return await Api.get("/vehicle-master/variants/metadata");
+        return await Api.get("/vehicle-master/variants/metadata");
+    },
+
+    async getFuelTypeDropdown(modelId,variantId){
+        return await Api.get("/dropdown/model/{modelId}/variants/{variantId}/transmissions/fuel-types")
+    },
+
+    async getTransmissionDropdown(modelId,variantId,fuelType) {
+        return await Api.get("/dropdown/model/{modelId}/variant/{variantId}/fuel-types/{fuelType}/transmissions")
+
     }
+
+
+
+
+
+
 
 };

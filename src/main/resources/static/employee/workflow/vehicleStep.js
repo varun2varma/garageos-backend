@@ -64,42 +64,66 @@ window.VehicleStep = {
                 </select>
 
             </div>
+            
+            <!-- VARIANT MOVED HERE -->
 
+    <div class="col-md-6 mb-3">
+
+        <label class="form-label">
+            Variant
+        </label>
+
+        <select
+            id="variant"
+            class="form-select">
+
+            <option value="">
+                Select Variant
+            </option>
+
+        </select>
+
+    </div>
+          <!-- FUEL TYPE -->
+          
             <div class="col-md-6 mb-3">
 
-                <label class="form-label">
-                    Fuel Type
-                </label>
+        <label class="form-label">
+            Fuel Type
+        </label>
 
-                <select
-                    id="fuelType"
-                    class="form-select">
+        <select
+            id="fuelType"
+            class="form-select">
 
-                    <option value="">Select Fuel Type</option>
+            <option value="">
+                Select Fuel Type
+            </option>
 
-                    <option value="PETROL"
-                        ${vehicle.fuelType === "PETROL" ? "selected" : ""}>
-                        PETROL
-                    </option>
+        </select>
 
-                    <option value="DIESEL"
-                        ${vehicle.fuelType === "DIESEL" ? "selected" : ""}>
-                        DIESEL
-                    </option>
+    </div>
+    
+    
+    <!-- TRANSMISSION -->
 
-                    <option value="CNG"
-                        ${vehicle.fuelType === "CNG" ? "selected" : ""}>
-                        CNG
-                    </option>
+    <div class="col-md-6 mb-3">
 
-                    <option value="EV"
-                        ${vehicle.fuelType === "EV" ? "selected" : ""}>
-                        EV
-                    </option>
+        <label class="form-label">
+            Transmission
+        </label>
 
-                </select>
+        <select
+            id="transmission"
+            class="form-select">
 
-            </div>
+            <option value="">
+                Select Transmission
+            </option>
+
+        </select>
+
+    </div>
 
             <div class="col-md-6 mb-3">
 
@@ -115,47 +139,9 @@ window.VehicleStep = {
 
             </div>
 
-            <div class="col-md-6 mb-3">
+            
 
-                <label class="form-label">
-                    Transmission
-                </label>
-
-                <select
-                    id="transmission"
-                    class="form-select">
-
-                    <option value="">Select Transmission</option>
-
-                    <option value="MANUAL"
-                        ${vehicle.transmission === "MANUAL" ? "selected" : ""}>
-                        MANUAL
-                    </option>
-
-                    <option value="AUTOMATIC"
-                        ${vehicle.transmission === "AUTOMATIC" ? "selected" : ""}>
-                        AUTOMATIC
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div class="col-md-6 mb-3">
-
-                <label class="form-label">
-                    Variant
-                </label>
-
-                <select
-                    id="variant"
-                    class="form-select">
-
-                    <option value=""> Select Variant</option>
-
-                </select>
-
-            </div>
+            
 
             <div class="col-md-6 mb-3">
 
@@ -207,24 +193,110 @@ window.VehicleStep = {
 
         this.initializeDropdowns();
 
+        /*
+        -----------------------------------------
+        Brand → Model
+        -----------------------------------------
+        */
+
         document
             .getElementById("brand")
             ?.addEventListener("change", async (e) => {
 
-                await this.loadModels(e.target.value);
+                const brandId = e.target.value;
 
-                document.getElementById("variant").innerHTML =
-                    '<option value="">Select Variant</option>';
+                this.resetVariants();
+                this.resetFuelTypes();
+                this.resetTransmissions();
+
+                await this.loadModels(brandId);
 
             });
+
+
+        /*
+        -----------------------------------------
+        Model → Variant
+        -----------------------------------------
+        */
 
         document
             .getElementById("model")
             ?.addEventListener("change", async (e) => {
 
-                await this.loadVariants(e.target.value);
+                const modelId = e.target.value;
+
+                this.resetFuelTypes();
+                this.resetTransmissions();
+
+                await this.loadVariants(modelId);
 
             });
+
+
+        /*
+        -----------------------------------------
+        Variant → Fuel Type
+        -----------------------------------------
+        */
+
+        document
+            .getElementById("variant")
+            ?.addEventListener("change", async (e) => {
+
+                const modelId = document.getElementById("model")?.value;
+
+                const variantId = e.target.value;
+
+                this.resetFuelTypes();
+                this.resetTransmissions();
+
+                if (!variantId ||!modelId) {
+                    return;
+                }
+
+                await this.loadFuelTypes(variantId,modelId);
+
+            });
+
+
+        /*
+        -----------------------------------------
+        Fuel Type → Transmission
+        -----------------------------------------
+        */
+
+        document
+            .getElementById("fuelType")
+            ?.addEventListener("change", async (e) => {
+
+                const fuelType = e.target.value;
+
+                const modelId =
+                    document.getElementById("model")?.value;
+                const variantId =
+                    document.getElementById("variant")?.value;
+
+                this.resetTransmissions();
+
+                if (!variantId || !fuelType ||!modelId) {
+                    return;
+                }
+
+                await this.loadTransmissions(
+                    modelId,
+                    variantId,
+                    fuelType
+                );
+
+            });
+
+
+        /*
+        -----------------------------------------
+        Next
+        -----------------------------------------
+        */
 
         document
             .getElementById("nextBtn")
@@ -249,12 +321,12 @@ window.VehicleStep = {
 
     async initializeDropdowns() {
 
-//        await this.loadBrands();
+       await this.loadBrands();
 
-        await Promise.all([
-            this.loadBrands(),
-            this.loadMetadata()
-        ]);
+        // await Promise.all([
+        //     this.loadBrands(),
+        //     this.loadMetadata()
+        // ]);
 
         const vehicle = WorkflowHelper.state.vehicle;
 
@@ -305,12 +377,67 @@ window.VehicleStep = {
             [...variantSelect.options]
                 .find(option => option.text === vehicle.variant);
 
-        if (variantOption) {
+        if (!variantOption) {
+            return;
+        }
 
-            variantSelect.value = variantOption.value;
+        variantSelect.value =
+            variantOption.value;
+
+
+        /*
+        -----------------------------------------
+        Load Fuel Types for Variant
+        -----------------------------------------
+        */
+
+        await this.loadFuelTypes(
+            document.getElementById("model")?.value,
+            document.getElementById("variant")?.value
+        );
+
+
+        /*
+        -----------------------------------------
+        Select Existing Fuel Type
+        -----------------------------------------
+        */
+
+        const fuelSelect =
+            document.getElementById("fuelType");
+
+        fuelSelect.value =
+            vehicle.fuelType || "";
+
+
+        /*
+        -----------------------------------------
+        Load Transmissions for Variant + Fuel
+        -----------------------------------------
+        */
+
+        if (vehicle.fuelType) {
+
+            await this.loadTransmissions(
+                modelOption.value,
+                variantOption.value,
+                vehicle.fuelType
+            );
 
         }
 
+
+        /*
+        -----------------------------------------
+        Select Existing Transmission
+        -----------------------------------------
+        */
+
+        const transmissionSelect =
+            document.getElementById("transmission");
+
+        transmissionSelect.value =
+            vehicle.transmission || "";
     },
 
         async loadBrands() {
@@ -420,6 +547,157 @@ window.VehicleStep = {
             }
 
         },
+
+    async loadFuelTypes(variantId,modelId) {
+
+        const fuelSelect =
+            document.getElementById("fuelType");
+
+        fuelSelect.innerHTML =
+            '<option value="">Select Fuel Type</option>';
+
+        if (!variantId) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await VehicleMasterService.getFuelTypeDropdown(
+                    modelId,
+                    variantId
+                );
+
+            const fuelTypes =
+                response.data || response;
+
+            fuelTypes.forEach(fuel => {
+
+                const value =
+                    fuel.id || fuel;
+
+                const name =
+                    fuel.name ||
+                    this.formatEnum(value);
+
+                fuelSelect.innerHTML += `
+                <option value="${value}">
+                    ${name}
+                </option>
+            `;
+
+            });
+
+        }
+        catch (e) {
+
+            console.error(
+                "Unable to load fuel types.",
+                e
+            );
+
+        }
+
+    },
+
+    async loadTransmissions(
+        modelId,
+        variantId,
+        fuelType
+    ) {
+
+        const transmissionSelect =
+            document.getElementById("transmission");
+
+        transmissionSelect.innerHTML =
+            '<option value="">Select Transmission</option>';
+
+        if (!variantId || !fuelType || !modelId) {
+            return;
+        }
+
+        try {
+
+            const response =
+                await VehicleMasterService.getTransmissionDropdown(
+                    modelId,
+                    variantId,
+                    fuelType
+                );
+
+            const transmissions =
+                response.data || response;
+
+            transmissions.forEach(type => {
+
+                const value =
+                    type.id || type;
+
+                const name =
+                    type.name ||
+                    this.formatEnum(value);
+
+                transmissionSelect.innerHTML += `
+                <option value="${value}">
+                    ${name}
+                </option>
+            `;
+
+            });
+
+        }
+        catch (e) {
+
+            console.error(
+                "Unable to load transmissions.",
+                e
+            );
+
+        }
+
+    },
+
+    resetVariants() {
+
+        const select =
+            document.getElementById("variant");
+
+        if (!select) {
+            return;
+        }
+
+        select.innerHTML =
+            '<option value="">Select Variant</option>';
+
+    },
+
+    resetFuelTypes() {
+
+        const select =
+            document.getElementById("fuelType");
+
+        if (!select) {
+            return;
+        }
+
+        select.innerHTML =
+            '<option value="">Select Fuel Type</option>';
+
+    },
+
+    resetTransmissions() {
+
+        const select =
+            document.getElementById("transmission");
+
+        if (!select) {
+            return;
+        }
+
+        select.innerHTML =
+            '<option value="">Select Transmission</option>';
+
+    },
 
         collectData() {
 
@@ -547,43 +825,9 @@ window.VehicleStep = {
 
         },
 
-        async loadMetadata() {
 
-            const response = await VehicleMasterService.getMetadata();
 
-            if (!response.success) {
-                return;
-            }
 
-            const metadata = response.data;
-
-            this.populateFuelTypes(metadata.fuelTypes);
-            this.populateTransmissionTypes(metadata.transmissionTypes);
-        //    this.populateBodyTypes(metadata.bodyTypes);
-
-        },
-
-        populateFuelTypes(fuelTypes) {
-
-            const vehicle = WorkflowHelper.state.vehicle || {};
-
-            const select = document.getElementById("fuelType");
-
-            select.innerHTML =
-                '<option value="">Select Fuel Type</option>';
-
-            fuelTypes.forEach(fuel => {
-
-                select.innerHTML += `
-                    <option value="${fuel}"
-                        ${vehicle.fuelType === fuel ? "selected" : ""}>
-                        ${this.formatEnum(fuel)}
-                    </option>
-                `;
-
-            });
-
-        },
 
         populateBodyTypes(bodyTypes) {
 
@@ -601,28 +845,7 @@ window.VehicleStep = {
             });
         },
 
-        populateTransmissionTypes(transmissionTypes) {
 
-            const vehicle = WorkflowHelper.state.vehicle || {};
-
-            const select =
-                document.getElementById("transmission");
-
-            select.innerHTML =
-                '<option value="">Select Transmission</option>';
-
-            transmissionTypes.forEach(type => {
-
-                select.innerHTML += `
-                    <option value="${type}"
-                        ${vehicle.transmission === type ? "selected" : ""}>
-                        ${this.formatEnum(type)}
-                    </option>
-                `;
-
-            });
-
-        },
 
         formatEnum(value) {
             return value
