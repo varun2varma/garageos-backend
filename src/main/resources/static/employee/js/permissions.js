@@ -54,6 +54,12 @@ window.Permissions = {
 
     },
 
+    isDriver() {
+
+        return this.has(Roles.DRIVER);
+
+    },
+
     isCashier() {
 
         return this.has(Roles.CASHIER);

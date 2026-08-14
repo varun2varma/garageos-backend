@@ -26,6 +26,8 @@ public class MasterServiceImpl
 
             RoleCode.TECHNICIAN,
 
+            RoleCode.DRIVER,
+
             RoleCode.INVENTORY_MANAGER,
 
             RoleCode.ACCOUNTANT,

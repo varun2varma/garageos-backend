@@ -113,6 +113,8 @@ async function login(event) {
 
             roles.includes("TECHNICIAN") ||
 
+            roles.includes("DRIVER") ||
+
             roles.includes("INVENTORY_MANAGER") ||
 
             roles.includes("ACCOUNTANT") ||

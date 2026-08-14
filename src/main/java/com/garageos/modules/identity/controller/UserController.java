@@ -102,4 +102,14 @@ public class UserController {
 
     }
 
+    @GetMapping("/repair-employees")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> repairEmployees() {
+
+        return ApiResponseUtil.success(
+                "Repair employees fetched successfully.",
+                service.getRepairEmployees()
+        );
+
+    }
+
 }

@@ -8,6 +8,8 @@ window.Roles = {
 
     TECHNICIAN:"TECHNICIAN",
 
+    DRIVER: "DRIVER",
+
     ACCOUNTANT:"ACCOUNTANT",
 
     CASHIER:"CASHIER",

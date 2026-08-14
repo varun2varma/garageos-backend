@@ -1,6 +1,7 @@
 package com.garageos.modules.jobassignment.service.impl;
 
 import com.garageos.core.enums.JobAssignmentStatus;
+import com.garageos.core.enums.JobAssignmentType;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
@@ -50,33 +51,56 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             AssignJobRequest request) {
 
         JobCard jobCard =
-                jobCardRepository.findById(request.getJobCardId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Job Card not found : "
-                                                + request.getJobCardId()));
+                jobCardRepository.findById(
+                        request.getJobCardId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : "
+                                        + request.getJobCardId()
+                        )
+                );
 
-        EstimateItem estimateItem =
-                estimateItemRepository.findById(request.getEstimateItemId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Estimate Item not found : "
-                                                + request.getEstimateItemId()));
+        EstimateItem estimateItem = null;
+
+        if (request.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN) {
+
+            if (request.getEstimateItemId() == null) {
+
+                throw new IllegalArgumentException(
+                        "Estimate item is required for technician assignment."
+                );
+            }
+
+            estimateItem =
+                    estimateItemRepository.findById(
+                            request.getEstimateItemId()
+                    ).orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Estimate Item not found : "
+                                            + request.getEstimateItemId()
+                            )
+                    );
+        }
 
         User user =
-                userRepository.findById(request.getEmployeeId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "User not found : "
-                                                + request.getEmployeeId()));
+                userRepository.findById(
+                        request.getEmployeeId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found : "
+                                        + request.getEmployeeId()
+                        )
+                );
 
         Garage garage =
                 garageRepository.findById(
-                                user.getGarageId())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException(
-                                        "Garage not found"
-                                ));
+                        user.getGarageId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Garage not found"
+                        )
+                );
 
         JobAssignment assignment =
                 new JobAssignment();
@@ -89,32 +113,63 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         assignment.setUser(user);
 
-        assignment.setAssignedAt(LocalDateTime.now());
+        assignment.setAssignmentType(
+                request.getAssignmentType()
+        );
+
+        assignment.setAssignedAt(
+                LocalDateTime.now()
+        );
 
         assignment.setEstimatedHours(
-                request.getEstimatedHours());
+                request.getEstimatedHours()
+        );
 
         assignment.setRemarks(
-                request.getRemarks());
+                request.getRemarks()
+        );
 
         assignment.setStatus(
-                JobAssignmentStatus.ASSIGNED);
+                JobAssignmentStatus.ASSIGNED
+        );
 
         assignment =
-                jobAssignmentRepository.save(assignment);
+                jobAssignmentRepository.save(
+                        assignment
+                );
 
         return jobAssignmentMapper.toResponse(
-                assignment);
-
+                assignment
+        );
     }
 
     @Override
     @Transactional
     public JobAssignmentResponse acceptJob(
-            Long assignmentId) {
+            Long assignmentId,
+            Long userId) {
 
         JobAssignment assignment =
-                getAssignmentOrThrow(assignmentId);
+                getAssignmentForUserOrThrow(
+                        assignmentId,
+                        userId
+                );
+
+//        if (assignment.getAssignmentType()
+//                != JobAssignmentType.DRIVER) {
+//
+//            throw new IllegalStateException(
+//                    "This assignment is not a driver assignment."
+//            );
+//        }
+
+        if (assignment.getStatus()
+                != JobAssignmentStatus.ASSIGNED) {
+
+            throw new IllegalStateException(
+                    "Job cannot be taken in current status."
+            );
+        }
 
         assignment.setStatus(
                 JobAssignmentStatus.ACCEPTED);
@@ -135,57 +190,106 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
     @Transactional
     public JobAssignmentResponse startJob(
             Long assignmentId,
-            StartJobRequest request) {
+            StartJobRequest request,
+            Long userId) {
 
         JobAssignment assignment =
-                getAssignmentOrThrow(assignmentId);
+                getAssignmentForUserOrThrow(
+                        assignmentId,
+                        userId
+                );
+
+//        if (assignment.getAssignmentType()
+//                != JobAssignmentType.DRIVER) {
+//
+//            throw new IllegalStateException(
+//                    "This assignment is not a driver assignment."
+//            );
+//        }
+
+        if (assignment.getStatus()
+                != JobAssignmentStatus.ACCEPTED) {
+
+            throw new IllegalStateException(
+                    "Job must be taken before starting."
+            );
+        }
 
         assignment.setStatus(
-                JobAssignmentStatus.IN_PROGRESS);
+                JobAssignmentStatus.IN_PROGRESS
+        );
 
         assignment.setStartedAt(
-                LocalDateTime.now());
+                LocalDateTime.now()
+        );
 
         assignment.setRemarks(
-                request.getRemarks());
+                request.getRemarks()
+        );
 
         assignment =
                 jobAssignmentRepository.save(
-                        assignment);
+                        assignment
+                );
 
         return jobAssignmentMapper.toResponse(
-                assignment);
-
+                assignment
+        );
     }
 
     @Override
     @Transactional
     public JobAssignmentResponse completeJob(
             Long assignmentId,
-            CompleteJobRequest request) {
+            CompleteJobRequest request,
+            Long userId) {
 
         JobAssignment assignment =
-                getAssignmentOrThrow(assignmentId);
+                getAssignmentForUserOrThrow(
+                        assignmentId,
+                        userId
+                );
+
+//        if (assignment.getAssignmentType()
+//                != JobAssignmentType.DRIVER) {
+//
+//            throw new IllegalStateException(
+//                    "This assignment is not a driver assignment."
+//            );
+//        }
+
+        if (assignment.getStatus()
+                != JobAssignmentStatus.IN_PROGRESS) {
+
+            throw new IllegalStateException(
+                    "Job must be started before completing."
+            );
+        }
 
         assignment.setStatus(
-                JobAssignmentStatus.COMPLETED);
+                JobAssignmentStatus.COMPLETED
+        );
 
         assignment.setCompletedAt(
-                LocalDateTime.now());
+                LocalDateTime.now()
+        );
 
         assignment.setActualHours(
-                request.getActualHours());
+                request.getActualHours()
+        );
 
         assignment.setRemarks(
-                request.getRemarks());
+                request.getRemarks()
+        );
 
         assignment =
                 jobAssignmentRepository.save(
-                        assignment);
+                        assignment
+                );
 
         return jobAssignmentMapper.toResponse(
-                assignment);
-
+                assignment
+        );
     }
 
     private JobAssignment getAssignmentOrThrow(
@@ -265,6 +369,47 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         return jobAssignmentMapper.toMyAssignment(assignments);
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MyAssignmentResponse> getMyDriverAssignments(
+            Long userId) {
+
+        List<JobAssignment> assignments =
+                jobAssignmentRepository
+                        .findByUserIdAndAssignmentType(
+                                userId,
+                                JobAssignmentType.DRIVER
+                        );
+
+        return jobAssignmentMapper.toMyAssignment(
+                assignments
+        );
+    }
+
+    private JobAssignment getAssignmentForUserOrThrow(
+            Long assignmentId,
+            Long userId) {
+
+        JobAssignment assignment =
+                jobAssignmentRepository.findById(
+                        assignmentId
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Assignment not found : "
+                                        + assignmentId
+                        )
+                );
+
+        if (!assignment.getUser().getId().equals(userId)) {
+
+            throw new IllegalStateException(
+                    "You are not authorized to access this assignment."
+            );
+        }
+
+        return assignment;
     }
 
 }

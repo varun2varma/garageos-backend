@@ -20,6 +20,7 @@ public enum RoleCode {
 
     CASHIER,
 
-    CUSTOMER
+    CUSTOMER,
+    DRIVER
 
 }

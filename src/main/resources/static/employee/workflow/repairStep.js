@@ -22,7 +22,7 @@ window.RepairStep = {
 
                 <small class="text-muted">
 
-                    Assign technicians and complete all repair activities before Quality Check.
+                    Assign technicians and monitor repair progress.
 
                 </small>
 
@@ -42,6 +42,7 @@ window.RepairStep = {
 
         </div>
 
+
         <div
             class="progress mt-3"
             style="height:10px;">
@@ -49,13 +50,14 @@ window.RepairStep = {
             <div
                 id="repairProgressBar"
                 class="progress-bar bg-success"
-                style="width:0%">
+                style="width:0%;">
 
             </div>
 
         </div>
 
     </div>
+
 
     <div class="card-body">
 
@@ -65,7 +67,9 @@ window.RepairStep = {
 
         </div>
 
+
         <hr>
+
 
         <div class="d-flex justify-content-between">
 
@@ -78,6 +82,7 @@ window.RepairStep = {
                 Previous
 
             </button>
+
 
             <button
                 id="nextRepairBtn"
@@ -96,16 +101,19 @@ window.RepairStep = {
 
 </div>
 
+
 ${this.renderAssignModal()}
 
 `;
 
     },
 
+
     renderTasks() {
 
         const tasks =
             WorkflowHelper.state.repairTasks || [];
+
 
         if (tasks.length === 0) {
 
@@ -119,11 +127,13 @@ ${this.renderAssignModal()}
 
     </i>
 
+
     <h5 class="mt-3">
 
         No Repair Tasks
 
     </h5>
+
 
     <p class="text-muted mb-0">
 
@@ -136,6 +146,7 @@ ${this.renderAssignModal()}
 `;
 
         }
+
 
         return tasks.map(task => `
 
@@ -151,15 +162,17 @@ ${this.renderAssignModal()}
 
                     <i class="bi bi-wrench-adjustable-circle me-2 text-primary"></i>
 
-                    ${task.description}
+                    ${task.description || "-"}
 
                 </h5>
+
 
                 <div class="mb-2">
 
                     ${this.renderStatus(task.status)}
 
                 </div>
+
 
                 <div class="small text-muted">
 
@@ -169,7 +182,10 @@ ${this.renderAssignModal()}
 
                 </div>
 
-                ${task.assignedAt ? `
+
+                ${
+                    task.assignedAt
+                        ? `
 
 <div class="small text-muted">
 
@@ -179,9 +195,31 @@ ${this.renderAssignModal()}
 
 </div>
 
-` : ""}
+`
+                        : ""
+                }
 
-                ${task.startedAt ? `
+
+                ${
+                    task.acceptedAt
+                        ? `
+
+<div class="small text-muted">
+
+    <strong>Accepted :</strong>
+
+    ${WorkflowHelper.formatDateTime(task.acceptedAt)}
+
+</div>
+
+`
+                        : ""
+                }
+
+
+                ${
+                    task.startedAt
+                        ? `
 
 <div class="small text-muted">
 
@@ -191,9 +229,14 @@ ${this.renderAssignModal()}
 
 </div>
 
-` : ""}
+`
+                        : ""
+                }
 
-                ${task.completedAt ? `
+
+                ${
+                    task.completedAt
+                        ? `
 
 <div class="small text-muted">
 
@@ -203,9 +246,12 @@ ${this.renderAssignModal()}
 
 </div>
 
-` : ""}
+`
+                        : ""
+                }
 
             </div>
+
 
             <div class="col-lg-5 text-end">
 
@@ -223,46 +269,90 @@ ${this.renderAssignModal()}
 
     },
 
+
     renderStatus(status) {
 
         let badge = "secondary";
 
+
         switch (status) {
 
-            case "PENDING":
-                badge = "secondary";
+            case "ASSIGNED":
+
+                badge = "info";
+
                 break;
 
-            case "ASSIGNED":
-                badge = "info";
-                break;
 
             case "ACCEPTED":
+
                 badge = "primary";
+
                 break;
+
 
             case "IN_PROGRESS":
+
                 badge = "warning";
+
                 break;
+
 
             case "COMPLETED":
+
                 badge = "success";
+
                 break;
+
 
             case "ON_HOLD":
+
                 badge = "danger";
+
                 break;
 
+
+            case "QC_PENDING":
+
+                badge = "dark";
+
+                break;
+
+
+            case "QC_FAILED":
+
+                badge = "danger";
+
+                break;
+
+
+            case "REWORK":
+
+                badge = "warning";
+
+                break;
+
+
+            case "CANCELLED":
+
+                badge = "secondary";
+
+                break;
+
+
             default:
+
                 badge = "secondary";
 
         }
+
 
         return `
 
 <span class="badge bg-${badge} fs-6">
 
-    ${status.replaceAll("_", " ")}
+    ${(status || "UNASSIGNED")
+        .replaceAll("_", " ")}
 
 </span>
 
@@ -270,11 +360,12 @@ ${this.renderAssignModal()}
 
     },
 
+
     renderActions(task) {
 
         /*
         -----------------------------------------
-        No Assignment Yet
+        No Assignment
         -----------------------------------------
         */
 
@@ -282,23 +373,24 @@ ${this.renderAssignModal()}
 
             return `
 
-    <button
-        class="btn btn-primary btn-sm assign-btn"
-        data-id="${task.id}">
+<button
+    class="btn btn-primary btn-sm assign-btn"
+    data-id="${task.id}">
 
-        <i class="bi bi-person-plus"></i>
+    <i class="bi bi-person-plus"></i>
 
-        Assign Technician
+    Assign Technician
 
-    </button>
+</button>
 
-    `;
+`;
 
         }
 
+
         /*
         -----------------------------------------
-        Already Assigned
+        Existing Assignment
         -----------------------------------------
         */
 
@@ -308,51 +400,95 @@ ${this.renderAssignModal()}
 
                 return `
 
-    <button
-        class="btn btn-outline-primary btn-sm assign-btn"
-        data-id="${task.id}">
+<button
+    class="btn btn-outline-primary btn-sm assign-btn"
+    data-id="${task.id}">
 
-        Reassign
+    <i class="bi bi-arrow-repeat"></i>
 
-    </button>
+    Reassign
 
-    `;
+</button>
+
+`;
 
             case "ACCEPTED":
 
                 return `
 
+<div>
+
     <span class="badge bg-primary">
 
-    Accepted By Technician
+        Accepted By Technician
 
     </span>
 
-    `;
+</div>
+
+<button
+    class="btn btn-outline-primary btn-sm mt-2 assign-btn"
+    data-id="${task.id}">
+
+    Reassign
+
+</button>
+
+`;
 
             case "IN_PROGRESS":
 
                 return `
 
-    <span class="badge bg-warning">
+<div>
 
-    Repair In Progress
+    <span class="badge bg-warning text-dark">
+
+        Repair In Progress
 
     </span>
 
-    `;
+</div>
+
+`;
 
             case "COMPLETED":
 
                 return `
 
-    <span class="badge bg-success">
+<span class="badge bg-success">
+
+    <i class="bi bi-check-circle me-1"></i>
 
     Completed
 
-    </span>
+</span>
 
-    `;
+`;
+
+            case "ON_HOLD":
+
+                return `
+
+<span class="badge bg-danger">
+
+    On Hold
+
+</span>
+
+`;
+
+            case "REWORK":
+
+                return `
+
+<span class="badge bg-warning text-dark">
+
+    Rework Required
+
+</span>
+
+`;
 
             default:
 
@@ -361,6 +497,7 @@ ${this.renderAssignModal()}
         }
 
     },
+
 
     renderAssignModal() {
 
@@ -385,6 +522,7 @@ ${this.renderAssignModal()}
 
                 </h5>
 
+
                 <button
                     type="button"
                     class="btn-close"
@@ -394,11 +532,13 @@ ${this.renderAssignModal()}
 
             </div>
 
+
             <div class="modal-body">
 
                 <input
                     id="repairTaskId"
                     type="hidden">
+
 
                 <div class="mb-3">
 
@@ -407,6 +547,7 @@ ${this.renderAssignModal()}
                         Technician
 
                     </label>
+
 
                     <select
                         id="technicianId"
@@ -422,6 +563,7 @@ ${this.renderAssignModal()}
 
                 </div>
 
+
                 <div class="mb-3">
 
                     <label class="form-label">
@@ -430,14 +572,17 @@ ${this.renderAssignModal()}
 
                     </label>
 
+
                     <input
                         id="estimatedHours"
                         type="number"
                         step="0.5"
+                        min="0"
                         class="form-control"
                         placeholder="Estimated Hours">
 
                 </div>
+
 
                 <div class="mb-3">
 
@@ -446,6 +591,7 @@ ${this.renderAssignModal()}
                         Remarks
 
                     </label>
+
 
                     <textarea
                         id="assignmentRemarks"
@@ -459,9 +605,11 @@ ${this.renderAssignModal()}
 
             </div>
 
+
             <div class="modal-footer">
 
                 <button
+                    type="button"
                     class="btn btn-secondary"
                     data-bs-dismiss="modal">
 
@@ -469,7 +617,9 @@ ${this.renderAssignModal()}
 
                 </button>
 
+
                 <button
+                    type="button"
                     id="saveTechnicianBtn"
                     class="btn btn-primary">
 
@@ -494,170 +644,577 @@ ${this.renderAssignModal()}
 
     async refresh() {
 
-        /*
-        -----------------------------------------
-        Load Existing Assignments
-        -----------------------------------------
-        */
-        const assignments =
-            await JobAssignmentService.getByJobCard(
-                WorkflowHelper.state.jobCardId
-            );
+        try {
 
-        WorkflowHelper.state.assignments = assignments;
+            /*
+            -----------------------------------------
+            Load assignments
+            -----------------------------------------
+            */
 
-
-        /*
-        -----------------------------------------
-        Merge Assignment Data Into Repair Tasks
-        -----------------------------------------
-        */
-
-        const tasks =
-            WorkflowHelper.state.repairTasks || [];
-
-        tasks.forEach(task => {
-
-            const assignment =
-                assignments.find(
-                    x => x.estimateItemId === task.estimateItemId
+            const assignments =
+                await JobAssignmentService.getByJobCard(
+                    WorkflowHelper.state.jobCardId
                 );
 
-            if (!assignment) {
-                return;
+
+            WorkflowHelper.state.assignments =
+                assignments || [];
+
+
+            /*
+            -----------------------------------------
+            Repair tasks
+            -----------------------------------------
+            */
+
+            const tasks =
+                WorkflowHelper.state.repairTasks || [];
+
+
+            /*
+            -----------------------------------------
+            Merge assignment information
+            -----------------------------------------
+            */
+
+            tasks.forEach(task => {
+
+                const assignment =
+                    assignments.find(
+                        x =>
+                            x.estimateItemId ===
+                            task.estimateItemId
+                    );
+
+
+                /*
+                No assignment
+                */
+
+                if (!assignment) {
+
+                    task.assignmentId = null;
+
+                    task.status = null;
+
+                    task.technicianId = null;
+
+                    task.technicianName = null;
+
+                    task.assignedAt = null;
+
+                    task.acceptedAt = null;
+
+                    task.startedAt = null;
+
+                    task.completedAt = null;
+
+                    return;
+
+                }
+
+
+                task.assignmentId =
+                    assignment.id;
+
+
+                task.status =
+                    assignment.status;
+
+
+                task.technicianId =
+                    assignment.employeeId;
+
+
+                task.technicianName =
+                    assignment.employeeName;
+
+
+                task.assignedAt =
+                    assignment.assignedAt;
+
+
+                task.acceptedAt =
+                    assignment.acceptedAt;
+
+
+                task.startedAt =
+                    assignment.startedAt;
+
+
+                task.completedAt =
+                    assignment.completedAt;
+
+
+                task.estimatedHours =
+                    assignment.estimatedHours;
+
+
+                task.actualHours =
+                    assignment.actualHours;
+
+
+                task.remarks =
+                    assignment.remarks;
+
+            });
+
+
+            /*
+            -----------------------------------------
+            Render
+            -----------------------------------------
+            */
+
+            const container =
+                document.getElementById(
+                    "repairTaskContainer"
+                );
+
+
+            if (container) {
+
+                container.innerHTML =
+                    this.renderTasks();
+
             }
 
-            task.assignmentId =
-                assignment.id;
 
-            task.status =
-                assignment.status;
+            /*
+            -----------------------------------------
+            Progress
+            -----------------------------------------
+            */
 
-            task.technicianId =
-                assignment.employeeId;
+            const total =
+                tasks.length;
 
-            task.technicianName =
-                assignment.employeeName;
 
-            task.assignedAt =
-                assignment.assignedAt;
+            const completed =
+                tasks.filter(
+                    task =>
+                        task.status === "COMPLETED"
+                ).length;
 
-            task.startedAt =
-                assignment.startedAt;
 
-            task.completedAt =
-                assignment.completedAt;
+            const percentage =
+                total === 0
+                    ? 0
+                    : Math.round(
+                        completed / total * 100
+                    );
 
-            task.estimatedHours =
-                assignment.estimatedHours;
 
-            task.remarks =
-                assignment.remarks;
-
-        });
-
-        /*
-        -----------------------------------------
-        Render Repair Tasks
-        -----------------------------------------
-        */
-
-        const container =
-            document.getElementById(
-                "repairTaskContainer"
-            );
-
-        if (container) {
-
-            container.innerHTML =
-                this.renderTasks();
-
-        }
-
-        /*
-        -----------------------------------------
-        Calculate Progress
-        -----------------------------------------
-        */
-
-        const total =
-            tasks.length;
-
-        const completed =
-            tasks.filter(
-                task =>
-                    task.status === "COMPLETED"
-            ).length;
-
-        const percentage =
-            total === 0
-                ? 0
-                : Math.round(
-                    (completed / total) * 100
+            const progressBar =
+                document.getElementById(
+                    "repairProgressBar"
                 );
 
-        /*
-        -----------------------------------------
-        Progress Bar
-        -----------------------------------------
-        */
 
-        const progressBar =
-            document.getElementById(
-                "repairProgressBar"
+            if (progressBar) {
+
+                progressBar.style.width =
+                    `${percentage}%`;
+
+                progressBar.innerHTML =
+                    `${percentage}%`;
+
+            }
+
+
+            const progressText =
+                document.getElementById(
+                    "repairProgressText"
+                );
+
+
+            if (progressText) {
+
+                progressText.innerHTML =
+                    `${completed} / ${total} Completed`;
+
+            }
+
+
+            /*
+            -----------------------------------------
+            Enable QC
+            -----------------------------------------
+            */
+
+            const nextButton =
+                document.getElementById(
+                    "nextRepairBtn"
+                );
+
+
+            if (nextButton) {
+
+                nextButton.disabled =
+                    !(
+                        total > 0 &&
+                        completed === total
+                    );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Unable to refresh repair tasks",
+                error
             );
 
-        if (progressBar) {
+            const container =
+                document.getElementById(
+                    "repairTaskContainer"
+                );
 
-            progressBar.style.width =
-                percentage + "%";
 
-            progressBar.innerHTML =
-                percentage + "%";
+            if (container) {
 
-        }
+                container.innerHTML = `
 
-        /*
-        -----------------------------------------
-        Progress Text
-        -----------------------------------------
-        */
+<div class="alert alert-danger">
 
-        const progressText =
-            document.getElementById(
-                "repairProgressText"
-            );
+    Unable to load repair assignments.
 
-        if (progressText) {
+</div>
 
-            progressText.innerHTML =
-                `${completed} / ${total} Completed`;
+`;
 
-        }
-
-        /*
-        -----------------------------------------
-        Enable Next Step
-        -----------------------------------------
-        */
-
-        const nextButton =
-            document.getElementById(
-                "nextRepairBtn"
-            );
-
-        if (nextButton) {
-
-            nextButton.disabled =
-                !(total > 0 && completed === total);
+            }
 
         }
 
     },
 
+
+    async openAssignModal(repairTaskId) {
+
+        const task =
+            (WorkflowHelper.state.repairTasks || [])
+                .find(
+                    x =>
+                        x.id === repairTaskId
+                );
+
+
+        if (!task) {
+
+            alert("Repair task not found.");
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "repairTaskId"
+        ).value = repairTaskId;
+
+
+        const technicianSelect =
+            document.getElementById(
+                "technicianId"
+            );
+
+
+        technicianSelect.innerHTML = `
+
+<option value="">
+
+    Loading technicians...
+
+</option>
+
+`;
+
+
+        try {
+
+            const response =
+                await UserService.getTechnicians();
+
+
+            const technicians =
+                response?.data || response || [];
+
+
+            technicianSelect.innerHTML = `
+
+<option value="">
+
+    Select Technician
+
+</option>
+
+`;
+
+
+            technicians.forEach(user => {
+
+                const selected =
+                    task.technicianId === user.id
+                        ? "selected"
+                        : "";
+
+
+                technicianSelect.innerHTML += `
+
+<option
+    value="${user.id}"
+    ${selected}>
+
+    ${user.firstName || ""}
+    ${user.lastName || ""}
+
+</option>
+
+`;
+
+            });
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            technicianSelect.innerHTML = `
+
+<option value="">
+
+    Unable to load technicians
+
+</option>
+
+`;
+
+            alert(
+                error.message ||
+                "Unable to load technicians."
+            );
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "estimatedHours"
+        ).value =
+            task.estimatedHours || "";
+
+
+        document.getElementById(
+            "assignmentRemarks"
+        ).value =
+            task.remarks || "";
+
+
+        const modalElement =
+            document.getElementById(
+                "assignTechnicianModal"
+            );
+
+
+        new bootstrap.Modal(
+            modalElement
+        ).show();
+
+    },
+
+
+    async saveAssignment() {
+
+        const repairTaskId =
+            Number(
+                document.getElementById(
+                    "repairTaskId"
+                ).value
+            );
+
+
+        const technicianId =
+            Number(
+                document.getElementById(
+                    "technicianId"
+                ).value
+            );
+
+
+        const estimatedHoursValue =
+            document.getElementById(
+                "estimatedHours"
+            ).value;
+
+
+        const estimatedHours =
+            estimatedHoursValue
+                ? Number(estimatedHoursValue)
+                : null;
+
+
+        const remarks =
+            document.getElementById(
+                "assignmentRemarks"
+            ).value.trim();
+
+
+        if (!technicianId) {
+
+            alert(
+                "Please select a technician."
+            );
+
+            return;
+
+        }
+
+
+        const task =
+            (WorkflowHelper.state.repairTasks || [])
+                .find(
+                    x =>
+                        x.id === repairTaskId
+                );
+
+
+        if (!task) {
+
+            alert(
+                "Repair task not found."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            /*
+            -----------------------------------------
+            Existing assignment -> REASSIGN
+            -----------------------------------------
+            */
+
+            if (task.assignmentId) {
+
+                await JobAssignmentService.reassign(
+
+                    task.assignmentId,
+
+                    {
+
+                        employeeId:
+                            technicianId,
+
+                        assignmentType:
+                            "TECHNICIAN",
+
+                        estimatedHours,
+
+                        remarks
+
+                    }
+
+                );
+
+            }
+
+
+            /*
+            -----------------------------------------
+            No assignment -> ASSIGN
+            -----------------------------------------
+            */
+
+            else {
+
+                await JobAssignmentService.assign({
+
+                    jobCardId:
+                        WorkflowHelper.state.jobCardId,
+
+                    estimateItemId:
+                        task.estimateItemId,
+
+                    employeeId:
+                        technicianId,
+
+                    assignmentType:
+                        "TECHNICIAN",
+
+                    estimatedHours,
+
+                    remarks
+
+                });
+
+            }
+
+
+            /*
+            -----------------------------------------
+            Close modal
+            -----------------------------------------
+            */
+
+            const modalElement =
+                document.getElementById(
+                    "assignTechnicianModal"
+                );
+
+
+            bootstrap.Modal
+                .getInstance(modalElement)
+                ?.hide();
+
+
+            /*
+            -----------------------------------------
+            Reload assignments
+            -----------------------------------------
+            */
+
+            await this.refresh();
+
+
+            alert(
+                "Technician assignment saved successfully."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Assignment error",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to save technician assignment."
+            );
+
+        }
+
+    },
+
+
     bindEvents() {
 
+        /*
+        -----------------------------------------
+        Initial load
+        -----------------------------------------
+        */
+
         this.refresh();
+
 
         /*
         -----------------------------------------
@@ -669,8 +1226,10 @@ ${this.renderAssignModal()}
             .getElementById("previousBtn")
             ?.addEventListener(
                 "click",
-                () => Workflow.previousStep()
+                () =>
+                    Workflow.previousStep()
             );
+
 
         /*
         -----------------------------------------
@@ -682,381 +1241,236 @@ ${this.renderAssignModal()}
             .getElementById("nextRepairBtn")
             ?.addEventListener(
                 "click",
-                () => Workflow.nextStep()
+                () =>
+                    Workflow.nextStep()
             );
+
 
         /*
         -----------------------------------------
-        Repair Actions
+        Assign / Reassign
         -----------------------------------------
         */
 
-        document.addEventListener(
+        document
+            .getElementById("repairTaskContainer")
+            ?.addEventListener(
+                "click",
+                async (event) => {
 
-            "click",
-
-            async (e) => {
-
-                /*
-                =============================
-                Assign Technician
-                =============================
-                */
-
-                const assignBtn =
-                    e.target.closest(".assign-btn");
-
-                if (assignBtn) {
-
-                    const repairTaskId =
-                        Number(assignBtn.dataset.id);
-
-                    document.getElementById(
-                        "repairTaskId"
-                    ).value = repairTaskId;
-
-                    const technicianSelect =
-                        document.getElementById(
-                            "technicianId"
+                    const button =
+                        event.target.closest(
+                            ".assign-btn"
                         );
 
-                    technicianSelect.innerHTML = `
 
-<option value="">
-
-    Loading...
-
-</option>
-
-`;
-
-                    try {
-
-                        console.log("Loading technicians...");
-
-                        const response =
-                            await UserService.getTechnicians();
-
-                        console.log("Technician API Response:", response);
-
-                        const technicians =
-                            response.data || response;
-
-                        console.log("Technicians:", technicians);
-
-                        technicianSelect.innerHTML = `
-
-<option value="">
-
-    Select Technician
-
-</option>
-
-`;
-
-                        technicians.forEach(user => {
-
-                            technicianSelect.innerHTML += `
-
-<option value="${user.id}">
-
-    ${user.firstName} ${user.lastName}
-
-</option>
-
-`;
-
-                        });
-
-                    }
-                    catch (error) {
-
-                        console.error(error);
-
-                        alert(error.message);
+                    if (!button) {
 
                         return;
 
                     }
 
-                    document.getElementById(
-                        "estimatedHours"
-                    ).value = "";
 
-                    document.getElementById(
-                        "assignmentRemarks"
-                    ).value = "";
-
-                    new bootstrap.Modal(
-
-                        document.getElementById(
-                            "assignTechnicianModal"
-                        )
-
-                    ).show();
-
-                    return;
-
-                }
-
-                /*
-                =============================
-                Start Repair
-                =============================
-                */
-
-                const startBtn =
-                    e.target.closest(".start-btn");
-
-                if (startBtn) {
-
-                    try {
-
-                        const repairTaskId =
-                            Number(startBtn.dataset.id);
-
-                        await WorkflowService.startRepair(
-                            repairTaskId
+                    const repairTaskId =
+                        Number(
+                            button.dataset.id
                         );
 
-                        const task =
-                            WorkflowHelper.state.repairTasks.find(
-                                x => x.id === repairTaskId
-                            );
 
-                        if (task) {
-
-                            task.status =
-                                "IN_PROGRESS";
-
-                            task.startedAt =
-                                new Date().toISOString();
-
-                        }
-
-                        await this.refresh();
-
-                        alert(
-                            "Repair started successfully."
-                        );
-
-                    }
-                    catch (error) {
-
-                        alert(
-
-                            error.message ||
-
-                            "Unable to start repair."
-
-                        );
-
-                    }
-
-                    return;
-
-                }
-
-                /*
-                =============================
-                Complete Repair
-                =============================
-                */
-
-                const completeBtn =
-                    e.target.closest(".complete-btn");
-
-                if (completeBtn) {
-
-                    try {
-
-                        const repairTaskId =
-                            Number(
-                                completeBtn.dataset.id
-                            );
-
-                        await WorkflowService.completeRepair(
-                            repairTaskId
-                        );
-
-                        const task =
-                            WorkflowHelper.state.repairTasks.find(
-                                x => x.id === repairTaskId
-                            );
-
-                        if (task) {
-
-                            task.status =
-                                "COMPLETED";
-
-                            task.completedAt =
-                                new Date().toISOString();
-
-                        }
-
-                        await this.refresh();
-
-                        alert(
-                            "Repair completed successfully."
-                        );
-
-                    }
-                    catch (error) {
-
-                        alert(
-
-                            error.message ||
-
-                            "Unable to complete repair."
-
-                        );
-
-                    }
-
-                    return;
-
-                }
-
-            }
-
-        );
-
-                /*
-                -----------------------------------------
-                Save Technician Assignment
-                -----------------------------------------
-                */
-
-                document
-                    .getElementById("saveTechnicianBtn")
-                    ?.addEventListener(
-
-                        "click",
-
-                        async () => {
-
-                            const repairTaskId =
-                                Number(
-                                    document.getElementById(
-                                        "repairTaskId"
-                                    ).value
-                                );
-
-                            const technicianId =
-                                Number(
-                                    document.getElementById(
-                                        "technicianId"
-                                    ).value
-                                );
-
-                            const estimatedHours =
-                                Number(
-                                    document.getElementById(
-                                        "estimatedHours"
-                                    ).value
-                                );
-
-                            const remarks =
-                                document.getElementById(
-                                    "assignmentRemarks"
-                                ).value;
-
-                            if (!technicianId) {
-
-                                alert(
-                                    "Please select a technician."
-                                );
-
-                                return;
-
-                            }
-
-                            try {
-
-                                /*
-                                -------------------------------------
-                                Save Job Assignment
-                                -------------------------------------
-                                */
-
-                                const task =
-                                    WorkflowHelper.state.repairTasks.find(
-                                        x => x.id === repairTaskId
-                                    );
-
-                                if (task.assignmentId) {
-
-                                    await JobAssignmentService.reassign(
-
-                                        task.assignmentId,
-
-                                        {
-                                            employeeId: technicianId,
-                                            estimatedHours,
-                                            remarks
-                                        }
-
-                                    );
-
-                                }
-                                else {
-
-                                    await JobAssignmentService.assign({
-                                        jobCardId:
-                                        WorkflowHelper.state.jobCardId,
-
-                                        estimateItemId:
-                                        task.estimateItemId,
-
-                                        employeeId:
-                                        technicianId,
-
-                                        estimatedHours,
-                                        remarks
-                                    });
-                                }
-
-                                /*
-                                -------------------------------------
-                                Update UI
-                                -------------------------------------
-                                */
-
-                                bootstrap.Modal
-                                    .getInstance(
-
-                                        document.getElementById(
-                                            "assignTechnicianModal"
-                                        )
-
-                                    )
-                                    ?.hide();
-
-                                await this.refresh();
-
-                                alert(
-                                    "Technician assigned successfully."
-                                );
-
-                            }
-                            catch (error) {
-
-                                console.error(error);
-
-                                alert(
-
-                                    error.message ||
-
-                                    "Unable to assign technician."
-
-                                );
-
-                            }
-
-                        }
-
+                    await this.openAssignModal(
+                        repairTaskId
                     );
 
-            }
+                }
+            );
 
-        };
+
+        /*
+        -----------------------------------------
+        Save Assignment
+        -----------------------------------------
+        */
+
+        document
+            .getElementById("saveTechnicianBtn")
+            ?.addEventListener(
+
+                "click",
+
+                async () => {
+
+                    const repairTaskId =
+                        Number(
+                            document.getElementById(
+                                "repairTaskId"
+                            ).value
+                        );
+
+                    const technicianId =
+                        Number(
+                            document.getElementById(
+                                "technicianId"
+                            ).value
+                        );
+
+                    const estimatedHours =
+                        Number(
+                            document.getElementById(
+                                "estimatedHours"
+                            ).value
+                        );
+
+                    const remarks =
+                        document.getElementById(
+                            "assignmentRemarks"
+                        ).value;
+
+
+                    if (!technicianId) {
+
+                        alert(
+                            "Please select a technician."
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        const task =
+                            WorkflowHelper.state.repairTasks.find(
+                                x => x.id === repairTaskId
+                            );
+
+
+                        if (!task) {
+
+                            throw new Error(
+                                "Repair task not found."
+                            );
+
+                        }
+
+
+                        /*
+                        =========================================
+                        REASSIGN EXISTING ASSIGNMENT
+                        =========================================
+                        */
+
+                        if (task.assignmentId) {
+
+                            await JobAssignmentService.reassign(
+
+                                task.assignmentId,
+
+                                {
+
+                                    employeeId:
+                                        technicianId,
+
+                                    assignmentType:
+                                        "TECHNICIAN",
+
+                                    estimatedHours,
+
+                                    remarks
+
+                                }
+
+                            );
+
+                        }
+
+
+                        /*
+                        =========================================
+                        CREATE NEW ASSIGNMENT
+                        =========================================
+                        */
+
+                        else {
+
+                            await JobAssignmentService.assign({
+
+                                jobCardId:
+                                    WorkflowHelper.state.jobCardId,
+
+                                estimateItemId:
+                                    task.estimateItemId,
+
+                                employeeId:
+                                    technicianId,
+
+                                assignmentType:
+                                    "TECHNICIAN",
+
+                                estimatedHours,
+
+                                remarks
+
+                            });
+
+                        }
+
+
+                        /*
+                        =========================================
+                        CLOSE MODAL
+                        =========================================
+                        */
+
+                        bootstrap.Modal
+                            .getInstance(
+
+                                document.getElementById(
+                                    "assignTechnicianModal"
+                                )
+
+                            )
+                            ?.hide();
+
+
+                        /*
+                        =========================================
+                        REFRESH
+                        =========================================
+                        */
+
+                        await this.refresh();
+
+
+                        alert(
+                            task.assignmentId
+                                ? "Technician reassigned successfully."
+                                : "Technician assigned successfully."
+                        );
+
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            "Technician assignment error:",
+                            error
+                        );
+
+                        alert(
+
+                            error.message ||
+
+                            "Unable to assign technician."
+
+                        );
+
+                    }
+
+                }
+
+            );
+
+    }
+
+};

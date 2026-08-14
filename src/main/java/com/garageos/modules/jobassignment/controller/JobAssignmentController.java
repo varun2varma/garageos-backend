@@ -38,37 +38,48 @@ public class JobAssignmentController {
 
     @PutMapping("/{id}/accept")
     public ResponseEntity<ApiResponse<JobAssignmentResponse>> acceptJob(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @AuthenticationPrincipal GarageUserPrincipal user) {
 
         return ApiResponseUtil.success(
                 "Job accepted successfully.",
-                service.acceptJob(id)
+                service.acceptJob(
+                        id,
+                        user.getId()
+                )
         );
-
     }
 
     @PutMapping("/{id}/start")
     public ResponseEntity<ApiResponse<JobAssignmentResponse>> startJob(
             @PathVariable Long id,
-            @Valid @RequestBody StartJobRequest request) {
+            @Valid @RequestBody StartJobRequest request,
+            @AuthenticationPrincipal GarageUserPrincipal user) {
 
         return ApiResponseUtil.success(
                 "Job started successfully.",
-                service.startJob(id, request)
+                service.startJob(
+                        id,
+                        request,
+                        user.getId()
+                )
         );
-
     }
 
     @PutMapping("/{id}/complete")
     public ResponseEntity<ApiResponse<JobAssignmentResponse>> completeJob(
             @PathVariable Long id,
-            @Valid @RequestBody CompleteJobRequest request) {
+            @Valid @RequestBody CompleteJobRequest request,
+            @AuthenticationPrincipal GarageUserPrincipal user) {
 
         return ApiResponseUtil.success(
                 "Job completed successfully.",
-                service.completeJob(id, request)
+                service.completeJob(
+                        id,
+                        request,
+                        user.getId()
+                )
         );
-
     }
 
     @PutMapping("/{id}/reassign")
@@ -114,6 +125,19 @@ public class JobAssignmentController {
                 service.getMyAssignments(user.getId())
         );
 
+    }
+
+    @GetMapping("/my/driver")
+    public ResponseEntity<ApiResponse<List<MyAssignmentResponse>>>
+    getMyDriverAssignments(
+            @AuthenticationPrincipal GarageUserPrincipal user) {
+
+        return ApiResponseUtil.success(
+                "My driver assignments fetched successfully.",
+                service.getMyDriverAssignments(
+                        user.getId()
+                )
+        );
     }
 
 }

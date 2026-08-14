@@ -467,7 +467,12 @@ public class ServiceWorkflowServiceImpl
             estimateItems =
                     estimateItemService.getItems(estimate.getId());
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw e;
+
         }
 
         List<RepairTaskResponse> repairTasks =
@@ -480,7 +485,12 @@ public class ServiceWorkflowServiceImpl
             invoice =
                     invoiceService.getInvoiceByJobCard(jobCard.getId());
 
-        } catch (Exception ignored) {
+        }   catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw e;
+
         }
 
         return WorkflowResumeResponse.builder()

@@ -27,4 +27,6 @@ public interface UserService {
 
     List<UserResponse> getTechnicians();
 
+    List<UserResponse> getRepairEmployees();
+
 }

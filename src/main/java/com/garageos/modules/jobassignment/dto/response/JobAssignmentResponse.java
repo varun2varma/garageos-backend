@@ -1,6 +1,7 @@
 package com.garageos.modules.jobassignment.dto.response;
 
 import com.garageos.core.enums.JobAssignmentStatus;
+import com.garageos.core.enums.JobAssignmentType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +25,8 @@ public class JobAssignmentResponse {
 
     private String employeeName;
 
+    private JobAssignmentType assignmentType;
+
     private JobAssignmentStatus status;
 
     private Double estimatedHours;
@@ -39,5 +42,4 @@ public class JobAssignmentResponse {
     private LocalDateTime startedAt;
 
     private LocalDateTime completedAt;
-
 }

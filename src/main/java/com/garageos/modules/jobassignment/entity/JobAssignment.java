@@ -2,6 +2,7 @@ package com.garageos.modules.jobassignment.entity;
 
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.JobAssignmentStatus;
+import com.garageos.core.enums.JobAssignmentType;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.modules.identity.entity.User;
@@ -41,6 +42,10 @@ public class JobAssignment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private JobAssignmentStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "assignment_type", nullable = false, length = 30)
+    private JobAssignmentType assignmentType;
 
     @Column(nullable = false)
     private LocalDateTime assignedAt;

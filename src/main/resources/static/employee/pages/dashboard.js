@@ -8,6 +8,12 @@ window.Dashboard = {
 
             }
 
+            if (Permissions.isDriver()) {
+
+                return DriverDashboard.render();
+
+            }
+
             if (Permissions.isServiceAdvisor()) {
 
                 return ServiceAdvisorDashboard.render();
@@ -23,6 +29,13 @@ window.Dashboard = {
                 if (Permissions.isTechnician()) {
 
                     TechnicianDashboard.bindEvents();
+                    return;
+
+                }
+
+                if (Permissions.isDriver()) {
+
+                    DriverDashboard.bindEvents();
                     return;
 
                 }

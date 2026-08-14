@@ -1,7 +1,8 @@
 package com.garageos.modules.jobassignment.repository;
 
-import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.core.enums.JobAssignmentStatus;
+import com.garageos.core.enums.JobAssignmentType;
+import com.garageos.modules.jobassignment.entity.JobAssignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -20,4 +21,8 @@ public interface JobAssignmentRepository
             JobAssignmentStatus status
     );
 
+    List<JobAssignment> findByUserIdAndAssignmentType(
+            Long userId,
+            JobAssignmentType assignmentType
+    );
 }

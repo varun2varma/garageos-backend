@@ -1,6 +1,7 @@
 package com.garageos.modules.jobassignment.dto.response;
 
 import com.garageos.core.enums.JobAssignmentStatus;
+import com.garageos.core.enums.JobAssignmentType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,8 +23,9 @@ public class MyAssignmentResponse {
 
     private String priority;
 
+    private JobAssignmentType assignmentType;
+
     private JobAssignmentStatus status;
 
     private Double estimatedHours;
-
 }

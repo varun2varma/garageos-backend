@@ -13,18 +13,6 @@ public interface JobAssignmentService {
 
     JobAssignmentResponse assignJob(AssignJobRequest request);
 
-    JobAssignmentResponse acceptJob(Long assignmentId);
-
-    JobAssignmentResponse startJob(
-            Long assignmentId,
-            StartJobRequest request
-    );
-
-    JobAssignmentResponse completeJob(
-            Long assignmentId,
-            CompleteJobRequest request
-    );
-
     JobAssignmentResponse reassignJob(
             Long assignmentId,
             ReassignJobRequest request
@@ -35,5 +23,21 @@ public interface JobAssignmentService {
     List<JobAssignmentResponse> getAssignmentsByJobCard(Long jobCardId);
 
     List<MyAssignmentResponse> getMyAssignments(Long userId);
+
+    List<MyAssignmentResponse> getMyDriverAssignments(Long userId);
+
+    JobAssignmentResponse acceptJob(Long assignmentId, Long userId);
+
+    JobAssignmentResponse startJob(
+            Long assignmentId,
+            StartJobRequest request,
+            Long userId
+    );
+
+    JobAssignmentResponse completeJob(
+            Long assignmentId,
+            CompleteJobRequest request,
+            Long userId
+    );
 
 }

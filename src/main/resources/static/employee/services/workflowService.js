@@ -376,16 +376,142 @@ window.WorkflowService = {
     },
 
 
-//    async startRepair() {
+async startRepair(assignmentId, request = {}) {
+
+    try {
+
+        const response =
+            await JobAssignmentService.start(
+                assignmentId,
+                request
+            );
+
+        /*
+        -----------------------------------------
+        Update assignment state
+        -----------------------------------------
+        */
+
+        const assignments =
+            WorkflowHelper.state.assignments || [];
+
+        const index =
+            assignments.findIndex(
+                assignment =>
+                    assignment.id === response.id
+            );
+
+        if (index >= 0) {
+
+            assignments[index] = response;
+
+        }
+
+        /*
+        -----------------------------------------
+        Refresh workflow status
+        -----------------------------------------
+        */
+
+        await this.refreshWorkflowStatus();
+
+        return response;
+
+    } catch (e) {
+
+        console.error(
+            "Unable to start assignment",
+            e
+        );
+
+        throw e;
+
+    }
+
+},
+
+
+async completeRepair(
+    assignmentId,
+    request = {}
+) {
+
+    try {
+
+        const response =
+            await JobAssignmentService.complete(
+                assignmentId,
+                request
+            );
+
+        /*
+        -----------------------------------------
+        Update assignment state
+        -----------------------------------------
+        */
+
+        const assignments =
+            WorkflowHelper.state.assignments || [];
+
+        const index =
+            assignments.findIndex(
+                assignment =>
+                    assignment.id === response.id
+            );
+
+        if (index >= 0) {
+
+            assignments[index] = response;
+
+        }
+
+        /*
+        -----------------------------------------
+        Refresh workflow status
+        -----------------------------------------
+        */
+
+        await this.refreshWorkflowStatus();
+
+        return response;
+
+    } catch (e) {
+
+        console.error(
+            "Unable to complete assignment",
+            e
+        );
+
+        throw e;
+
+    }
+
+},
+
+//    async startRepair(repairTaskId) {
 //
 //        try {
 //
 //            const response =
-//                await Api.post(
-//                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/start`
+//                await Api.put(
+//                    `/repair-tasks/${repairTaskId}/start`
 //                );
+//console.log("API Response", response);
+//            const index =
+//                WorkflowHelper.state.repairTasks.findIndex(
+//                    task => task.id === response.id
+//                );
+//console.log("Index", index);
+//            if (index >= 0) {
 //
-//            WorkflowHelper.state.job = response;
+//                WorkflowHelper.state.repairTasks[index] =
+//                    response;
+//
+//            }
+//            console.log(
+//                WorkflowHelper.state.repairTasks);
+//
+//                await this.refreshWorkflowStatus();
 //
 //            return response;
 //
@@ -398,18 +524,34 @@ window.WorkflowService = {
 //        }
 //
 //    },
-
-//    async completeRepair() {
+//
+//    async completeRepair(repairTaskId) {
 //
 //        try {
 //
 //            const response =
-//                await Api.post(
-//                    `/workflow/${WorkflowHelper.state.jobCardNumber}/repair/complete`
+//                await Api.put(
+//                    `/repair-tasks/${repairTaskId}/complete`
 //                );
 //
-//            WorkflowHelper.state.job = response;
+//                console.log("API Response", response);
 //
+//            const index =
+//                WorkflowHelper.state.repairTasks.findIndex(
+//                    task => task.id === response.id
+//                );
+//console.log("Index", index);
+//await this.refreshWorkflowStatus();
+//
+//            if (index >= 0) {
+//
+//                WorkflowHelper.state.repairTasks[index] =
+//                    response;
+//
+//            }
+//
+//            console.log(
+//                WorkflowHelper.state.repairTasks);
 //            return response;
 //
 //        } catch (e) {
@@ -421,82 +563,6 @@ window.WorkflowService = {
 //        }
 //
 //    },
-
-    async startRepair(repairTaskId) {
-
-        try {
-
-            const response =
-                await Api.put(
-                    `/repair-tasks/${repairTaskId}/start`
-                );
-console.log("API Response", response);
-            const index =
-                WorkflowHelper.state.repairTasks.findIndex(
-                    task => task.id === response.id
-                );
-console.log("Index", index);
-            if (index >= 0) {
-
-                WorkflowHelper.state.repairTasks[index] =
-                    response;
-
-            }
-            console.log(
-                WorkflowHelper.state.repairTasks);
-
-                await this.refreshWorkflowStatus();
-
-            return response;
-
-        } catch (e) {
-
-            console.error(e);
-
-            throw e;
-
-        }
-
-    },
-
-    async completeRepair(repairTaskId) {
-
-        try {
-
-            const response =
-                await Api.put(
-                    `/repair-tasks/${repairTaskId}/complete`
-                );
-
-                console.log("API Response", response);
-
-            const index =
-                WorkflowHelper.state.repairTasks.findIndex(
-                    task => task.id === response.id
-                );
-console.log("Index", index);
-await this.refreshWorkflowStatus();
-
-            if (index >= 0) {
-
-                WorkflowHelper.state.repairTasks[index] =
-                    response;
-
-            }
-
-            console.log(
-                WorkflowHelper.state.repairTasks);
-            return response;
-
-        } catch (e) {
-
-            console.error(e);
-
-            throw e;
-
-        }
-
-    },
 
     async performQualityCheck() {
 
