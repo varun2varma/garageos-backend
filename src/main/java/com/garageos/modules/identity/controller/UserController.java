@@ -5,11 +5,13 @@ import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.identity.dto.request.CreateUserRequest;
 import com.garageos.modules.identity.dto.request.UpdateUserRequest;
 import com.garageos.modules.identity.dto.response.UserResponse;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.identity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -108,6 +110,17 @@ public class UserController {
         return ApiResponseUtil.success(
                 "Repair employees fetched successfully.",
                 service.getRepairEmployees()
+        );
+
+    }
+
+    @GetMapping("/drivers")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> drivers(
+            @AuthenticationPrincipal GarageUserPrincipal user) {
+
+        return ApiResponseUtil.success(
+                "Drivers fetched successfully.",
+                service.getDrivers(user.getGarageId())
         );
 
     }

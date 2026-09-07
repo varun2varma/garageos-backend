@@ -10,6 +10,60 @@ window.CustomerVehicle = {
 
     selectedVehicle: null,
 
+    requestPickupDelivery() {
+
+        if (!this.selectedVehicle) {
+
+            alert(
+                "Please select a vehicle first."
+            );
+
+            return;
+
+        }
+
+
+        sessionStorage.setItem(
+            "navigationVehicleId",
+            String(
+                this.selectedVehicle.id
+            )
+        );
+
+
+        CustomerRouter.navigate(
+            "navigation"
+        );
+
+    },
+
+    trackVehicle() {
+
+        if (!this.selectedVehicle) {
+
+            alert(
+                "Please select a vehicle first."
+            );
+
+            return;
+
+        }
+
+
+        sessionStorage.setItem(
+            "navigationVehicleId",
+            String(
+                this.selectedVehicle.id
+            )
+        );
+
+
+        CustomerRouter.navigate(
+            "navigation"
+        );
+
+    },
+
     openRepair(jobCardNumber) {
 
         sessionStorage.setItem(
@@ -126,6 +180,7 @@ window.CustomerVehicle = {
             console.log("STEP 4");
 
             this.renderVehicleTable(this.vehicles);
+            this.updateNavigationActions();
 
             console.log("STEP 5");
 
@@ -334,16 +389,31 @@ window.CustomerVehicle = {
                     this.vehicles.find(
 
                         vehicle =>
-
                             vehicle.id === vehicleId
 
                     );
+
 
                 if (!this.selectedVehicle) {
 
                     return;
 
                 }
+
+
+                /*
+                ======================================================
+                 Remember selected vehicle
+                ======================================================
+                */
+
+                sessionStorage.setItem(
+                    "selectedVehicleId",
+                    String(
+                        this.selectedVehicle.id
+                    )
+                );
+
 
                 const jobCards =
 
@@ -356,6 +426,7 @@ window.CustomerVehicle = {
 
                     );
 
+
                 this.renderVehicleDetails(
 
                     this.selectedVehicle,
@@ -363,6 +434,85 @@ window.CustomerVehicle = {
                     jobCards
 
                 );
+
+
+                this.updateNavigationActions();
+
+            },
+
+            updateNavigationActions() {
+
+                const requestButton =
+                    document.getElementById(
+                        "requestVehicleMovementButton"
+                    );
+
+
+                const trackButton =
+                    document.getElementById(
+                        "trackVehicleButton"
+                    );
+
+
+                const message =
+                    document.getElementById(
+                        "vehicleNavigationMessage"
+                    );
+
+
+                if (!this.selectedVehicle) {
+
+                    requestButton?.setAttribute(
+                        "disabled",
+                        "disabled"
+                    );
+
+                    trackButton?.setAttribute(
+                        "disabled",
+                        "disabled"
+                    );
+
+                    if (message) {
+
+                        message.textContent =
+                            "Select a vehicle to request pickup or delivery.";
+
+                    }
+
+                    return;
+
+                }
+
+
+                requestButton?.removeAttribute(
+                    "disabled"
+                );
+
+
+                trackButton?.removeAttribute(
+                    "disabled"
+                );
+
+
+                if (message) {
+
+                    message.innerHTML = `
+
+                        Ready for
+
+                        <strong>
+
+                            ${this.selectedVehicle.registrationNumber}
+
+                        </strong>
+
+                        -
+                        ${this.selectedVehicle.brand}
+                        ${this.selectedVehicle.model}
+
+                    `;
+
+                }
 
             },
 

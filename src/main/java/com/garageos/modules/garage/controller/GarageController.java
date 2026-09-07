@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -60,6 +62,16 @@ public class GarageController {
         return ApiResponseUtil.success(
                 "Garage deleted successfully."
         );
+    }
+
+    @GetMapping("/garages")
+    public ResponseEntity<ApiResponse<List<GarageResponse>>> getAllGarages() {
+
+        return ApiResponseUtil.success(
+                "Garages fetched successfully.",
+                service.getAllGarages()
+        );
+
     }
 
 }

@@ -11,4 +11,7 @@ public interface DriverCurrentLocationRepository
         extends JpaRepository<DriverCurrentLocation, Long> {
 
     Optional<DriverCurrentLocation> findByDriverId(Long driverId);
+
+    Optional<DriverCurrentLocation>
+    findByTripId(Long tripId);
 }

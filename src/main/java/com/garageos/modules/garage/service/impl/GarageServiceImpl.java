@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -150,6 +152,18 @@ public class GarageServiceImpl implements GarageService {
                 .build();
 
         userRoleRepository.save(userRole);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GarageResponse> getAllGarages() {
+
+        return garageRepository
+                .findAll()
+                .stream()
+                .map(garageMapper::toResponse)
+                .toList();
+
     }
 
 }

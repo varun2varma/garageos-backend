@@ -479,8 +479,59 @@
                         <hr class="my-4">
 
                         <!-- ==========================================
-                             Quick Navigation
-                             ========================================== -->
+           Quick Navigation
+           ========================================== -->
+
+                        <div class="row g-3">
+
+                            <!-- Pickup / Delivery -->
+
+                            <div class="col-md-6">
+
+                                <button
+                                        id="requestVehicleMovementButton"
+                                        type="button"
+                                        class="btn btn-primary w-100"
+                                        onclick="CustomerVehicle.requestPickupDelivery()"
+                                        disabled>
+
+                                    <i class="bi bi-truck me-2"></i>
+
+                                    Request Pickup / Delivery
+
+                                </button>
+
+                            </div>
+
+
+                            <!-- Track Vehicle -->
+
+                            <div class="col-md-6">
+
+                                <button
+                                        id="trackVehicleButton"
+                                        type="button"
+                                        class="btn btn-outline-primary w-100"
+                                        onclick="CustomerVehicle.trackVehicle()"
+                                        disabled>
+
+                                    <i class="bi bi-geo-alt me-2"></i>
+
+                                    Track Vehicle
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                                id="vehicleNavigationMessage"
+                                class="small text-muted mt-3">
+
+                            Select a vehicle to request pickup or delivery.
+
+                        </div>
 
 
 

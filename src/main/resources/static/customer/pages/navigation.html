@@ -1,0 +1,363 @@
+<div class="container-fluid">
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold">
+
+            Pickup & Delivery 🚗
+
+        </h2>
+
+        <p class="text-muted">
+
+            Request pickup or delivery for your vehicle.
+
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- ==================================================
+             SELECTED VEHICLE
+             ================================================== -->
+
+        <div class="col-lg-5">
+
+            <div class="customer-card">
+
+                <h5 class="mb-3">
+
+                    Selected Vehicle
+
+                </h5>
+
+
+                <div
+                        id="navigationSelectedVehicle"
+                        class="border rounded p-3">
+
+                    <div class="text-muted">
+
+                        Loading vehicle...
+
+                    </div>
+
+                </div>
+
+
+                <button
+                        type="button"
+                        class="btn btn-link px-0 mt-2"
+                        onclick="CustomerRouter.navigate('vehicles')">
+
+                    <i class="bi bi-car-front me-1"></i>
+
+                    Choose another vehicle
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             REQUEST
+             ================================================== -->
+
+        <div class="col-lg-7">
+
+            <div class="customer-card">
+
+                <h5 class="mb-4">
+
+                    Request Vehicle Movement
+
+                </h5>
+
+
+                <form
+                        id="navigationRequestForm">
+
+                    <!-- Request Type -->
+
+                    <div class="mb-3">
+
+                        <label
+                                class="form-label fw-semibold">
+
+                            What do you need?
+
+                        </label>
+
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label
+                                        class="border rounded p-3 d-block"
+                                        style="cursor:pointer">
+
+                                    <input
+                                            type="radio"
+                                            name="navigationRequestType"
+                                            value="PICKUP"
+                                            class="form-check-input me-2"
+                                            checked>
+
+                                    <strong>
+
+                                        🚗 Pickup
+
+                                    </strong>
+
+                                    <div
+                                            class="small text-muted mt-1">
+
+                                        Pick up my vehicle
+
+                                    </div>
+
+                                </label>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                        class="border rounded p-3 d-block"
+                                        style="cursor:pointer">
+
+                                    <input
+                                            type="radio"
+                                            name="navigationRequestType"
+                                            value="DELIVERY"
+                                            class="form-check-input me-2">
+
+                                    <strong>
+
+                                        🚙 Delivery
+
+                                    </strong>
+
+                                    <div
+                                            class="small text-muted mt-1">
+
+                                        Deliver my vehicle
+
+                                    </div>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Garage -->
+
+                    <div class="mb-3">
+
+                        <label
+                                class="form-label fw-semibold">
+
+                            Garage
+
+                        </label>
+
+
+                        <select
+                                id="navigationGarage"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+
+                                Select Garage
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Pickup Address -->
+
+                    <div
+                            id="pickupAddressSection"
+                            class="mb-3">
+
+                        <label class="form-label">
+                            Pickup Location
+                        </label>
+
+                        <div
+                                id="pickupMap"
+                                style="
+        height: 280px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+    ">
+                        </div>
+
+                        <div
+                                id="pickupLocationInfo"
+                                class="mt-2">
+
+                            <div class="text-muted small">
+
+                                Click on the map to select
+                                your pickup location.
+
+                            </div>
+
+                        </div>
+
+                        <input
+                                type="hidden"
+                                id="pickupAddress">
+
+                        <input
+                                type="hidden"
+                                id="pickupLatitude">
+
+                        <input
+                                type="hidden"
+                                id="pickupLongitude">
+
+                    </div>
+
+
+                    <!-- Delivery Address -->
+
+                    <div
+                            id="deliveryAddressSection"
+                            class="mb-3 d-none">
+
+                        <label
+                                class="form-label fw-semibold">
+
+                            Delivery Address
+
+                        </label>
+
+
+                        <textarea
+                                id="navigationDeliveryAddress"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Where should we deliver your vehicle?">
+                        </textarea>
+
+                    </div>
+
+
+                    <!-- Schedule -->
+
+                    <div class="mb-4">
+
+                        <label
+                                class="form-label fw-semibold">
+
+                            Preferred Time
+
+                        </label>
+
+
+                        <input
+                                id="navigationScheduledAt"
+                                type="datetime-local"
+                                class="form-control"
+                                required>
+
+                    </div>
+
+
+                    <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+
+                        <i class="bi bi-truck me-2"></i>
+
+                        Submit Request
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         REQUEST HISTORY
+         ================================================== -->
+
+    <div class="customer-card mt-4">
+
+        <div
+                class="d-flex
+                   justify-content-between
+                   align-items-center
+                   mb-3">
+
+            <div>
+
+                <h5 class="mb-1">
+
+                    My Pickup & Delivery Requests
+
+                </h5>
+
+                <small class="text-muted">
+
+                    Track your previous and active requests.
+
+                </small>
+
+            </div>
+
+
+            <button
+                    id="refreshNavigationRequests"
+                    class="btn btn-sm btn-outline-primary">
+
+                <i class="bi bi-arrow-clockwise"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+                id="customerNavigationRequests">
+
+            <div
+                    class="text-center
+                       text-muted
+                       py-4">
+
+                Loading requests...
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

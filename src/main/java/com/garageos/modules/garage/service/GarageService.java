@@ -3,6 +3,8 @@ package com.garageos.modules.garage.service;
 import com.garageos.modules.garage.dto.request.CreateGarageRequest;
 import com.garageos.modules.garage.dto.response.GarageResponse;
 
+import java.util.List;
+
 public interface GarageService {
 
     GarageResponse createGarage(
@@ -18,5 +20,7 @@ public interface GarageService {
     );
 
     void deleteGarage(Long id);
+
+    List<GarageResponse> getAllGarages();
 
 }

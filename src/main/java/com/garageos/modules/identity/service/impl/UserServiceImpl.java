@@ -1,5 +1,6 @@
 package com.garageos.modules.identity.service.impl;
 
+import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -285,6 +286,29 @@ public class UserServiceImpl implements UserService {
 
                 .toList();
 
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getDrivers(
+            Long garageId) {
+
+        if (garageId == null) {
+            throw new BusinessException(
+                    "Garage ID is required to fetch drivers."
+            );
+        }
+
+        return userRepository
+                .findByGarageIdAndRoleAndStatus(
+                        garageId,
+                        RoleCode.DRIVER,
+                        UserStatus.ACTIVE
+                )
+                .stream()
+                .map(this::buildResponse)
+                .toList();
     }
 
 

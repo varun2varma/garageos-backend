@@ -14,6 +14,12 @@ window.CustomerRouter = {
             page: "vehicle"
         },
 
+        navigation: {
+            title: "Pickup & Delivery",
+            subtitle: "Request and track your vehicle pickup or delivery.",
+            page: "navigation"
+        },
+
         repair: {
             title: "Repair Workflow",
             subtitle: "Track your vehicle repair status in real time.",
@@ -209,6 +215,8 @@ window.CustomerRouter = {
             vehicle: "CustomerVehicle",
 
             repair: "CustomerRepair",
+
+            navigation: "CustomerNavigation",
 
             estimate: "CustomerEstimate",
 

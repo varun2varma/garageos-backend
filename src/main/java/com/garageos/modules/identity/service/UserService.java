@@ -29,4 +29,5 @@ public interface UserService {
 
     List<UserResponse> getRepairEmployees();
 
+    List<UserResponse> getDrivers(Long garageId);
 }

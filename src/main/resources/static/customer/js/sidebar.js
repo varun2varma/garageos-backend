@@ -15,6 +15,12 @@ window.CustomerSidebar = {
         },
 
         {
+            id: "navigation",
+            title: "Pickup & Delivery",
+            icon: "bi-truck"
+        },
+
+        {
             id: "repair",
             title: "Repair Workflow",
             icon: "bi-tools"

@@ -15,6 +15,17 @@ window.UserService = {
 
         return response.data || response;
 
-    }
+    },
+
+    async getDrivers() {
+
+            const response =
+                await Api.get(
+                    "/users/drivers"
+                );
+
+            return response.data || response;
+
+        }
 
 };

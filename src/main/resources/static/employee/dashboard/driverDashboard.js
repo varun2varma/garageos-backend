@@ -1,5 +1,277 @@
 window.DriverDashboard = {
 
+    trips: [],
+
+    async loadTrips() {
+
+        try {
+
+            const trips =
+                await NavigationTripService
+                    .getMyTrips();
+
+            this.trips =
+                trips ?? [];
+
+            this.renderTrips();
+
+            this.updateStatistics();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load driver trips:",
+                error
+            );
+
+            const container =
+                document.getElementById(
+                    "driverTrips"
+                );
+
+            if (container) {
+
+                container.innerHTML = `
+
+                    <div class="alert alert-danger">
+
+                        Unable to load trips.
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+    },
+
+
+    renderTrips() {
+
+        const container =
+            document.getElementById(
+                "driverTrips"
+            );
+
+        if (!container) {
+            return;
+        }
+
+
+        if (!this.trips.length) {
+
+            container.innerHTML = `
+
+                <div class="text-center text-muted py-5">
+
+                    <div class="fs-1 mb-3">
+                        🚗
+                    </div>
+
+                    <h5>
+                        No trips assigned
+                    </h5>
+
+                    <p class="mb-0">
+                        You don't have any active trips.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        container.innerHTML =
+            this.trips
+                .map(
+                    trip =>
+                        this.renderTripCard(trip)
+                )
+                .join("");
+
+
+        this.bindTripEvents();
+
+    },
+
+    renderTripCard(trip) {
+
+        return `
+
+            <div
+                class="card border-0 shadow-sm mb-3"
+            >
+
+                <div class="card-body">
+
+                    <div
+                        class="d-flex
+                               justify-content-between
+                               align-items-start"
+                    >
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+
+                                🚗 Trip #${trip.id}
+
+                            </h5>
+
+                            <div class="text-muted">
+
+                                Vehicle #${trip.vehicleId}
+
+                            </div>
+
+                        </div>
+
+                        <span
+                            class="${this.getTripStatusBadge(
+                                trip.status
+                            )}"
+                        >
+
+                            ${this.formatTripStatus(
+                                trip.status
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <div class="row">
+
+                        <div class="col-md-5">
+
+                            <div class="text-muted small">
+                                From
+                            </div>
+
+                            <div class="fw-semibold">
+
+                                ${trip.sourceAddress ?? "-"}
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="col-md-2
+                                   text-center
+                                   align-self-center"
+                        >
+
+                            🚗
+
+                        </div>
+
+
+                        <div class="col-md-5">
+
+                            <div class="text-muted small">
+                                To
+                            </div>
+
+                            <div class="fw-semibold">
+
+                                ${trip.destinationAddress ?? "-"}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mt-4">
+
+                        ${this.renderTripAction(trip)}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    },
+
+    renderTripAction(trip) {
+
+        switch (trip.status) {
+
+            case "ASSIGNED":
+
+                return `
+
+                    <button
+                        class="btn btn-primary
+                               accept-trip-btn"
+                        data-trip-id="${trip.id}"
+                    >
+
+                        Accept Trip
+
+                    </button>
+
+                `;
+
+
+            case "ACCEPTED":
+
+                return `
+
+                    <button
+                        class="btn btn-success
+                               start-trip-btn"
+                        data-trip-id="${trip.id}"
+                    >
+
+                        🚗 Start Trip
+
+                    </button>
+
+                `;
+
+
+            case "IN_PROGRESS":
+
+                return `
+
+                    <button
+                        class="btn btn-primary
+                               arrive-trip-btn"
+                        data-trip-id="${trip.id}"
+                    >
+
+                        I Have Arrived
+
+                    </button>
+
+                `;
+
+
+            default:
+
+                return "";
+
+        }
+
+    },
+
+
     render() {
 
         return `
@@ -210,6 +482,252 @@ window.DriverDashboard = {
     bindEvents() {
 
         this.initializeMap();
+
+        this.loadTrips();
+
+    },
+
+    bindTripEvents() {
+
+        document
+            .querySelectorAll(
+                ".accept-trip-btn"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () =>
+                        this.acceptTrip(
+                            Number(
+                                button.dataset.tripId
+                            )
+                        )
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(
+                ".start-trip-btn"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () =>
+                        this.startTrip(
+                            Number(
+                                button.dataset.tripId
+                            )
+                        )
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(
+                ".arrive-trip-btn"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () =>
+                        this.arriveTrip(
+                            Number(
+                                button.dataset.tripId
+                            )
+                        )
+                );
+
+            });
+
+    },
+
+
+    async acceptTrip(tripId) {
+
+        try {
+
+            await NavigationTripService
+                .acceptTrip(tripId);
+
+            await this.loadTrips();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to accept trip:",
+                error
+            );
+
+            alert(
+                "Unable to accept trip."
+            );
+
+        }
+
+    },
+
+
+    async startTrip(tripId) {
+
+        try {
+
+            await NavigationTripService
+                .startTrip(tripId);
+
+            await this.loadTrips();
+
+            /*
+             * GPS WebSocket will be started
+             * after the trip becomes IN_PROGRESS.
+             */
+
+        } catch (error) {
+
+            console.error(
+                "Unable to start trip:",
+                error
+            );
+
+            alert(
+                "Unable to start trip."
+            );
+
+        }
+
+    },
+
+    async arriveTrip(tripId) {
+
+        try {
+
+            await NavigationTripService
+                .arriveTrip(tripId);
+
+            await this.loadTrips();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to update arrival:",
+                error
+            );
+
+            alert(
+                "Unable to update arrival."
+            );
+
+        }
+
+    },
+
+
+    updateStatistics() {
+
+        const trips =
+            this.trips ?? [];
+
+
+        const pending =
+            trips.filter(
+                trip =>
+                    trip.status === "ASSIGNED"
+            ).length;
+
+
+        const active =
+            trips.filter(
+                trip =>
+                    trip.status === "IN_PROGRESS"
+            ).length;
+
+
+        const ready =
+            trips.filter(
+                trip =>
+                    trip.status === "ACCEPTED"
+            ).length;
+
+
+        this.setStatistic(
+            "driverPendingTrips",
+            pending
+        );
+
+        this.setStatistic(
+            "driverActiveTrips",
+            active
+        );
+
+        this.setStatistic(
+            "driverReadyTrips",
+            ready
+        );
+
+    },
+
+
+    setStatistic(id, value) {
+
+        const element =
+            document.getElementById(id);
+
+        if (element) {
+
+            element.textContent =
+                value;
+
+        }
+
+    },
+
+    getTripStatusBadge(status) {
+
+        switch (status) {
+
+            case "ASSIGNED":
+                return "badge bg-warning text-dark";
+
+            case "ACCEPTED":
+                return "badge bg-info text-dark";
+
+            case "IN_PROGRESS":
+                return "badge bg-primary";
+
+            case "COMPLETED":
+                return "badge bg-success";
+
+            case "CANCELLED":
+                return "badge bg-danger";
+
+            default:
+                return "badge bg-secondary";
+
+        }
+
+    },
+
+
+    formatTripStatus(status) {
+
+        return (status ?? "")
+
+            .replaceAll(
+                "_",
+                " "
+            )
+
+            .toLowerCase()
+
+            .replace(
+                /\b\w/g,
+                c => c.toUpperCase()
+            );
 
     },
 
