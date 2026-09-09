@@ -2,7 +2,6 @@ package com.garageos.modules.garage.service.impl;
 
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.ResourceNotFoundException;
-import com.garageos.core.util.GarageCodeGenerator;
 import com.garageos.modules.garage.dto.request.CreateGarageRequest;
 import com.garageos.modules.garage.dto.response.GarageResponse;
 import com.garageos.modules.garage.entity.Garage;
@@ -33,7 +32,6 @@ public class GarageServiceImpl implements GarageService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final GarageCodeGenerator garageCodeGenerator;
 
     @Override
     @Transactional
@@ -52,8 +50,7 @@ public class GarageServiceImpl implements GarageService {
         garage = garageRepository.save(garage);
 
         garage.setGarageCode(
-//                String.format("G%03d", garage.getId())
-                garageCodeGenerator.generate()
+                String.format("G%03d", garage.getId())
         );
 
         garage = garageRepository.save(garage);
