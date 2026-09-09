@@ -104,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
 
                 .refreshToken(refreshToken)
 
-                .expiresIn(jwtService.getAccessTokenExpiration().toMillis())
+                .expiresIn(jwtService.getAccessTokenExpiration().toSeconds())
 
                 .firstLogin(principal.getFirstLogin())
 
@@ -201,6 +201,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponse refreshToken(String refreshToken) {
 
+        if (!jwtService.isTokenValid(refreshToken)) {
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+
         UserSession session = userSessionRepository
                 .findByRefreshTokenAndRevokedFalse(refreshToken)
                 .orElseThrow(() ->
@@ -222,7 +226,7 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .expiresIn(jwtService.getAccessTokenExpiration().toMillis())
+                .expiresIn(jwtService.getAccessTokenExpiration().toSeconds())
                 .firstLogin(principal.getFirstLogin())
                 .user(buildUserProfile(principal))
                 .build();

@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -64,6 +66,18 @@ public class AuthController {
         return ApiResponseUtil.created(
                 "Registration successful.",
                 authService.register(request)
+        );
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<LoginResponse>> refresh(
+            @RequestBody Map<String, String> request) {
+
+        String refreshToken = request.get("refreshToken");
+
+        return ApiResponseUtil.success(
+                "Token refreshed successfully.",
+                authService.refreshToken(refreshToken)
         );
     }
 

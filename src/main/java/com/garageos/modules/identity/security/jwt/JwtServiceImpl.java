@@ -67,21 +67,15 @@ public class JwtServiceImpl implements JwtService {
         Date now = new Date();
 
         Date expiry = new Date(
-                now.getTime() + accessTokenExpiration.toMillis()
+                now.getTime() + refreshTokenExpiration.toMillis()
         );
 
         return Jwts.builder()
-
                 .subject(user.getUsername())
-
                 .claim("userId", user.getId())
-
                 .issuedAt(now)
-
                 .expiration(expiry)
-
                 .signWith(getSigningKey())
-
                 .compact();
     }
 
