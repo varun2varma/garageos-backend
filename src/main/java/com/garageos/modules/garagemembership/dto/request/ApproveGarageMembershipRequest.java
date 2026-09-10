@@ -13,6 +13,4 @@ public class ApproveGarageMembershipRequest {
     @NotEmpty(message = "At least one role is required.")
     private List<Long> roleIds;
 
-    private String employeeCode;
-
 }

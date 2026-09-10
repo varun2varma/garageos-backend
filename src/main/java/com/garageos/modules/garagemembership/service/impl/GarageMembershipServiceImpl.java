@@ -161,11 +161,13 @@ public class GarageMembershipServiceImpl
 
         }
 
+        String employeeCode = generateEmployeeCode(
+                membership.getGarage());
+
         employee.setGarageId(
                 membership.getGarage().getId());
 
-        employee.setEmployeeCode(
-                request.getEmployeeCode());
+        employee.setEmployeeCode(employeeCode);
 
         userRepository.save(employee);
 
@@ -177,12 +179,41 @@ public class GarageMembershipServiceImpl
 
         membership.setApprovedBy(owner);
 
-        membership.setEmployeeCode(
-                request.getEmployeeCode());
+        membership.setEmployeeCode(employeeCode);
 
         membershipRepository.save(membership);
 
         return buildResponse(membership);
+    }
+
+    private String generateEmployeeCode(Garage garage) {
+
+        List<GarageMembership> memberships =
+                membershipRepository.findByGarage_Id(garage.getId());
+
+        int maxEmployeeNumber = memberships.stream()
+                .map(GarageMembership::getEmployeeCode)
+                .filter(code -> code != null && !code.isBlank())
+                .filter(code -> code.startsWith(garage.getGarageCode() + "-EMP"))
+                .map(code -> {
+                    try {
+                        return Integer.parseInt(
+                                code.substring(
+                                        (garage.getGarageCode() + "-EMP").length()
+                                )
+                        );
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                })
+                .max(Integer::compareTo)
+                .orElse(0);
+
+        return String.format(
+                "%s-EMP%03d",
+                garage.getGarageCode(),
+                maxEmployeeNumber + 1
+        );
     }
 
     @Override
