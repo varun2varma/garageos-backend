@@ -21,10 +21,10 @@ public class InspectionMasterSeeder {
         log.info("==========================================");
         log.info("Starting Inspection Master Import");
         log.info("==========================================");
-
-        masterImporter.importMasters();
-
-        itemImporter.importItems();
+//
+//        masterImporter.importMasters();
+//
+//        itemImporter.importItems();
 
         log.info("==========================================");
         log.info("Inspection Master Import Completed");

@@ -14,11 +14,11 @@ public class VehicleMasterImporterImpl implements VehicleMasterImporter {
     @Override
     public void importData() {
 
-        brandImporter.importBrands();
-
-        modelImporter.importModels();
-
-        variantImporter.importVariants();
+//        brandImporter.importBrands();
+//
+//        modelImporter.importModels();
+//
+//        variantImporter.importVariants();
 
     }
 }

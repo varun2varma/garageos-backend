@@ -119,7 +119,6 @@ public class InspectionMasterServiceImpl
                         variant,
                         fuelType,
                         transmissionType,
-                        year,
                         odometer)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(

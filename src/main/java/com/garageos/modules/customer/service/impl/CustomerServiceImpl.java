@@ -135,28 +135,37 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User not found."));
 
-        if (repository.existsByMobileNumber(user.getMobile())) {
+        /*
+         * Employee may have already created this customer using
+         * the same mobile number.
+         *
+         * In that case, reuse the existing Customer record instead
+         * of creating another one or throwing "already activated".
+         */
+        Customer customer = repository
+                .findByMobileNumber(user.getMobile())
+                .orElseGet(() -> {
 
-            throw new BusinessException(
-                    "Customer already activated.");
-        }
+                    Customer newCustomer = new Customer();
 
-        Customer customer = new Customer();
+                    newCustomer.setFirstName(user.getFirstName());
+                    newCustomer.setLastName(user.getLastName());
+                    newCustomer.setMobileNumber(user.getMobile());
+                    newCustomer.setEmail(user.getEmail());
 
-        customer.setFirstName(user.getFirstName());
+                    return repository.save(newCustomer);
+                });
 
-        customer.setLastName(user.getLastName());
-
-        customer.setMobileNumber(user.getMobile());
-
-        customer.setEmail(user.getEmail());
-
-        customer = repository.save(customer);
-
+        /*
+         * Registration/onboarding is now completed.
+         */
         user.setFirstLogin(false);
-
         userRepository.save(user);
 
+        /*
+         * Make sure CUSTOMER role exists.
+         * assignCustomerRole() is already idempotent.
+         */
         assignCustomerRole(user);
 
         return mapper.toResponse(customer);

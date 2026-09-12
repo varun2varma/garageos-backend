@@ -166,7 +166,6 @@ public class InspectionFindingServiceImpl
                                 vehicle.getVariant(),
                                 vehicle.getFuelType(),
                                 vehicle.getTransmission(),
-                                vehicle.getManufacturingYear(),
                                 jobCard.getOdometerReading().intValue())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
@@ -235,49 +234,36 @@ public class InspectionFindingServiceImpl
     public List<InspectionMasterItemResponse> getRecommendations(
             RecommendationRequest request) {
 
-//        String brand = request.getBrand();
-//        String model = request.getModel();
-//        String variant = request.getVariant();
-//        FuelType fuelType = request.getFuelType();
-//        TransmissionType transmission = request.getTransmission();
-//        Integer manufacturingYear = request.getManufacturingYear();
-//        Integer odometer = request.getOdometer();
-
-        // existing recommendation logic
         System.out.println("==============================");
         System.out.println("Request        : " + request.toString());
-        System.out.println("Make        : " + request.getBrand());
-        System.out.println("Model       : " + request.getModel());
-        System.out.println("Variant     : " + request.getVariant());
-        System.out.println("FuelType    : " + request.getFuelType());
-        System.out.println("Transmission: " + request.getTransmission());
-        System.out.println("Year        : " + request.getManufacturingYear());
-        System.out.println("Odometer    : " + request.getOdometer());
+        System.out.println("Make           : " + request.getBrand());
+        System.out.println("Model          : " + request.getModel());
+        System.out.println("Variant        : " + request.getVariant());
+        System.out.println("FuelType       : " + request.getFuelType());
+        System.out.println("Transmission   : " + request.getTransmission());
+        System.out.println("Year           : " + request.getManufacturingYear());
+        System.out.println("Odometer       : " + request.getOdometer());
         System.out.println("==============================");
+
+        Integer odometer = request.getOdometer();
+
+        if (odometer != null && odometer > 100000) {
+            odometer = odometer % 100000;
+        }
 
         InspectionMaster master =
                 inspectionMasterRepository.findApplicableInspectionMaster(
-
                         request.getBrand(),
-
                         request.getModel(),
-
                         request.getVariant(),
-
                         request.getFuelType(),
-
                         request.getTransmission(),
-
-                        request.getManufacturingYear(),
-
-                        request.getOdometer()
-
+                        odometer
                 ).orElse(new InspectionMaster());
 
         return master.getItems()
                 .stream()
                 .map(inspectionMasterItemMapper::toResponse)
                 .toList();
-
     }
 }

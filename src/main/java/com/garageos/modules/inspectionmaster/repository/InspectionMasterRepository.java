@@ -30,7 +30,6 @@ public interface InspectionMasterRepository
       AND (:variant IS NULL OR LOWER(im.variant) = LOWER(:variant))
       AND im.fuelType = :fuelType
       AND im.transmissionType = :transmissionType
-      AND :year BETWEEN im.minYear AND im.maxYear
       AND :odometer BETWEEN im.minOdometer AND im.maxOdometer
       AND im.active = true
     """)
@@ -40,7 +39,6 @@ public interface InspectionMasterRepository
             @Param("variant") String variant,
             @Param("fuelType") FuelType fuelType,
             @Param("transmissionType") TransmissionType transmissionType,
-            @Param("year") Integer year,
             @Param("odometer") Integer odometer
     );
 
