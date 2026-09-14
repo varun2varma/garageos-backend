@@ -5,7 +5,6 @@ import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.jobcard.entity.JobCard;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +16,7 @@ public interface JobCardRepository extends JpaRepository<JobCard, Long> {
 
     Optional<JobCard> findByJobCardNumber(String jobCardNumber);
 
-    Optional<JobCard> findTopByOrderByIdDesc();
+    Optional<JobCard> findTopByGarageIdOrderByIdDesc(Long garageId);
 
     long countByStatusNotIn(List<JobCardStatus> statuses);
 

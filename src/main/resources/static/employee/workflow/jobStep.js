@@ -87,6 +87,86 @@ window.JobStep = {
 
         </div>
 
+        <!-- MEDIA -->
+
+        <div class="card border-0 bg-light mb-4">
+
+            <div class="card-body">
+
+                <h6 class="fw-bold mb-3">
+
+                    <i class="bi bi-camera"></i>
+
+                    Vehicle Media
+
+                </h6>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+
+                            Media Stage
+
+                        </label>
+
+                        <select
+                            id="mediaStage"
+                            class="form-select">
+
+                            <option value="BEFORE_SERVICE">
+
+                                Before Service
+
+                            </option>
+
+                            <option value="DURING_REPAIR">
+
+                                During Repair
+
+                            </option>
+
+                            <option value="AFTER_REPAIR">
+
+                                After Repair
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+
+                        <label class="form-label">
+
+                            Photo / Video
+
+                        </label>
+
+                        <input
+                            id="mediaFile"
+                            type="file"
+                            class="form-control"
+                            accept="image/*,video/*">
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="mediaUploadMessage"
+                    class="small text-muted">
+
+                    Media will be uploaded after the Job Card is created.
+
+                </div>
+
+            </div>
+
+        </div>
+
         <div class="d-flex justify-content-between">
 
             <button
@@ -101,7 +181,9 @@ window.JobStep = {
                 id="createJobBtn"
                 class="btn btn-success">
 
-                ${WorkflowHelper.state.jobCardId ? "Update Job Card" : "Create Job Card"}
+                ${WorkflowHelper.state.jobCardId
+                    ? "Update Job Card"
+                    : "Create Job Card"}
 
             </button>
 
@@ -171,41 +253,55 @@ window.JobStep = {
     renderRecommendations() {
 
         const container =
-            document.getElementById("recommendedInspectionContainer");
+            document.getElementById(
+                "recommendedInspectionContainer"
+            );
 
         if (!container) return;
 
         const items =
-            WorkflowHelper.state.recommendedInspectionItems || [];
+            WorkflowHelper.state
+                .recommendedInspectionItems || [];
 
         container.innerHTML = "";
 
         if (items.length === 0) return;
 
         container.innerHTML =
-            `<label class="form-label">Recommended Inspection Items</label>`;
+            `<label class="form-label">
+                Recommended Inspection Items
+            </label>`;
 
         items.forEach(item => {
 
             container.innerHTML += `
                 <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+
                     <span>${item.checkItem}</span>
 
                     <button
                         class="btn btn-sm btn-outline-primary"
                         onclick="JobStep.addRecommendation('${item.checkItem}')">
+
                         +
+
                     </button>
+
                 </div>
             `;
+
         });
 
     },
 
     addRecommendation(name) {
 
-        const exists = [...document.querySelectorAll(".complaint-input")]
-            .some(input => input.value.trim() === name);
+        const exists =
+            [...document.querySelectorAll(".complaint-input")]
+                .some(
+                    input =>
+                        input.value.trim() === name
+                );
 
         if (exists) {
             return;
@@ -255,12 +351,33 @@ window.JobStep = {
             .getElementById("createJobBtn")
             ?.addEventListener("click", async () => {
 
+                const button =
+                    document.getElementById(
+                        "createJobBtn"
+                    );
+
+                button.disabled = true;
+
+                const originalText =
+                    button.innerHTML;
+
+                button.innerHTML =
+                    `<i class="bi bi-hourglass-split"></i>
+                     Saving...`;
+
                 const success =
                     await this.save();
 
                 if (success) {
 
                     Workflow.nextStep();
+
+                } else {
+
+                    button.disabled = false;
+
+                    button.innerHTML =
+                        originalText;
 
                 }
 
@@ -277,7 +394,9 @@ window.JobStep = {
                 button.onclick = () => {
 
                     const rows =
-                        document.querySelectorAll(".complaint-row");
+                        document.querySelectorAll(
+                            ".complaint-row"
+                        );
 
                     if (rows.length === 1) {
 
@@ -294,149 +413,322 @@ window.JobStep = {
             });
 
     },
-        collectData() {
 
-            const complaints = [];
+    collectData() {
 
-            document
-                .querySelectorAll(".complaint-input")
-                .forEach(input => {
+        const complaints = [];
 
-                    const value = input.value.trim();
+        document
+            .querySelectorAll(".complaint-input")
+            .forEach(input => {
 
-                    if (value.length > 0) {
+                const value =
+                    input.value.trim();
 
-                        complaints.push({
+                if (value.length > 0) {
 
-                            complaint: value,
+                    complaints.push({
 
-                            status: "OPEN"
+                        complaint: value,
 
-                        });
+                        status: "OPEN"
+
+                    });
+
+                }
+
+            });
+
+        return {
+
+            vehicleId:
+                WorkflowHelper.state.vehicleId,
+
+            odometerReading:
+                Number(
+                    document
+                        .getElementById(
+                            "odometerReading"
+                        )
+                        .value
+                ),
+
+            complaints,
+
+            estimatedDeliveryDate:
+                document
+                    .getElementById(
+                        "estimatedDeliveryDate"
+                    )
+                    .value,
+
+            remarks:
+                document
+                    .getElementById("remarks")
+                    .value
+                    .trim()
+
+        };
+
+    },
+
+    validate(request) {
+
+        if (!request.vehicleId) {
+
+            alert(
+                "Vehicle information is missing."
+            );
+
+            return false;
+
+        }
+
+        if (request.complaints.length === 0) {
+
+            alert(
+                "Please enter at least one complaint."
+            );
+
+            return false;
+
+        }
+
+        if (
+            !request.odometerReading ||
+            request.odometerReading <= 0
+        ) {
+
+            alert(
+                "Please enter a valid odometer reading."
+            );
+
+            return false;
+
+        }
+
+        if (!request.estimatedDeliveryDate) {
+
+            alert(
+                "Please select estimated delivery date."
+            );
+
+            return false;
+
+        }
+
+        return true;
+
+    },
+
+    async save() {
+
+        const request =
+            this.collectData();
+
+        if (!this.validate(request)) {
+
+            return false;
+
+        }
+
+        try {
+
+            let job;
+
+            if (WorkflowHelper.state.jobCardId) {
+
+                const response =
+                    await JobCardService.updateJob(
+                        WorkflowHelper.state.jobCardId,
+                        request
+                    );
+
+                job = response;
+
+            }
+
+            else {
+
+                job =
+                    await WorkflowService.createJob(
+                        request
+                    );
+
+            }
+
+            WorkflowHelper.state.job =
+                job;
+
+            WorkflowHelper.state.jobCardId =
+                job.id;
+
+            WorkflowHelper.state.jobCardNumber =
+                job.jobCardNumber;
+
+            console.log(
+                "Job Card Saved",
+                job
+            );
+
+            /*
+             * -----------------------------------------------------
+             * MEDIA UPLOAD
+             * -----------------------------------------------------
+             */
+
+            const mediaFile =
+                document.getElementById(
+                    "mediaFile"
+                )?.files?.[0];
+
+            const mediaStage =
+                document.getElementById(
+                    "mediaStage"
+                )?.value;
+
+            if (mediaFile) {
+
+                const message =
+                    document.getElementById(
+                        "mediaUploadMessage"
+                    );
+
+                if (message) {
+
+                    message.innerHTML =
+                        `<span class="text-muted">
+
+                            <i class="bi bi-cloud-upload"></i>
+
+                            Uploading media...
+
+                        </span>`;
+
+                }
+
+                const formData =
+                    new FormData();
+
+                formData.append(
+                    "stage",
+                    mediaStage
+                );
+
+                formData.append(
+                    "file",
+                    mediaFile
+                );
+
+                /*
+                 * Use the SAME JWT authentication mechanism
+                 * used by window.Api.
+                 *
+                 * IMPORTANT:
+                 * Do not set Content-Type manually.
+                 * Browser will set multipart/form-data boundary.
+                 */
+
+                const token =
+                    window.Auth
+                        ? Auth.getAccessToken()
+                        : null;
+
+                const headers = {};
+
+                if (token) {
+
+                    headers.Authorization =
+                        `Bearer ${token}`;
+
+                }
+
+                const response =
+                    await fetch(
+                        `/api/v1/job-cards/${job.id}/media`,
+                        {
+                            method: "POST",
+
+                            headers,
+
+                            body: formData
+                        }
+                    );
+
+                if (!response.ok) {
+
+                    let message =
+                        `Media upload failed (${response.status})`;
+
+                    try {
+
+                        const error =
+                            await response.json();
+
+                        message =
+                            error.message ||
+                            error.error ||
+                            message;
 
                     }
 
-                });
+                    catch (e) {
 
-            return {
+                        const text =
+                            await response.text();
 
-                vehicleId:
-                    WorkflowHelper.state.vehicleId,
+                        if (text) {
 
-                odometerReading:
-                    Number(
-                        document.getElementById("odometerReading").value
-                    ),
+                            message = text;
 
-                complaints,
+                        }
 
-                estimatedDeliveryDate:
-                    document.getElementById("estimatedDeliveryDate").value,
+                    }
 
-                remarks:
-                    document
-                        .getElementById("remarks")
-                        .value
-                        .trim()
+                    throw new Error(message);
 
-            };
+                }
 
-        },
+                const media =
+                    await response.json();
 
-        validate(request) {
+                console.log(
+                    "Media Uploaded",
+                    media
+                );
 
-            if (!request.vehicleId) {
+                if (message) {
 
-                alert("Vehicle information is missing.");
+                    message.innerHTML =
+                        `<span class="text-success">
 
-                return false;
+                            <i class="bi bi-check-circle-fill"></i>
 
-            }
+                            Media uploaded successfully.
 
-            if (request.complaints.length === 0) {
+                        </span>`;
 
-                alert("Please enter at least one complaint.");
-
-                return false;
-
-            }
-
-            if (!request.odometerReading || request.odometerReading <= 0) {
-
-                alert("Please enter a valid odometer reading.");
-
-                return false;
-
-            }
-
-            if (!request.estimatedDeliveryDate) {
-
-                alert("Please select estimated delivery date.");
-
-                return false;
+                }
 
             }
 
             return true;
 
-        },
+        }
 
-        async save() {
+        catch (e) {
 
-            const request = this.collectData();
+            console.error(e);
 
-            if (!this.validate(request)) {
+            alert(
+                e.message ||
+                "Unable to create Job Card."
+            );
 
-                return false;
-
-            }
-
-            try {
-
-                let job;
-
-                if (WorkflowHelper.state.jobCardId) {
-
-                    const response =
-                        await JobCardService.updateJob(
-
-                            WorkflowHelper.state.jobCardId,
-
-                            request
-
-                        );
-
-                    job = response;
-
-                }
-
-                else {
-
-                    job =
-                        await WorkflowService.createJob(request);
-
-                }
-
-                WorkflowHelper.state.job = job;
-                WorkflowHelper.state.jobCardId = job.id;
-                WorkflowHelper.state.jobCardNumber = job.jobCardNumber;
-
-                console.log("Job Card Saved", job);
-
-                return true;
-
-            }
-
-            catch (e) {
-
-                console.error(e);
-
-                alert(e.message || "Unable to create Job Card.");
-
-                return false;
-
-            }
+            return false;
 
         }
 
-    };
+    }
+
+};

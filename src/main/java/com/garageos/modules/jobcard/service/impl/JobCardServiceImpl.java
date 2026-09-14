@@ -9,6 +9,9 @@ import com.garageos.modules.complaint.dto.response.ComplaintResponse;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.complaint.mapper.ComplaintMapper;
 import com.garageos.modules.complaint.service.ComplaintService;
+import com.garageos.modules.garage.entity.Garage;
+import com.garageos.modules.garage.repository.GarageRepository;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
@@ -23,6 +26,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,6 +39,7 @@ public class JobCardServiceImpl implements JobCardService {
 
     private final JobCardRepository jobCardRepository;
     private final VehicleRepository vehicleRepository;
+    private final GarageRepository garageRepository;
     private final JobCardMapper jobCardMapper;
     private final JobCardStatusValidator statusValidator;
     private final ComplaintService complaintService;
@@ -49,11 +54,32 @@ public class JobCardServiceImpl implements JobCardService {
                                 "Vehicle not found with id : "
                                         + request.getVehicleId()));
 
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        Long garageId = principal.getGarageId();
+
+        if (garageId == null) {
+            throw new BusinessException(
+                    "User is not associated with a garage."
+            );
+        }
+
+        Garage garage = garageRepository.findById(garageId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Garage not found with id : "
+                                        + garageId));
+
         Optional<JobCard> latestJobCard =
-                jobCardRepository.findTopByOrderByIdDesc();
+                jobCardRepository.findTopByGarageIdOrderByIdDesc(garageId);
 
         String jobCardNumber =
                 JobCardNumberGenerator.generate(
+                        garage.getGarageCode(),
                         latestJobCard
                                 .map(JobCard::getJobCardNumber)
                                 .orElse(null));
@@ -61,6 +87,7 @@ public class JobCardServiceImpl implements JobCardService {
         JobCard jobCard = jobCardMapper.toEntity(request);
 
         jobCard.setJobCardNumber(jobCardNumber);
+        jobCard.setGarage(garage);
         jobCard.setVehicle(vehicle);
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
@@ -73,14 +100,7 @@ public class JobCardServiceImpl implements JobCardService {
         });
         jobCard.setComplaints(complaints);
         jobCard = jobCardRepository.save(jobCard);
-//        List<ComplaintResponse> complaintResponseList = complaintService.createComplaintList(jobCard.getId(),request.getComplaints());
-//        List<Complaint> complaints =
-//                complaintService.createJobWorkComplaintList(
-//                        jobCard,
-//                        request.getComplaints()
-//                );
 
-//        jobCard.setComplaints(complaints);
         return jobCardMapper.toResponse(jobCard);
     }
 

@@ -4,6 +4,7 @@ import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.customer.entity.Customer;
+import com.garageos.modules.garage.entity.Garage;
 import com.garageos.modules.vehicle.entity.Vehicle;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,6 +24,13 @@ import java.util.List;
 @Table(name = "job_card")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JobCard extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "garage_id",
+            nullable = false
+    )
+    Garage garage;
 
     @Column(nullable = false, unique = true, length = 30)
     String jobCardNumber;

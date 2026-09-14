@@ -18,6 +18,7 @@ public interface JobCardMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jobCardNumber", ignore = true)
+    @Mapping(target = "garage", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "serviceDate", ignore = true)
@@ -33,7 +34,6 @@ public interface JobCardMapper {
                     "\" \" + jobCard.getCustomer().getLastName() : \"\"))",
             target = "customerName")
     @Mapping(source = "customer.mobileNumber", target = "customerMobileNumber")
-
     @Mapping(source = "vehicle.id", target = "vehicleId")
     @Mapping(source = "vehicle.registrationNumber", target = "registrationNumber")
     @Mapping(source = "vehicle.brand", target = "brand")
@@ -43,6 +43,7 @@ public interface JobCardMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "jobCardNumber", ignore = true)
+    @Mapping(target = "garage", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "serviceDate", ignore = true)

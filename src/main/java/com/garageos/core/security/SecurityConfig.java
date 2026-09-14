@@ -44,25 +44,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(
-//                                "/api/v1/auth/**",
-//                                "/api/v1/health/**",
-//                                "/swagger-ui/**",
-//                                "/swagger-ui.html",
-//                                "/v3/api-docs/**",
-//                                "/v3/api-docs",
-//                                "/webjars/**",
-//                                "/api/v1/auth/login",
-//                                "/api/v1/auth/refresh",
-//                                "/",
-//                                "/index.html",
-//                                "/css/**",
-//                                "/js/**",
-//                                "/images/**",
-//                                "/favicon.ico",
-//                                "/auth/**",
-//                                "/onboarding/**",
-//                                "/garage/**",
-//                                "/dashboard/**"
                                 "/",
                                 "/*.html",
 
@@ -85,11 +66,14 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/health/**",
 
+                                // Google Drive OAuth
+                                "/api/v1/media/google/**",
+
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/webjars/**"
-                                ).permitAll()
+                        ).permitAll()
 
                         .anyRequest()
                         .authenticated())
