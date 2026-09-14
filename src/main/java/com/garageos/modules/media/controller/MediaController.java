@@ -4,6 +4,7 @@ import com.garageos.core.enums.media.MediaStage;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/job-cards")
 @RequiredArgsConstructor
+@Slf4j
 public class MediaController {
 
     private final MediaService mediaService;
@@ -29,13 +31,44 @@ public class MediaController {
             @RequestParam("stage") MediaStage stage,
             @RequestParam("file") MultipartFile file) {
 
-        JobCardMedia media =
-                mediaService.uploadMedia(
-                        jobCardId,
-                        stage,
-                        file
-                );
+        log.info(
+                "[MEDIA] Upload request received. jobCardId={}, stage={}, fileName={}, contentType={}, size={}",
+                jobCardId,
+                stage,
+                file != null ? file.getOriginalFilename() : null,
+                file != null ? file.getContentType() : null,
+                file != null ? file.getSize() : null
+        );
 
-        return ResponseEntity.ok(media);
+        try {
+
+            JobCardMedia media =
+                    mediaService.uploadMedia(
+                            jobCardId,
+                            stage,
+                            file
+                    );
+
+            log.info(
+                    "[MEDIA] Upload request completed successfully. jobCardId={}, mediaId={}, fileName={}",
+                    jobCardId,
+                    media.getId(),
+                    media.getFileName()
+            );
+
+            return ResponseEntity.ok(media);
+
+        } catch (Exception ex) {
+
+            log.error(
+                    "[MEDIA] Upload request failed. jobCardId={}, stage={}, error={}",
+                    jobCardId,
+                    stage,
+                    ex.getMessage(),
+                    ex
+            );
+
+            throw ex;
+        }
     }
 }

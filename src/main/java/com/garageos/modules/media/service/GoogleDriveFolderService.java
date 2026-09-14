@@ -3,6 +3,7 @@ package com.garageos.modules.media.service;
 import com.garageos.core.config.GoogleDriveProperties;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 @Service
+@Slf4j
 public class GoogleDriveFolderService {
 
     private static final String FOLDER_MIME_TYPE =
@@ -31,7 +33,19 @@ public class GoogleDriveFolderService {
             String parentFolderId)
             throws GeneralSecurityException, IOException {
 
-        Drive drive = driveClientService.getDriveClient();
+        log.info(
+                "[DRIVE] Resolving folder. folderName={}, parentFolderId={}",
+                folderName,
+                parentFolderId
+        );
+
+        Drive drive =
+                driveClientService.getDriveClient();
+
+        log.debug(
+                "[DRIVE] Drive client obtained for folder lookup. folderName={}",
+                folderName
+        );
 
         String escapedFolderName =
                 folderName.replace("'", "\\'");
@@ -41,6 +55,12 @@ public class GoogleDriveFolderService {
                         + " and mimeType = '" + FOLDER_MIME_TYPE + "'"
                         + " and trashed = false"
                         + " and '" + parentFolderId + "' in parents";
+
+        log.debug(
+                "[DRIVE] Searching for folder. folderName={}, parentFolderId={}",
+                folderName,
+                parentFolderId
+        );
 
         List<File> folders = drive.files()
                 .list()
@@ -52,23 +72,53 @@ public class GoogleDriveFolderService {
                 .getFiles();
 
         if (folders != null && !folders.isEmpty()) {
-            return folders.get(0);
+
+            File existingFolder =
+                    folders.get(0);
+
+            log.info(
+                    "[DRIVE] Existing folder found. folderName={}, folderId={}",
+                    folderName,
+                    existingFolder.getId()
+            );
+
+            return existingFolder;
         }
+
+        log.info(
+                "[DRIVE] Folder not found. Creating folder. folderName={}, parentFolderId={}",
+                folderName,
+                parentFolderId
+        );
 
         File folderMetadata = new File()
                 .setName(folderName)
                 .setMimeType(FOLDER_MIME_TYPE)
                 .setParents(List.of(parentFolderId));
 
-        return drive.files()
-                .create(folderMetadata)
-                .setFields("id,name,parents,webViewLink")
-                .execute();
+        File createdFolder =
+                drive.files()
+                        .create(folderMetadata)
+                        .setFields("id,name,parents,webViewLink")
+                        .execute();
+
+        log.info(
+                "[DRIVE] Folder created successfully. folderName={}, folderId={}",
+                folderName,
+                createdFolder.getId()
+        );
+
+        return createdFolder;
     }
 
     public File getOrCreateGarageFolder(
             String garageCode)
             throws GeneralSecurityException, IOException {
+
+        log.info(
+                "[DRIVE] Resolving garage folder. garageCode={}",
+                garageCode
+        );
 
         return getOrCreateFolder(
                 garageCode,
@@ -81,8 +131,20 @@ public class GoogleDriveFolderService {
             String jobCardNumber)
             throws GeneralSecurityException, IOException {
 
+        log.info(
+                "[DRIVE] Resolving Job Card folder. garageCode={}, jobCardNumber={}",
+                garageCode,
+                jobCardNumber
+        );
+
         File garageFolder =
                 getOrCreateGarageFolder(garageCode);
+
+        log.debug(
+                "[DRIVE] Garage folder resolved. garageCode={}, folderId={}",
+                garageCode,
+                garageFolder.getId()
+        );
 
         return getOrCreateFolder(
                 jobCardNumber,
@@ -96,15 +158,37 @@ public class GoogleDriveFolderService {
             String stage)
             throws GeneralSecurityException, IOException {
 
+        log.info(
+                "[DRIVE] Resolving stage folder. garageCode={}, jobCardNumber={}, stage={}",
+                garageCode,
+                jobCardNumber,
+                stage
+        );
+
         File jobCardFolder =
                 getOrCreateJobCardFolder(
                         garageCode,
                         jobCardNumber
                 );
 
-        return getOrCreateFolder(
-                stage,
+        log.debug(
+                "[DRIVE] Job Card folder resolved. jobCardNumber={}, folderId={}",
+                jobCardNumber,
                 jobCardFolder.getId()
         );
+
+        File stageFolder =
+                getOrCreateFolder(
+                        stage,
+                        jobCardFolder.getId()
+                );
+
+        log.info(
+                "[DRIVE] Stage folder resolved. stage={}, folderId={}",
+                stage,
+                stageFolder.getId()
+        );
+
+        return stageFolder;
     }
 }

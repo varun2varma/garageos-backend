@@ -13,6 +13,7 @@ import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.media.service.MediaService;
 import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,7 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MediaServiceImpl implements MediaService {
 
     private static final Pattern SEQUENCE_PATTERN =
@@ -42,33 +44,77 @@ public class MediaServiceImpl implements MediaService {
             MediaStage mediaStage,
             MultipartFile file) {
 
+        log.info(
+                "[MEDIA] Starting media upload. jobCardId={}, stage={}",
+                jobCardId,
+                mediaStage
+        );
+
         if (jobCardId == null) {
-            throw new IllegalArgumentException("Job card id is required.");
+            log.warn("[MEDIA] Job card id is missing.");
+            throw new IllegalArgumentException(
+                    "Job card id is required."
+            );
         }
 
         if (mediaStage == null) {
-            throw new IllegalArgumentException("Media stage is required.");
+            log.warn(
+                    "[MEDIA] Media stage is missing. jobCardId={}",
+                    jobCardId
+            );
+
+            throw new IllegalArgumentException(
+                    "Media stage is required."
+            );
         }
 
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File is required.");
+            log.warn(
+                    "[MEDIA] File is missing or empty. jobCardId={}, stage={}",
+                    jobCardId,
+                    mediaStage
+            );
+
+            throw new IllegalArgumentException(
+                    "File is required."
+            );
         }
+
+        log.info(
+                "[MEDIA] File validated. jobCardId={}, stage={}, fileName={}, contentType={}, size={}",
+                jobCardId,
+                mediaStage,
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize()
+        );
 
         JobCard jobCard =
                 jobCardRepository.findById(jobCardId)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Job Card not found with id : "
-                                                + jobCardId));
+                        .orElseThrow(() -> {
+                            log.warn(
+                                    "[MEDIA] Job Card not found. jobCardId={}",
+                                    jobCardId
+                            );
+
+                            return new ResourceNotFoundException(
+                                    "Job Card not found with id : "
+                                            + jobCardId
+                            );
+                        });
+
+        log.info(
+                "[MEDIA] Job Card loaded. jobCardId={}, jobCardNumber={}",
+                jobCardId,
+                jobCard.getJobCardNumber()
+        );
 
         /*
          * -------------------------------------------------------------
          * GARAGE ISOLATION
          * -------------------------------------------------------------
-         *
-         * A logged-in user can only upload media against a JobCard
-         * belonging to the user's current garage.
          */
+
         GarageUserPrincipal principal =
                 (GarageUserPrincipal)
                         SecurityContextHolder
@@ -78,38 +124,102 @@ public class MediaServiceImpl implements MediaService {
 
         Long userGarageId = principal.getGarageId();
 
+        log.info(
+                "[MEDIA] Garage context resolved. jobCardId={}, userGarageId={}",
+                jobCardId,
+                userGarageId
+        );
+
         if (userGarageId == null) {
+
+            log.error(
+                    "[MEDIA] User is not associated with a garage. jobCardId={}",
+                    jobCardId
+            );
+
             throw new IllegalStateException(
-                    "User is not associated with a garage.");
+                    "User is not associated with a garage."
+            );
         }
 
         if (jobCard.getGarage() == null) {
+
+            log.error(
+                    "[MEDIA] Job Card is not associated with a garage. jobCardId={}",
+                    jobCardId
+            );
+
             throw new IllegalStateException(
-                    "Job Card is not associated with a garage.");
+                    "Job Card is not associated with a garage."
+            );
         }
 
         Long jobCardGarageId =
                 jobCard.getGarage().getId();
 
+        log.info(
+                "[MEDIA] Garage isolation check. jobCardId={}, userGarageId={}, jobCardGarageId={}",
+                jobCardId,
+                userGarageId,
+                jobCardGarageId
+        );
+
         if (!userGarageId.equals(jobCardGarageId)) {
+
+            log.warn(
+                    "[MEDIA] Garage access denied. jobCardId={}, userGarageId={}, jobCardGarageId={}",
+                    jobCardId,
+                    userGarageId,
+                    jobCardGarageId
+            );
+
             throw new org.springframework.security.access.AccessDeniedException(
-                    "You do not have access to this Job Card.");
+                    "You do not have access to this Job Card."
+            );
         }
+
+        log.info(
+                "[MEDIA] Garage access validated. jobCardId={}, garageId={}",
+                jobCardId,
+                jobCardGarageId
+        );
 
         String contentType = file.getContentType();
 
         MediaType mediaType =
                 resolveMediaType(contentType);
 
+        log.info(
+                "[MEDIA] Media type resolved. jobCardId={}, mediaType={}, contentType={}",
+                jobCardId,
+                mediaType,
+                contentType
+        );
+
         String extension =
                 resolveExtension(
                         file.getOriginalFilename(),
-                        contentType);
+                        contentType
+                );
+
+        log.info(
+                "[MEDIA] File extension resolved. jobCardId={}, extension={}",
+                jobCardId,
+                extension
+        );
 
         int sequence =
                 getNextSequence(
                         jobCardId,
-                        mediaStage);
+                        mediaStage
+                );
+
+        log.info(
+                "[MEDIA] Media sequence resolved. jobCardId={}, stage={}, sequence={}",
+                jobCardId,
+                mediaStage,
+                sequence
+        );
 
         String garageCode =
                 jobCard.getGarage().getGarageCode();
@@ -126,7 +236,20 @@ public class MediaServiceImpl implements MediaService {
                         extension
                 );
 
+        log.info(
+                "[MEDIA] Generated Drive file name. jobCardId={}, fileName={}",
+                jobCardId,
+                generatedFileName
+        );
+
         try {
+
+            log.info(
+                    "[DRIVE] Resolving stage folder. garageCode={}, jobCardNumber={}, stage={}",
+                    garageCode,
+                    jobCardNumber,
+                    mediaStage
+            );
 
             File driveFolder =
                     folderService.getOrCreateStageFolder(
@@ -135,12 +258,32 @@ public class MediaServiceImpl implements MediaService {
                             mediaStage.name()
                     );
 
+            log.info(
+                    "[DRIVE] Stage folder resolved. folderId={}, folderName={}",
+                    driveFolder.getId(),
+                    driveFolder.getName()
+            );
+
+            log.info(
+                    "[DRIVE] Starting file upload. jobCardId={}, fileName={}, folderId={}",
+                    jobCardId,
+                    generatedFileName,
+                    driveFolder.getId()
+            );
+
             File driveFile =
                     googleDriveFileService.uploadFile(
                             file,
                             generatedFileName,
                             driveFolder.getId()
                     );
+
+            log.info(
+                    "[DRIVE] File upload successful. jobCardId={}, driveFileId={}, fileName={}",
+                    jobCardId,
+                    driveFile.getId(),
+                    generatedFileName
+            );
 
             JobCardMedia media =
                     JobCardMedia.builder()
@@ -156,9 +299,33 @@ public class MediaServiceImpl implements MediaService {
                             .createdAt(LocalDateTime.now())
                             .build();
 
-            return jobCardMediaRepository.save(media);
+            log.info(
+                    "[MEDIA] Saving media metadata to database. jobCardId={}, driveFileId={}",
+                    jobCardId,
+                    driveFile.getId()
+            );
+
+            JobCardMedia savedMedia =
+                    jobCardMediaRepository.save(media);
+
+            log.info(
+                    "[MEDIA] Media metadata saved successfully. mediaId={}, jobCardId={}, driveFileId={}",
+                    savedMedia.getId(),
+                    jobCardId,
+                    driveFile.getId()
+            );
+
+            return savedMedia;
 
         } catch (GeneralSecurityException | IOException ex) {
+
+            log.error(
+                    "[DRIVE] Google Drive operation failed. jobCardId={}, fileName={}, error={}",
+                    jobCardId,
+                    generatedFileName,
+                    ex.getMessage(),
+                    ex
+            );
 
             throw new IllegalStateException(
                     "Failed to upload media to Google Drive.",
@@ -170,6 +337,11 @@ public class MediaServiceImpl implements MediaService {
     private MediaType resolveMediaType(String contentType) {
 
         if (contentType == null || contentType.isBlank()) {
+
+            log.warn(
+                    "[MEDIA] File content type is missing."
+            );
+
             throw new IllegalArgumentException(
                     "File content type is required."
             );
@@ -188,6 +360,11 @@ public class MediaServiceImpl implements MediaService {
 
             return MediaType.VIDEO;
         }
+
+        log.warn(
+                "[MEDIA] Unsupported content type: {}",
+                contentType
+        );
 
         throw new IllegalArgumentException(
                 "Only image and video files are supported."
@@ -232,6 +409,12 @@ public class MediaServiceImpl implements MediaService {
             Long jobCardId,
             MediaStage mediaStage) {
 
+        log.debug(
+                "[MEDIA] Calculating next sequence. jobCardId={}, stage={}",
+                jobCardId,
+                mediaStage
+        );
+
         List<JobCardMedia> existingMedia =
                 jobCardMediaRepository
                         .findByJobCardIdAndMediaStageOrderByCreatedAtAsc(
@@ -260,9 +443,17 @@ public class MediaServiceImpl implements MediaService {
                 maxSequence =
                         Math.max(
                                 maxSequence,
-                                sequence);
+                                sequence
+                        );
             }
         }
+
+        log.debug(
+                "[MEDIA] Existing media count={}, maxSequence={}, nextSequence={}",
+                existingMedia.size(),
+                maxSequence,
+                maxSequence + 1
+        );
 
         return maxSequence + 1;
     }

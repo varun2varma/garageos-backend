@@ -456,42 +456,21 @@ public class ServiceWorkflowServiceImpl
         List<InspectionResponse> inspections =
                 inspectionService.getInspectionsByJobCard(jobCard.getId());
 
-        EstimateResponse estimate = null;
+        EstimateResponse estimate =
+                estimateService.getEstimateByJobCard(jobCard.getId());
+
         List<EstimateItemResponse> estimateItems = List.of();
 
-        try {
-
-            estimate =
-                    estimateService.getEstimateByJobCard(jobCard.getId());
-
+        if (estimate != null && estimate.getId() != null) {
             estimateItems =
                     estimateItemService.getItems(estimate.getId());
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw e;
-
         }
 
         List<RepairTaskResponse> repairTasks =
                 repairTaskService.getRepairTasks(jobCard.getId());
 
-        InvoiceResponse invoice = null;
-
-        try {
-
-            invoice =
-                    invoiceService.getInvoiceByJobCard(jobCard.getId());
-
-        }   catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw e;
-
-        }
+        InvoiceResponse invoice =
+                invoiceService.getInvoiceByJobCard(jobCard.getId());
 
         return WorkflowResumeResponse.builder()
                 .workflowStatus(getWorkflowStatus(jobCardNumber))
