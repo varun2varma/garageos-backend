@@ -16,4 +16,13 @@ public interface JobCardMediaRepository
             Long jobCardId,
             String mediaStage
     );
+
+    List<JobCardMedia> findByRepairTaskIdOrderByCreatedAtAsc(
+            Long repairTaskId
+    );
+
+    List<JobCardMedia> findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
+            Long jobCardId,
+            String visibility
+    );
 }

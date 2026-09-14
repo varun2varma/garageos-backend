@@ -9,6 +9,7 @@ public interface MediaService {
     JobCardMedia uploadMedia(
             Long jobCardId,
             MediaStage mediaStage,
+            Long repairTaskId,
             MultipartFile file
     );
 }

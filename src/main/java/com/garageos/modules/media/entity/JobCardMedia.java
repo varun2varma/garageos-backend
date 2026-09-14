@@ -24,6 +24,14 @@ import java.time.LocalDateTime;
                 @Index(
                         name = "idx_job_card_media_drive_file",
                         columnList = "drive_file_id"
+                ),
+                @Index(
+                        name = "idx_job_card_media_repair_task",
+                        columnList = "repair_task_id"
+                ),
+                @Index(
+                        name = "idx_job_card_media_visibility",
+                        columnList = "job_card_id, visibility"
                 )
         }
 )
@@ -40,6 +48,9 @@ public class JobCardMedia {
 
     @Column(name = "job_card_id", nullable = false)
     private Long jobCardId;
+
+    @Column(name = "repair_task_id")
+    private Long repairTaskId;
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
@@ -64,6 +75,10 @@ public class JobCardMedia {
 
     @Column(name = "uploaded_by")
     private Long uploadedBy;
+
+    @Column(name = "visibility", nullable = false, length = 30)
+    @Builder.Default
+    private String visibility = "INTERNAL";
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

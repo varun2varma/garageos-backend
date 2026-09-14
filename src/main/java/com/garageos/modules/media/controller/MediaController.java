@@ -29,12 +29,15 @@ public class MediaController {
     public ResponseEntity<JobCardMedia> uploadMedia(
             @PathVariable Long jobCardId,
             @RequestParam("stage") MediaStage stage,
+            @RequestParam(value = "repairTaskId", required = false)
+            Long repairTaskId,
             @RequestParam("file") MultipartFile file) {
 
         log.info(
-                "[MEDIA] Upload request received. jobCardId={}, stage={}, fileName={}, contentType={}, size={}",
+                "[MEDIA] Upload request received. jobCardId={}, stage={}, repairTaskId={}, fileName={}, contentType={}, size={}",
                 jobCardId,
                 stage,
+                repairTaskId,
                 file != null ? file.getOriginalFilename() : null,
                 file != null ? file.getContentType() : null,
                 file != null ? file.getSize() : null
@@ -46,6 +49,7 @@ public class MediaController {
                     mediaService.uploadMedia(
                             jobCardId,
                             stage,
+                            repairTaskId,
                             file
                     );
 
@@ -61,9 +65,10 @@ public class MediaController {
         } catch (Exception ex) {
 
             log.error(
-                    "[MEDIA] Upload request failed. jobCardId={}, stage={}, error={}",
+                    "[MEDIA] Upload request failed. jobCardId={}, stage={}, repairTaskId={}, error={}",
                     jobCardId,
                     stage,
+                    repairTaskId,
                     ex.getMessage(),
                     ex
             );

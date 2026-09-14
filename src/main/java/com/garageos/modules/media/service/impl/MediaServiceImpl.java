@@ -11,6 +11,8 @@ import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.service.GoogleDriveFileService;
 import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.media.service.MediaService;
+import com.garageos.modules.repairtask.entity.RepairTask;
+import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +35,15 @@ public class MediaServiceImpl implements MediaService {
     private static final Pattern SEQUENCE_PATTERN =
             Pattern.compile("_(\\d+)\\.[^.]+$");
 
+    private static final String VISIBILITY_INTERNAL =
+            "INTERNAL";
+
+    private static final String VISIBILITY_CUSTOMER_VISIBLE =
+            "CUSTOMER_VISIBLE";
+
     private final JobCardRepository jobCardRepository;
     private final JobCardMediaRepository jobCardMediaRepository;
+    private final RepairTaskRepository repairTaskRepository;
     private final GoogleDriveFolderService folderService;
     private final GoogleDriveFileService googleDriveFileService;
 
@@ -42,22 +51,27 @@ public class MediaServiceImpl implements MediaService {
     public JobCardMedia uploadMedia(
             Long jobCardId,
             MediaStage mediaStage,
+            Long repairTaskId,
             MultipartFile file) {
 
         log.info(
-                "[MEDIA] Starting media upload. jobCardId={}, stage={}",
+                "[MEDIA] Starting media upload. jobCardId={}, stage={}, repairTaskId={}",
                 jobCardId,
-                mediaStage
+                mediaStage,
+                repairTaskId
         );
 
         if (jobCardId == null) {
+
             log.warn("[MEDIA] Job card id is missing.");
+
             throw new IllegalArgumentException(
                     "Job card id is required."
             );
         }
 
         if (mediaStage == null) {
+
             log.warn(
                     "[MEDIA] Media stage is missing. jobCardId={}",
                     jobCardId
@@ -69,6 +83,7 @@ public class MediaServiceImpl implements MediaService {
         }
 
         if (file == null || file.isEmpty()) {
+
             log.warn(
                     "[MEDIA] File is missing or empty. jobCardId={}, stage={}",
                     jobCardId,
@@ -80,10 +95,17 @@ public class MediaServiceImpl implements MediaService {
             );
         }
 
-        log.info(
-                "[MEDIA] File validated. jobCardId={}, stage={}, fileName={}, contentType={}, size={}",
+        validateRepairTaskRequirement(
                 jobCardId,
                 mediaStage,
+                repairTaskId
+        );
+
+        log.info(
+                "[MEDIA] File validated. jobCardId={}, stage={}, repairTaskId={}, fileName={}, contentType={}, size={}",
+                jobCardId,
+                mediaStage,
+                repairTaskId,
                 file.getOriginalFilename(),
                 file.getContentType(),
                 file.getSize()
@@ -92,6 +114,7 @@ public class MediaServiceImpl implements MediaService {
         JobCard jobCard =
                 jobCardRepository.findById(jobCardId)
                         .orElseThrow(() -> {
+
                             log.warn(
                                     "[MEDIA] Job Card not found. jobCardId={}",
                                     jobCardId
@@ -122,7 +145,8 @@ public class MediaServiceImpl implements MediaService {
                                 .getAuthentication()
                                 .getPrincipal();
 
-        Long userGarageId = principal.getGarageId();
+        Long userGarageId =
+                principal.getGarageId();
 
         log.info(
                 "[MEDIA] Garage context resolved. jobCardId={}, userGarageId={}",
@@ -184,7 +208,57 @@ public class MediaServiceImpl implements MediaService {
                 jobCardGarageId
         );
 
-        String contentType = file.getContentType();
+        /*
+         * -------------------------------------------------------------
+         * REPAIR TASK VALIDATION
+         * -------------------------------------------------------------
+         */
+
+        RepairTask repairTask = null;
+
+        if (repairTaskId != null) {
+
+            repairTask =
+                    repairTaskRepository.findById(repairTaskId)
+                            .orElseThrow(() -> {
+
+                                log.warn(
+                                        "[MEDIA] Repair Task not found. repairTaskId={}, jobCardId={}",
+                                        repairTaskId,
+                                        jobCardId
+                                );
+
+                                return new ResourceNotFoundException(
+                                        "Repair Task not found with id : "
+                                                + repairTaskId
+                                );
+                            });
+
+            if (repairTask.getJobCard() == null
+                    || repairTask.getJobCard().getId() == null
+                    || !jobCardId.equals(
+                    repairTask.getJobCard().getId())) {
+
+                log.warn(
+                        "[MEDIA] Repair Task does not belong to Job Card. repairTaskId={}, jobCardId={}",
+                        repairTaskId,
+                        jobCardId
+                );
+
+                throw new IllegalArgumentException(
+                        "Repair Task does not belong to this Job Card."
+                );
+            }
+
+            log.info(
+                    "[MEDIA] Repair Task validated. repairTaskId={}, jobCardId={}",
+                    repairTaskId,
+                    jobCardId
+            );
+        }
+
+        String contentType =
+                file.getContentType();
 
         MediaType mediaType =
                 resolveMediaType(contentType);
@@ -242,6 +316,18 @@ public class MediaServiceImpl implements MediaService {
                 generatedFileName
         );
 
+        String visibility =
+                resolveInitialVisibility(
+                        mediaStage
+                );
+
+        log.info(
+                "[MEDIA] Initial visibility resolved. jobCardId={}, stage={}, visibility={}",
+                jobCardId,
+                mediaStage,
+                visibility
+        );
+
         try {
 
             log.info(
@@ -288,6 +374,7 @@ public class MediaServiceImpl implements MediaService {
             JobCardMedia media =
                     JobCardMedia.builder()
                             .jobCardId(jobCardId)
+                            .repairTaskId(repairTaskId)
                             .fileName(generatedFileName)
                             .driveFileId(driveFile.getId())
                             .driveWebViewLink(
@@ -296,23 +383,28 @@ public class MediaServiceImpl implements MediaService {
                             .mediaStage(mediaStage.name())
                             .contentType(contentType)
                             .fileSize(file.getSize())
+                            .visibility(visibility)
                             .createdAt(LocalDateTime.now())
                             .build();
 
             log.info(
-                    "[MEDIA] Saving media metadata to database. jobCardId={}, driveFileId={}",
+                    "[MEDIA] Saving media metadata to database. jobCardId={}, repairTaskId={}, driveFileId={}, visibility={}",
                     jobCardId,
-                    driveFile.getId()
+                    repairTaskId,
+                    driveFile.getId(),
+                    visibility
             );
 
             JobCardMedia savedMedia =
                     jobCardMediaRepository.save(media);
 
             log.info(
-                    "[MEDIA] Media metadata saved successfully. mediaId={}, jobCardId={}, driveFileId={}",
+                    "[MEDIA] Media metadata saved successfully. mediaId={}, jobCardId={}, repairTaskId={}, driveFileId={}, visibility={}",
                     savedMedia.getId(),
                     jobCardId,
-                    driveFile.getId()
+                    repairTaskId,
+                    driveFile.getId(),
+                    visibility
             );
 
             return savedMedia;
@@ -334,7 +426,52 @@ public class MediaServiceImpl implements MediaService {
         }
     }
 
-    private MediaType resolveMediaType(String contentType) {
+    private void validateRepairTaskRequirement(
+            Long jobCardId,
+            MediaStage mediaStage,
+            Long repairTaskId) {
+
+        if (mediaStage == MediaStage.DURING_REPAIR
+                && repairTaskId == null) {
+
+            log.warn(
+                    "[MEDIA] Repair Task is required for DURING_REPAIR media. jobCardId={}",
+                    jobCardId
+            );
+
+            throw new IllegalArgumentException(
+                    "Repair Task is required for DURING_REPAIR media."
+            );
+        }
+
+        if (mediaStage != MediaStage.DURING_REPAIR
+                && repairTaskId != null) {
+
+            log.warn(
+                    "[MEDIA] Repair Task is only allowed for DURING_REPAIR media. jobCardId={}, stage={}, repairTaskId={}",
+                    jobCardId,
+                    mediaStage,
+                    repairTaskId
+            );
+
+            throw new IllegalArgumentException(
+                    "Repair Task can only be specified for DURING_REPAIR media."
+            );
+        }
+    }
+
+    private String resolveInitialVisibility(
+            MediaStage mediaStage) {
+
+        if (mediaStage == MediaStage.DURING_REPAIR) {
+            return VISIBILITY_INTERNAL;
+        }
+
+        return VISIBILITY_CUSTOMER_VISIBLE;
+    }
+
+    private MediaType resolveMediaType(
+            String contentType) {
 
         if (contentType == null || contentType.isBlank()) {
 
