@@ -7,8 +7,12 @@ import com.garageos.modules.customer.service.CustomerPortalService;
 import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
+import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.vehicle.dto.response.VehicleResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -98,6 +102,34 @@ public class CustomerPortalController {
                 )
         );
 
+    }
+
+    @GetMapping("/jobcards/{jobCardNumber}/media")
+    public ResponseEntity<ApiResponse<List<JobCardMediaResponse>>> getJobCardMedia(
+            @PathVariable String jobCardNumber) {
+
+        return ApiResponseUtil.success(
+                "Media fetched successfully.",
+                service.getJobCardMedia(jobCardNumber)
+        );
+    }
+
+    @GetMapping("/jobcards/{jobCardNumber}/media/{mediaId}/content")
+    public ResponseEntity<byte[]> getJobCardMediaContent(
+            @PathVariable String jobCardNumber,
+            @PathVariable Long mediaId) {
+
+        MediaContent content =
+                service.getJobCardMediaContent(jobCardNumber, mediaId);
+
+        return ResponseEntity.ok()
+                .contentType(
+                        MediaType.parseMediaType(
+                                content.contentType()))
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + content.fileName() + "\"")
+                .body(content.content());
     }
 
 }

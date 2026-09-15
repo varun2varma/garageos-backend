@@ -15,6 +15,12 @@ import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.entity.JobCardMedia;
+import com.garageos.modules.media.mapper.JobCardMediaMapper;
+import com.garageos.modules.media.repository.JobCardMediaRepository;
+import com.garageos.modules.media.service.MediaContent;
+import com.garageos.modules.media.service.MediaService;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,6 +50,14 @@ public class CustomerPortalServiceImpl
     private final EstimateService estimateService;
 
     private final EstimateItemService estimateItemService;
+
+    private final JobCardMediaRepository jobCardMediaRepository;
+
+    private final JobCardMediaMapper jobCardMediaMapper;
+
+    private final MediaService mediaService;
+
+    private static final String VISIBILITY_CUSTOMER_VISIBLE = "CUSTOMER_VISIBLE";
 
 
     @Override
@@ -202,6 +216,70 @@ public class CustomerPortalServiceImpl
 
     }
 
+    @Override
+    public List<JobCardMediaResponse> getJobCardMedia(
+            String jobCardNumber) {
 
+        JobCard jobCard =
+                ownedJobCard(jobCardNumber);
+
+        List<JobCardMedia> media =
+                jobCardMediaRepository
+                        .findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
+                                jobCard.getId(),
+                                VISIBILITY_CUSTOMER_VISIBLE
+                        );
+
+        return jobCardMediaMapper.toResponseList(media);
+    }
+
+    @Override
+    public MediaContent getJobCardMediaContent(
+            String jobCardNumber,
+            Long mediaId) {
+
+        JobCard jobCard =
+                ownedJobCard(jobCardNumber);
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Media not found with id : " + mediaId));
+
+        // Never trust mediaId alone: it must belong to a job card this
+        // customer owns, and it must be customer-visible even if it does.
+        if (!jobCard.getId().equals(media.getJobCardId())
+                || !VISIBILITY_CUSTOMER_VISIBLE.equals(media.getVisibility())) {
+
+            throw new ResourceNotFoundException(
+                    "Media not found with id : " + mediaId);
+        }
+
+        return mediaService.downloadContent(media);
+    }
+
+    /**
+     * Resolves a Job Card by number and verifies it belongs to the
+     * currently authenticated customer, throwing the same
+     * ResourceNotFoundException {@link #trackRepair} already throws on a
+     * mismatch (never revealing that the job card exists but belongs to
+     * someone else).
+     */
+    private JobCard ownedJobCard(String jobCardNumber) {
+
+        Customer customer = getCurrentCustomer();
+
+        JobCard jobCard =
+                jobCardRepository.findByJobCardNumber(jobCardNumber)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Job Card not found."));
+
+        if (!jobCard.getCustomer().getId().equals(customer.getId())) {
+            throw new ResourceNotFoundException("Job Card not found.");
+        }
+
+        return jobCard;
+    }
 
 }

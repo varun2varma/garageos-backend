@@ -1,21 +1,27 @@
 package com.garageos.modules.media.service.impl;
 
+import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.media.MediaStage;
 import com.garageos.core.enums.media.MediaType;
+import com.garageos.core.enums.media.MediaVisibility;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.jobassignment.entity.JobAssignment;
+import com.garageos.modules.jobassignment.repository.JobAssignmentRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.service.GoogleDriveFileService;
 import com.garageos.modules.media.service.GoogleDriveFolderService;
+import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.media.service.MediaService;
 import com.garageos.modules.repairtask.entity.RepairTask;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +30,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +51,7 @@ public class MediaServiceImpl implements MediaService {
     private final JobCardRepository jobCardRepository;
     private final JobCardMediaRepository jobCardMediaRepository;
     private final RepairTaskRepository repairTaskRepository;
+    private final JobAssignmentRepository jobAssignmentRepository;
     private final GoogleDriveFolderService folderService;
     private final GoogleDriveFileService googleDriveFileService;
 
@@ -134,7 +142,7 @@ public class MediaServiceImpl implements MediaService {
 
         /*
          * -------------------------------------------------------------
-         * GARAGE ISOLATION
+         * AUTHORIZATION (garage isolation + technician assignment)
          * -------------------------------------------------------------
          */
 
@@ -145,68 +153,7 @@ public class MediaServiceImpl implements MediaService {
                                 .getAuthentication()
                                 .getPrincipal();
 
-        Long userGarageId =
-                principal.getGarageId();
-
-        log.info(
-                "[MEDIA] Garage context resolved. jobCardId={}, userGarageId={}",
-                jobCardId,
-                userGarageId
-        );
-
-        if (userGarageId == null) {
-
-            log.error(
-                    "[MEDIA] User is not associated with a garage. jobCardId={}",
-                    jobCardId
-            );
-
-            throw new IllegalStateException(
-                    "User is not associated with a garage."
-            );
-        }
-
-        if (jobCard.getGarage() == null) {
-
-            log.error(
-                    "[MEDIA] Job Card is not associated with a garage. jobCardId={}",
-                    jobCardId
-            );
-
-            throw new IllegalStateException(
-                    "Job Card is not associated with a garage."
-            );
-        }
-
-        Long jobCardGarageId =
-                jobCard.getGarage().getId();
-
-        log.info(
-                "[MEDIA] Garage isolation check. jobCardId={}, userGarageId={}, jobCardGarageId={}",
-                jobCardId,
-                userGarageId,
-                jobCardGarageId
-        );
-
-        if (!userGarageId.equals(jobCardGarageId)) {
-
-            log.warn(
-                    "[MEDIA] Garage access denied. jobCardId={}, userGarageId={}, jobCardGarageId={}",
-                    jobCardId,
-                    userGarageId,
-                    jobCardGarageId
-            );
-
-            throw new org.springframework.security.access.AccessDeniedException(
-                    "You do not have access to this Job Card."
-            );
-        }
-
-        log.info(
-                "[MEDIA] Garage access validated. jobCardId={}, garageId={}",
-                jobCardId,
-                jobCardGarageId
-        );
+        authorizeEmployeeAccess(jobCard, principal);
 
         /*
          * -------------------------------------------------------------
@@ -383,6 +330,7 @@ public class MediaServiceImpl implements MediaService {
                             .mediaStage(mediaStage.name())
                             .contentType(contentType)
                             .fileSize(file.getSize())
+                            .uploadedBy(principal.getId())
                             .visibility(visibility)
                             .createdAt(LocalDateTime.now())
                             .build();
@@ -424,6 +372,332 @@ public class MediaServiceImpl implements MediaService {
                     ex
             );
         }
+    }
+
+    @Override
+    public List<JobCardMedia> listMedia(Long jobCardId) {
+
+        log.info(
+                "[MEDIA] Listing media. jobCardId={}",
+                jobCardId
+        );
+
+        JobCard jobCard =
+                jobCardRepository.findById(jobCardId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Job Card not found with id : "
+                                                + jobCardId));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal)
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+
+        authorizeEmployeeAccess(jobCard, principal);
+
+        return jobCardMediaRepository
+                .findByJobCardIdOrderByCreatedAtAsc(jobCardId);
+    }
+
+    @Override
+    public MediaContent getMediaContent(Long jobCardId, Long mediaId) {
+
+        log.info(
+                "[MEDIA] Fetching media content. jobCardId={}, mediaId={}",
+                jobCardId,
+                mediaId
+        );
+
+        JobCard jobCard =
+                jobCardRepository.findById(jobCardId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Job Card not found with id : "
+                                                + jobCardId));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal)
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+
+        authorizeEmployeeAccess(jobCard, principal);
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Media not found with id : "
+                                                + mediaId));
+
+        // Defense in depth: never trust that mediaId alone belongs to
+        // jobCardId just because both path variables were supplied.
+        if (!jobCardId.equals(media.getJobCardId())) {
+
+            log.warn(
+                    "[MEDIA] Media does not belong to Job Card. mediaId={}, jobCardId={}, actualJobCardId={}",
+                    mediaId,
+                    jobCardId,
+                    media.getJobCardId()
+            );
+
+            throw new ResourceNotFoundException(
+                    "Media not found with id : " + mediaId
+            );
+        }
+
+        return downloadContent(media);
+    }
+
+    @Override
+    public JobCardMedia updateVisibility(
+            Long jobCardId,
+            Long mediaId,
+            MediaVisibility visibility) {
+
+        log.info(
+                "[MEDIA] Visibility update requested. jobCardId={}, mediaId={}, visibility={}",
+                jobCardId,
+                mediaId,
+                visibility
+        );
+
+        JobCard jobCard =
+                jobCardRepository.findById(jobCardId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Job Card not found with id : "
+                                                + jobCardId));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal)
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+
+        // Reuses the same garage-isolation check every other employee-side
+        // media operation uses. The technician-assignment branch inside it
+        // is unreachable here in practice — the controller's @PreAuthorize
+        // restricts this endpoint to MANAGER/SERVICE_ADVISOR/OWNER, all of
+        // which take the "privileged" (garage-only) path — but calling the
+        // same shared method keeps this one authorization rule in one
+        // place rather than re-implementing the garage check a third time.
+        authorizeEmployeeAccess(jobCard, principal);
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Media not found with id : "
+                                                + mediaId));
+
+        // Defense in depth, same as getMediaContent: never trust that
+        // mediaId alone belongs to jobCardId just because both path
+        // variables were supplied.
+        if (!jobCardId.equals(media.getJobCardId())) {
+
+            log.warn(
+                    "[MEDIA] Media does not belong to Job Card. mediaId={}, jobCardId={}, actualJobCardId={}",
+                    mediaId,
+                    jobCardId,
+                    media.getJobCardId()
+            );
+
+            throw new ResourceNotFoundException(
+                    "Media not found with id : " + mediaId
+            );
+        }
+
+        media.setVisibility(visibility.name());
+
+        JobCardMedia saved =
+                jobCardMediaRepository.save(media);
+
+        log.info(
+                "[MEDIA] Visibility updated. mediaId={}, jobCardId={}, visibility={}",
+                mediaId,
+                jobCardId,
+                visibility
+        );
+
+        return saved;
+    }
+
+    @Override
+    public MediaContent downloadContent(JobCardMedia media) {
+
+        try {
+
+            byte[] content =
+                    googleDriveFileService.downloadFile(
+                            media.getDriveFileId()
+                    );
+
+            return new MediaContent(
+                    content,
+                    media.getContentType(),
+                    media.getFileName()
+            );
+
+        } catch (GeneralSecurityException | IOException ex) {
+
+            log.error(
+                    "[DRIVE] Failed to download media content. mediaId={}, driveFileId={}, error={}",
+                    media.getId(),
+                    media.getDriveFileId(),
+                    ex.getMessage(),
+                    ex
+            );
+
+            throw new IllegalStateException(
+                    "Failed to download media from Google Drive.",
+                    ex
+            );
+        }
+    }
+
+    /**
+     * Shared authorization for every employee/technician/owner-side media
+     * operation (upload, list, content download):
+     *   - the caller must belong to the same garage as the Job Card
+     *     (identical check/messages to the original upload-only garage
+     *     isolation check this was extracted from);
+     *   - a caller whose only relevant role is TECHNICIAN must additionally
+     *     hold a non-cancelled {@link JobAssignment} on this Job Card —
+     *     using the existing JobAssignment mechanism, per the Media feature
+     *     requirement that technicians only reach jobs they're assigned to.
+     * MANAGER/SERVICE_ADVISOR/OWNER are not restricted beyond garage
+     * isolation, matching how those roles are treated everywhere else in
+     * this backend (no other endpoint restricts them to a subset of their
+     * garage's job cards).
+     */
+    private void authorizeEmployeeAccess(
+            JobCard jobCard,
+            GarageUserPrincipal principal) {
+
+        Long userGarageId =
+                principal.getGarageId();
+
+        log.info(
+                "[MEDIA] Garage context resolved. jobCardId={}, userGarageId={}",
+                jobCard.getId(),
+                userGarageId
+        );
+
+        if (userGarageId == null) {
+
+            log.error(
+                    "[MEDIA] User is not associated with a garage. jobCardId={}",
+                    jobCard.getId()
+            );
+
+            throw new IllegalStateException(
+                    "User is not associated with a garage."
+            );
+        }
+
+        if (jobCard.getGarage() == null) {
+
+            log.error(
+                    "[MEDIA] Job Card is not associated with a garage. jobCardId={}",
+                    jobCard.getId()
+            );
+
+            throw new IllegalStateException(
+                    "Job Card is not associated with a garage."
+            );
+        }
+
+        Long jobCardGarageId =
+                jobCard.getGarage().getId();
+
+        log.info(
+                "[MEDIA] Garage isolation check. jobCardId={}, userGarageId={}, jobCardGarageId={}",
+                jobCard.getId(),
+                userGarageId,
+                jobCardGarageId
+        );
+
+        if (!userGarageId.equals(jobCardGarageId)) {
+
+            log.warn(
+                    "[MEDIA] Garage access denied. jobCardId={}, userGarageId={}, jobCardGarageId={}",
+                    jobCard.getId(),
+                    userGarageId,
+                    jobCardGarageId
+            );
+
+            throw new AccessDeniedException(
+                    "You do not have access to this Job Card."
+            );
+        }
+
+        log.info(
+                "[MEDIA] Garage access validated. jobCardId={}, garageId={}",
+                jobCard.getId(),
+                jobCardGarageId
+        );
+
+        Set<String> roles =
+                principal.getRoles();
+
+        boolean privileged =
+                roles.contains("MANAGER")
+                        || roles.contains("SERVICE_ADVISOR")
+                        || roles.contains("OWNER");
+
+        if (privileged) {
+            return;
+        }
+
+        if (roles.contains("TECHNICIAN")) {
+
+            boolean assigned =
+                    jobAssignmentRepository
+                            .findByJobCardId(jobCard.getId())
+                            .stream()
+                            .anyMatch(assignment ->
+                                    assignment.getUser() != null
+                                            && assignment.getUser().getId() != null
+                                            && assignment.getUser().getId().equals(principal.getId())
+                                            && assignment.getStatus() != JobAssignmentStatus.CANCELLED);
+
+            if (!assigned) {
+
+                log.warn(
+                        "[MEDIA] Technician has no assignment on this Job Card. jobCardId={}, userId={}",
+                        jobCard.getId(),
+                        principal.getId()
+                );
+
+                throw new AccessDeniedException(
+                        "You are not assigned to this Job Card."
+                );
+            }
+
+            log.info(
+                    "[MEDIA] Technician assignment validated. jobCardId={}, userId={}",
+                    jobCard.getId(),
+                    principal.getId()
+            );
+
+            return;
+        }
+
+        log.warn(
+                "[MEDIA] Caller has no role entitled to this Job Card's media. jobCardId={}, roles={}",
+                jobCard.getId(),
+                roles
+        );
+
+        throw new AccessDeniedException(
+                "You do not have access to this Job Card's media."
+        );
     }
 
     private void validateRepairTaskRequirement(

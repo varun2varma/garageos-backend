@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
@@ -156,6 +157,68 @@ public class GoogleDriveFileServiceImpl
                     "[DRIVE] Drive file upload failed. fileName={}, parentFolderId={}, error={}",
                     fileName,
                     parentFolderId,
+                    ex.getMessage(),
+                    ex
+            );
+
+            throw ex;
+        }
+    }
+
+    @Override
+    public byte[] downloadFile(
+            String driveFileId)
+            throws GeneralSecurityException, IOException {
+
+        log.info(
+                "[DRIVE] Preparing file download. driveFileId={}",
+                driveFileId
+        );
+
+        if (driveFileId == null || driveFileId.isBlank()) {
+
+            log.warn(
+                    "[DRIVE] Download requested with a missing Drive file id."
+            );
+
+            throw new IllegalArgumentException(
+                    "Drive file id is required."
+            );
+        }
+
+        Drive drive =
+                driveClientService.getDriveClient();
+
+        log.info(
+                "[DRIVE] Drive client obtained. Starting download. driveFileId={}",
+                driveFileId
+        );
+
+        try (InputStream mediaStream =
+                     drive.files()
+                             .get(driveFileId)
+                             .executeMediaAsInputStream();
+             ByteArrayOutputStream buffer =
+                     new ByteArrayOutputStream()) {
+
+            mediaStream.transferTo(buffer);
+
+            byte[] content =
+                    buffer.toByteArray();
+
+            log.info(
+                    "[DRIVE] Drive file download successful. driveFileId={}, size={}",
+                    driveFileId,
+                    content.length
+            );
+
+            return content;
+
+        } catch (IOException ex) {
+
+            log.error(
+                    "[DRIVE] Drive file download failed. driveFileId={}, error={}",
+                    driveFileId,
                     ex.getMessage(),
                     ex
             );
