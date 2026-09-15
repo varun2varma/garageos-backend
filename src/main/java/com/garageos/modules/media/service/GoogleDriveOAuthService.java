@@ -1,37 +1,46 @@
 package com.garageos.modules.media.service;
 
 import com.garageos.core.config.GoogleDriveProperties;
+import com.garageos.modules.media.service.impl.GoogleDriveCredentialDataStore;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.DriveScopes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 
+/**
+ * OAuth Authorization Code flow (unchanged from the original implementation)
+ * — client id/secret, redirect URI, "offline" access type, and the Drive
+ * scope are all exactly as before. The only change is *where* the resulting
+ * {@code StoredCredential} is persisted: previously a local-disk
+ * FileDataStoreFactory directory (google-drive-tokens/, wiped on every
+ * Render restart/redeploy); now {@link GoogleDriveCredentialDataStore},
+ * backed by the application's own PostgreSQL database, which survives
+ * restarts, redeploys, and is shared correctly across multiple instances.
+ */
 @Service
 @Slf4j
 public class GoogleDriveOAuthService {
-
-    private static final String TOKENS_DIRECTORY =
-            "google-drive-tokens";
 
     private static final String USER_ID =
             "garagest-drive";
 
     private final GoogleDriveProperties properties;
+    private final GoogleDriveCredentialDataStore credentialDataStore;
 
     public GoogleDriveOAuthService(
-            GoogleDriveProperties properties) {
+            GoogleDriveProperties properties,
+            GoogleDriveCredentialDataStore credentialDataStore) {
 
         this.properties = properties;
+        this.credentialDataStore = credentialDataStore;
     }
 
     private GoogleAuthorizationCodeFlow createFlow()
@@ -67,10 +76,8 @@ public class GoogleDriveOAuthService {
                                 DriveScopes.DRIVE_FILE
                         )
                 )
-                        .setDataStoreFactory(
-                                new FileDataStoreFactory(
-                                        new File(TOKENS_DIRECTORY)
-                                )
+                        .setCredentialDataStore(
+                                credentialDataStore
                         )
                         .setAccessType("offline")
                         .build();
