@@ -21,6 +21,11 @@ public interface GarageMembershipService {
             Long garageId
     );
 
+    /** The current user's own ACTIVE memberships - every garage they belong to (a multi-garage Owner may have several). */
+    List<GarageMembershipResponse> getMyMemberships(
+            Long userId
+    );
+
     GarageMembershipResponse approveMembership(
             Long membershipId,
             Long ownerId,

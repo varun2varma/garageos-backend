@@ -54,6 +54,22 @@ public class GlobalExceptionHandler {
                 .body(buildError(ex.getMessage()));
     }
 
+    /**
+     * Backend hardening: JobCardStatusValidator (and other lifecycle
+     * guards) throw IllegalStateException for an invalid state
+     * transition - e.g. closing an already-CLOSED JobCard, or closing
+     * from an earlier state. That is a business/lifecycle validation
+     * failure, not a server failure, so it belongs on the same 400
+     * response shape as BusinessException, not the generic 500
+     * catch-all below.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiError> handleIllegalStateException(IllegalStateException ex) {
+
+        return ResponseEntity.badRequest()
+                .body(buildError(ex.getMessage()));
+    }
+
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<ApiError> handleException(Exception ex) {
 //

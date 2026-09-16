@@ -2,6 +2,7 @@ package com.garageos.modules.navigation.repository;
 
 import com.garageos.modules.navigation.entity.NavigationTrip;
 import com.garageos.core.enums.navigation.TripStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,17 @@ public interface NavigationTripRepository
     findByDriverIdAndStatusIn(
             Long driverId,
             List<TripStatus> statuses
+    );
+
+    /**
+     * Driver trip history - newest first, capped by the caller's
+     * [Pageable] rather than returning every trip a driver has ever run.
+     */
+    List<NavigationTrip>
+    findByDriverIdAndStatusInOrderByIdDesc(
+            Long driverId,
+            List<TripStatus> statuses,
+            Pageable pageable
     );
 
     Optional<NavigationTrip>
@@ -33,5 +45,10 @@ public interface NavigationTripRepository
     findFirstByVehicleIdAndStatusInOrderByCreatedAtDesc(
             Long vehicleId,
             List<TripStatus> statuses
+    );
+
+    Optional<NavigationTrip>
+    findFirstByNavigationRequestIdOrderByIdDesc(
+            Long navigationRequestId
     );
 }

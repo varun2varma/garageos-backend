@@ -13,6 +13,7 @@ import com.garageos.modules.jobassignment.service.JobAssignmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,21 @@ public class JobAssignmentController {
 
     private final JobAssignmentService service;
 
+    /**
+     * Locked operational-access decision: SERVICE_ADVISOR, MANAGER and
+     * OWNER may assign/reassign technicians; OWNER and MANAGER are
+     * equivalent for JobCard operational actions.
+     */
+    private static final String ASSIGNMENT_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
+
     @PostMapping
+    @PreAuthorize(ASSIGNMENT_ROLES)
     public ResponseEntity<ApiResponse<JobAssignmentResponse>> assignJob(
             @Valid @RequestBody AssignJobRequest request) {
 
@@ -83,6 +98,7 @@ public class JobAssignmentController {
     }
 
     @PutMapping("/{id}/reassign")
+    @PreAuthorize(ASSIGNMENT_ROLES)
     public ResponseEntity<ApiResponse<JobAssignmentResponse>> reassignJob(
             @PathVariable Long id,
             @Valid @RequestBody ReassignJobRequest request) {

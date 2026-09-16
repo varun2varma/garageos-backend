@@ -111,6 +111,19 @@ public class GarageMembershipServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<GarageMembershipResponse> getMyMemberships(
+            Long userId) {
+
+        return membershipRepository
+                .findByUser_Id(userId)
+                .stream()
+                .filter(m -> m.getStatus() == GarageMembershipStatus.ACTIVE)
+                .map(this::buildResponse)
+                .toList();
+    }
+
+    @Override
     public GarageMembershipResponse approveMembership(
             Long membershipId,
             Long ownerId,
@@ -162,7 +175,7 @@ public class GarageMembershipServiceImpl
         }
 
         String employeeCode = generateEmployeeCode(
-                membership.getGarage());
+                membership.getGarage().getId());
 
         employee.setGarageId(
                 membership.getGarage().getId());
@@ -186,33 +199,30 @@ public class GarageMembershipServiceImpl
         return buildResponse(membership);
     }
 
-    private String generateEmployeeCode(Garage garage) {
+    /**
+     * Concurrency-safe replacement for the previous MAX(existing code) + 1
+     * scan, which raced when two employees were approved into the same
+     * garage at the same time. Garage.nextEmployeeSequence is read and
+     * incremented under a pessimistic row lock (held for the remainder of
+     * this @Transactional method), so concurrent approvals for the same
+     * garage serialize instead of computing the same next value.
+     */
+    private String generateEmployeeCode(Long garageId) {
 
-        List<GarageMembership> memberships =
-                membershipRepository.findByGarage_Id(garage.getId());
+        Garage garage = garageRepository.findByIdForUpdate(garageId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Garage not found."));
 
-        int maxEmployeeNumber = memberships.stream()
-                .map(GarageMembership::getEmployeeCode)
-                .filter(code -> code != null && !code.isBlank())
-                .filter(code -> code.startsWith(garage.getGarageCode() + "-EMP"))
-                .map(code -> {
-                    try {
-                        return Integer.parseInt(
-                                code.substring(
-                                        (garage.getGarageCode() + "-EMP").length()
-                                )
-                        );
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                })
-                .max(Integer::compareTo)
-                .orElse(0);
+        int sequence = garage.getNextEmployeeSequence();
+
+        garage.setNextEmployeeSequence(sequence + 1);
+
+        garageRepository.save(garage);
 
         return String.format(
                 "%s-EMP%03d",
                 garage.getGarageCode(),
-                maxEmployeeNumber + 1
+                sequence
         );
     }
 

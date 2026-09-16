@@ -3,6 +3,7 @@ package com.garageos.modules.repairtask.entity;
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.RepairStatus;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
+import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.modules.jobcard.entity.JobCard;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,6 +44,17 @@ public class RepairTask extends BaseEntity {
 
     @Column(length = 100)
     private String technicianName;
+
+    /**
+     * Authoritative current technician ownership for this RepairTask,
+     * additive to (never a replacement for) technicianName above, which
+     * remains a display/history snapshot and is never read for
+     * authorization. Nullable: not every existing/legacy RepairTask has
+     * a linked JobAssignment.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_assignment_id")
+    private JobAssignment jobAssignment;
 
     private LocalDateTime assignedAt;
 

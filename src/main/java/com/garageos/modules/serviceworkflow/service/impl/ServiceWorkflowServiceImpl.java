@@ -86,6 +86,7 @@ public class ServiceWorkflowServiceImpl
     }
 
     @Override
+    @Transactional
     public WorkflowResponse startInspection(String jobCardNumber) {
 
         List<InspectionResponse> inspections =
@@ -139,10 +140,12 @@ public class ServiceWorkflowServiceImpl
     @Override
     public WorkflowResponse approveEstimate(String jobCardNumber) {
 
+        // EstimateServiceImpl.approveEstimate(String) is now the
+        // canonical operation: it approves the Estimate, creates the
+        // RepairTasks, and transitions the JobCard to REPAIR_PENDING
+        // atomically, so no separate JobCard-side call is needed here.
         EstimateResponse estimate =
                 estimateService.approveEstimate(jobCardNumber);
-
-        jobCardService.approveEstimate(jobCardNumber);
 
         return WorkflowResponse.builder()
                 .data(estimate)
@@ -199,24 +202,21 @@ public class ServiceWorkflowServiceImpl
     public InvoiceResponse generateInvoice(
             String jobCardNumber) {
 
-        InvoiceResponse invoice =
-                invoiceService.generateInvoice(jobCardNumber);
-
-        jobCardService.invoiceGenerated(jobCardNumber);
-
-        return invoice;
+        // InvoiceServiceImpl.generateInvoice(String) now transitions the
+        // JobCard to INVOICE_GENERATED internally (canonical operation),
+        // so no separate JobCard-side call is needed here.
+        return invoiceService.generateInvoice(jobCardNumber);
     }
 
     @Override
     public WorkflowResponse receivePayment(
             String jobCardNumber) {
 
+        // InvoiceServiceImpl.receivePayment(String) now transitions the
+        // JobCard to READY_FOR_DELIVERY internally, atomically with the
+        // payment write, once it is validated as a legal transition.
         InvoiceResponse invoice =
                 invoiceService.receivePayment(jobCardNumber);
-
-//        jobCardService.closeJobCard(jobCardNumber);
-
-        jobCardService.readyForDelivery(jobCardNumber);
 
         return WorkflowResponse.builder()
                 .data(invoice)

@@ -21,9 +21,13 @@ import com.garageos.modules.invoiceitem.entity.InvoiceItem;
 import com.garageos.modules.invoiceitem.repository.InvoiceItemRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.jobcard.service.JobCardService;
+import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -41,6 +45,31 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final JobCardRepository jobCardRepository;
     private final InvoiceItemRepository invoiceItemRepository;
     private final EstimateItemRepository estimateItemRepository;
+    private final JobCardStatusValidator statusValidator;
+    private final JobCardService jobCardService;
+
+    /**
+     * Canonical invoice-generation JobCard transition, shared by every
+     * invoice-creation entry point. Idempotent: a JobCard already at or
+     * past INVOICE_GENERATED is left untouched rather than re-validated,
+     * so a legacy entry point invoked after the canonical one already
+     * ran does not fail on a redundant call.
+     */
+    private void transitionJobCardToInvoiceGenerated(JobCard jobCard) {
+
+        if (jobCard.getStatus() == JobCardStatus.INVOICE_GENERATED) {
+            return;
+        }
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.INVOICE_GENERATED
+        );
+
+        jobCard.setStatus(JobCardStatus.INVOICE_GENERATED);
+
+        jobCardRepository.save(jobCard);
+    }
 
     @Override
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
@@ -87,9 +116,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         JobCard jobCard = estimate.getJobCard();
 
-        jobCard.setStatus(JobCardStatus.WORK_COMPLETED);
-
-        jobCardRepository.save(jobCard);
+        transitionJobCardToInvoiceGenerated(jobCard);
 
         return invoiceMapper.toResponse(invoice);
     }
@@ -164,6 +191,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
 
+        authorizeInvoiceAction(jobCard);
+
         Estimate estimate = estimateRepository
                 .findByJobCardId(jobCard.getId())
                 .orElseThrow(() ->
@@ -209,6 +238,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGrandTotal(estimate.getGrandTotal());
         invoice.setGeneratedAt(LocalDateTime.now());
         invoice = invoiceRepository.save(invoice);
+
+        transitionJobCardToInvoiceGenerated(jobCard);
 
         return invoiceMapper.toResponse(invoice);
     }
@@ -264,9 +295,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         JobCard jobCard = estimate.getJobCard();
 
-        jobCard.setStatus(JobCardStatus.INVOICED);
-
-        jobCardRepository.save(jobCard);
+        transitionJobCardToInvoiceGenerated(jobCard);
 
         return invoiceMapper.toResponse(invoice);
 
@@ -319,6 +348,17 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceItemRepository.saveAll(invoiceItems);
     }
 
+    /**
+     * Canonical payment transition: Invoice.paymentStatus is the
+     * authoritative payment record (never JobCardStatus.PAYMENT_PENDING/
+     * PAYMENT_COMPLETED, which remain unused legacy enum values). A
+     * successful payment atomically advances the JobCard to
+     * READY_FOR_DELIVERY via the same validated transition
+     * JobCardServiceImpl.readyForDelivery already implements — this is
+     * what makes INVOICE_GENERATED -> READY_FOR_DELIVERY a validator-legal
+     * transition instead of the previously-confirmed contradiction where
+     * ServiceWorkflowServiceImpl called this out-of-band after the fact.
+     */
     @Override
     @Transactional
     public InvoiceResponse receivePayment(String jobCardNumber) {
@@ -328,6 +368,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
+
+        authorizeInvoiceAction(jobCard);
 
         Invoice invoice = invoiceRepository
                 .findByEstimateJobCardId(jobCard.getId())
@@ -345,6 +387,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice = invoiceRepository.save(invoice);
 
+        if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
+            jobCardService.readyForDelivery(jobCardNumber);
+        }
+
         return invoiceMapper.toResponse(invoice);
     }
 
@@ -356,6 +402,32 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .findByEstimateJobCardId(jobCardId)
                 .map(invoiceMapper::toResponse)
                 .orElse(null);
+    }
+
+    /**
+     * Corrective fix for Defect #7: generateInvoice()/receivePayment()
+     * relied solely on @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES) at the
+     * controller (role-only, no tenant scoping), so a MANAGER/OWNER/
+     * SERVICE_ADVISOR from any garage could generate an invoice or record
+     * payment for any other garage's JobCard - confirmed live against
+     * Postgres. Mirrors the garage-match check already used successfully
+     * in RepairTaskServiceImpl and QualityCheckServiceImpl.
+     */
+    private void authorizeInvoiceAction(JobCard jobCard) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (jobCard.getGarage() == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+
+            throw new BusinessException(
+                    "This Job Card does not belong to your garage.");
+        }
     }
 
 }

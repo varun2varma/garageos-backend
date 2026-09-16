@@ -22,6 +22,8 @@ public class RepairTaskResponse {
 
     private String description;
 
+    private Long jobAssignmentId;
+
     private RepairStatus status;
 
     private String technicianName;

@@ -12,7 +12,9 @@ import com.garageos.modules.qualitycheck.entity.QualityCheck;
 import com.garageos.modules.qualitycheck.mapper.QualityCheckMapper;
 import com.garageos.modules.qualitycheck.repository.QualityCheckRepository;
 import com.garageos.modules.qualitycheck.service.QualityCheckService;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -110,6 +112,8 @@ public class QualityCheckServiceImpl
 
         JobCard jobCard = qualityCheck.getJobCard();
 
+        authorizeQualityCheckAction(jobCard);
+
         if (jobCard.getStatus() != JobCardStatus.REPAIR_COMPLETED) {
             throw new BusinessException(
                     "Repair must be completed before Quality Check.");
@@ -142,6 +146,8 @@ public class QualityCheckServiceImpl
 
         JobCard jobCard = qualityCheck.getJobCard();
 
+        authorizeQualityCheckAction(jobCard);
+
         if (jobCard.getStatus() != JobCardStatus.REPAIR_COMPLETED) {
             throw new BusinessException(
                     "Repair must be completed before Quality Check.");
@@ -160,6 +166,30 @@ public class QualityCheckServiceImpl
         return mapper.toResponse(qualityCheck);
     }
 
+    /**
+     * Corrective fix for Defect #6: passQualityCheck()/failQualityCheck()
+     * relied solely on @PreAuthorize(JOBCARD_OPERATIONAL_ROLES) at the
+     * controller (role-only, no tenant scoping), so a MANAGER/OWNER/
+     * SERVICE_ADVISOR from any garage could pass or fail QC on any other
+     * garage's JobCard. Mirrors the garage-match check already used
+     * successfully in RepairTaskServiceImpl.authorizeRepairTaskAction().
+     */
+    private void authorizeQualityCheckAction(JobCard jobCard) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (jobCard.getGarage() == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+
+            throw new BusinessException(
+                    "This Job Card does not belong to your garage.");
+        }
+    }
 
 //    @Override
 //    @Transactional

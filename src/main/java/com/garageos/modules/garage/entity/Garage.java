@@ -42,7 +42,6 @@ public class Garage extends BaseEntity {
     @Column(
             nullable = false,
             unique = true,
-            updatable = false,
             length = 10
     )
     String garageCode;
@@ -84,5 +83,17 @@ public class Garage extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     GarageStatus status;
+
+    /**
+     * Next value to assign when generating this garage's next employee
+     * code (G%03d-EMPnnn). Incremented under a pessimistic row lock in
+     * GarageMembershipServiceImpl.generateEmployeeCode() so concurrent
+     * approvals for the same garage can never receive the same code.
+     */
+    @Column(
+            name = "next_employee_sequence",
+            nullable = false
+    )
+    Integer nextEmployeeSequence;
 
 }

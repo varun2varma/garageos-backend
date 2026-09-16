@@ -64,4 +64,16 @@ public class JobCard extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String remarks;
+
+    /**
+     * Nullable link back to the Booking this JobCard originated from, when
+     * applicable (V37). Not required - most JobCards, including every
+     * historical one, have no booking. Not yet populated by any create
+     * flow; see the Booking module's completion report for why this is
+     * schema-only in this sprint (deliberately not wired into
+     * JobCardServiceImpl.createJob to avoid touching that method's
+     * currently in-flight behavior in the same change).
+     */
+    @Column(name = "booking_id")
+    Long bookingId;
 }

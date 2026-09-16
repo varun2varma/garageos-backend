@@ -21,6 +21,8 @@ import com.garageos.modules.jobassignment.repository.JobAssignmentRepository;
 import com.garageos.modules.jobassignment.service.JobAssignmentService;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.repairtask.entity.RepairTask;
+import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,8 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
     private final UserRepository userRepository;
 
     private final GarageRepository garageRepository;
+
+    private final RepairTaskRepository repairTaskRepository;
 
     @Override
     @Transactional
@@ -138,9 +142,34 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         assignment
                 );
 
+        linkRepairTaskToAssignment(assignment);
+
         return jobAssignmentMapper.toResponse(
                 assignment
         );
+    }
+
+    /**
+     * RepairTask.jobAssignment is the additive, authoritative-ownership
+     * link (RepairTask -> JobAssignment.id). RepairTask and JobAssignment
+     * are correlated 1:1 via the shared EstimateItem (RepairTaskServiceImpl
+     * .createRepairTasks creates exactly one RepairTask per EstimateItem),
+     * so a TECHNICIAN-type assignment against a given EstimateItem points
+     * its RepairTask at the new/current assignment. No-op for assignment
+     * types that don't carry an EstimateItem (e.g. DRIVER).
+     */
+    private void linkRepairTaskToAssignment(JobAssignment assignment) {
+
+        if (assignment.getEstimateItem() == null) {
+            return;
+        }
+
+        repairTaskRepository
+                .findByEstimateItemId(assignment.getEstimateItem().getId())
+                .ifPresent(task -> {
+                    task.setJobAssignment(assignment);
+                    repairTaskRepository.save(task);
+                });
     }
 
     @Override
@@ -304,13 +333,22 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
     }
 
+    /**
+     * Reassignment preserves history rather than mutating the existing
+     * row in place: the old JobAssignment is marked CANCELLED and a new
+     * JobAssignment is created for the new technician, carrying over the
+     * same garage/job card/estimate item. Any RepairTask currently
+     * pointing at the old assignment is re-pointed at the new one, so
+     * RepairTask.jobAssignment always reflects current ownership while
+     * the cancelled row remains queryable as history.
+     */
     @Override
     @Transactional
     public JobAssignmentResponse reassignJob(
             Long assignmentId,
             ReassignJobRequest request) {
 
-        JobAssignment assignment =
+        JobAssignment oldAssignment =
                 getAssignmentOrThrow(assignmentId);
 
         User user =
@@ -320,18 +358,28 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                                         "User not found : "
                                                 + request.getEmployeeId()));
 
-        assignment.setUser(user);
+        oldAssignment.setStatus(JobAssignmentStatus.CANCELLED);
 
-        assignment.setAssignedAt(LocalDateTime.now());
+        jobAssignmentRepository.save(oldAssignment);
 
-        assignment.setRemarks(request.getRemarks());
+        JobAssignment newAssignment = new JobAssignment();
 
-        assignment.setStatus(JobAssignmentStatus.ASSIGNED);
+        newAssignment.setGarage(oldAssignment.getGarage());
+        newAssignment.setJobCard(oldAssignment.getJobCard());
+        newAssignment.setEstimateItem(oldAssignment.getEstimateItem());
+        newAssignment.setUser(user);
+        newAssignment.setAssignmentType(oldAssignment.getAssignmentType());
+        newAssignment.setAssignedAt(LocalDateTime.now());
+        newAssignment.setEstimatedHours(oldAssignment.getEstimatedHours());
+        newAssignment.setRemarks(request.getRemarks());
+        newAssignment.setStatus(JobAssignmentStatus.ASSIGNED);
 
-        assignment =
-                jobAssignmentRepository.save(assignment);
+        newAssignment =
+                jobAssignmentRepository.save(newAssignment);
 
-        return jobAssignmentMapper.toResponse(assignment);
+        linkRepairTaskToAssignment(newAssignment);
+
+        return jobAssignmentMapper.toResponse(newAssignment);
 
     }
 

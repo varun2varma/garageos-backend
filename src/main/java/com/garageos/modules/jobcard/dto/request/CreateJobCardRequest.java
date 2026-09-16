@@ -23,4 +23,13 @@ public class CreateJobCardRequest {
     private LocalDate estimatedDeliveryDate;
 
     private String remarks;
+
+    /**
+     * Optional - the confirmed Booking this Job Card originates from.
+     * Every historical/booking-less Job Card creation leaves this null.
+     * Never trusted blindly: JobCardServiceImpl.createJobCard validates
+     * garage scope, booking status, and vehicle/customer consistency
+     * before honoring it.
+     */
+    private Long bookingId;
 }

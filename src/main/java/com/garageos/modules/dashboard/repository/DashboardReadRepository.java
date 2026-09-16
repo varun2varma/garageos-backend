@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface DashboardReadRepository {
 
-    DashboardSummaryResponse getDashboardSummary();
+    DashboardSummaryResponse getDashboardSummary(List<Long> garageIds);
 
-    List<RecentJobResponse> getRecentJobs();
+    List<RecentJobResponse> getRecentJobs(List<Long> garageIds);
 
 }

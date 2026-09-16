@@ -46,6 +46,7 @@ public class GarageServiceImpl implements GarageService {
         Garage garage = garageMapper.toEntity(request);
 
         garage.setStatus(GarageStatus.ACTIVE);
+        garage.setNextEmployeeSequence(1);
 
         garage = garageRepository.save(garage);
 

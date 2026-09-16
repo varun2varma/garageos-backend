@@ -25,6 +25,7 @@ public interface JobCardMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "bookingId", ignore = true)
     JobCard toEntity(CreateJobCardRequest request);
 
     @Mapping(source = "customer.id", target = "customerId")
@@ -50,6 +51,7 @@ public interface JobCardMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "bookingId", ignore = true)
     void updateEntity(CreateJobCardRequest request,
                       @MappingTarget JobCard jobCard);
 }

@@ -2,6 +2,8 @@ package com.garageos.modules.navigation.controller;
 
 import com.garageos.modules.navigation.dto.request.CreateNavigationTripRequest;
 import com.garageos.modules.navigation.dto.response.NavigationTripResponse;
+import com.garageos.modules.navigation.dto.response.TripLocationResponse;
+import com.garageos.modules.navigation.service.DriverLocationService;
 import com.garageos.modules.navigation.service.NavigationTripService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,9 @@ public class NavigationTripController {
 
     private final NavigationTripService
             navigationTripService;
+
+    private final DriverLocationService
+            driverLocationService;
 
 
     /*
@@ -46,11 +51,31 @@ public class NavigationTripController {
         );
     }
 
+    /**
+     * Authorized read of the trip's last reported location - the REST
+     * counterpart to the existing WebSocket-only broadcast at
+     * /topic/trips/{tripId}/location, for the customer/driver/manager/
+     * advisor/owner live-trip experience.
+     */
+    @GetMapping("/{tripId}/location")
+    public TripLocationResponse getLocation(
+            @PathVariable Long tripId) {
+
+        return driverLocationService.getCurrentLocation(
+                tripId
+        );
+    }
+
 
     /*
      * DRIVER
      */
 
+    /**
+     * The calling driver's own open trips. driverId must be the caller's
+     * own id - enforced in NavigationTripServiceImpl, not here, so every
+     * driver-scoped path shares one check.
+     */
     @GetMapping("/driver/{driverId}")
     public List<NavigationTripResponse>
     getDriverTrips(
@@ -58,6 +83,20 @@ public class NavigationTripController {
 
         return navigationTripService
                 .getDriverTrips(driverId);
+    }
+
+
+    /**
+     * The calling driver's completed/cancelled trips, newest first.
+     */
+    @GetMapping("/driver/{driverId}/history")
+    public List<NavigationTripResponse>
+    getDriverTripHistory(
+            @PathVariable Long driverId,
+            @RequestParam(defaultValue = "25") int limit) {
+
+        return navigationTripService
+                .getDriverTripHistory(driverId, limit);
     }
 
 

@@ -1,17 +1,26 @@
 package com.garageos.modules.navigation.service.impl;
 
+import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.navigation.TripStatus;
+import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.customer.entity.Customer;
+import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.DriverLocationRequest;
+import com.garageos.modules.navigation.dto.response.TripLocationResponse;
 import com.garageos.modules.navigation.entity.DriverCurrentLocation;
 import com.garageos.modules.navigation.entity.DriverLocationHistory;
+import com.garageos.modules.navigation.entity.NavigationRequest;
 import com.garageos.modules.navigation.entity.NavigationTrip;
 import com.garageos.modules.navigation.repository.DriverCurrentLocationRepository;
 import com.garageos.modules.navigation.repository.DriverLocationHistoryRepository;
+import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.navigation.repository.NavigationTripRepository;
 import com.garageos.modules.navigation.service.DriverLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +41,10 @@ public class DriverLocationServiceImpl
     private final DriverCurrentLocationRepository currentLocationRepository;
 
     private final NavigationTripRepository navigationTripRepository;
+
+    private final NavigationRequestRepository navigationRequestRepository;
+
+    private final CustomerRepository customerRepository;
 
     @Override
     @Transactional
@@ -175,6 +188,71 @@ public class DriverLocationServiceImpl
                 Instant.ofEpochMilli(timestamp),
                 ZoneOffset.UTC
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TripLocationResponse getCurrentLocation(Long tripId) {
+
+        NavigationTrip trip = navigationTripRepository.findById(tripId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
+
+        NavigationRequest navigationRequest = navigationRequestRepository
+                .findById(trip.getNavigationRequestId())
+                .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
+
+        authorizeViewer(trip, navigationRequest);
+
+        DriverCurrentLocation location = currentLocationRepository.findByTripId(tripId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No location has been reported for this trip yet."));
+
+        return TripLocationResponse.builder()
+                .tripId(tripId)
+                .latitude(location.getLatitude())
+                .longitude(location.getLongitude())
+                .speed(location.getSpeed())
+                .heading(location.getHeading())
+                .accuracy(location.getAccuracy())
+                .lastUpdated(location.getLastUpdated())
+                .build();
+    }
+
+    /**
+     * Never trust a client-supplied tripId alone: only the trip's own
+     * customer, its assigned driver, or garage-matched operational staff
+     * may read its location - the same three-way viewer split
+     * JobCardProjectionServiceImpl already uses for JobCard visibility.
+     */
+    private void authorizeViewer(NavigationTrip trip, NavigationRequest navigationRequest) {
+
+        GarageUserPrincipal principal = (GarageUserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+
+            Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Trip not found : " + trip.getId()));
+
+            if (!navigationRequest.getCustomerId().equals(customer.getId())) {
+                throw new ResourceNotFoundException("Trip not found : " + trip.getId());
+            }
+
+            return;
+        }
+
+        boolean isAssignedDriver = trip.getDriverId() != null
+                && trip.getDriverId().equals(principal.getId());
+
+        boolean isSameGarageEmployee = principal.getGarageId() != null
+                && principal.getGarageId().equals(navigationRequest.getGarageId());
+
+        if (!isAssignedDriver && !isSameGarageEmployee) {
+            throw new ResourceNotFoundException("Trip not found : " + trip.getId());
+        }
     }
 
     private void validate(DriverLocationRequest request) {

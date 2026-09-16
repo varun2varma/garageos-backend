@@ -7,6 +7,7 @@ import com.garageos.modules.customer.mapper.CustomerPortalMapper;
 import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.modules.customer.service.CustomerPortalService;
 import com.garageos.modules.estimate.dto.response.EstimateResponse;
+import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.repository.EstimateRepository;
 import com.garageos.modules.estimate.service.EstimateService;
 import com.garageos.modules.estimateitem.dto.response.EstimateItemResponse;
@@ -198,6 +199,20 @@ public class CustomerPortalServiceImpl
     @Transactional(readOnly = true)
     public CustomerEstimateDetailsResponse getEstimateDetails(
             Long estimateId) {
+
+        Customer customer = getCurrentCustomer();
+
+        Estimate estimateEntity =
+                estimateRepository.findById(estimateId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Estimate not found."));
+
+        if (!estimateEntity.getJobCard().getCustomer().getId()
+                .equals(customer.getId())) {
+            throw new ResourceNotFoundException(
+                    "Estimate not found.");
+        }
 
         EstimateResponse estimate =
                 estimateService.getEstimate(

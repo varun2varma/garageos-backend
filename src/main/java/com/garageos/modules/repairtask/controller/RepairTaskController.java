@@ -8,6 +8,7 @@ import com.garageos.modules.repairtask.service.RepairTaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,20 @@ import java.util.List;
 public class RepairTaskController {
 
     private final RepairTaskService service;
+
+    /**
+     * Locked operational-access decision: assigning a technician
+     * (including via this legacy free-text endpoint) is an
+     * OWNER/MANAGER/SERVICE_ADVISOR action, matching
+     * JobAssignmentController's ASSIGNMENT_ROLES.
+     */
+    private static final String ASSIGNMENT_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
 
     @GetMapping("/jobcards/{jobCardId}")
     public ResponseEntity<ApiResponse<List<RepairTaskResponse>>> getRepairTasks(
@@ -40,6 +55,7 @@ public class RepairTaskController {
     }
 
     @PutMapping("/{id}/assign")
+    @PreAuthorize(ASSIGNMENT_ROLES)
     public ResponseEntity<ApiResponse<RepairTaskResponse>> assignTechnician(
             @PathVariable Long id,
             @Valid @RequestBody AssignTechnicianRequest request) {
@@ -48,7 +64,7 @@ public class RepairTaskController {
                 "Technician assigned successfully.",
                 service.assignTechnician(
                         id,
-                        request.getTechnicianName()
+                        request
                 )
         );
     }

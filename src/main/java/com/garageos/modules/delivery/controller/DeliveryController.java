@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,7 +19,24 @@ public class DeliveryController {
 
     private final DeliveryService service;
 
+    /**
+     * Locked operational-access decision: delivery completion is an
+     * OWNER/MANAGER/SERVICE_ADVISOR action, matching the same
+     * WORKFLOW_OPERATIONAL_ROLES/JOBCARD_OPERATIONAL_ROLES set already
+     * used for every other stage of this exact operational chain
+     * (invoice generation, payment, quality check, close). Corrective
+     * fix: this endpoint previously had no role restriction at all.
+     */
+    private static final String DELIVERY_OPERATIONAL_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
+
     @PostMapping
+    @PreAuthorize(DELIVERY_OPERATIONAL_ROLES)
     public ResponseEntity<ApiResponse<DeliveryResponse>> createDelivery(
             @Valid @RequestBody CreateDeliveryRequest request) {
 

@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,24 @@ import java.util.List;
 public class ServiceWorkflowController {
 
     private final ServiceWorkflowService workflowService;
+
+    /**
+     * Locked operational-access decision: OWNER/MANAGER/SERVICE_ADVISOR
+     * for general operational JobCard actions on this controller.
+     * estimate/approve is deliberately NOT annotated here — it is
+     * enforced at the service layer (EstimateServiceImpl
+     * .authorizeEmployeeEstimateApproval, MANAGER-only) so the business
+     * operation cannot be bypassed by another controller/entry point;
+     * duplicating a different role set here would risk the two checks
+     * drifting out of sync.
+     */
+    private static final String WORKFLOW_OPERATIONAL_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
 
     @PostMapping("/job")
     public ResponseEntity<WorkflowResponse> createJob(
@@ -90,6 +109,7 @@ public class ServiceWorkflowController {
     }
 
     @PostMapping("/{jobCardNumber}/quality-check")
+    @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES)
     public ResponseEntity<WorkflowResponse> qualityCheck(
             @PathVariable String jobCardNumber) {
 
@@ -106,6 +126,7 @@ public class ServiceWorkflowController {
     }
 
     @PostMapping("/{jobCardNumber}/close")
+    @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES)
     public ResponseEntity<WorkflowResponse> closeJob(
             @PathVariable String jobCardNumber) {
 
@@ -114,6 +135,7 @@ public class ServiceWorkflowController {
     }
 
     @PostMapping("/{jobCardNumber}/invoice")
+    @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES)
     public ResponseEntity<ApiResponse<InvoiceResponse>>
     generateInvoice(
             @PathVariable String jobCardNumber) {
@@ -123,6 +145,7 @@ public class ServiceWorkflowController {
                 workflowService.generateInvoice(jobCardNumber));
     }
     @PostMapping("/{jobCardNumber}/payment")
+    @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES)
     public ResponseEntity<ApiResponse<WorkflowResponse>>
     receivePayment(
             @PathVariable String jobCardNumber) {

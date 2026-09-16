@@ -5,6 +5,7 @@ import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.mapper.CustomerPortalMapper;
 import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.repository.EstimateRepository;
 import com.garageos.modules.estimate.service.EstimateService;
 import com.garageos.modules.estimateitem.service.EstimateItemService;
@@ -65,6 +66,7 @@ class CustomerPortalServiceImplTest {
     private static final Long OTHER_CUSTOMER_ID = 2L;
     private static final Long JOB_CARD_ID = 100L;
     private static final String JOB_CARD_NUMBER = "JC-2026-000100";
+    private static final Long ESTIMATE_ID = 200L;
 
     @AfterEach
     void clearSecurityContext() {
@@ -193,5 +195,62 @@ class CustomerPortalServiceImplTest {
         MediaContent actual = service.getJobCardMediaContent(JOB_CARD_NUMBER, 51L);
 
         assertThat(actual).isSameAs(expected);
+    }
+
+    // getEstimateDetails() previously fetched an estimate by raw ID with no
+    // ownership check at all (unlike every sibling method above) — a
+    // read IDOR. These tests cover the P0 hotfix.
+
+    private Estimate estimateOwnedBy(Customer owner) {
+        Estimate estimate = new Estimate();
+        estimate.setId(ESTIMATE_ID);
+        estimate.setJobCard(jobCardOwnedBy(owner));
+        return estimate;
+    }
+
+    @Test
+    void customer_canViewTheirOwnEstimateDetails() {
+        Customer owner = customer(OWNING_CUSTOMER_ID, "9000000001");
+        when(customerRepository.findByMobileNumber("9000000001")).thenReturn(Optional.of(owner));
+
+        when(estimateRepository.findById(ESTIMATE_ID))
+                .thenReturn(Optional.of(estimateOwnedBy(owner)));
+        when(estimateService.getEstimate(ESTIMATE_ID))
+                .thenReturn(com.garageos.modules.estimate.dto.response.EstimateResponse.builder().build());
+        when(estimateItemService.getItems(ESTIMATE_ID)).thenReturn(List.of());
+
+        authenticateAsCustomer("9000000001");
+
+        assertThat(service.getEstimateDetails(ESTIMATE_ID)).isNotNull();
+    }
+
+    @Test
+    void customerA_cannotViewCustomerBsEstimateDetails() {
+        Customer requester = customer(OTHER_CUSTOMER_ID, "9000000002");
+        when(customerRepository.findByMobileNumber("9000000002")).thenReturn(Optional.of(requester));
+
+        Customer owner = customer(OWNING_CUSTOMER_ID, "9000000001");
+        when(estimateRepository.findById(ESTIMATE_ID))
+                .thenReturn(Optional.of(estimateOwnedBy(owner)));
+
+        authenticateAsCustomer("9000000002");
+
+        assertThatThrownBy(() -> service.getEstimateDetails(ESTIMATE_ID))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void customerB_cannotViewCustomerAsEstimateDetails() {
+        Customer requester = customer(OWNING_CUSTOMER_ID, "9000000001");
+        when(customerRepository.findByMobileNumber("9000000001")).thenReturn(Optional.of(requester));
+
+        Customer owner = customer(OTHER_CUSTOMER_ID, "9000000002");
+        when(estimateRepository.findById(ESTIMATE_ID))
+                .thenReturn(Optional.of(estimateOwnedBy(owner)));
+
+        authenticateAsCustomer("9000000001");
+
+        assertThatThrownBy(() -> service.getEstimateDetails(ESTIMATE_ID))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

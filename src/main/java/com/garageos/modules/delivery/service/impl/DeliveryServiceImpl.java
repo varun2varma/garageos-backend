@@ -2,6 +2,8 @@ package com.garageos.modules.delivery.service.impl;
 
 import com.garageos.core.enums.DeliveryStatus;
 import com.garageos.core.enums.InvoiceStatus;
+import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.enums.PaymentStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.delivery.dto.request.CreateDeliveryRequest;
@@ -14,9 +16,13 @@ import com.garageos.modules.invoice.entity.Invoice;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -28,8 +34,20 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final JobCardRepository jobCardRepository;
     private final InvoiceRepository invoiceRepository;
     private final DeliveryMapper mapper;
+    private final JobCardStatusValidator statusValidator;
 
+    /**
+     * Existing semantics already treat Delivery creation as the actual
+     * completed-delivery event (DeliveryStatus is set straight to
+     * DELIVERED here, with no separate "mark delivered" step anywhere in
+     * this service) — so this is the correct point to transition the
+     * JobCard to DELIVERED, per the canonical lifecycle. Invoice-before-
+     * delivery was already enforced (InvoiceStatus.GENERATED check);
+     * payment-before-delivery is added here since it previously was not
+     * enforced anywhere.
+     */
     @Override
+    @Transactional
     public DeliveryResponse createDelivery(CreateDeliveryRequest request) {
 
         JobCard jobCard = jobCardRepository.findById(request.getJobCardId())
@@ -37,6 +55,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                         new ResourceNotFoundException(
                                 "Job Card not found with id : "
                                         + request.getJobCardId()));
+
+        authorizeDeliveryAction(jobCard);
 
         Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
                 .orElseThrow(() ->
@@ -59,6 +79,11 @@ public class DeliveryServiceImpl implements DeliveryService {
                     "Only generated invoices can be delivered.");
         }
 
+        if (invoice.getPaymentStatus() != PaymentStatus.PAID) {
+            throw new BusinessException(
+                    "Invoice must be paid before delivery can be completed.");
+        }
+
         Delivery delivery = mapper.toEntity(request);
 
         delivery.setJobCard(jobCard);
@@ -69,6 +94,15 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setStatus(DeliveryStatus.DELIVERED);
 
         delivery = repository.save(delivery);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.DELIVERED
+        );
+
+        jobCard.setStatus(JobCardStatus.DELIVERED);
+
+        jobCardRepository.save(jobCard);
 
         return mapper.toResponse(delivery);
     }
@@ -127,5 +161,31 @@ public class DeliveryServiceImpl implements DeliveryService {
                                 "Delivery not found with id : " + id));
 
         repository.delete(delivery);
+    }
+
+    /**
+     * Corrective fix for Defect #7: createDelivery() (which is the actual
+     * completed-delivery event - see the class-level doc comment above)
+     * relied solely on controller-level role protection, with no tenant
+     * scoping in the service layer, so a MANAGER/OWNER/SERVICE_ADVISOR
+     * from any garage could complete delivery for any other garage's
+     * JobCard. Mirrors the garage-match check already used successfully
+     * in RepairTaskServiceImpl and QualityCheckServiceImpl.
+     */
+    private void authorizeDeliveryAction(JobCard jobCard) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (jobCard.getGarage() == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+
+            throw new BusinessException(
+                    "This Job Card does not belong to your garage.");
+        }
     }
 }

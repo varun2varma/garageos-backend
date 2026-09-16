@@ -18,6 +18,7 @@ public interface RepairTaskMapper {
     @Mapping(target = "estimateItem", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "technicianName", ignore = true)
+    @Mapping(target = "jobAssignment", ignore = true)
     @Mapping(target = "assignedAt", ignore = true)
     @Mapping(target = "startedAt", ignore = true)
     @Mapping(target = "completedAt", ignore = true)
@@ -30,6 +31,7 @@ public interface RepairTaskMapper {
     @Mapping(target = "jobCardNumber", source = "jobCard.jobCardNumber")
     @Mapping(target = "estimateItemId", source = "estimateItem.id")
     @Mapping(target = "description", source = "estimateItem.description")
+    @Mapping(target = "jobAssignmentId", source = "jobAssignment.id")
     RepairTaskResponse toResponse(RepairTask entity);
 
     List<RepairTaskResponse> toResponseList(
@@ -41,6 +43,7 @@ public interface RepairTaskMapper {
     @Mapping(target = "estimateItem", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "technicianName", ignore = true)
+    @Mapping(target = "jobAssignment", ignore = true)
     @Mapping(target = "assignedAt", ignore = true)
     @Mapping(target = "startedAt", ignore = true)
     @Mapping(target = "completedAt", ignore = true)

@@ -14,6 +14,7 @@ public interface GarageMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "garageCode", ignore = true)
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "nextEmployeeSequence", ignore = true)
     Garage toEntity(CreateGarageRequest request);
 
     GarageResponse toResponse(Garage garage);
