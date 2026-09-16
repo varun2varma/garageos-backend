@@ -57,7 +57,8 @@ public class QualityCheckServiceImpl
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Quality Check not found for Job Card : "
-                                                + jobCardNumber));
+                                                + jobCardNumber,
+                                        "QUALITY_CHECK_NOT_AVAILABLE"));
 
         return mapper.toResponse(qualityCheck);
 
@@ -108,7 +109,8 @@ public class QualityCheckServiceImpl
                 .findByJobCardJobCardNumber(jobCardNumber)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Quality Check not found."));
+                                "Quality Check not found.",
+                                "QUALITY_CHECK_NOT_AVAILABLE"));
 
         JobCard jobCard = qualityCheck.getJobCard();
 
@@ -142,7 +144,8 @@ public class QualityCheckServiceImpl
                 .findByJobCardJobCardNumber(jobCardNumber)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Quality Check not found."));
+                                "Quality Check not found.",
+                                "QUALITY_CHECK_NOT_AVAILABLE"));
 
         JobCard jobCard = qualityCheck.getJobCard();
 

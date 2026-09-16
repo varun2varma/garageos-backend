@@ -20,6 +20,7 @@ import com.garageos.modules.navigation.repository.NavigationTripMediaRepository;
 import com.garageos.modules.navigation.repository.NavigationTripRepository;
 import com.garageos.modules.navigation.service.NavigationTripService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -86,8 +87,9 @@ public class NavigationTripServiceImpl
         if (navigationRequest.getStatus()
                 != NavigationRequestStatus.REQUESTED) {
 
-            throw new IllegalStateException(
-                    "Navigation request is not available for assignment."
+            throw new BusinessException(
+                    "Navigation request is not available for assignment.",
+                    "NAVIGATION_ALREADY_ASSIGNED"
             );
         }
 
@@ -177,8 +179,30 @@ public class NavigationTripServiceImpl
                         .build();
 
 
-        NavigationTrip savedTrip =
-                navigationTripRepository.save(trip);
+        NavigationTrip savedTrip;
+
+        try {
+
+            savedTrip =
+                    navigationTripRepository.save(trip);
+
+        } catch (DataIntegrityViolationException e) {
+
+            // Backstop for the race the code-level status check above
+            // cannot fully close under READ COMMITTED: two concurrent
+            // "Assign Driver" submissions can both read status =
+            // REQUESTED before either commits. The database's unique
+            // index (V42__enforce_single_trip_per_navigation_request)
+            // is what actually prevents a second trip in that case;
+            // this just turns that constraint violation into the same
+            // controlled business error the earlier, more common
+            // non-concurrent case already returns, instead of a raw
+            // 500.
+            throw new BusinessException(
+                    "Navigation request is not available for assignment.",
+                    "NAVIGATION_ALREADY_ASSIGNED"
+            );
+        }
 
 
         navigationRequest.setStatus(

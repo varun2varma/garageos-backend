@@ -21,6 +21,17 @@ public class ApiError {
 
     String message;
 
+    /**
+     * Stable machine-readable identifier for a specific, known business
+     * error (e.g. "NAVIGATION_ALREADY_ASSIGNED", "QUALITY_CHECK_NOT_AVAILABLE")
+     * so a client can react to *which* error this is without parsing the
+     * human-readable message. Null for errors with no such stable
+     * identity (validation errors, generic exceptions) — the message
+     * remains the only signal for those, exactly as before this field was
+     * added.
+     */
+    String code;
+
     List<FieldError> errors;
 
     LocalDateTime timestamp;

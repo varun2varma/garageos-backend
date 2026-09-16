@@ -2,6 +2,7 @@ package com.garageos.modules.dashboard.repository;
 
 import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.enums.QualityCheckStatus;
 import com.garageos.modules.dashboard.dto.response.DashboardSummaryResponse;
 import com.garageos.modules.dashboard.dto.response.RecentJobResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -63,14 +65,28 @@ public class DashboardReadRepositoryImpl implements DashboardReadRepository {
 
         Long readyForDelivery = countByStatus(garageIds, JobCardStatus.READY_FOR_DELIVERY);
 
+        // Corrective fix: previously filtered on j.serviceDate = :today, which
+        // is set once at job creation and never updated - this counted jobs
+        // OPENED today, not jobs actually completed today. DELIVERED/CLOSED
+        // are the only two terminal statuses a JobCard reaches, and
+        // BaseEntity.updatedAt (@LastModifiedDate) reflects the moment that
+        // status transition was persisted, so filtering on updatedAt against
+        // a terminal status is the real "completed today" signal.
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayEnd = todayStart.plusDays(1);
         Long completedToday = entityManager.createQuery("""
                 SELECT COUNT(j)
                 FROM JobCard j
                 WHERE j.garage.id IN :garageIds
-                AND j.serviceDate = :today
+                AND j.status IN (:delivered, :closed)
+                AND j.updatedAt >= :todayStart
+                AND j.updatedAt < :todayEnd
                 """, Long.class)
                 .setParameter("garageIds", garageIds)
-                .setParameter("today", LocalDate.now())
+                .setParameter("delivered", JobCardStatus.DELIVERED)
+                .setParameter("closed", JobCardStatus.CLOSED)
+                .setParameter("todayStart", todayStart)
+                .setParameter("todayEnd", todayEnd)
                 .getSingleResult();
 
         BigDecimal todayRevenue = entityManager.createQuery("""
@@ -85,10 +101,39 @@ public class DashboardReadRepositoryImpl implements DashboardReadRepository {
 
         Long inspectionJobs = countByStatus(garageIds, JobCardStatus.INSPECTION_PENDING);
         Long estimateJobs = countByStatus(garageIds, JobCardStatus.ESTIMATE_PENDING);
-        Long repairJobs = countByStatus(garageIds, JobCardStatus.REPAIR_IN_PROGRESS);
-        Long qualityCheckJobs = countByStatus(garageIds, JobCardStatus.QUALITY_CHECK);
+        // Corrective fix: REPAIR_IN_PROGRESS is only reached via the legacy
+        // JobCardServiceImpl.startRepair() endpoint. The canonical path
+        // (EstimateServiceImpl.approveEstimateCanonical -> RepairTaskService)
+        // sets REPAIR_PENDING instead, so counting only REPAIR_IN_PROGRESS
+        // undercounts (often to 0) jobs actually in the repair phase.
+        Long repairJobs = countByStatusIn(garageIds, JobCardStatus.REPAIR_PENDING, JobCardStatus.REPAIR_IN_PROGRESS);
+        // Corrective fix (round 2): JobCardStatus.QUALITY_CHECK is a dead
+        // enum value (see below), and the first fix approximated "awaiting
+        // QC" via JobCard.status == REPAIR_COMPLETED. That is a correct
+        // proxy today (RepairTaskServiceImpl.completeRepair sets
+        // REPAIR_COMPLETED and creates the QualityCheck row in the same
+        // transaction, and a QC fail moves the JobCard back to
+        // REPAIR_PENDING, not REPAIR_COMPLETED) but it is still a proxy
+        // through JobCard state rather than the actual QC record. The
+        // QualityCheck entity has its own authoritative status
+        // (PENDING/PASSED/FAILED, one row per JobCard - QualityCheck.java),
+        // so "genuinely awaiting QC" is expressed directly against it
+        // instead of being inferred.
+        Long qualityCheckJobs = entityManager.createQuery("""
+                SELECT COUNT(q)
+                FROM QualityCheck q
+                WHERE q.jobCard.garage.id IN :garageIds
+                AND q.status = :status
+                """, Long.class)
+                .setParameter("garageIds", garageIds)
+                .setParameter("status", QualityCheckStatus.PENDING)
+                .getSingleResult();
         Long invoiceJobs = countByStatus(garageIds, JobCardStatus.READY_FOR_INVOICE);
-        Long paymentPending = countByStatus(garageIds, JobCardStatus.PAYMENT_PENDING);
+        // Corrective fix: JobCardStatus.PAYMENT_PENDING is a dead enum value -
+        // InvoiceServiceImpl never writes it. INVOICE_GENERATED is the real
+        // "invoice generated, payment not yet received" state (payment
+        // receipt moves the JobCard straight to READY_FOR_DELIVERY).
+        Long paymentPending = countByStatus(garageIds, JobCardStatus.INVOICE_GENERATED);
 
         Long totalCustomers = entityManager.createQuery("""
                 SELECT COUNT(DISTINCT j.customer)
@@ -151,6 +196,19 @@ public class DashboardReadRepositoryImpl implements DashboardReadRepository {
                 """, Long.class)
                 .setParameter("garageIds", garageIds)
                 .setParameter("status", status)
+                .getSingleResult();
+    }
+
+    private Long countByStatusIn(List<Long> garageIds, JobCardStatus... statuses) {
+
+        return entityManager.createQuery("""
+                SELECT COUNT(j)
+                FROM JobCard j
+                WHERE j.garage.id IN :garageIds
+                AND j.status IN :statuses
+                """, Long.class)
+                .setParameter("garageIds", garageIds)
+                .setParameter("statuses", List.of(statuses))
                 .getSingleResult();
     }
 

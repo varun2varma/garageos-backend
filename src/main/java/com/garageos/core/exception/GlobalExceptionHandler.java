@@ -49,14 +49,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException ex) {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(buildError(ex.getMessage()));
+                .body(buildError(ex.getMessage(), ex.getCode()));
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
 
         return ResponseEntity.badRequest()
-                .body(buildError(ex.getMessage()));
+                .body(buildError(ex.getMessage(), ex.getCode()));
     }
 
     /**
@@ -158,10 +158,15 @@ public class GlobalExceptionHandler {
     }
 
     private ApiError buildError(String message) {
+        return buildError(message, null);
+    }
+
+    private ApiError buildError(String message, String code) {
 
         return ApiError.builder()
                 .success(false)
                 .message(message)
+                .code(code)
                 .timestamp(LocalDateTime.now())
                 .requestId(RequestContext.getRequestId())
                 .build();

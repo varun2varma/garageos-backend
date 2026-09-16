@@ -20,6 +20,7 @@ import com.garageos.modules.navigation.service.DriverLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +48,43 @@ public class DriverLocationServiceImpl
     private final CustomerRepository customerRepository;
 
     @Override
+    public Long resolveAuthenticatedDriverId(Authentication authentication) {
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof GarageUserPrincipal principal)) {
+
+            return null;
+        }
+
+        return principal.getId();
+    }
+
+    @Override
     @Transactional
-    public void processLocation(DriverLocationRequest request) {
+    public void processLocation(DriverLocationRequest request, Long authenticatedUserId) {
 
         validate(request);
+
+        // Root-cause fix: previously the driverId in the message body was
+        // trusted outright - the only check was that it matched the
+        // trip's assigned driver, which any authenticated user could
+        // still satisfy by simply putting that driver's id in the
+        // payload. This ties the update to who the WebSocket session
+        // actually authenticated as.
+        if (authenticatedUserId == null) {
+
+            throw new IllegalStateException(
+                    "Location updates require an authenticated session."
+            );
+        }
+
+        if (!authenticatedUserId.equals(request.getDriverId())) {
+
+            throw new IllegalStateException(
+                    "Cannot report location for a different driver."
+            );
+        }
 
         NavigationTrip trip =
                 validateActiveTrip(request);

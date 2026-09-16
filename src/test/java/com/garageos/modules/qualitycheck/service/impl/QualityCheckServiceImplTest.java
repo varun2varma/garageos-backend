@@ -4,6 +4,7 @@ import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.QualityCheckStatus;
 import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.exception.BusinessException;
+import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -202,6 +203,41 @@ class QualityCheckServiceImplTest {
         assertThat(qc.getJobCard().getStatus()).isEqualTo(JobCardStatus.REPAIR_COMPLETED);
         verify(repository, never()).save(any());
         verify(jobCardRepository, never()).save(any());
+    }
+
+    // ---- 404 root cause (the traced "Quality Check not found." bug) ----
+
+    @Test
+    void noQualityCheckRecordExists_surfacesTheStableCode_notARawException() {
+
+        // Reproduces the exact reported bug: a JobCard whose RepairTask(s)
+        // were never actually completed via the canonical backend call
+        // never gets a QualityCheck row created (RepairTaskServiceImpl.
+        // completeRepair is the only thing that creates one), so passing
+        // QC 404s here. This asserts the response carries the stable
+        // QUALITY_CHECK_NOT_AVAILABLE code (Phase W) so Flutter can show a
+        // specific message instead of a raw 404 body.
+        when(repository.findByJobCardJobCardNumber(JC_NUMBER)).thenReturn(Optional.empty());
+
+        authenticate(GARAGE_ID, "MANAGER");
+
+        assertThatThrownBy(() -> service().passQualityCheck(JC_NUMBER, request()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .satisfies(e -> assertThat(((ResourceNotFoundException) e).getCode())
+                        .isEqualTo("QUALITY_CHECK_NOT_AVAILABLE"));
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void getQualityCheck_noRecordExists_alsoSurfacesTheStableCode() {
+
+        when(repository.findByJobCardJobCardNumber(JC_NUMBER)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().getQualityCheck(JC_NUMBER))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .satisfies(e -> assertThat(((ResourceNotFoundException) e).getCode())
+                        .isEqualTo("QUALITY_CHECK_NOT_AVAILABLE"));
     }
 
     // ---- FAIL ----
