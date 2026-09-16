@@ -5,6 +5,10 @@ import com.garageos.core.enums.navigation.*;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.core.exception.BusinessException;
+import com.garageos.modules.garage.repository.GarageRepository;
+import com.garageos.modules.identity.entity.User;
+import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.handover.repository.VehicleHandoverRepository;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.request.CreateNavigationTripRequest;
@@ -21,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,6 +49,12 @@ public class NavigationTripServiceImpl
     private final CustomerRepository
             customerRepository;
 
+    private final GarageRepository
+            garageRepository;
+
+    private final UserRepository
+            userRepository;
+
 
     @Override
     @Transactional
@@ -63,6 +74,15 @@ public class NavigationTripServiceImpl
                         );
 
 
+        /*
+         * Corrective security fix: this had no authorization at all. Any
+         * authenticated caller could assign any driver to any garage's
+         * navigation request, simply by supplying the ids. Assignment is
+         * a garage operation, so it is now scoped to the garage that owns
+         * the request, and the driver must belong to that same garage.
+         */
+        requireOperationalStaffOfGarage(navigationRequest.getGarageId());
+
         if (navigationRequest.getStatus()
                 != NavigationRequestStatus.REQUESTED) {
 
@@ -78,6 +98,12 @@ public class NavigationTripServiceImpl
                     "Driver ID is required."
             );
         }
+
+
+        requireDriverOfGarage(
+                request.getDriverId(),
+                navigationRequest.getGarageId()
+        );
 
 
         TripType tripType =
@@ -130,13 +156,15 @@ public class NavigationTripServiceImpl
                                 TripStatus.ASSIGNED
                         )
 
+                        // Corrective fix: both branches of this ternary
+                        // were identical and both wrote the garage *id*
+                        // into an address field, so a driver's trip card
+                        // showed a bare number like "10" as the place they
+                        // were starting from. Both legs do start at the
+                        // garage, so the ternary was pointless - what was
+                        // missing was the garage's actual address.
                         .sourceAddress(
-                                navigationRequest.getRequestType()
-                                        == NavigationRequestType.PICKUP
-                                        ? navigationRequest.getGarageId()
-                                        .toString()
-                                        : navigationRequest.getGarageId()
-                                        .toString()
+                                garageAddress(navigationRequest.getGarageId())
                         )
 
                         .destinationAddress(
@@ -678,6 +706,74 @@ public class NavigationTripServiceImpl
         }
     }
 
+    /**
+     * Assigning a driver is a garage operation. The caller must be
+     * operational staff of the garage that owns the navigation request,
+     * and the driver they nominate must belong to that same garage - so a
+     * manager cannot dispatch another garage's driver, and cannot touch
+     * another garage's pickup at all.
+     *
+     * Deliberately throws not-found rather than forbidden, matching the
+     * rest of this service, so probing ids cannot be used to discover
+     * that a request exists in another garage.
+     */
+    private void requireOperationalStaffOfGarage(Long garageId) {
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        if (garageId == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(garageId)) {
+
+            throw new ResourceNotFoundException(
+                    "Navigation request not found."
+            );
+        }
+    }
+
+    private void requireDriverOfGarage(Long driverId, Long garageId) {
+
+        User driver = userRepository.findById(driverId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Driver not found."));
+
+        if (driver.getGarageId() == null
+                || !driver.getGarageId().equals(garageId)) {
+
+            throw new BusinessException(
+                    "That driver does not belong to this garage."
+            );
+        }
+    }
+
+    /**
+     * A readable starting address for the trip: the garage's own address,
+     * falling back to its name and then its code. Never the raw id.
+     */
+    private String garageAddress(Long garageId) {
+
+        if (garageId == null) {
+            return null;
+        }
+
+        return garageRepository.findById(garageId)
+                .map(garage -> {
+
+                    if (garage.getAddress() != null
+                            && !garage.getAddress().isBlank()) {
+                        return garage.getAddress();
+                    }
+
+                    if (garage.getGarageName() != null
+                            && !garage.getGarageName().isBlank()) {
+                        return garage.getGarageName();
+                    }
+
+                    return garage.getGarageCode();
+                })
+                .orElse(null);
+    }
+
     private GarageUserPrincipal currentPrincipal() {
 
         return (GarageUserPrincipal) SecurityContextHolder
@@ -687,10 +783,56 @@ public class NavigationTripServiceImpl
     }
 
 
+    /**
+     * Enriches the trip with the canonical destination coordinates and
+     * the customer id, both read from the NavigationRequest this trip was
+     * created for.
+     *
+     * Resolved rather than copied onto the trip: the request already owns
+     * the location, and duplicating it would create two places for it to
+     * drift. A driver's trip lists are their own and capped, so the extra
+     * lookup is bounded.
+     *
+     * A request that cannot be found leaves the coordinates null - the
+     * trip is still returned, because a driver losing their whole queue
+     * over one missing row would be worse than a trip with no map point.
+     */
     private NavigationTripResponse toResponse(
             NavigationTrip trip) {
 
+        NavigationRequest request =
+                trip.getNavigationRequestId() == null
+                        ? null
+                        : navigationRequestRepository
+                                .findById(trip.getNavigationRequestId())
+                                .orElse(null);
+
+        BigDecimal destinationLatitude = null;
+        BigDecimal destinationLongitude = null;
+        Long customerId = null;
+
+        if (request != null) {
+
+            customerId = request.getCustomerId();
+
+            boolean pickup = trip.getTripType() == TripType.PICKUP;
+
+            destinationLatitude = pickup
+                    ? request.getPickupLatitude()
+                    : request.getDeliveryLatitude();
+
+            destinationLongitude = pickup
+                    ? request.getPickupLongitude()
+                    : request.getDeliveryLongitude();
+        }
+
         return NavigationTripResponse.builder()
+
+                .destinationLatitude(destinationLatitude)
+
+                .destinationLongitude(destinationLongitude)
+
+                .customerId(customerId)
 
                 .id(trip.getId())
 

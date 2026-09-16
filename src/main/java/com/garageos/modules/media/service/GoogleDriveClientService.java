@@ -1,6 +1,7 @@
 package com.garageos.modules.media.service;
 
 import com.garageos.core.config.GoogleDriveProperties;
+import com.garageos.core.exception.MediaException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -44,12 +45,13 @@ public class GoogleDriveClientService {
         if (credential == null) {
 
             log.error(
-                    "[DRIVE_AUTH] No stored Google Drive credential found."
+                    "[DRIVE_AUTH_CHECK] No stored Google Drive credential found. "
+                            + "Drive has not been authorized, or the stored grant was removed."
             );
 
-            throw new IllegalStateException(
-                    "Google Drive is not authorized. "
-                            + "Please authorize Google Drive first."
+            throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_DRIVE_AUTH_REQUIRED,
+                    "Google Drive has not been authorized for this server yet."
             );
         }
 

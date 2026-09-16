@@ -68,8 +68,19 @@ public class BookingServiceImpl implements BookingService {
                         new ResourceNotFoundException(
                                 "Garage not found with id : " + request.getGarageId()));
 
-        if (request.isPickupRequested() && isBlank(request.getPickupAddress())) {
-            throw new BusinessException("Pickup address is required when pickup is requested.");
+        if (request.isPickupRequested()) {
+
+            // Coordinates are the canonical navigation location, so they
+            // are what a pickup booking genuinely requires. The address is
+            // descriptive metadata and stays optional: a customer who
+            // drops a pin on a spot with no useful street name must still
+            // be able to book.
+            if (request.getPickupLatitude() == null
+                    || request.getPickupLongitude() == null) {
+
+                throw new BusinessException(
+                        "A pickup location must be selected when pickup is requested.");
+            }
         }
 
         Booking booking = Booking.builder()
@@ -81,6 +92,12 @@ public class BookingServiceImpl implements BookingService {
                 .requestedAt(request.getRequestedAt())
                 .pickupRequested(request.isPickupRequested())
                 .pickupAddress(request.getPickupAddress())
+                // Only ever stored for a pickup booking - a drop-off
+                // booking must not carry a stray location.
+                .pickupLatitude(request.isPickupRequested()
+                        ? request.getPickupLatitude() : null)
+                .pickupLongitude(request.isPickupRequested()
+                        ? request.getPickupLongitude() : null)
                 .status(BookingStatus.REQUESTED)
                 .build();
 
@@ -165,6 +182,14 @@ public class BookingServiceImpl implements BookingService {
             navigationRequest.setGarageId(booking.getGarageId());
             navigationRequest.setRequestType(NavigationRequestType.PICKUP);
             navigationRequest.setPickupAddress(booking.getPickupAddress());
+
+            // Carry the canonical coordinates onto the NavigationRequest.
+            // CreateNavigationRequest has always had these fields; nothing
+            // ever populated them, which is why every pickup trip reached
+            // its driver with an address and no location.
+            navigationRequest.setPickupLatitude(booking.getPickupLatitude());
+            navigationRequest.setPickupLongitude(booking.getPickupLongitude());
+
             navigationRequest.setScheduledAt(booking.getRequestedAt());
 
             NavigationRequestResponse created =
@@ -295,6 +320,8 @@ public class BookingServiceImpl implements BookingService {
                 .requestedAt(booking.getRequestedAt())
                 .pickupRequested(booking.isPickupRequested())
                 .pickupAddress(booking.getPickupAddress())
+                .pickupLatitude(booking.getPickupLatitude())
+                .pickupLongitude(booking.getPickupLongitude())
                 .status(booking.getStatus())
                 .garageRemarks(booking.getGarageRemarks())
                 .navigationRequestId(booking.getNavigationRequestId())

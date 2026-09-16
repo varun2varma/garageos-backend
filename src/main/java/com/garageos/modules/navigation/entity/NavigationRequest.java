@@ -5,6 +5,7 @@ import com.garageos.core.enums.navigation.NavigationRequestType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -74,6 +75,24 @@ public class NavigationRequest {
 
     @Column(name = "delivery_address")
     private String deliveryAddress;
+
+    /**
+     * Corrective fix: these four columns were added in V30 but never
+     * mapped onto this entity, so every coordinate supplied upstream was
+     * silently dropped and the columns stayed permanently null. A driver
+     * therefore only ever received a free-text address to navigate by.
+     */
+    @Column(name = "pickup_latitude", precision = 10, scale = 7)
+    private BigDecimal pickupLatitude;
+
+    @Column(name = "pickup_longitude", precision = 10, scale = 7)
+    private BigDecimal pickupLongitude;
+
+    @Column(name = "delivery_latitude", precision = 10, scale = 7)
+    private BigDecimal deliveryLatitude;
+
+    @Column(name = "delivery_longitude", precision = 10, scale = 7)
+    private BigDecimal deliveryLongitude;
 
     @Column(
             name = "scheduled_at",

@@ -4,6 +4,7 @@ import com.garageos.core.enums.booking.BookingStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,6 +29,14 @@ public class BookingResponse {
 
     private boolean pickupRequested;
     private String pickupAddress;
+
+    /**
+     * Canonical pickup coordinates — what the customer selected, what the
+     * manager sees, and what the driver navigates to. Null when pickup
+     * was not requested, or for bookings created before V41.
+     */
+    private BigDecimal pickupLatitude;
+    private BigDecimal pickupLongitude;
 
     private BookingStatus status;
     private String garageRemarks;

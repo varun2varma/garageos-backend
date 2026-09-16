@@ -174,8 +174,22 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
                         .assignments(ownAssignments);
 
                 allowedActions.add("view");
-                allowedActions.add("start_repair");
-                allowedActions.add("complete_repair");
+
+                /*
+                 * Corrective fix: this listed start_repair AND
+                 * complete_repair unconditionally, regardless of the Job
+                 * Card's state. A technician looking at a job sitting at
+                 * ESTIMATE_APPROVED was offered "Complete Repair" on work
+                 * that had not started, and the backend's own transition
+                 * table would reject it - an action the projection had
+                 * just said was allowed.
+                 *
+                 * The projection is what the client renders, so it must
+                 * agree with the state machine rather than contradict it.
+                 * Repair actions are now derived from the same status the
+                 * validator enforces.
+                 */
+                allowedActions.addAll(resolveTechnicianRepairActions(jobCard.getStatus()));
             }
 
             default -> {
@@ -296,6 +310,34 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
         return deliveryRepository.findByJobCardId(jobCardId)
                 .map(deliveryMapper::toResponse)
                 .orElse(null);
+    }
+
+    /**
+     * The repair actions a technician may take, by state.
+     *
+     * Deliberately narrower than the operational set: a technician moves
+     * repair forward and does nothing else. Any state outside the repair
+     * window offers no action at all, which is the truthful answer -
+     * the job is simply not theirs to move yet.
+     */
+    private List<String> resolveTechnicianRepairActions(JobCardStatus status) {
+
+        return switch (status) {
+
+            // The only state from which starting repair is a legal
+            // transition: startRepair() targets REPAIR_IN_PROGRESS, and
+            // JobCardStatusValidator allows that from REPAIR_PENDING
+            // alone. Offering it from WAITING_FOR_APPROVAL or the legacy
+            // ESTIMATE_APPROVED would put a button on screen that the
+            // validator then refuses - which is the whole defect this
+            // method exists to remove.
+            case REPAIR_PENDING -> List.of("start_repair");
+
+            // Work is under way; finishing it is the only move.
+            case REPAIR_IN_PROGRESS -> List.of("complete_repair");
+
+            default -> List.of();
+        };
     }
 
     private List<String> resolveOperationalActions(JobCardStatus status) {

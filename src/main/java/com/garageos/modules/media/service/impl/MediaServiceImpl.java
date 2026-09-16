@@ -4,7 +4,10 @@ import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.media.MediaStage;
 import com.garageos.core.enums.media.MediaType;
 import com.garageos.core.enums.media.MediaVisibility;
+import com.garageos.core.exception.MediaException;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.modules.jobassignment.repository.JobAssignmentRepository;
@@ -360,18 +363,69 @@ public class MediaServiceImpl implements MediaService {
         } catch (GeneralSecurityException | IOException ex) {
 
             log.error(
-                    "[DRIVE] Google Drive operation failed. jobCardId={}, fileName={}, error={}",
+                    "[DRIVE_UPLOAD_FAILURE] Google Drive operation failed. "
+                            + "jobCardId={}, stage={}, fileName={}, error={}",
                     jobCardId,
+                    mediaStage,
                     generatedFileName,
                     ex.getMessage(),
                     ex
             );
 
-            throw new IllegalStateException(
-                    "Failed to upload media to Google Drive.",
+            throw toMediaException(ex);
+        }
+    }
+
+    /**
+     * Turns a Google failure into something the client can act on.
+     *
+     * Every Drive failure previously became one IllegalStateException
+     * with the message "Failed to upload media to Google Drive." - which
+     * the handler returned as a 400. That was wrong twice over: the cause
+     * was unknowable to the caller, and a Drive outage or an expired
+     * token is not a client error.
+     *
+     * The distinction that matters operationally is authorization (someone
+     * must reauthorize Drive) versus anything else (retry, or investigate
+     * the logs). Google signals the former with 401/403 on the API call,
+     * and with TokenResponseException when a refresh is refused.
+     *
+     * The exception's own text is never put in the client message -
+     * Google's errors can include request URLs and token metadata. The
+     * full cause goes to the logs above and is attached for the handler.
+     */
+    private MediaException toMediaException(Exception ex) {
+
+        if (ex instanceof TokenResponseException) {
+
+            return new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_DRIVE_AUTH_FAILED,
+                    "Google Drive rejected the stored authorization. "
+                            + "Reauthorize Google Drive and try again.",
                     ex
             );
         }
+
+        if (ex instanceof GoogleJsonResponseException googleError) {
+
+            int statusCode = googleError.getStatusCode();
+
+            if (statusCode == 401 || statusCode == 403) {
+
+                return new MediaException(
+                        MediaException.MediaErrorCode.MEDIA_DRIVE_AUTH_FAILED,
+                        "Google Drive refused this operation. The stored "
+                                + "authorization may have expired or lost access.",
+                        ex
+                );
+            }
+        }
+
+        return new MediaException(
+                MediaException.MediaErrorCode.MEDIA_DRIVE_UPLOAD_FAILED,
+                "Google Drive could not store this file. Please try again.",
+                ex
+        );
     }
 
     @Override
@@ -700,23 +754,31 @@ public class MediaServiceImpl implements MediaService {
         );
     }
 
+    /**
+     * Corrective fix: DURING_REPAIR media used to REQUIRE a repairTaskId.
+     * No client ever sent one - the Job Card screen uploads against the
+     * job card and a stage, which is the only thing it knows - so every
+     * repair photo and video was rejected before it reached Google Drive.
+     * The rejection was an IllegalArgumentException, which had no handler
+     * and so surfaced as a bare 500 "Something went wrong."; that is the
+     * whole of the "repair media upload returns 500" defect, and it is
+     * also why the Photos & Videos section stayed empty.
+     *
+     * Repair media is now valid at job-card level. A repairTaskId remains
+     * optional and, when supplied, still narrows the media to that one
+     * task - so per-task media keeps working without making it the only
+     * way to upload.
+     *
+     * Note what is NOT required here: a task name, a job card number, a
+     * folder name or any other display string. Media is identified by
+     * stable ids (jobCardId, optional repairTaskId) plus the stage, so a
+     * task with an arbitrary, duplicated, renamed or empty name cannot
+     * break an upload.
+     */
     private void validateRepairTaskRequirement(
             Long jobCardId,
             MediaStage mediaStage,
             Long repairTaskId) {
-
-        if (mediaStage == MediaStage.DURING_REPAIR
-                && repairTaskId == null) {
-
-            log.warn(
-                    "[MEDIA] Repair Task is required for DURING_REPAIR media. jobCardId={}",
-                    jobCardId
-            );
-
-            throw new IllegalArgumentException(
-                    "Repair Task is required for DURING_REPAIR media."
-            );
-        }
 
         if (mediaStage != MediaStage.DURING_REPAIR
                 && repairTaskId != null) {

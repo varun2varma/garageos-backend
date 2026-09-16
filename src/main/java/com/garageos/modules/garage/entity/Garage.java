@@ -46,6 +46,16 @@ public class Garage extends BaseEntity {
     )
     String garageCode;
 
+    /**
+     * The user who registered this garage. The column has existed since
+     * V24 but had no entity field, so nothing could ever populate it -
+     * it was permanently null. Mapped here so garage ownership is
+     * expressed on the aggregate itself, alongside the ACTIVE OWNER
+     * GarageMembership that authorization actually reads.
+     */
+    @Column(name = "owner_user_id")
+    Long ownerUserId;
+
     @Column(
             nullable = false,
             length = 150

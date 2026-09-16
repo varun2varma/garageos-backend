@@ -7,6 +7,8 @@ import com.garageos.core.enums.navigation.TripType;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.modules.garage.repository.GarageRepository;
+import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.handover.repository.VehicleHandoverRepository;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.response.NavigationTripResponse;
@@ -46,13 +48,20 @@ class NavigationTripServiceImplTripByRequestTest {
     @Mock private VehicleHandoverRepository vehicleHandoverRepository;
     @Mock private CustomerRepository customerRepository;
 
+    // Injected so a trip's starting address can be the garage's real
+    // address instead of its raw id.
+    @Mock private GarageRepository garageRepository;
+    @Mock private UserRepository userRepository;
+
     private NavigationTripServiceImpl service() {
         return new NavigationTripServiceImpl(
                 navigationRequestRepository,
                 navigationTripRepository,
                 navigationTripMediaRepository,
                 vehicleHandoverRepository,
-                customerRepository
+                customerRepository,
+                garageRepository,
+                userRepository
         );
     }
 

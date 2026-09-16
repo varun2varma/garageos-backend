@@ -4,6 +4,7 @@ import com.garageos.core.enums.booking.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -66,8 +67,27 @@ public class Booking {
     @Column(name = "pickup_requested", nullable = false)
     private boolean pickupRequested;
 
+    /**
+     * Human-readable pickup location - descriptive metadata for the
+     * customer, driver and garage to read. Deliberately NOT the source of
+     * truth for navigation: see the coordinate pair below.
+     */
     @Column(name = "pickup_address", length = 500)
     private String pickupAddress;
+
+    /**
+     * Canonical pickup coordinates. These, not {@link #pickupAddress},
+     * are what a driver navigates to, and what is carried onto the
+     * NavigationRequest when the garage confirms the booking.
+     *
+     * Null when pickup was not requested, and null for bookings created
+     * before V41.
+     */
+    @Column(name = "pickup_latitude", precision = 10, scale = 7)
+    private BigDecimal pickupLatitude;
+
+    @Column(name = "pickup_longitude", precision = 10, scale = 7)
+    private BigDecimal pickupLongitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

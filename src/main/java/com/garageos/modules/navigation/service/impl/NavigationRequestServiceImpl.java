@@ -50,8 +50,24 @@ public class NavigationRequestServiceImpl
                                 request.getPickupAddress()
                         )
 
+                        .pickupLatitude(
+                                request.getPickupLatitude()
+                        )
+
+                        .pickupLongitude(
+                                request.getPickupLongitude()
+                        )
+
                         .deliveryAddress(
                                 request.getDeliveryAddress()
+                        )
+
+                        .deliveryLatitude(
+                                request.getDeliveryLatitude()
+                        )
+
+                        .deliveryLongitude(
+                                request.getDeliveryLongitude()
                         )
 
                         .scheduledAt(
@@ -146,8 +162,24 @@ public class NavigationRequestServiceImpl
                         request.getPickupAddress()
                 )
 
+                .pickupLatitude(
+                        request.getPickupLatitude()
+                )
+
+                .pickupLongitude(
+                        request.getPickupLongitude()
+                )
+
                 .deliveryAddress(
                         request.getDeliveryAddress()
+                )
+
+                .deliveryLatitude(
+                        request.getDeliveryLatitude()
+                )
+
+                .deliveryLongitude(
+                        request.getDeliveryLongitude()
                 )
 
                 .scheduledAt(
