@@ -608,10 +608,16 @@ public class MediaServiceImpl implements MediaService {
                     ex
             );
 
-            throw new IllegalStateException(
-                    "Failed to download media from Google Drive.",
-                    ex
-            );
+            // Same mapping uploadMedia() already uses (toMediaException) —
+            // previously this collapsed a Drive-auth failure (expired/
+            // revoked token, 401/403) into a generic IllegalStateException
+            // that GlobalExceptionHandler flattened to a plain 400, hiding
+            // that the real fix is reauthorization, not retrying the
+            // request. Routing it through the same classifier means an
+            // auth failure now correctly surfaces as 503
+            // MEDIA_DRIVE_AUTH_FAILED on download exactly like it already
+            // does on upload.
+            throw toMediaException(ex);
         }
     }
 

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.garageos.core.api.error.FieldError;
@@ -120,6 +121,24 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(ex.getStatus()).body(error);
+    }
+
+    /**
+     * Corrective fix: AccessDeniedException (both from @PreAuthorize
+     * checks and from manual ownership checks such as
+     * VehicleServiceImpl.updateVehicle) had no handler at all, so every
+     * authorization failure fell through to the generic catch-all below
+     * and reached the client as a bare 500 "Something went wrong.",
+     * indistinguishable from a real server error.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDeniedException(
+            AccessDeniedException ex) {
+
+        log.warn("Access denied: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(buildError(ex.getMessage()));
     }
 
     /**

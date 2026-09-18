@@ -59,11 +59,15 @@ public class EstimateServiceImpl implements EstimateService {
                                 "Job Card not found with id : "
                                         + request.getJobCardId()));
 
+        Long garageId = jobCard.getGarage().getId();
+
         Optional<Estimate> latestEstimate =
-                estimateRepository.findTopByOrderByIdDesc();
+                estimateRepository
+                        .findTopByJobCardGarageIdOrderByIdDesc(garageId);
 
         String estimateNumber =
                 EstimateNumberGenerator.generate(
+                        jobCard.getGarage().getGarageCode(),
                         latestEstimate
                                 .map(Estimate::getEstimateNumber)
                                 .orElse(null));
@@ -282,57 +286,60 @@ public class EstimateServiceImpl implements EstimateService {
                 .findByJobCardNumber(jobCardNumber)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Job Card not found : " + jobCardNumber));
-
-        if (estimateRepository.existsByJobCardId(jobCard.getId())) {
-            throw new BusinessException(
-                    "Estimate already exists for Job Card.");
-        }
+                                "Job Card not found with number : " + jobCardNumber));
 
         List<Inspection> inspections =
                 inspectionRepository.findByComplaintJobCardId(jobCard.getId());
 
         if (inspections.isEmpty()) {
             throw new BusinessException(
-                    "No inspections found for Job Card.");
+                    "Complete inspection before creating estimate.");
         }
 
-        for (Inspection inspection : inspections) {
+        boolean allCompleted = inspections.stream()
+                .allMatch(inspection ->
+                        inspection.getStatus() == InspectionStatus.COMPLETED);
 
-            if (inspection.getStatus() != InspectionStatus.COMPLETED) {
-                throw new BusinessException(
-                        "Complete all inspections before creating estimate.");
-            }
+        if (!allCompleted) {
+            throw new BusinessException(
+                    "Complete all complaint inspections before creating estimate.");
         }
+
+        /*
+         * Estimate is created as an empty DRAFT.
+         *
+         * Estimate items are NOT generated automatically from
+         * InspectionFinding / InspectionMasterItem.
+         *
+         * The service advisor adds Labour / Parts
+         * complaint-by-complaint.
+         */
+
+        Long garageId = jobCard.getGarage().getId();
 
         Optional<Estimate> latestEstimate =
-                estimateRepository.findTopByOrderByIdDesc();
+                estimateRepository
+                        .findTopByJobCardGarageIdOrderByIdDesc(garageId);
 
         String estimateNumber =
                 EstimateNumberGenerator.generate(
+                        jobCard.getGarage().getGarageCode(),
                         latestEstimate
                                 .map(Estimate::getEstimateNumber)
                                 .orElse(null));
 
         Estimate estimate = new Estimate();
 
-        estimate.setEstimateNumber(estimateNumber);
-
         estimate.setJobCard(jobCard);
-
+        estimate.setEstimateNumber(estimateNumber);
         estimate.setStatus(EstimateStatus.DRAFT);
 
         estimate.setSubtotal(BigDecimal.ZERO);
-
         estimate.setDiscount(BigDecimal.ZERO);
-
         estimate.setGst(BigDecimal.ZERO);
-
         estimate.setGrandTotal(BigDecimal.ZERO);
 
         estimate = estimateRepository.save(estimate);
-
-        createEstimateItems(estimate);
 
         return estimateMapper.toResponse(estimate);
     }

@@ -1,5 +1,7 @@
 package com.garageos.modules.customer.service.impl;
 
+import com.garageos.core.enums.EstimateStatus;
+import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.customer.entity.Customer;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -157,6 +160,51 @@ public class CustomerPortalServiceImpl
 
     }
 
+    /**
+     * Corrective fix: this method previously hardcoded
+     * inspectionCompleted=true unconditionally, aliased estimateApproved
+     * to "an estimate row exists" (true as soon as an estimate is merely
+     * prepared, before the customer ever approves it), and hardcoded
+     * repairCompleted/qualityChecked/paymentCompleted to false forever —
+     * so the customer's own repair-tracking screen could never show those
+     * three milestones as done no matter how far the job actually
+     * progressed. Confirmed live: a job that had genuinely reached
+     * READY_FOR_DELIVERY (repaired, QC passed, invoiced, paid) still
+     * reported repairCompleted=false and qualityChecked=false to the
+     * customer. Every milestone here is now derived from the JobCard's
+     * real status, using the same canonical lifecycle
+     * JobCardStatusValidator already encodes — "has the job reached at
+     * least this point" — plus the actual Estimate.status for approval,
+     * which is the one milestone with a more precise source than the
+     * JobCard status string alone.
+     */
+    private static final Map<JobCardStatus, Integer> LIFECYCLE_RANK = Map.ofEntries(
+            Map.entry(JobCardStatus.OPEN, 0),
+            Map.entry(JobCardStatus.INSPECTION_PENDING, 1),
+            Map.entry(JobCardStatus.INSPECTION_COMPLETED, 2),
+            Map.entry(JobCardStatus.ESTIMATE_PENDING, 3),
+            Map.entry(JobCardStatus.WAITING_FOR_APPROVAL, 4),
+            Map.entry(JobCardStatus.ESTIMATE_APPROVED, 5),   // legacy synonym, see JobCardStatusValidator
+            Map.entry(JobCardStatus.REPAIR_PENDING, 5),
+            Map.entry(JobCardStatus.REPAIR_IN_PROGRESS, 6),
+            Map.entry(JobCardStatus.REPAIR_COMPLETED, 7),
+            Map.entry(JobCardStatus.WORK_COMPLETED, 7),      // legacy synonym
+            Map.entry(JobCardStatus.QUALITY_CHECK, 7),       // legacy synonym (mid-QC, repair already done)
+            Map.entry(JobCardStatus.READY_FOR_INVOICE, 8),
+            Map.entry(JobCardStatus.INVOICE_GENERATED, 9),
+            Map.entry(JobCardStatus.INVOICED, 9),            // legacy synonym
+            Map.entry(JobCardStatus.PAYMENT_PENDING, 9),     // legacy synonym
+            Map.entry(JobCardStatus.PAYMENT_COMPLETED, 10),
+            Map.entry(JobCardStatus.READY_FOR_DELIVERY, 10),
+            Map.entry(JobCardStatus.DELIVERED, 11),
+            Map.entry(JobCardStatus.CLOSED, 12),
+            Map.entry(JobCardStatus.CANCELLED, -1)
+    );
+
+    private static boolean reached(JobCardStatus current, JobCardStatus milestone) {
+        return LIFECYCLE_RANK.getOrDefault(current, -1) >= LIFECYCLE_RANK.get(milestone);
+    }
+
     @Override
     public CustomerRepairTrackingResponse trackRepair(String jobCardNumber) {
 
@@ -171,8 +219,13 @@ public class CustomerPortalServiceImpl
             throw new ResourceNotFoundException("Job Card not found.");
         }
 
-        boolean estimatePrepared =
-                estimateRepository.findByJobCardId(jobCard.getId()).isPresent();
+        JobCardStatus status = jobCard.getStatus();
+
+        var estimate = estimateRepository.findByJobCardId(jobCard.getId());
+        boolean estimatePrepared = estimate.isPresent();
+        boolean estimateApproved = estimate
+                .map(e -> e.getStatus() == EstimateStatus.APPROVED)
+                .orElse(false);
 
         boolean invoiceGenerated =
                 invoiceRepository.findByEstimateJobCardId(jobCard.getId()).isPresent();
@@ -184,13 +237,13 @@ public class CustomerPortalServiceImpl
                 .serviceDate(jobCard.getServiceDate())
                 .estimatedDeliveryDate(jobCard.getEstimatedDeliveryDate())
 
-                .inspectionCompleted(true)
+                .inspectionCompleted(reached(status, JobCardStatus.INSPECTION_COMPLETED))
                 .estimatePrepared(estimatePrepared)
-                .estimateApproved(estimatePrepared)
-                .repairCompleted(false)
-                .qualityChecked(false)
+                .estimateApproved(estimateApproved)
+                .repairCompleted(reached(status, JobCardStatus.REPAIR_COMPLETED))
+                .qualityChecked(reached(status, JobCardStatus.READY_FOR_INVOICE))
                 .invoiceGenerated(invoiceGenerated)
-                .paymentCompleted(false)
+                .paymentCompleted(reached(status, JobCardStatus.PAYMENT_COMPLETED))
 
                 .build();
     }

@@ -45,18 +45,26 @@ public class EstimateItemServiceImpl
 
         item.setEstimate(estimate);
 
-        if (request.getComplaintId() != null) {
-
-            Complaint complaint =
-                    complaintRepository.findById(
-                                    request.getComplaintId())
-                            .orElseThrow(() ->
-                                    new ResourceNotFoundException(
-                                            "Complaint not found with id : "
-                                                    + request.getComplaintId()));
-
-            item.setComplaint(complaint);
+        if (request.getComplaintId() == null) {
+            throw new ResourceNotFoundException(
+                    "Complaint is required for an estimate item.");
         }
+
+        Complaint complaint = complaintRepository.findById(
+                request.getComplaintId()
+        ).orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Complaint not found with id : "
+                                + request.getComplaintId()));
+
+        if (!complaint.getJobCard().getId()
+                .equals(estimate.getJobCard().getId())) {
+
+            throw new ResourceNotFoundException(
+                    "Complaint does not belong to this Job Card.");
+        }
+
+        item.setComplaint(complaint);
 
         item.setItemType(
                 EstimateItemType.valueOf(

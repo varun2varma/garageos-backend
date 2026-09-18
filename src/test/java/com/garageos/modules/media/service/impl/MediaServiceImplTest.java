@@ -3,6 +3,7 @@ package com.garageos.modules.media.service.impl;
 import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.enums.media.MediaVisibility;
+import com.garageos.core.exception.MediaException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.modules.identity.entity.User;
@@ -16,6 +17,13 @@ import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.service.GoogleDriveFileService;
 import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.testing.http.MockHttpTransport;
+import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -235,6 +244,57 @@ class MediaServiceImplTest {
 
         assertThatThrownBy(() -> mediaService.getMediaContent(JOB_CARD_ID, 999L))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ------------------------------------------------------------------
+    // Regression: downloadContent() used to collapse EVERY Google Drive
+    // failure into a generic IllegalStateException -> flat HTTP 400,
+    // unlike uploadMedia()'s toMediaException() which already correctly
+    // mapped a 401/403 from Google to MEDIA_DRIVE_AUTH_FAILED (503). A
+    // client hitting an expired/revoked Drive credential on DOWNLOAD saw
+    // an unhelpful "bad request" instead of "reauthorize Google Drive".
+    // ------------------------------------------------------------------
+    @Test
+    void getMediaContent_driveAuthFailure_mapsToMediaDriveAuthFailed_notGenericBadRequest() throws Exception {
+        JobCard jobCard = jobCardInGarage(GARAGE_A);
+        when(jobCardRepository.findById(JOB_CARD_ID)).thenReturn(Optional.of(jobCard));
+
+        JobCardMedia media = new JobCardMedia();
+        media.setId(42L);
+        media.setJobCardId(JOB_CARD_ID);
+        media.setDriveFileId("some-drive-file-id");
+        when(jobCardMediaRepository.findById(42L)).thenReturn(Optional.of(media));
+
+        when(googleDriveFileService.downloadFile("some-drive-file-id"))
+                .thenThrow(googleAuthFailure401());
+
+        authenticateAs(1L, GARAGE_A, "MANAGER");
+
+        assertThatThrownBy(() -> mediaService.getMediaContent(JOB_CARD_ID, 42L))
+                .isInstanceOf(MediaException.class)
+                .satisfies(ex -> {
+                    MediaException mediaException = (MediaException) ex;
+                    assertThat(mediaException.getErrorCode())
+                            .isEqualTo(MediaException.MediaErrorCode.MEDIA_DRIVE_AUTH_FAILED);
+                    assertThat(mediaException.getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+                });
+    }
+
+    /** A real {@link GoogleJsonResponseException} carrying a 401, built the same way the Drive client library
+     * itself constructs one from an actual HTTP response — not a hand-rolled subclass. */
+    private GoogleJsonResponseException googleAuthFailure401() throws Exception {
+        MockLowLevelHttpResponse rawResponse = new MockLowLevelHttpResponse()
+                .setStatusCode(401)
+                .setContentType("application/json")
+                .setContent("{\"error\":{\"code\":401,\"message\":\"Invalid Credentials\"}}");
+        MockHttpTransport transport = new MockHttpTransport.Builder()
+                .setLowLevelHttpResponse(rawResponse)
+                .build();
+        HttpRequest request = transport.createRequestFactory()
+                .buildGetRequest(new GenericUrl("https://example.test/drive/files/some-drive-file-id"));
+        request.setThrowExceptionOnExecuteError(false);
+        HttpResponse response = request.execute();
+        return GoogleJsonResponseException.from(GsonFactory.getDefaultInstance(), response);
     }
 
     // ------------------------------------------------------------------

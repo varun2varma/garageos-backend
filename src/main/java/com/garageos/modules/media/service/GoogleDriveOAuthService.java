@@ -6,7 +6,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.services.drive.DriveScopes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,13 +35,28 @@ public class GoogleDriveOAuthService {
 
     private final GoogleDriveProperties properties;
     private final GoogleDriveCredentialDataStore credentialDataStore;
+    private final HttpTransport httpTransport;
+    private final JsonFactory jsonFactory;
 
+    // Root-cause fix (testability + consistency): this used to build its
+    // own GoogleNetHttpTransport.newTrustedTransport() on every single
+    // call instead of reusing the same HttpTransport/JsonFactory beans
+    // GoogleDriveConfig already exposes and GoogleDriveClientService
+    // already consumes. Besides the wasted per-call transport
+    // construction, hardcoding the real network transport made this class
+    // impossible to unit-test against credential-refresh behavior without
+    // hitting Google's real servers — injecting it (like every other
+    // Drive-facing service in this module already does) fixes both.
     public GoogleDriveOAuthService(
             GoogleDriveProperties properties,
-            GoogleDriveCredentialDataStore credentialDataStore) {
+            GoogleDriveCredentialDataStore credentialDataStore,
+            HttpTransport httpTransport,
+            JsonFactory jsonFactory) {
 
         this.properties = properties;
         this.credentialDataStore = credentialDataStore;
+        this.httpTransport = httpTransport;
+        this.jsonFactory = jsonFactory;
     }
 
     private GoogleAuthorizationCodeFlow createFlow()
@@ -49,10 +65,6 @@ public class GoogleDriveOAuthService {
         log.debug(
                 "[DRIVE_AUTH] Creating Google authorization flow."
         );
-
-        var httpTransport =
-                GoogleNetHttpTransport
-                        .newTrustedTransport();
 
         GoogleClientSecrets clientSecrets =
                 new GoogleClientSecrets()
@@ -69,8 +81,7 @@ public class GoogleDriveOAuthService {
         GoogleAuthorizationCodeFlow flow =
                 new GoogleAuthorizationCodeFlow.Builder(
                         httpTransport,
-                        com.google.api.client.json.gson.GsonFactory
-                                .getDefaultInstance(),
+                        jsonFactory,
                         clientSecrets,
                         Collections.singleton(
                                 DriveScopes.DRIVE_FILE
@@ -102,6 +113,25 @@ public class GoogleDriveOAuthService {
                         .setRedirectUri(
                                 properties.getRedirectUri()
                         )
+                        // Root-cause fix (permanent Drive auth, not
+                        // per-run manual reauthorization): accessType
+                        // "offline" alone is NOT sufficient to get a
+                        // refresh_token back from Google on every
+                        // authorization. Google's token endpoint only
+                        // includes refresh_token in the very first
+                        // consent for a given user+client pair — any
+                        // later /authorize call (e.g. re-running this
+                        // flow after the DB was reset, or after this
+                        // exact bug, where a previous consent already
+                        // happened) silently returns an access-token-only
+                        // response, because Google recognizes the user
+                        // already granted consent and skips re-issuing a
+                        // refresh_token. Forcing prompt=consent makes
+                        // Google show the consent screen and reissue a
+                        // refresh_token EVERY time this URL is used,
+                        // which is what actually makes the one-time-setup
+                        // promise true going forward.
+                        .set("prompt", "consent")
                         .build();
 
         log.info(

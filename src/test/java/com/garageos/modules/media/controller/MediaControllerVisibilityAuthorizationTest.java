@@ -116,26 +116,18 @@ class MediaControllerVisibilityAuthorizationTest {
     @Test
     @WithMockUser(roles = "TECHNICIAN")
     void technician_isDenied() throws Exception {
-        // NOT status().isForbidden(): this backend's GlobalExceptionHandler
-        // has a catch-all @ExceptionHandler(Exception.class) that runs
-        // inside the DispatcherServlet and intercepts the
-        // AuthorizationDeniedException @PreAuthorize throws before Spring
-        // Security's own translation ever gets a chance to turn it into a
-        // 403 — so the ACTUAL, verified response is 500 "Something went
-        // wrong.", not 403. This is a pre-existing backend behavior (not
-        // introduced by this feature, and not specific to this endpoint —
-        // it would affect MediaController.uploadMedia's pre-existing
-        // @PreAuthorize identically), confirmed here rather than assumed.
-        // Flagged in the completion report; intentionally NOT fixed, per
-        // "do not change unrelated files" / "reuse existing architecture."
-        // What IS proven and asserted below: mediaService.updateVisibility
-        // is never invoked for a TECHNICIAN — the update never happens,
-        // regardless of which status code reports that fact.
+        // GlobalExceptionHandler now has a dedicated
+        // @ExceptionHandler(AccessDeniedException.class) (added to fix the
+        // exact gap this comment used to document — every @PreAuthorize
+        // denial previously leaked as a bare 500 "Something went wrong."
+        // instead of 403), so this correctly asserts isForbidden() now.
+        // What IS proven and asserted below either way:
+        // mediaService.updateVisibility is never invoked for a TECHNICIAN.
         mockMvc.perform(put("/api/v1/job-cards/1/media/5/visibility")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isForbidden());
 
         org.mockito.Mockito.verifyNoInteractions(mediaService);
     }
@@ -143,12 +135,12 @@ class MediaControllerVisibilityAuthorizationTest {
     @Test
     @WithMockUser(roles = "CUSTOMER")
     void customer_isDenied() throws Exception {
-        // Same GlobalExceptionHandler caveat as technician_isDenied above.
+        // Same fix as technician_isDenied above.
         mockMvc.perform(put("/api/v1/job-cards/1/media/5/visibility")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isForbidden());
 
         org.mockito.Mockito.verifyNoInteractions(mediaService);
     }

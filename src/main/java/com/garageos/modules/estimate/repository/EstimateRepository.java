@@ -24,4 +24,7 @@ public interface EstimateRepository extends JpaRepository<Estimate, Long> {
 
     long countByJobCardCustomer(Customer customer);
 
+    Optional<Estimate> findTopByJobCardGarageIdOrderByIdDesc(
+            Long garageId);
+
 }

@@ -90,11 +90,17 @@ public class InvoiceServiceImpl implements InvoiceService {
                     "Invoice already exists for this estimate.");
         }
 
+        JobCard jobCard = estimate.getJobCard();
+
+        Long garageId = jobCard.getGarage().getId();
+
         Optional<Invoice> latestInvoice =
-                invoiceRepository.findTopByOrderByIdDesc();
+                invoiceRepository
+                        .findTopByEstimateJobCardGarageIdOrderByIdDesc(garageId);
 
         String invoiceNumber =
                 InvoiceNumberGenerator.generate(
+                        jobCard.getGarage().getGarageCode(),
                         latestInvoice
                                 .map(Invoice::getInvoiceNumber)
                                 .orElse(null));
@@ -113,8 +119,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGrandTotal(estimate.getGrandTotal());
 
         invoice = invoiceRepository.save(invoice);
-
-        JobCard jobCard = estimate.getJobCard();
 
         transitionJobCardToInvoiceGenerated(jobCard);
 
@@ -210,11 +214,15 @@ public class InvoiceServiceImpl implements InvoiceService {
                     "Invoice already exists for this Job Card.");
         }
 
+        Long garageId = jobCard.getGarage().getId();
+
         Optional<Invoice> latestInvoice =
-                invoiceRepository.findTopByOrderByIdDesc();
+                invoiceRepository
+                        .findTopByEstimateJobCardGarageIdOrderByIdDesc(garageId);
 
         String invoiceNumber =
                 InvoiceNumberGenerator.generate(
+                        jobCard.getGarage().getGarageCode(),
                         latestInvoice
                                 .map(Invoice::getInvoiceNumber)
                                 .orElse(null));
@@ -254,26 +262,35 @@ public class InvoiceServiceImpl implements InvoiceService {
                                 "Estimate not found"));
 
         if (estimate.getStatus() != EstimateStatus.APPROVED) {
-
             throw new BusinessException(
                     "Only approved estimates can generate invoices.");
-
         }
 
         if (invoiceRepository.existsByEstimateId(estimateId)) {
-
             throw new BusinessException(
                     "Invoice already generated.");
-
         }
+
+        JobCard jobCard = estimate.getJobCard();
+
+        Long garageId = jobCard.getGarage().getId();
+
+        Optional<Invoice> latestInvoice =
+                invoiceRepository
+                        .findTopByEstimateJobCardGarageIdOrderByIdDesc(garageId);
+
+        String invoiceNumber =
+                InvoiceNumberGenerator.generate(
+                        jobCard.getGarage().getGarageCode(),
+                        latestInvoice
+                                .map(Invoice::getInvoiceNumber)
+                                .orElse(null));
 
         Invoice invoice = new Invoice();
 
-        invoice.setInvoiceNumber(generateInvoiceNumber());
+        invoice.setInvoiceNumber(invoiceNumber);
 
         invoice.setEstimate(estimate);
-
-//        invoice.setJobCard(estimate.getJobCard());
 
         invoice.setInvoiceStatus(InvoiceStatus.DRAFT);
 
@@ -289,27 +306,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setRemarks(estimate.getRemarks());
 
+        invoice.setGeneratedAt(LocalDateTime.now());
+
         invoice = invoiceRepository.save(invoice);
 
         copyEstimateItems(invoice, estimate);
 
-        JobCard jobCard = estimate.getJobCard();
-
         transitionJobCardToInvoiceGenerated(jobCard);
 
         return invoiceMapper.toResponse(invoice);
-
-    }
-
-    private String generateInvoiceNumber() {
-
-        long count = invoiceRepository.count() + 1;
-
-        return String.format(
-                "INV-%d-%06d",
-                java.time.Year.now().getValue(),
-                count
-        );
     }
 
     private void copyEstimateItems(

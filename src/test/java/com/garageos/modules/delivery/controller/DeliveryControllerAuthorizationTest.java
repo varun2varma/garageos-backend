@@ -98,19 +98,16 @@ class DeliveryControllerAuthorizationTest {
     @Test
     @WithMockUser(roles = "TECHNICIAN")
     void technician_isDenied_noMutation() throws Exception {
-        // Same GlobalExceptionHandler caveat documented in
-        // MediaControllerVisibilityAuthorizationTest: the catch-all
-        // @ExceptionHandler(Exception.class) intercepts the
-        // AuthorizationDeniedException before Spring Security's own
-        // translation produces a 403, so the actual response is 500 -
-        // this is the pre-existing, out-of-scope Defect #4, not
-        // introduced here. What matters for this hardening item is that
-        // the delivery is never created.
+        // Defect #4 (GlobalExceptionHandler had no AccessDeniedException
+        // handler, so every authorization denial leaked as a bare 500) is
+        // now fixed — see GlobalExceptionHandler.handleAccessDeniedException.
+        // This now asserts the correct 403. What matters for this
+        // hardening item either way: the delivery is never created.
         mockMvc.perform(post("/api/v1/deliveries")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isForbidden());
 
         verifyNoInteractions(deliveryService);
     }
@@ -122,7 +119,7 @@ class DeliveryControllerAuthorizationTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_BODY))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isForbidden());
 
         verifyNoInteractions(deliveryService);
     }

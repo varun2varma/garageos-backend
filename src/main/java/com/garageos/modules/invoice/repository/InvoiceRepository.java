@@ -33,4 +33,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     long countByEstimateJobCardCustomer(Customer customer);
 
+    Optional<Invoice> findTopByEstimateJobCardGarageIdOrderByIdDesc(
+            Long garageId);
+
 }

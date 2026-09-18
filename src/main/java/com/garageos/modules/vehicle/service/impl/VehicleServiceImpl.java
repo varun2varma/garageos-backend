@@ -1,9 +1,11 @@
 package com.garageos.modules.vehicle.service.impl;
 
+import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.vehicle.dto.request.CreateVehicleRequest;
 import com.garageos.modules.vehicle.dto.response.VehicleResponse;
 import com.garageos.modules.vehicle.entity.Vehicle;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -78,6 +82,28 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Vehicle not found with id : " + id));
+
+        // A customer may only edit their own vehicle, and may not use this
+        // call to reassign it to a different customer. Employee roles keep
+        // the existing unrestricted behavior (garage-side vehicle CRUD).
+        GarageUserPrincipal principal = (GarageUserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+
+            Customer caller = customerRepository.findByMobileNumber(principal.getMobile())
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found."));
+
+            boolean ownsVehicle = vehicle.getCustomer() != null
+                    && vehicle.getCustomer().getId().equals(caller.getId());
+
+            if (!ownsVehicle || !caller.getId().equals(request.getCustomerId())) {
+                throw new AccessDeniedException(
+                        "You may only edit your own vehicle.");
+            }
+        }
 
         if (!vehicle.getRegistrationNumber().equals(request.getRegistrationNumber())
                 && repository.existsByRegistrationNumber(request.getRegistrationNumber())) {

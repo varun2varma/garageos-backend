@@ -30,6 +30,7 @@ public class InspectionServiceImpl implements InspectionService {
     private final JobCardRepository jobCardRepository;
 
     @Override
+    @Transactional
     public InspectionResponse createInspection(
             Long complaintId,
             CreateInspectionRequest request) {
@@ -39,9 +40,20 @@ public class InspectionServiceImpl implements InspectionService {
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + complaintId));
 
-        Inspection inspection = inspectionMapper.toEntity(request);
+        Inspection inspection = inspectionRepository
+                .findByComplaintId(complaintId)
+                .orElseGet(() -> {
+                    Inspection newInspection =
+                            inspectionMapper.toEntity(request);
 
-        inspection.setComplaint(complaint);
+                    newInspection.setComplaint(complaint);
+                    newInspection.setStatus(InspectionStatus.PENDING);
+
+                    return newInspection;
+                });
+
+        inspectionMapper.updateEntity(request, inspection);
+
         inspection.setStatus(InspectionStatus.PENDING);
 
         inspection = inspectionRepository.save(inspection);
