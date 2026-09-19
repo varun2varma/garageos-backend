@@ -19,6 +19,8 @@ public class JobAssignmentResponse {
 
     private Long estimateItemId;
 
+    private Long repairTaskId;
+
     private String serviceName;
 
     private Long employeeId;

@@ -18,6 +18,10 @@ public class RepairTaskResponse {
 
     private String jobCardNumber;
 
+    private Long complaintId;
+
+    private String complaint;
+
     private Long estimateItemId;
 
     private String description;

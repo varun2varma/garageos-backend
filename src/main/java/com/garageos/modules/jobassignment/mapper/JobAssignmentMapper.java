@@ -13,10 +13,9 @@ public interface JobAssignmentMapper {
 
     @Mapping(target = "jobCardId", source = "jobCard.id")
     @Mapping(target = "jobCardNumber", source = "jobCard.jobCardNumber")
-
     @Mapping(target = "estimateItemId", source = "estimateItem.id")
+    @Mapping(target = "repairTaskId", source = "repairTask.id")
     @Mapping(target = "serviceName", source = "estimateItem.description")
-
     @Mapping(target = "employeeId", source = "user.id")
 
     @Mapping(

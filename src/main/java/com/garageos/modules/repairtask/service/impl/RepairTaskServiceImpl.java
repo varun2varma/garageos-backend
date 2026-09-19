@@ -6,6 +6,8 @@ import com.garageos.core.enums.RepairStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.complaint.entity.Complaint;
+import com.garageos.modules.complaint.repository.ComplaintRepository;
 import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
@@ -34,7 +36,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -48,25 +52,71 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     private final JobCardStatusValidator statusValidator;
     private final JobAssignmentService jobAssignmentService;
     private final UserRepository userRepository;
+    private final ComplaintRepository complaintRepository;
 
     @Override
     @Transactional
     public void createRepairTasks(Estimate estimate) {
 
         List<EstimateItem> estimateItems =
-                estimateItemRepository.findByEstimateId(estimate.getId());
+                estimateItemRepository.findByEstimateId(
+                        estimate.getId()
+                );
 
-        List<RepairTask> tasks = new ArrayList<>();
+        /*
+         * One RepairTask = one Complaint.
+         *
+         * EstimateItems remain financial line items.
+         * Multiple parts/labour items can belong to the same complaint,
+         * but they must NOT create multiple RepairTasks.
+         */
+
+        Map<Long, EstimateItem> representativeItemByComplaint =
+                new LinkedHashMap<>();
 
         for (EstimateItem item : estimateItems) {
 
-            if (repository.existsByEstimateItemId(item.getId())) {
+            if (item.getComplaint() == null) {
                 continue;
             }
 
+            representativeItemByComplaint.putIfAbsent(
+                    item.getComplaint().getId(),
+                    item
+            );
+        }
+
+        List<RepairTask> tasks = new ArrayList<>();
+
+        for (Map.Entry<Long, EstimateItem> entry
+                : representativeItemByComplaint.entrySet()) {
+
+            Long complaintId = entry.getKey();
+            EstimateItem representativeItem = entry.getValue();
+
+            if (repository.existsByJobCardIdAndComplaintId(
+                    estimate.getJobCard().getId(),
+                    complaintId)) {
+
+                continue;
+            }
+
+            Complaint complaint =
+                    complaintRepository.findById(complaintId)
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "Complaint not found : "
+                                                    + complaintId
+                                    ));
+
             RepairTask task = RepairTask.builder()
                     .jobCard(estimate.getJobCard())
-                    .estimateItem(item)
+                    .complaint(complaint)
+
+                    // Keep one representative estimate item for
+                    // backward traceability only.
+                    .estimateItem(representativeItem)
+
                     .status(RepairStatus.PENDING)
                     .build();
 
@@ -74,12 +124,6 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         }
 
         repository.saveAll(tasks);
-
-//        JobCard jobCard = estimate.getJobCard();
-//
-//        jobCard.setStatus(JobCardStatus.REPAIR_PENDING);
-//
-//        jobCardRepository.save(jobCard);
     }
 
     /**
@@ -156,7 +200,7 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 
             AssignJobRequest assignRequest = new AssignJobRequest();
             assignRequest.setJobCardId(task.getJobCard().getId());
-            assignRequest.setEstimateItemId(task.getEstimateItem().getId());
+            assignRequest.setRepairTaskId(task.getId());
             assignRequest.setEmployeeId(employeeId);
             assignRequest.setAssignmentType(JobAssignmentType.TECHNICIAN);
 

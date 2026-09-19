@@ -12,6 +12,8 @@ public class AssignJobRequest {
     @NotNull
     private Long jobCardId;
 
+    private Long repairTaskId;
+
     private Long estimateItemId;
 
     @NotNull

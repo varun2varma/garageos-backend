@@ -29,4 +29,14 @@ public interface RepairTaskRepository
 
     Optional<RepairTask> findByJobAssignmentId(Long jobAssignmentId);
 
+    boolean existsByJobCardIdAndComplaintId(
+            Long jobCardId,
+            Long complaintId
+    );
+
+    Optional<RepairTask> findByJobCardIdAndComplaintId(
+            Long jobCardId,
+            Long complaintId
+    );
+
 }

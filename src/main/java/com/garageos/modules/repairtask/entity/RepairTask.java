@@ -2,6 +2,7 @@ package com.garageos.modules.repairtask.entity;
 
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -31,10 +32,11 @@ public class RepairTask extends BaseEntity {
     private JobCard jobCard;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "estimate_item_id",
-            nullable = false
-    )
+    @JoinColumn(name = "complaint_id", nullable = false)
+    private Complaint complaint;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "estimate_item_id")
     private EstimateItem estimateItem;
 
     @Enumerated(EnumType.STRING)

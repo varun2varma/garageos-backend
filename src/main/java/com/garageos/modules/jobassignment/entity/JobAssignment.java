@@ -7,6 +7,7 @@ import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.modules.identity.entity.User;
 import com.garageos.modules.jobcard.entity.JobCard;
+import com.garageos.modules.repairtask.entity.RepairTask;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,10 @@ public class JobAssignment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estimate_item_id")
     private EstimateItem estimateItem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repair_task_id")
+    private RepairTask repairTask;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

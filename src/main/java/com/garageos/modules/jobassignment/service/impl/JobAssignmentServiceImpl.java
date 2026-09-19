@@ -2,6 +2,7 @@ package com.garageos.modules.jobassignment.service.impl;
 
 import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.JobAssignmentType;
+import com.garageos.core.enums.RepairStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
@@ -66,25 +67,25 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         EstimateItem estimateItem = null;
 
+        RepairTask repairTask = null;
+
         if (request.getAssignmentType()
                 == JobAssignmentType.TECHNICIAN) {
 
-            if (request.getEstimateItemId() == null) {
-
+            if (request.getRepairTaskId() == null) {
                 throw new IllegalArgumentException(
-                        "Estimate item is required for technician assignment."
+                        "Repair task is required for technician assignment."
                 );
             }
 
-            estimateItem =
-                    estimateItemRepository.findById(
-                            request.getEstimateItemId()
+            repairTask =
+                    repairTaskRepository.findById(
+                            request.getRepairTaskId()
                     ).orElseThrow(() ->
                             new ResourceNotFoundException(
-                                    "Estimate Item not found : "
-                                            + request.getEstimateItemId()
-                            )
-                    );
+                                    "Repair Task not found : "
+                                            + request.getRepairTaskId()
+                            ));
         }
 
         User user =
@@ -114,6 +115,8 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         assignment.setJobCard(jobCard);
 
         assignment.setEstimateItem(estimateItem);
+
+        assignment.setRepairTask(repairTask);
 
         assignment.setUser(user);
 
@@ -158,18 +161,19 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
      * its RepairTask at the new/current assignment. No-op for assignment
      * types that don't carry an EstimateItem (e.g. DRIVER).
      */
-    private void linkRepairTaskToAssignment(JobAssignment assignment) {
+    private void linkRepairTaskToAssignment(
+            JobAssignment assignment) {
 
-        if (assignment.getEstimateItem() == null) {
+        if (assignment.getRepairTask() == null) {
             return;
         }
 
-        repairTaskRepository
-                .findByEstimateItemId(assignment.getEstimateItem().getId())
-                .ifPresent(task -> {
-                    task.setJobAssignment(assignment);
-                    repairTaskRepository.save(task);
-                });
+        RepairTask task =
+                assignment.getRepairTask();
+
+        task.setJobAssignment(assignment);
+
+        repairTaskRepository.save(task);
     }
 
     @Override
@@ -261,6 +265,27 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         assignment
                 );
 
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN
+                && assignment.getRepairTask() != null) {
+
+            RepairTask task =
+                    assignment.getRepairTask();
+
+            if (task.getStatus() == RepairStatus.ASSIGNED) {
+
+                task.setStatus(
+                        RepairStatus.IN_PROGRESS
+                );
+
+                task.setStartedAt(
+                        LocalDateTime.now()
+                );
+
+                repairTaskRepository.save(task);
+            }
+        }
+
         return jobAssignmentMapper.toResponse(
                 assignment
         );
@@ -315,6 +340,31 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                 jobAssignmentRepository.save(
                         assignment
                 );
+
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN
+                && assignment.getRepairTask() != null) {
+
+            RepairTask task =
+                    assignment.getRepairTask();
+
+            if (task.getStatus() != RepairStatus.IN_PROGRESS) {
+
+                throw new IllegalStateException(
+                        "Repair Task must be IN_PROGRESS before completion."
+                );
+            }
+
+            task.setStatus(
+                    RepairStatus.COMPLETED
+            );
+
+            task.setCompletedAt(
+                    LocalDateTime.now()
+            );
+
+            repairTaskRepository.save(task);
+        }
 
         return jobAssignmentMapper.toResponse(
                 assignment

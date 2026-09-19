@@ -29,8 +29,10 @@ public interface RepairTaskMapper {
 
     @Mapping(target = "jobCardId", source = "jobCard.id")
     @Mapping(target = "jobCardNumber", source = "jobCard.jobCardNumber")
+    @Mapping(target = "complaintId", source = "complaint.id")
+    @Mapping(target = "complaint", source = "complaint.complaint")
     @Mapping(target = "estimateItemId", source = "estimateItem.id")
-    @Mapping(target = "description", source = "estimateItem.description")
+    @Mapping(target = "description", source = "complaint.complaint")
     @Mapping(target = "jobAssignmentId", source = "jobAssignment.id")
     RepairTaskResponse toResponse(RepairTask entity);
 
