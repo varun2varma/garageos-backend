@@ -408,6 +408,13 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                                         "User not found : "
                                                 + request.getEmployeeId()));
 
+        /*
+         * Preserve the RepairTask linked to the old assignment.
+         * The old assignment will be cancelled, but the RepairTask
+         * must be transferred to the new assignment.
+         */
+        RepairTask repairTask = oldAssignment.getRepairTask();
+
         oldAssignment.setStatus(JobAssignmentStatus.CANCELLED);
 
         jobAssignmentRepository.save(oldAssignment);
@@ -417,6 +424,7 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         newAssignment.setGarage(oldAssignment.getGarage());
         newAssignment.setJobCard(oldAssignment.getJobCard());
         newAssignment.setEstimateItem(oldAssignment.getEstimateItem());
+        newAssignment.setRepairTask(repairTask);
         newAssignment.setUser(user);
         newAssignment.setAssignmentType(oldAssignment.getAssignmentType());
         newAssignment.setAssignedAt(LocalDateTime.now());
@@ -427,10 +435,14 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         newAssignment =
                 jobAssignmentRepository.save(newAssignment);
 
+        /*
+         * RepairTask.jobAssignment now points to the NEW active
+         * assignment while the old assignment remains CANCELLED
+         * for history/audit.
+         */
         linkRepairTaskToAssignment(newAssignment);
 
         return jobAssignmentMapper.toResponse(newAssignment);
-
     }
 
     @Override
