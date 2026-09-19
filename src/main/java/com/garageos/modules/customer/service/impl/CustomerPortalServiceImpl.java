@@ -15,6 +15,7 @@ import com.garageos.modules.estimate.service.EstimateService;
 import com.garageos.modules.estimateitem.dto.response.EstimateItemResponse;
 import com.garageos.modules.estimateitem.service.EstimateItemService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
@@ -139,6 +140,59 @@ public class CustomerPortalServiceImpl
                 .map(mapper::toInvoice)
                 .toList();
 
+    }
+
+    @Override
+    public CustomerInvoiceDetailsResponse getInvoiceDetails(Long invoiceId) {
+
+        Customer customer = getCurrentCustomer();
+
+        var invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Invoice not found."));
+
+        /*
+         * Never expose an invoice just because the caller knows its ID.
+         * The invoice belongs to an Estimate, which belongs to a Job Card,
+         * which belongs to the Customer.
+         */
+        if (!invoice.getEstimate()
+                .getJobCard()
+                .getCustomer()
+                .getId()
+                .equals(customer.getId())) {
+
+            throw new ResourceNotFoundException("Invoice not found.");
+        }
+
+        Long estimateId = invoice.getEstimate().getId();
+
+        InvoiceResponse invoiceResponse =
+                InvoiceResponse.builder()
+                        .id(invoice.getId())
+                        .invoiceNumber(invoice.getInvoiceNumber())
+                        .estimateId(estimateId)
+                        .invoiceStatus(invoice.getInvoiceStatus().name())
+                        .paymentStatus(invoice.getPaymentStatus().name())
+                        .subtotal(invoice.getSubtotal())
+                        .discount(invoice.getDiscount())
+                        .gst(invoice.getGst())
+                        .grandTotal(invoice.getGrandTotal())
+                        .remarks(invoice.getRemarks())
+                        .build();
+
+        List<EstimateItemResponse> items =
+                estimateItemService.getItems(estimateId);
+
+        return CustomerInvoiceDetailsResponse.builder()
+                .invoice(invoiceResponse)
+                .jobCardNumber(
+                        invoice.getEstimate()
+                                .getJobCard()
+                                .getJobCardNumber()
+                )
+                .items(items)
+                .build();
     }
 
     @Override

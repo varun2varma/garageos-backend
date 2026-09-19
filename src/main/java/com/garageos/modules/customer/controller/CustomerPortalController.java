@@ -79,6 +79,17 @@ public class CustomerPortalController {
         );
     }
 
+    @GetMapping("/invoices/{invoiceId}")
+    public ResponseEntity<ApiResponse<CustomerInvoiceDetailsResponse>>
+    getInvoiceDetails(
+            @PathVariable Long invoiceId) {
+
+        return ApiResponseUtil.success(
+                "Invoice fetched successfully.",
+                service.getInvoiceDetails(invoiceId)
+        );
+    }
+
     @GetMapping("/repair-tracking/{jobCardNumber}")
     public ResponseEntity<ApiResponse<CustomerRepairTrackingResponse>> trackRepair(
             @PathVariable String jobCardNumber) {

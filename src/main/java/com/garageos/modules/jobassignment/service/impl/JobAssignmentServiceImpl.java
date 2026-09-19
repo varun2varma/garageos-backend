@@ -472,13 +472,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                     jobCardRepository.save(
                             jobCard
                     );
-
-                    /*
-                     * Preserve the existing quality-check creation.
-                     */
-                    qualityCheckService.createQualityCheck(
-                            jobCard
-                    );
                 }
             }
         }

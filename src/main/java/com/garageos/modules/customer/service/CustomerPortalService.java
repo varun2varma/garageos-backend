@@ -20,6 +20,8 @@ public interface CustomerPortalService {
 
     List<CustomerInvoiceResponse> getInvoices();
 
+    CustomerInvoiceDetailsResponse getInvoiceDetails(Long invoiceId);
+
     CustomerRepairTrackingResponse trackRepair(String jobCardNumber);
 
     CustomerEstimateDetailsResponse getEstimateDetails(Long estimateId);
