@@ -9,50 +9,61 @@ public final class InvoiceNumberGenerator {
 
     public static String generate(
             String garageCode,
-            String lastInvoiceNumber) {
-
+            String lastInvoiceNumber
+    ) {
         if (garageCode == null || garageCode.isBlank()) {
             throw new IllegalArgumentException(
-                    "Garage code is required to generate invoice number.");
+                    "Garage code is required to generate invoice number."
+            );
         }
 
         int currentYear = Year.now().getValue();
 
-        if (lastInvoiceNumber == null
-                || lastInvoiceNumber.isBlank()) {
-
-            return String.format(
-                    "%s-INV-%d-%06d",
-                    garageCode,
-                    currentYear,
-                    1);
+        if (lastInvoiceNumber == null || lastInvoiceNumber.isBlank()) {
+            return format(garageCode, currentYear, 1);
         }
 
         String[] parts = lastInvoiceNumber.split("-");
 
+        /*
+         * Legacy format:
+         * INV-2026-000007
+         *
+         * Ignore it for the new garage-specific sequence.
+         */
         if (parts.length != 4) {
-            throw new IllegalArgumentException(
-                    "Invalid invoice number format: "
-                            + lastInvoiceNumber);
+            return format(garageCode, currentYear, 1);
         }
 
-        int year = Integer.parseInt(parts[2]);
-        int sequence = Integer.parseInt(parts[3]);
+        try {
+            int year = Integer.parseInt(parts[2]);
+            int sequence = Integer.parseInt(parts[3]);
 
-        if (year != currentYear) {
-            return String.format(
-                    "%s-INV-%d-%06d",
+            if (year != currentYear) {
+                return format(garageCode, currentYear, 1);
+            }
+
+            return format(
                     garageCode,
                     currentYear,
-                    1);
+                    sequence + 1
+            );
+
+        } catch (NumberFormatException ex) {
+            return format(garageCode, currentYear, 1);
         }
+    }
 
-        sequence++;
-
+    private static String format(
+            String garageCode,
+            int year,
+            int sequence
+    ) {
         return String.format(
                 "%s-INV-%d-%06d",
                 garageCode,
-                currentYear,
-                sequence);
+                year,
+                sequence
+        );
     }
 }
