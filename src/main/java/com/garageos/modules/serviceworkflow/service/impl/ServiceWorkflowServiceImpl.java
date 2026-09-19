@@ -123,17 +123,27 @@ public class ServiceWorkflowServiceImpl
                 .build();
     }
 
+//    @Override
+//    public WorkflowResponse prepareEstimate(String jobCardNumber) {
+//
+//        EstimateResponse estimate =
+//                estimateService.createEstimate(jobCardNumber);
+//
+//        jobCardService.prepareEstimate(jobCardNumber);
+//
+//        return WorkflowResponse.builder()
+//                .data(estimate)
+//                .message("Estimate prepared successfully.")
+//                .build();
+//    }
+
     @Override
     public WorkflowResponse prepareEstimate(String jobCardNumber) {
-
-        EstimateResponse estimate =
-                estimateService.createEstimate(jobCardNumber);
 
         jobCardService.prepareEstimate(jobCardNumber);
 
         return WorkflowResponse.builder()
-                .data(estimate)
-                .message("Estimate prepared successfully.")
+                .message("Estimate stage prepared successfully.")
                 .build();
     }
 
