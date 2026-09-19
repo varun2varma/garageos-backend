@@ -22,6 +22,7 @@ public interface InspectionFindingMapper {
     InspectionFinding toEntity(CreateInspectionFindingRequest request);
 
     @Mapping(target = "jobCardId", source = "jobCard.id")
+    @Mapping(target = "complaintId", source = "complaint.id")
     @Mapping(target = "inspectionMasterItemId", source = "inspectionMasterItem.id")
     @Mapping(target = "category", source = "inspectionMasterItem.category")
     @Mapping(target = "checkItem", source = "inspectionMasterItem.checkItem")

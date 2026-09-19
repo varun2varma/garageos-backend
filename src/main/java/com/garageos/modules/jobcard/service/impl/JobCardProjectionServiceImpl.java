@@ -146,7 +146,14 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
             case TECHNICIAN -> {
 
                 visibleSections.addAll(List.of(
-                        "header", "vehicle", "assignments", "repairTasks"));
+                        "header", "vehicle", "complaints", "assignments", "repairTasks"));
+
+                // Additive: a technician already receives the complaint
+                // text for their own tasks via RepairTaskResponse.complaint;
+                // this exposes the same job card's complaints as a
+                // structured section too (as the CUSTOMER/OPERATIONAL
+                // viewers already get), not a new privilege.
+                builder.complaints(complaintService.getComplaints(jobCard.getId()));
 
                 List<RepairTaskResponse> allTasks =
                         repairTaskService.getRepairTasks(jobCard.getId());

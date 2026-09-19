@@ -14,6 +14,8 @@ public class InspectionFindingResponse {
 
     private Long jobCardId;
 
+    private Long complaintId;
+
     private Long inspectionMasterItemId;
 
     private String category;

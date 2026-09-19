@@ -50,6 +50,22 @@ public class EstimateItemController {
         );
     }
 
+    /**
+     * Additive read, scoped to one Complaint (and therefore, since
+     * RepairTask<->Complaint is 1:1, to one RepairTask's worth of
+     * PART/LABOUR line items) — for the technician Repair Task Details
+     * screen. Returns the existing EstimateItemResponse; no new DTO.
+     */
+    @GetMapping("/estimate-items")
+    public ResponseEntity<ApiResponse<List<EstimateItemResponse>>> getItemsByComplaint(
+            @RequestParam Long complaintId) {
+
+        return ApiResponseUtil.success(
+                "Estimate items fetched successfully.",
+                service.getItemsByComplaint(complaintId)
+        );
+    }
+
     @PutMapping("/estimate-items/{id}")
     public ResponseEntity<ApiResponse<EstimateItemResponse>> updateItem(
             @PathVariable Long id,

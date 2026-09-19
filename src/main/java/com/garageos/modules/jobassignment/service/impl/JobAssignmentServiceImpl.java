@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -160,6 +161,13 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
      * so a TECHNICIAN-type assignment against a given EstimateItem points
      * its RepairTask at the new/current assignment. No-op for assignment
      * types that don't carry an EstimateItem (e.g. DRIVER).
+     *
+     * A TECHNICIAN assignment being linked here is exactly the domain
+     * event that makes the RepairTask "assigned" — so a still-PENDING
+     * RepairTask is moved to ASSIGNED right here, at link time, the same
+     * way RepairTaskServiceImpl.assignTechnician() (the other, legacy
+     * entry point) already does it. This is the single place that flip
+     * happens; it is not deferred to JobAssignment acceptance.
      */
     private void linkRepairTaskToAssignment(
             JobAssignment assignment) {
@@ -172,6 +180,13 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                 assignment.getRepairTask();
 
         task.setJobAssignment(assignment);
+
+        if (assignment.getAssignmentType() == JobAssignmentType.TECHNICIAN
+                && task.getStatus() == RepairStatus.PENDING) {
+
+            task.setStatus(RepairStatus.ASSIGNED);
+            task.setAssignedAt(LocalDateTime.now());
+        }
 
         repairTaskRepository.save(task);
     }
@@ -196,36 +211,11 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             );
         }
 
-        /*
-         * Technician assignment:
-         * the assignment must be linked to a RepairTask.
-         */
-        if (assignment.getAssignmentType()
-                == JobAssignmentType.TECHNICIAN) {
-
-            RepairTask repairTask = assignment.getRepairTask();
-
-            if (repairTask == null) {
-                throw new ResourceNotFoundException(
-                        "Technician assignment is not linked to a Repair Task."
-                );
-            }
-
-            /*
-             * Converge the RepairTask lifecycle.
-             *
-             * Some existing assignment records may have:
-             * JobAssignment = ASSIGNED
-             * RepairTask = PENDING
-             *
-             * Once the technician accepts the assignment,
-             * the RepairTask is officially assigned.
-             */
-            if (repairTask.getStatus() == RepairStatus.PENDING) {
-                repairTask.setStatus(RepairStatus.ASSIGNED);
-            }
-        }
-
+        // RepairTask.status is already ASSIGNED by this point (set when
+        // the assignment was created/linked — see
+        // linkRepairTaskToAssignment). Accepting only changes the
+        // JobAssignment's own status; it must not otherwise mutate the
+        // RepairTask.
         assignment.setStatus(
                 JobAssignmentStatus.ACCEPTED);
 
@@ -498,7 +488,16 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         List<JobAssignment> assignments =
                 jobAssignmentRepository.findByUserId(userId);
 
-        return jobAssignmentMapper.toMyAssignment(assignments);
+        // job_assignments is reassignment history, not a list of
+        // currently-active work — a CANCELLED row (superseded by a
+        // reassignment) must not show up in "My Work" as a task the
+        // technician still has, even though the row itself is preserved
+        // for audit history.
+        List<JobAssignment> active = assignments.stream()
+                .filter(a -> a.getStatus() != JobAssignmentStatus.CANCELLED)
+                .collect(Collectors.toList());
+
+        return jobAssignmentMapper.toMyAssignment(active);
 
     }
 

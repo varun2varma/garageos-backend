@@ -103,6 +103,15 @@ public class EstimateItemServiceImpl
     }
 
     @Override
+    public List<EstimateItemResponse> getItemsByComplaint(Long complaintId) {
+
+        return repository.findByComplaintId(complaintId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public EstimateItemResponse updateItem(
             Long id,
             CreateEstimateItemRequest request) {

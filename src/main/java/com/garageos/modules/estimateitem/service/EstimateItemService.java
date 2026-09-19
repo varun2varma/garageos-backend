@@ -15,6 +15,8 @@ public interface EstimateItemService {
 
     List<EstimateItemResponse> getItems(Long estimateId);
 
+    List<EstimateItemResponse> getItemsByComplaint(Long complaintId);
+
     EstimateItemResponse updateItem(
             Long id,
             CreateEstimateItemRequest request);

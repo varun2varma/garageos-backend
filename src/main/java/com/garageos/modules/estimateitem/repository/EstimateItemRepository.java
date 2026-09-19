@@ -10,4 +10,6 @@ public interface EstimateItemRepository
 
     List<EstimateItem> findByEstimateId(Long estimateId);
 
+    List<EstimateItem> findByComplaintId(Long complaintId);
+
 }
