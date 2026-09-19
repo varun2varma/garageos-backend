@@ -21,6 +21,7 @@ import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.modules.jobassignment.service.JobAssignmentService;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.jobcard.service.JobCardService;
 import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
 import com.garageos.modules.qualitycheck.service.QualityCheckService;
 import com.garageos.modules.repairtask.dto.request.AssignTechnicianRequest;
@@ -53,6 +54,7 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     private final JobAssignmentService jobAssignmentService;
     private final UserRepository userRepository;
     private final ComplaintRepository complaintRepository;
+    private final JobCardService jobCardService;
 
     @Override
     @Transactional
@@ -263,13 +265,13 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     }
 
     @Override
+    @Transactional
     public RepairTaskResponse startRepair(Long repairTaskId) {
 
         RepairTask task = repository.findById(repairTaskId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "Repair Task not found with id : "
-                                        + repairTaskId));
+                                "Repair Task not found with id : " + repairTaskId));
 
         authorizeRepairTaskAction(task);
 
@@ -278,6 +280,12 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                     "Repair Task must be assigned before starting.");
         }
 
+        // Start the Job Card repair workflow
+        jobCardService.startRepair(
+                task.getJobCard().getJobCardNumber()
+        );
+
+        // Start the actual Repair Task
         task.setStatus(RepairStatus.IN_PROGRESS);
         task.setStartedAt(LocalDateTime.now());
 

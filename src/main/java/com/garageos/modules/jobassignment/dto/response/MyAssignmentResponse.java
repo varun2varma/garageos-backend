@@ -11,6 +11,8 @@ public class MyAssignmentResponse {
 
     private Long assignmentId;
 
+    private Long repairTaskId;
+
     private String jobCardNumber;
 
     private String customerName;

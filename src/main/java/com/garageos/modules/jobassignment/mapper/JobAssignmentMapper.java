@@ -33,7 +33,7 @@ public interface JobAssignmentMapper {
     );
 
     @Mapping(target = "assignmentId", source = "id")
-
+    @Mapping(target = "repairTaskId", source = "repairTask.id")
     @Mapping(target = "jobCardNumber",
             source = "jobCard.jobCardNumber")
 
