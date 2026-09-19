@@ -188,20 +188,42 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         userId
                 );
 
-//        if (assignment.getAssignmentType()
-//                != JobAssignmentType.DRIVER) {
-//
-//            throw new IllegalStateException(
-//                    "This assignment is not a driver assignment."
-//            );
-//        }
-
         if (assignment.getStatus()
                 != JobAssignmentStatus.ASSIGNED) {
 
             throw new IllegalStateException(
                     "Job cannot be taken in current status."
             );
+        }
+
+        /*
+         * Technician assignment:
+         * the assignment must be linked to a RepairTask.
+         */
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN) {
+
+            RepairTask repairTask = assignment.getRepairTask();
+
+            if (repairTask == null) {
+                throw new ResourceNotFoundException(
+                        "Technician assignment is not linked to a Repair Task."
+                );
+            }
+
+            /*
+             * Converge the RepairTask lifecycle.
+             *
+             * Some existing assignment records may have:
+             * JobAssignment = ASSIGNED
+             * RepairTask = PENDING
+             *
+             * Once the technician accepts the assignment,
+             * the RepairTask is officially assigned.
+             */
+            if (repairTask.getStatus() == RepairStatus.PENDING) {
+                repairTask.setStatus(RepairStatus.ASSIGNED);
+            }
         }
 
         assignment.setStatus(
@@ -216,7 +238,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         return jobAssignmentMapper.toResponse(
                 assignment);
-
     }
 
     @Override
