@@ -2,6 +2,7 @@ package com.garageos.modules.jobassignment.service.impl;
 
 import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.JobAssignmentType;
+import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.RepairStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
@@ -22,6 +23,8 @@ import com.garageos.modules.jobassignment.repository.JobAssignmentRepository;
 import com.garageos.modules.jobassignment.service.JobAssignmentService;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
+import com.garageos.modules.qualitycheck.service.QualityCheckService;
 import com.garageos.modules.repairtask.entity.RepairTask;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +53,10 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
     private final GarageRepository garageRepository;
 
     private final RepairTaskRepository repairTaskRepository;
+
+    private final JobCardStatusValidator statusValidator;
+
+    private final QualityCheckService qualityCheckService;
 
     @Override
     @Transactional
@@ -154,20 +161,10 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
     }
 
     /**
-     * RepairTask.jobAssignment is the additive, authoritative-ownership
-     * link (RepairTask -> JobAssignment.id). RepairTask and JobAssignment
-     * are correlated 1:1 via the shared EstimateItem (RepairTaskServiceImpl
-     * .createRepairTasks creates exactly one RepairTask per EstimateItem),
-     * so a TECHNICIAN-type assignment against a given EstimateItem points
-     * its RepairTask at the new/current assignment. No-op for assignment
-     * types that don't carry an EstimateItem (e.g. DRIVER).
+     * Links the RepairTask to the current JobAssignment.
      *
-     * A TECHNICIAN assignment being linked here is exactly the domain
-     * event that makes the RepairTask "assigned" — so a still-PENDING
-     * RepairTask is moved to ASSIGNED right here, at link time, the same
-     * way RepairTaskServiceImpl.assignTechnician() (the other, legacy
-     * entry point) already does it. This is the single place that flip
-     * happens; it is not deferred to JobAssignment acceptance.
+     * For technician assignments, creating the assignment is the
+     * domain event that moves a PENDING RepairTask to ASSIGNED.
      */
     private void linkRepairTaskToAssignment(
             JobAssignment assignment) {
@@ -181,11 +178,17 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         task.setJobAssignment(assignment);
 
-        if (assignment.getAssignmentType() == JobAssignmentType.TECHNICIAN
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN
                 && task.getStatus() == RepairStatus.PENDING) {
 
-            task.setStatus(RepairStatus.ASSIGNED);
-            task.setAssignedAt(LocalDateTime.now());
+            task.setStatus(
+                    RepairStatus.ASSIGNED
+            );
+
+            task.setAssignedAt(
+                    LocalDateTime.now()
+            );
         }
 
         repairTaskRepository.save(task);
@@ -211,23 +214,29 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             );
         }
 
-        // RepairTask.status is already ASSIGNED by this point (set when
-        // the assignment was created/linked — see
-        // linkRepairTaskToAssignment). Accepting only changes the
-        // JobAssignment's own status; it must not otherwise mutate the
-        // RepairTask.
+        /*
+         * RepairTask is already ASSIGNED when the technician
+         * assignment is created.
+         *
+         * Accepting the job only changes the JobAssignment
+         * lifecycle. RepairTask remains ASSIGNED until Start.
+         */
         assignment.setStatus(
-                JobAssignmentStatus.ACCEPTED);
+                JobAssignmentStatus.ACCEPTED
+        );
 
         assignment.setAcceptedAt(
-                LocalDateTime.now());
+                LocalDateTime.now()
+        );
 
         assignment =
                 jobAssignmentRepository.save(
-                        assignment);
+                        assignment
+                );
 
         return jobAssignmentMapper.toResponse(
-                assignment);
+                assignment
+        );
     }
 
     @Override
@@ -243,14 +252,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         userId
                 );
 
-//        if (assignment.getAssignmentType()
-//                != JobAssignmentType.DRIVER) {
-//
-//            throw new IllegalStateException(
-//                    "This assignment is not a driver assignment."
-//            );
-//        }
-
         if (assignment.getStatus()
                 != JobAssignmentStatus.ACCEPTED) {
 
@@ -259,6 +260,33 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             );
         }
 
+        RepairTask task =
+                assignment.getRepairTask();
+
+        /*
+         * Technician assignments must have a RepairTask.
+         */
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN) {
+
+            if (task == null) {
+                throw new IllegalStateException(
+                        "Technician assignment has no repair task."
+                );
+            }
+
+            if (task.getStatus()
+                    != RepairStatus.ASSIGNED) {
+
+                throw new IllegalStateException(
+                        "Repair Task must be ASSIGNED before starting."
+                );
+            }
+        }
+
+        /*
+         * Start the JobAssignment.
+         */
         assignment.setStatus(
                 JobAssignmentStatus.IN_PROGRESS
         );
@@ -267,35 +295,52 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                 LocalDateTime.now()
         );
 
-        assignment.setRemarks(
-                request.getRemarks()
-        );
+        if (request != null) {
+            assignment.setRemarks(
+                    request.getRemarks()
+            );
+        }
+
+        /*
+         * Start the RepairTask and JobCard as part of
+         * the same transaction.
+         */
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN) {
+
+            task.setStatus(
+                    RepairStatus.IN_PROGRESS
+            );
+
+            task.setStartedAt(
+                    LocalDateTime.now()
+            );
+
+            JobCard jobCard =
+                    task.getJobCard();
+
+            if (jobCard != null
+                    && jobCard.getStatus()
+                    == JobCardStatus.REPAIR_PENDING) {
+
+                jobCard.setStatus(
+                        JobCardStatus.REPAIR_IN_PROGRESS
+                );
+
+                jobCardRepository.save(
+                        jobCard
+                );
+            }
+
+            repairTaskRepository.save(
+                    task
+            );
+        }
 
         assignment =
                 jobAssignmentRepository.save(
                         assignment
                 );
-
-        if (assignment.getAssignmentType()
-                == JobAssignmentType.TECHNICIAN
-                && assignment.getRepairTask() != null) {
-
-            RepairTask task =
-                    assignment.getRepairTask();
-
-            if (task.getStatus() == RepairStatus.ASSIGNED) {
-
-                task.setStatus(
-                        RepairStatus.IN_PROGRESS
-                );
-
-                task.setStartedAt(
-                        LocalDateTime.now()
-                );
-
-                repairTaskRepository.save(task);
-            }
-        }
 
         return jobAssignmentMapper.toResponse(
                 assignment
@@ -315,14 +360,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         userId
                 );
 
-//        if (assignment.getAssignmentType()
-//                != JobAssignmentType.DRIVER) {
-//
-//            throw new IllegalStateException(
-//                    "This assignment is not a driver assignment."
-//            );
-//        }
-
         if (assignment.getStatus()
                 != JobAssignmentStatus.IN_PROGRESS) {
 
@@ -331,6 +368,33 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             );
         }
 
+        RepairTask task =
+                assignment.getRepairTask();
+
+        /*
+         * Technician assignments must have a RepairTask.
+         */
+        if (assignment.getAssignmentType()
+                == JobAssignmentType.TECHNICIAN) {
+
+            if (task == null) {
+                throw new IllegalStateException(
+                        "Technician assignment has no repair task."
+                );
+            }
+
+            if (task.getStatus()
+                    != RepairStatus.IN_PROGRESS) {
+
+                throw new IllegalStateException(
+                        "Repair Task must be IN_PROGRESS before completion."
+                );
+            }
+        }
+
+        /*
+         * Complete the JobAssignment.
+         */
         assignment.setStatus(
                 JobAssignmentStatus.COMPLETED
         );
@@ -339,32 +403,22 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                 LocalDateTime.now()
         );
 
-        assignment.setActualHours(
-                request.getActualHours()
-        );
+        if (request != null) {
 
-        assignment.setRemarks(
-                request.getRemarks()
-        );
+            assignment.setActualHours(
+                    request.getActualHours()
+            );
 
-        assignment =
-                jobAssignmentRepository.save(
-                        assignment
-                );
+            assignment.setRemarks(
+                    request.getRemarks()
+            );
+        }
 
+        /*
+         * Complete the RepairTask as part of the same transaction.
+         */
         if (assignment.getAssignmentType()
-                == JobAssignmentType.TECHNICIAN
-                && assignment.getRepairTask() != null) {
-
-            RepairTask task =
-                    assignment.getRepairTask();
-
-            if (task.getStatus() != RepairStatus.IN_PROGRESS) {
-
-                throw new IllegalStateException(
-                        "Repair Task must be IN_PROGRESS before completion."
-                );
-            }
+                == JobAssignmentType.TECHNICIAN) {
 
             task.setStatus(
                     RepairStatus.COMPLETED
@@ -375,7 +429,64 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             );
 
             repairTaskRepository.save(task);
+
+            /*
+             * Check whether all RepairTasks belonging to this
+             * JobCard are now completed.
+             */
+            JobCard jobCard =
+                    task.getJobCard();
+
+            if (jobCard != null) {
+
+                long total =
+                        repairTaskRepository.countByJobCardId(
+                                jobCard.getId()
+                        );
+
+                long completed =
+                        repairTaskRepository.countByJobCardIdAndStatus(
+                                jobCard.getId(),
+                                RepairStatus.COMPLETED
+                        );
+
+                /*
+                 * Only complete the JobCard when every RepairTask
+                 * has been completed.
+                 */
+                if (total > 0 && total == completed) {
+
+                    /*
+                     * Preserve the existing JobCard transition
+                     * validation from RepairTaskServiceImpl.
+                     */
+                    statusValidator.validate(
+                            jobCard.getStatus(),
+                            JobCardStatus.REPAIR_COMPLETED
+                    );
+
+                    jobCard.setStatus(
+                            JobCardStatus.REPAIR_COMPLETED
+                    );
+
+                    jobCardRepository.save(
+                            jobCard
+                    );
+
+                    /*
+                     * Preserve the existing quality-check creation.
+                     */
+                    qualityCheckService.createQualityCheck(
+                            jobCard
+                    );
+                }
+            }
         }
+
+        assignment =
+                jobAssignmentRepository.save(
+                        assignment
+                );
 
         return jobAssignmentMapper.toResponse(
                 assignment
@@ -391,7 +502,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         new ResourceNotFoundException(
                                 "Assignment not found : "
                                         + assignmentId));
-
     }
 
     /**
@@ -410,61 +520,110 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             ReassignJobRequest request) {
 
         JobAssignment oldAssignment =
-                getAssignmentOrThrow(assignmentId);
+                getAssignmentOrThrow(
+                        assignmentId
+                );
 
         User user =
-                userRepository.findById(request.getEmployeeId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "User not found : "
-                                                + request.getEmployeeId()));
+                userRepository.findById(
+                        request.getEmployeeId()
+                ).orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found : "
+                                        + request.getEmployeeId()
+                        ));
 
         /*
          * Preserve the RepairTask linked to the old assignment.
          * The old assignment will be cancelled, but the RepairTask
          * must be transferred to the new assignment.
          */
-        RepairTask repairTask = oldAssignment.getRepairTask();
+        RepairTask repairTask =
+                oldAssignment.getRepairTask();
 
-        oldAssignment.setStatus(JobAssignmentStatus.CANCELLED);
+        oldAssignment.setStatus(
+                JobAssignmentStatus.CANCELLED
+        );
 
-        jobAssignmentRepository.save(oldAssignment);
+        jobAssignmentRepository.save(
+                oldAssignment
+        );
 
-        JobAssignment newAssignment = new JobAssignment();
+        JobAssignment newAssignment =
+                new JobAssignment();
 
-        newAssignment.setGarage(oldAssignment.getGarage());
-        newAssignment.setJobCard(oldAssignment.getJobCard());
-        newAssignment.setEstimateItem(oldAssignment.getEstimateItem());
-        newAssignment.setRepairTask(repairTask);
-        newAssignment.setUser(user);
-        newAssignment.setAssignmentType(oldAssignment.getAssignmentType());
-        newAssignment.setAssignedAt(LocalDateTime.now());
-        newAssignment.setEstimatedHours(oldAssignment.getEstimatedHours());
-        newAssignment.setRemarks(request.getRemarks());
-        newAssignment.setStatus(JobAssignmentStatus.ASSIGNED);
+        newAssignment.setGarage(
+                oldAssignment.getGarage()
+        );
+
+        newAssignment.setJobCard(
+                oldAssignment.getJobCard()
+        );
+
+        newAssignment.setEstimateItem(
+                oldAssignment.getEstimateItem()
+        );
+
+        newAssignment.setRepairTask(
+                repairTask
+        );
+
+        newAssignment.setUser(
+                user
+        );
+
+        newAssignment.setAssignmentType(
+                oldAssignment.getAssignmentType()
+        );
+
+        newAssignment.setAssignedAt(
+                LocalDateTime.now()
+        );
+
+        newAssignment.setEstimatedHours(
+                oldAssignment.getEstimatedHours()
+        );
+
+        newAssignment.setRemarks(
+                request.getRemarks()
+        );
+
+        newAssignment.setStatus(
+                JobAssignmentStatus.ASSIGNED
+        );
 
         newAssignment =
-                jobAssignmentRepository.save(newAssignment);
+                jobAssignmentRepository.save(
+                        newAssignment
+                );
 
         /*
          * RepairTask.jobAssignment now points to the NEW active
          * assignment while the old assignment remains CANCELLED
          * for history/audit.
          */
-        linkRepairTaskToAssignment(newAssignment);
+        linkRepairTaskToAssignment(
+                newAssignment
+        );
 
-        return jobAssignmentMapper.toResponse(newAssignment);
+        return jobAssignmentMapper.toResponse(
+                newAssignment
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public JobAssignmentResponse getAssignment(Long assignmentId) {
+    public JobAssignmentResponse getAssignment(
+            Long assignmentId) {
 
         JobAssignment assignment =
-                getAssignmentOrThrow(assignmentId);
+                getAssignmentOrThrow(
+                        assignmentId
+                );
 
-        return jobAssignmentMapper.toResponse(assignment);
-
+        return jobAssignmentMapper.toResponse(
+                assignment
+        );
     }
 
     @Override
@@ -473,32 +632,40 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             Long jobCardId) {
 
         List<JobAssignment> assignments =
-                jobAssignmentRepository.findByJobCardId(jobCardId);
+                jobAssignmentRepository.findByJobCardId(
+                        jobCardId
+                );
 
-        return jobAssignmentMapper.toResponse(assignments);
-
+        return jobAssignmentMapper.toResponse(
+                assignments
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<MyAssignmentResponse> getMyAssignments(Long userId) {
-
-//        Long userId = 1L; // Temporary until JWT integration
+    public List<MyAssignmentResponse> getMyAssignments(
+            Long userId) {
 
         List<JobAssignment> assignments =
-                jobAssignmentRepository.findByUserId(userId);
+                jobAssignmentRepository.findByUserId(
+                        userId
+                );
 
-        // job_assignments is reassignment history, not a list of
-        // currently-active work — a CANCELLED row (superseded by a
-        // reassignment) must not show up in "My Work" as a task the
-        // technician still has, even though the row itself is preserved
-        // for audit history.
-        List<JobAssignment> active = assignments.stream()
-                .filter(a -> a.getStatus() != JobAssignmentStatus.CANCELLED)
-                .collect(Collectors.toList());
+        /*
+         * job_assignments is reassignment history, not a list of
+         * currently-active work. A CANCELLED row must not show up
+         * in "My Work".
+         */
+        List<JobAssignment> active =
+                assignments.stream()
+                        .filter(a ->
+                                a.getStatus()
+                                        != JobAssignmentStatus.CANCELLED)
+                        .collect(Collectors.toList());
 
-        return jobAssignmentMapper.toMyAssignment(active);
-
+        return jobAssignmentMapper.toMyAssignment(
+                active
+        );
     }
 
     @Override
@@ -541,5 +708,4 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         return assignment;
     }
-
 }

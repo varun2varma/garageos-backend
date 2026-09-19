@@ -4,9 +4,12 @@ import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.InvoiceStatus;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.PaymentStatus;
+import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.InvoiceNumberGenerator;
+import com.garageos.modules.customer.entity.Customer;
+import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.estimate.repository.EstimateRepository;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
@@ -47,6 +50,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final EstimateItemRepository estimateItemRepository;
     private final JobCardStatusValidator statusValidator;
     private final JobCardService jobCardService;
+    private final CustomerRepository customerRepository;
 
     /**
      * Canonical invoice-generation JobCard transition, shared by every
@@ -374,7 +378,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
 
-        authorizeInvoiceAction(jobCard);
+        authorizePaymentAction(jobCard);
 
         Invoice invoice = invoiceRepository
                 .findByEstimateJobCardId(jobCard.getId())
@@ -397,6 +401,49 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
 
         return invoiceMapper.toResponse(invoice);
+    }
+
+    /**
+     * receivePayment()'s own authorization - deliberately separate from
+     * authorizeInvoiceAction(), which stays exactly as-is for
+     * generateInvoice() and every staff caller. A CUSTOMER principal is
+     * not a garage employee (no meaningful principal.getGarageId() to
+     * compare), so the garage-match check does not apply to them at all;
+     * they are authorized instead by owning the Job Card itself, the same
+     * Customer-by-mobile-number lookup JobCardProjectionServiceImpl
+     * already uses for the customer job-card view. A customer who does
+     * not own this Job Card gets the same ResourceNotFoundException the
+     * rest of the app already uses to avoid confirming another
+     * customer's Job Card/invoice exists.
+     */
+    private void authorizePaymentAction(JobCard jobCard) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+
+            Customer customer = customerRepository
+                    .findByMobileNumber(principal.getMobile())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Job Card not found : "
+                                            + jobCard.getJobCardNumber()));
+
+            if (jobCard.getCustomer() == null
+                    || !jobCard.getCustomer().getId().equals(customer.getId())) {
+
+                throw new ResourceNotFoundException(
+                        "Job Card not found : " + jobCard.getJobCardNumber());
+            }
+
+            return;
+        }
+
+        authorizeInvoiceAction(jobCard);
     }
 
     @Override

@@ -144,8 +144,19 @@ public class ServiceWorkflowController {
                 "Invoice generated successfully.",
                 workflowService.generateInvoice(jobCardNumber));
     }
+    /**
+     * Deliberately NOT WORKFLOW_OPERATIONAL_ROLES: unlike every other
+     * action on this controller, paying an invoice is a customer
+     * self-service action, not a staff operation - the legacy static
+     * customer portal (customer/js/invoice.js -> customerPortalService.js)
+     * calls this exact endpoint directly. CUSTOMER is added here only,
+     * not to the shared constant, so no other action on this controller
+     * is affected. Ownership for a CUSTOMER caller (this job card is
+     * actually theirs) is enforced in InvoiceServiceImpl.receivePayment,
+     * since @PreAuthorize only checks role, not which job card.
+     */
     @PostMapping("/{jobCardNumber}/payment")
-    @PreAuthorize(WORKFLOW_OPERATIONAL_ROLES)
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER', 'CUSTOMER')")
     public ResponseEntity<ApiResponse<WorkflowResponse>>
     receivePayment(
             @PathVariable String jobCardNumber) {

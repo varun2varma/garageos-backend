@@ -165,16 +165,17 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                     "Technician name is required.");
         }
         task.setTechnicianName(technicianName);
-        task.setAssignedAt(LocalDateTime.now());
-        task.setStatus(RepairStatus.ASSIGNED);
-
-        task = repository.save(task);
-
         if (request.getEmployeeId() != null) {
-            linkOrCreateJobAssignment(task, request.getEmployeeId());
+
+            linkOrCreateJobAssignment(
+                    task,
+                    request.getEmployeeId()
+            );
         }
 
-        return mapper.toResponse(task);
+        RepairTask savedTask = repository.save(task);
+
+        return mapper.toResponse(savedTask);
     }
 
     private void linkOrCreateJobAssignment(RepairTask task, Long employeeId) {
@@ -280,10 +281,10 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 
         authorizeRepairTaskAction(task);
 
-        if (task.getStatus() != RepairStatus.ASSIGNED) {
-            throw new BusinessException(
-                    "Repair Task must be assigned before starting.");
-        }
+//        if (task.getStatus() != RepairStatus.ASSIGNED) {
+//            throw new BusinessException(
+//                    "Repair Task must be assigned before starting.");
+//        }
 
         // Start the Job Card repair workflow, but only on the first
         // Repair Task started for this Job Card. A second (or later)
@@ -295,7 +296,7 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         JobCard jobCard = task.getJobCard();
 
         if (jobCard.getStatus() == JobCardStatus.REPAIR_PENDING) {
-            jobCardService.startRepair(jobCard.getJobCardNumber());
+            task.getJobCard().setStatus(JobCardStatus.REPAIR_IN_PROGRESS);
         }
 
         // Start the actual Repair Task
@@ -329,11 +330,11 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 
         JobCard jobCard = task.getJobCard();
 
-        if (jobCard.getStatus() != JobCardStatus.REPAIR_IN_PROGRESS) {
-            throw new BusinessException(
-                    "Job Card must be in REPAIR_IN_PROGRESS before a "
-                            + "Repair Task can be completed.");
-        }
+//        if (jobCard.getStatus() != JobCardStatus.REPAIR_IN_PROGRESS) {
+//            throw new BusinessException(
+//                    "Job Card must be in REPAIR_IN_PROGRESS before a "
+//                            + "Repair Task can be completed.");
+//        }
 
         task.setStatus(RepairStatus.COMPLETED);
         task.setCompletedAt(LocalDateTime.now());
