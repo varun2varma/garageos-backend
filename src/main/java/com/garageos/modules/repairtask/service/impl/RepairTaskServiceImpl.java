@@ -33,6 +33,7 @@ import com.garageos.modules.repairtask.service.RepairTaskService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -54,6 +55,8 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     private final JobAssignmentService jobAssignmentService;
     private final UserRepository userRepository;
     private final ComplaintRepository complaintRepository;
+
+    @Lazy
     private final JobCardService jobCardService;
 
     @Override
