@@ -20,6 +20,8 @@ import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.jobcard.service.JobCardService;
+import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
+import com.garageos.modules.qualitycheck.service.QualityCheckService;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.repairtask.service.RepairTaskService;
 import com.garageos.modules.serviceworkflow.dto.response.WorkflowResponse;
@@ -47,11 +49,10 @@ public class ServiceWorkflowServiceImpl
     private final RepairTaskService repairTaskService;
     private final JobCardRepository jobCardRepository;
     private final CustomerService customerService;
-
     private final VehicleService vehicleService;
-
     private final ComplaintService complaintService;
-
+    private final JobCardStatusValidator statusValidator;
+    private final QualityCheckService qualityCheckService;
     private final EstimateItemService estimateItemService;
 
 //    @Override
@@ -182,11 +183,24 @@ public class ServiceWorkflowServiceImpl
     }
 
     @Override
+    @Transactional
     public WorkflowResponse performQualityCheck(String jobCardNumber) {
 
+        JobCard jobCard = getJobCard(jobCardNumber);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.QUALITY_CHECK
+        );
+
+        jobCard.setStatus(JobCardStatus.QUALITY_CHECK);
+        jobCardRepository.save(jobCard);
+
+        qualityCheckService.createQualityCheck(jobCard);
+
         return WorkflowResponse.builder()
-                .data(jobCardService.performQualityCheck(jobCardNumber))
-                .message("Quality check completed successfully.")
+                .data(jobCardService.getJobCardByNumber(jobCardNumber))
+                .message("Quality check started successfully.")
                 .build();
     }
 
@@ -343,7 +357,7 @@ public class ServiceWorkflowServiceImpl
 
         List<String> steps = new ArrayList<>();
 
-        // These are always completed once a Job Card exists
+        // These are always completed once a Job Card exists.
         steps.add("CUSTOMER");
         steps.add("VEHICLE");
         steps.add("JOB_CARD");
@@ -376,7 +390,31 @@ public class ServiceWorkflowServiceImpl
                 steps.add("APPROVAL");
                 break;
 
+            /*
+             * Repair work is technically completed, but the Manager still
+             * needs to review the completed repair work/evidence and explicitly
+             * proceed to Quality Check.
+             *
+             * Therefore REPAIR is intentionally NOT marked completed here.
+             * WorkflowController will resolve the Repair screen.
+             */
             case REPAIR_COMPLETED:
+                steps.add("INSPECTION");
+                steps.add("ESTIMATE");
+                steps.add("ESTIMATE_ITEMS");
+                steps.add("ESTIMATE_SUMMARY");
+                steps.add("APPROVAL");
+                break;
+
+            /*
+             * Quality Check has started and is currently pending.
+             *
+             * Repair is now completed because the Manager explicitly proceeded
+             * from REPAIR_COMPLETED to QUALITY_CHECK.
+             *
+             * QUALITY_CHECK itself is NOT completed until PASS.
+             */
+            case QUALITY_CHECK:
                 steps.add("INSPECTION");
                 steps.add("ESTIMATE");
                 steps.add("ESTIMATE_ITEMS");
@@ -385,7 +423,9 @@ public class ServiceWorkflowServiceImpl
                 steps.add("REPAIR");
                 break;
 
-            case QUALITY_CHECK:
+            /*
+             * QC passed. Invoice is now the next active stage.
+             */
             case READY_FOR_INVOICE:
                 steps.add("INSPECTION");
                 steps.add("ESTIMATE");

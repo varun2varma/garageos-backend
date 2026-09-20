@@ -360,7 +360,7 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 
             jobCardRepository.save(jobCard);
 
-            qualityCheckService.createQualityCheck(jobCard);
+//            qualityCheckService.createQualityCheck(jobCard);
         }
 
         return mapper.toResponse(task);

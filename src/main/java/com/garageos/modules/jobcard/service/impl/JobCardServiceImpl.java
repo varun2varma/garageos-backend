@@ -454,7 +454,7 @@ public class JobCardServiceImpl implements JobCardService {
 
             jobCardRepository.save(jobCard);
 
-            qualityCheckService.createQualityCheck(jobCard);
+//            qualityCheckService.createQualityCheck(jobCard);
         }
 
         return jobCardMapper.toResponse(jobCard);

@@ -194,9 +194,17 @@ public class JobCardStatusValidator {
         VALID_TRANSITIONS.put(
                 JobCardStatus.REPAIR_COMPLETED,
                 EnumSet.of(
-                        JobCardStatus.READY_FOR_INVOICE,
+                        JobCardStatus.QUALITY_CHECK,
                         JobCardStatus.REPAIR_PENDING,
                         JobCardStatus.CANCELLED
+                )
+        );
+
+        VALID_TRANSITIONS.put(
+                JobCardStatus.QUALITY_CHECK,
+                EnumSet.of(
+                        JobCardStatus.READY_FOR_INVOICE,
+                        JobCardStatus.REPAIR_PENDING
                 )
         );
 
@@ -249,13 +257,6 @@ public class JobCardStatusValidator {
                 EnumSet.of(JobCardStatus.REPAIR_PENDING)
         );
 
-        VALID_TRANSITIONS.put(
-                JobCardStatus.QUALITY_CHECK,
-                EnumSet.of(
-                        JobCardStatus.READY_FOR_INVOICE,
-                        JobCardStatus.REPAIR_PENDING
-                )
-        );
 
         VALID_TRANSITIONS.put(
                 JobCardStatus.WORK_COMPLETED,

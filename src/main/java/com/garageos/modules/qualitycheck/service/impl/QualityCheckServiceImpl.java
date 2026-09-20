@@ -2,6 +2,7 @@ package com.garageos.modules.qualitycheck.service.impl;
 
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.QualityCheckStatus;
+import com.garageos.core.enums.RepairStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.jobcard.entity.JobCard;
@@ -13,12 +14,15 @@ import com.garageos.modules.qualitycheck.mapper.QualityCheckMapper;
 import com.garageos.modules.qualitycheck.repository.QualityCheckRepository;
 import com.garageos.modules.qualitycheck.service.QualityCheckService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.repairtask.entity.RepairTask;
+import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,22 +35,32 @@ public class QualityCheckServiceImpl
 
     private final QualityCheckMapper mapper;
 
+    private final RepairTaskRepository repairTaskRepository;
+
     @Override
     @Transactional
     public void createQualityCheck(JobCard jobCard) {
 
-        if (repository.existsByJobCardId(jobCard.getId())) {
-            return;
+        QualityCheck qualityCheck =
+                repository.findByJobCardId(jobCard.getId())
+                        .orElse(null);
+
+        if (qualityCheck == null) {
+
+            qualityCheck = QualityCheck.builder()
+                    .jobCard(jobCard)
+                    .status(QualityCheckStatus.PENDING)
+                    .build();
+
+        } else {
+
+            qualityCheck.setStatus(QualityCheckStatus.PENDING);
+            qualityCheck.setInspectedBy(null);
+            qualityCheck.setInspectedAt(null);
+            qualityCheck.setRemarks(null);
         }
 
-        QualityCheck qualityCheck =
-                QualityCheck.builder()
-                        .jobCard(jobCard)
-                        .status(QualityCheckStatus.PENDING)
-                        .build();
-
         repository.save(qualityCheck);
-
     }
 
     @Override
@@ -116,9 +130,9 @@ public class QualityCheckServiceImpl
 
         authorizeQualityCheckAction(jobCard);
 
-        if (jobCard.getStatus() != JobCardStatus.REPAIR_COMPLETED) {
+        if (jobCard.getStatus() != JobCardStatus.QUALITY_CHECK) {
             throw new BusinessException(
-                    "Repair must be completed before Quality Check.");
+                    "Quality Check is not currently active for this Job Card.");
         }
 
         mapper.updateEntity(request, qualityCheck);
@@ -151,9 +165,9 @@ public class QualityCheckServiceImpl
 
         authorizeQualityCheckAction(jobCard);
 
-        if (jobCard.getStatus() != JobCardStatus.REPAIR_COMPLETED) {
+        if (jobCard.getStatus() != JobCardStatus.QUALITY_CHECK) {
             throw new BusinessException(
-                    "Repair must be completed before Quality Check.");
+                    "Quality Check is not currently active for this Job Card.");
         }
 
         mapper.updateEntity(request, qualityCheck);
@@ -162,6 +176,19 @@ public class QualityCheckServiceImpl
         qualityCheck.setInspectedAt(LocalDateTime.now());
 
         jobCard.setStatus(JobCardStatus.REPAIR_PENDING);
+
+        List<RepairTask> repairTasks =
+                repairTaskRepository.findByJobCardIdOrderById(jobCard.getId());
+
+        for (RepairTask task : repairTasks) {
+            task.setStatus(RepairStatus.PENDING);
+            task.setJobAssignment(null);
+            task.setAssignedAt(null);
+            task.setStartedAt(null);
+            task.setCompletedAt(null);
+        }
+
+        repairTaskRepository.saveAll(repairTasks);
 
         repository.save(qualityCheck);
         jobCardRepository.save(jobCard);
