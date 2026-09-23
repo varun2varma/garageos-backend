@@ -51,4 +51,15 @@ public class Invoice extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime generatedAt;
+
+    /**
+     * Customer-payment-authorization investigation (V55): receivePayment()
+     * already guards same-transaction double-payment via the PAID check,
+     * but without row-level protection two concurrent requests could both
+     * read PENDING before either commits. Standard JPA optimistic locking,
+     * scoped to this entity only — not added to BaseEntity.
+     */
+    @Version
+    @Column(nullable = false)
+    private Long version;
 }

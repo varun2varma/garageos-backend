@@ -1,5 +1,6 @@
 package com.garageos.modules.customer.service;
 
+import com.garageos.modules.customer.dto.request.portal.UpdateCustomerProfileRequest;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
 import com.garageos.modules.media.service.MediaContent;
@@ -9,6 +10,9 @@ import java.util.List;
 public interface CustomerPortalService {
 
     CustomerProfileResponse getProfile();
+
+    /** Mission backlog #14 — self-service profile edit, for the calling customer only. */
+    CustomerProfileResponse updateProfile(UpdateCustomerProfileRequest request);
 
     CustomerDashboardResponse getDashboard();
 

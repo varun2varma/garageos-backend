@@ -1,17 +1,27 @@
 package com.garageos.modules.navigation.service.impl;
 
+import com.garageos.core.enums.audit.AuditEventType;
 import com.garageos.core.enums.navigation.TripLeg;
+import com.garageos.core.enums.navigation.TripMediaShotType;
 import com.garageos.core.enums.navigation.TripMediaStage;
 import com.garageos.core.enums.navigation.TripStatus;
 import com.garageos.core.enums.navigation.TripType;
+import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.audit.service.AuditService;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.response.NavigationTripMediaResponse;
+import com.garageos.modules.navigation.entity.NavigationRequest;
 import com.garageos.modules.navigation.entity.NavigationTrip;
 import com.garageos.modules.navigation.entity.NavigationTripMedia;
+import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.navigation.repository.NavigationTripMediaRepository;
 import com.garageos.modules.navigation.repository.NavigationTripRepository;
+import com.garageos.modules.navigation.security.NavigationTripAccessGuard;
 import com.garageos.modules.navigation.service.NavigationTripMediaService;
+import com.garageos.modules.navigation.service.TripMediaContent;
 import com.garageos.modules.navigation.storage.MediaStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +43,15 @@ public class NavigationTripMediaServiceImpl
     private final MediaStorageService
             mediaStorageService;
 
+    private final NavigationTripAccessGuard
+            accessGuard;
+
+    private final NavigationRequestRepository
+            navigationRequestRepository;
+
+    private final AuditService
+            auditService;
+
 
     @Override
     @Transactional
@@ -40,9 +59,21 @@ public class NavigationTripMediaServiceImpl
             Long tripId,
             Long driverId,
             TripMediaStage stage,
+            TripMediaShotType shotType,
             MultipartFile file,
             Double latitude,
             Double longitude) {
+
+        // Root-cause fix: this previously trusted the client-supplied
+        // driverId outright - any authenticated user of any role could
+        // upload pickup/delivery evidence attributed to a different
+        // driver's trip simply by putting that driver's id in the
+        // request. Mirrors the identical corrective fix already applied
+        // to every driver-side trip-transition endpoint in
+        // NavigationTripServiceImpl.getDriverTrip/requireCallerIsDriver:
+        // the caller's own identity is the authority, driverId is only
+        // honoured when it matches the authenticated principal.
+        requireCallerIsDriver(driverId);
 
         NavigationTrip trip =
                 navigationTripRepository
@@ -85,6 +116,8 @@ public class NavigationTripMediaServiceImpl
 
                         .mediaStage(stage)
 
+                        .shotType(shotType)
+
                         .storageKey(storageKey)
 
                         .fileName(
@@ -119,8 +152,26 @@ public class NavigationTripMediaServiceImpl
                         media
                 );
 
+        auditService.record(
+                AuditEventType.EVIDENCE_CAPTURED,
+                "NavigationTripMedia",
+                saved.getId(),
+                resolveGarageId(tripId),
+                java.util.Map.of("tripId", tripId, "stage", stage, "shotType", shotType == null ? "OTHER" : shotType),
+                latitude,
+                longitude
+        );
 
         return toResponse(saved);
+    }
+
+    private Long resolveGarageId(Long tripId) {
+
+        return navigationTripRepository.findById(tripId)
+                .map(NavigationTrip::getNavigationRequestId)
+                .flatMap(navigationRequestRepository::findById)
+                .map(NavigationRequest::getGarageId)
+                .orElse(null);
     }
 
 
@@ -128,6 +179,11 @@ public class NavigationTripMediaServiceImpl
     @Transactional(readOnly = true)
     public List<NavigationTripMediaResponse>
     getTripMedia(Long tripId) {
+
+        // Root-cause fix: this previously had no authorization at all -
+        // any authenticated user could list any trip's pickup/delivery
+        // evidence by guessing a tripId.
+        accessGuard.authorizeViewer(currentPrincipal(), tripId);
 
         return mediaRepository
                 .findByTripIdOrderByCapturedAtAsc(
@@ -146,6 +202,9 @@ public class NavigationTripMediaServiceImpl
             Long tripId,
             TripMediaStage stage) {
 
+        // Same fix as getTripMedia above.
+        accessGuard.authorizeViewer(currentPrincipal(), tripId);
+
         return mediaRepository
                 .findByTripIdAndMediaStageOrderByCapturedAtAsc(
                         tripId,
@@ -154,6 +213,26 @@ public class NavigationTripMediaServiceImpl
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public TripMediaContent getMediaContent(Long tripId, Long mediaId) {
+
+        accessGuard.authorizeViewer(currentPrincipal(), tripId);
+
+        NavigationTripMedia media = mediaRepository.findById(mediaId)
+                .filter(m -> m.getTripId() != null && m.getTripId().equals(tripId))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Media not found for trip : " + tripId));
+
+        byte[] content = mediaStorageService.readBytes(media.getStorageKey());
+
+        String contentType = media.getContentType() != null ? media.getContentType() : "application/octet-stream";
+        String fileName = media.getFileName() != null ? media.getFileName() : ("media-" + media.getId());
+
+        return new TripMediaContent(content, contentType, fileName);
     }
 
 
@@ -240,6 +319,36 @@ public class NavigationTripMediaServiceImpl
     }
 
 
+    /**
+     * A driver may only ever upload evidence as themselves. Deliberately
+     * throws the same not-found-style error the trip lookup that follows
+     * would throw, so passing another driver's id cannot be used to
+     * distinguish "exists but not yours" from "does not exist" - mirrors
+     * NavigationTripServiceImpl.requireCallerIsDriver.
+     */
+    private void requireCallerIsDriver(Long driverId) {
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        if (driverId == null
+                || principal.getId() == null
+                || !principal.getId().equals(driverId)) {
+
+            throw new ResourceNotFoundException(
+                    "Trip not found for driver."
+            );
+        }
+    }
+
+    private GarageUserPrincipal currentPrincipal() {
+
+        return (GarageUserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
+
     private boolean isImage(
             MultipartFile file) {
 
@@ -266,6 +375,10 @@ public class NavigationTripMediaServiceImpl
 
                 .mediaStage(
                         media.getMediaStage()
+                )
+
+                .shotType(
+                        media.getShotType()
                 )
 
                 .fileName(

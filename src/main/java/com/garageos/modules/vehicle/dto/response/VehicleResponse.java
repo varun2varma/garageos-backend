@@ -1,7 +1,10 @@
 package com.garageos.modules.vehicle.dto.response;
 
+import com.garageos.core.enums.vehicle.RcVerificationStatus;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -30,4 +33,12 @@ public class VehicleResponse {
     private String customerName;
 
     private String customerMobileNumber;
+
+    private RcVerificationStatus rcVerificationStatus;
+
+    private String rcDocumentReference;
+
+    private Long rcVerifiedBy;
+
+    private LocalDateTime rcVerifiedAt;
 }

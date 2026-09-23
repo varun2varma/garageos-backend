@@ -4,11 +4,13 @@ import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.booking.dto.request.BookingDecisionRequest;
 import com.garageos.modules.booking.dto.request.CreateBookingRequest;
+import com.garageos.modules.booking.dto.request.CreatePhoneBookingRequest;
 import com.garageos.modules.booking.dto.response.BookingResponse;
 import com.garageos.modules.booking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,19 @@ public class BookingController {
 
     private final BookingService bookingService;
 
+    /**
+     * Mission backlog #6 — phone-call booking is a garage-staff action,
+     * not a technician or customer one. Matches the ASSIGNMENT_ROLES
+     * pattern used elsewhere.
+     */
+    private static final String PHONE_BOOKING_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
+
     /** Customer: create a service-request booking for their own vehicle. */
     @PostMapping
     public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
@@ -28,6 +43,18 @@ public class BookingController {
         return ApiResponseUtil.created(
                 "Booking created successfully.",
                 bookingService.createBooking(request)
+        );
+    }
+
+    /** Mission backlog #6 — employee creates a booking on behalf of a customer who called in. */
+    @PostMapping("/phone")
+    @PreAuthorize(PHONE_BOOKING_ROLES)
+    public ResponseEntity<ApiResponse<BookingResponse>> createPhoneBooking(
+            @Valid @RequestBody CreatePhoneBookingRequest request) {
+
+        return ApiResponseUtil.created(
+                "Phone booking created successfully.",
+                bookingService.createPhoneBooking(request)
         );
     }
 

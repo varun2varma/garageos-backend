@@ -23,4 +23,12 @@ public interface EstimateItemService {
 
     void deleteItem(Long id);
 
+    /**
+     * Mission: customer select/deselect of individual estimate items,
+     * before approval. Customer-only, for an item on their own estimate,
+     * only while the estimate has not yet been approved - see
+     * EstimateItemServiceImpl.setItemSelection for the exact checks.
+     */
+    EstimateItemResponse setItemSelection(Long itemId, boolean selected);
+
 }

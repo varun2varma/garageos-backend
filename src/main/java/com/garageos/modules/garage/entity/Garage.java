@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -83,6 +85,19 @@ public class Garage extends BaseEntity {
 
     @Column(length = 6)
     String pincode;
+
+    /**
+     * Optional real-world coordinates for this garage, used as the route
+     * origin for pickup/delivery ETA calculations (the manager
+     * pre-acceptance map, V46). Null for a garage that hasn't set a map
+     * location yet - callers must degrade to address-only display rather
+     * than assuming these are always present.
+     */
+    @Column(precision = 10, scale = 7)
+    BigDecimal latitude;
+
+    @Column(precision = 10, scale = 7)
+    BigDecimal longitude;
 
     @Column(length = 15)
     String gstNumber;

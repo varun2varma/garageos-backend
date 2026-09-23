@@ -54,6 +54,7 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     private final QualityCheckService qualityCheckService;
     private final JobCardStatusValidator statusValidator;
     private final JobAssignmentService jobAssignmentService;
+    private final com.garageos.modules.jobassignment.repository.JobAssignmentRepository jobAssignmentRepository;
     private final UserRepository userRepository;
     private final ComplaintRepository complaintRepository;
 
@@ -84,6 +85,16 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         for (EstimateItem item : estimateItems) {
 
             if (item.getComplaint() == null) {
+                continue;
+            }
+
+            // Mission: a deselected item must not continue into repair.
+            // If every item under a complaint was deselected, no
+            // RepairTask is created for that complaint at all; if some
+            // remain selected, the complaint's repair still proceeds
+            // (RepairTask granularity is per-complaint, not per-item -
+            // see this method's own comment above).
+            if (!Boolean.TRUE.equals(item.getSelected())) {
                 continue;
             }
 
@@ -270,6 +281,76 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                 "You are not authorized to perform this action.");
     }
 
+    /**
+     * Phase H — RepairTask/JobAssignment reconciliation (Known Issue #1:
+     * "whichever path a technician actually uses, the other model never
+     * finds out"). RepairTask is the canonical technician-work entity
+     * (confirmed consistent with this codebase's own existing direction —
+     * CLAUDE.md §12 already says "for any NEW technician/assignment
+     * functionality, default to JobAssignment... unless the task
+     * explicitly requires RepairTask", and RepairTask already owns
+     * priority (V49) and is what every manager/customer-facing screen
+     * actually reads). This keeps the *linked* JobAssignment's status a
+     * derived projection of RepairTask's, rather than a second
+     * independently-mutable source of truth:
+     * - never touches a JobAssignment that isn't linked (task.getJobAssignment() == null)
+     * - never resurrects one that's CANCELLED (a cancelled assignment is a
+     *   deliberate, separate decision - not something a task transition
+     *   should undo)
+     * - never regresses one that's already past the target status in the
+     *   normal forward order (ASSIGNED &lt; ACCEPTED &lt; IN_PROGRESS &lt; COMPLETED) -
+     *   e.g. completing a task must not "un-complete" an assignment a QC
+     *   flow already moved to QC_PENDING/QC_FAILED/REWORK
+     * This does NOT change RepairTaskType/JobAssignmentType's own
+     * independent lifecycle semantics (RepairTask keeps its own status
+     * enum, its own PENDING/IN_PROGRESS/COMPLETED transitions, and
+     * multiple RepairTasks remain independently trackable) - it only
+     * keeps the one JobAssignment linked to a given RepairTask from
+     * silently diverging from it.
+     */
+    private void syncLinkedJobAssignment(
+            RepairTask task,
+            JobAssignmentStatus targetStatus,
+            LocalDateTime startedAt,
+            LocalDateTime completedAt) {
+
+        JobAssignment assignment = task.getJobAssignment();
+
+        if (assignment == null || assignment.getStatus() == JobAssignmentStatus.CANCELLED) {
+            return;
+        }
+
+        java.util.List<JobAssignmentStatus> forwardOrder = java.util.List.of(
+                JobAssignmentStatus.ASSIGNED,
+                JobAssignmentStatus.ACCEPTED,
+                JobAssignmentStatus.IN_PROGRESS,
+                JobAssignmentStatus.COMPLETED
+        );
+
+        int currentIndex = forwardOrder.indexOf(assignment.getStatus());
+        int targetIndex = forwardOrder.indexOf(targetStatus);
+
+        // A status outside the normal forward order (QC_PENDING,
+        // QC_FAILED, REWORK, ON_HOLD) is a state a separate quality/rework
+        // flow put the assignment into deliberately - a RepairTask
+        // start/complete call must not silently overwrite that.
+        if (currentIndex < 0 || targetIndex < 0 || targetIndex <= currentIndex) {
+            return;
+        }
+
+        assignment.setStatus(targetStatus);
+
+        if (startedAt != null) {
+            assignment.setStartedAt(startedAt);
+        }
+
+        if (completedAt != null) {
+            assignment.setCompletedAt(completedAt);
+        }
+
+        jobAssignmentRepository.save(assignment);
+    }
+
     @Override
     @Transactional
     public RepairTaskResponse startRepair(Long repairTaskId) {
@@ -303,7 +384,15 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         task.setStatus(RepairStatus.IN_PROGRESS);
         task.setStartedAt(LocalDateTime.now());
 
-        return mapper.toResponse(repository.save(task));
+        task = repository.save(task);
+
+        // Phase H reconciliation (Known Issue #1): RepairTask is the
+        // canonical technician-work entity; the linked JobAssignment must
+        // never be allowed to drift from it. See syncLinkedJobAssignment's
+        // own doc comment for exactly what this does and doesn't change.
+        syncLinkedJobAssignment(task, JobAssignmentStatus.IN_PROGRESS, task.getStartedAt(), null);
+
+        return mapper.toResponse(task);
     }
 
     /**
@@ -340,6 +429,10 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         task.setCompletedAt(LocalDateTime.now());
 
         task = repository.save(task);
+
+        // Phase H reconciliation (Known Issue #1) - see startRepair's own
+        // call and syncLinkedJobAssignment's doc comment.
+        syncLinkedJobAssignment(task, JobAssignmentStatus.COMPLETED, null, task.getCompletedAt());
 
         long total =
                 repository.countByJobCardId(jobCard.getId());
@@ -382,5 +475,27 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                                 "Repair Task not found with id : " + id));
 
         return mapper.toResponse(task);
+    }
+
+    @Override
+    @Transactional
+    public RepairTaskResponse setPriority(
+            Long repairTaskId,
+            com.garageos.core.enums.RepairTaskPriority priority) {
+
+        RepairTask task = repository.findById(repairTaskId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Repair Task not found with id : " + repairTaskId));
+
+        // Same garage-scoping rule every other privileged mutation on this
+        // entity already uses; the @PreAuthorize on the controller already
+        // excludes TECHNICIAN entirely, so a technician can never reach
+        // here to set their own work's priority.
+        authorizeRepairTaskAction(task);
+
+        task.setPriority(priority);
+
+        return mapper.toResponse(repository.save(task));
     }
 }

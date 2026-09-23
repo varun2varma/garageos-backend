@@ -4,15 +4,19 @@ import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.identity.dto.request.ChangePasswordRequest;
+import com.garageos.modules.identity.dto.request.ForgotPasswordRequest;
 import com.garageos.modules.identity.dto.request.LoginRequest;
 import com.garageos.modules.identity.dto.request.RegisterRequest;
+import com.garageos.modules.identity.dto.request.ResetPasswordRequest;
 import com.garageos.modules.identity.dto.response.LoginResponse;
 import com.garageos.modules.identity.dto.response.RegisterResponse;
 import com.garageos.modules.identity.dto.response.UserProfileResponse;
+import com.garageos.modules.identity.entity.PasswordResetToken;
 import com.garageos.modules.identity.entity.Role;
 import com.garageos.modules.identity.entity.User;
 import com.garageos.modules.identity.entity.UserRole;
 import com.garageos.modules.identity.entity.UserSession;
+import com.garageos.modules.identity.repository.PasswordResetTokenRepository;
 import com.garageos.modules.identity.repository.RoleRepository;
 import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.identity.repository.UserSessionRepository;
@@ -20,8 +24,10 @@ import com.garageos.modules.identity.security.jwt.JwtService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.identity.security.service.GarageUserDetailsService;
 import com.garageos.modules.identity.service.AuthService;
+import com.garageos.modules.identity.service.PasswordResetNotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,12 +37,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+    private static final int RESET_TOKEN_LENGTH_BYTES = 24;
+    private static final int RESET_TOKEN_EXPIRY_MINUTES = 30;
 
     private final AuthenticationManager authenticationManager;
 
@@ -51,6 +63,12 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final RoleRepository roleRepository;
+
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    private final PasswordResetNotificationService passwordResetNotificationService;
+
+    private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
     public LoginResponse login(
@@ -199,6 +217,85 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+
+        String identifier = request.getIdentifier().trim();
+
+        User user = userRepository.findByUsername(identifier)
+                .or(() -> userRepository.findByEmail(identifier))
+                .or(() -> userRepository.findByMobile(identifier))
+                .orElse(null);
+
+        // Deliberately does not throw when no account matches - revealing
+        // "no such account" here is an account-enumeration vector. The
+        // caller always sees the same generic outcome either way; only
+        // the (matched) user's own inbox/phone would ever see a
+        // difference, once real delivery is configured.
+        if (user == null) {
+            log.debug("Password reset requested for unknown identifier.");
+            return;
+        }
+
+        // Any previously-issued, still-unused token for this user is
+        // superseded - only the newest one should be usable, matching
+        // VehicleHandover's expireExistingActiveCode pattern.
+        for (PasswordResetToken existing : passwordResetTokenRepository.findByUserIdAndUsedFalse(user.getId())) {
+            existing.setUsed(true);
+            passwordResetTokenRepository.save(existing);
+        }
+
+        byte[] randomBytes = new byte[RESET_TOKEN_LENGTH_BYTES];
+        secureRandom.nextBytes(randomBytes);
+        String plaintextToken = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        PasswordResetToken token = PasswordResetToken.builder()
+                .userId(user.getId())
+                .tokenHash(passwordEncoder.encode(plaintextToken))
+                .expiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_EXPIRY_MINUTES))
+                .used(false)
+                .build();
+
+        passwordResetTokenRepository.save(token);
+
+        String destination = user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : user.getMobile();
+
+        passwordResetNotificationService.sendResetToken(destination, plaintextToken, user.getFirstName());
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+
+        // The token can't be looked up by a direct query (only the hash
+        // is stored, same reasoning as VehicleHandover's codeHash) - scan
+        // not-yet-used, not-yet-expired tokens and match by
+        // passwordEncoder, same shape as HandoverServiceImpl.verify.
+        List<PasswordResetToken> candidates = passwordResetTokenRepository.findAll().stream()
+                .filter(t -> !Boolean.TRUE.equals(t.getUsed()))
+                .filter(t -> t.getExpiresAt().isAfter(LocalDateTime.now()))
+                .toList();
+
+        PasswordResetToken matched = candidates.stream()
+                .filter(t -> passwordEncoder.matches(request.getToken(), t.getTokenHash()))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(
+                        "This reset link is invalid or has expired. Please request a new one."));
+
+        User user = userRepository.findById(matched.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setFirstLogin(false);
+        userRepository.save(user);
+
+        matched.setUsed(true);
+        passwordResetTokenRepository.save(matched);
+
+        userSessionRepository.revokeAllByUserId(user.getId());
+    }
+
+    @Override
+    @Transactional
     public LoginResponse refreshToken(String refreshToken) {
 
         if (!jwtService.isTokenValid(refreshToken)) {
@@ -243,6 +340,47 @@ public class AuthServiceImpl implements AuthService {
                         .getPrincipal();
 
         return buildUserProfile(principal);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updateProfile(
+            com.garageos.modules.identity.dto.request.UpdateProfileRequest request) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new com.garageos.core.exception.ResourceNotFoundException(
+                        "User not found."));
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+
+        user = userRepository.save(user);
+
+        // Built from the freshly-saved entity for name/email (the JWT
+        // principal is a snapshot from login/refresh time and would still
+        // show the old values until the next token issue), but roles/
+        // permissions/status are unchanged, so still read from principal
+        // rather than re-deriving authorities here.
+        return UserProfileResponse.builder()
+                .id(principal.getId())
+                .garageId(principal.getGarageId())
+                .username(principal.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .mobile(principal.getMobile())
+                .status(principal.getStatus())
+                .firstLogin(principal.getFirstLogin())
+                .roles(principal.getRoles())
+                .permissions(principal.getPermissions())
+                .build();
     }
 
 

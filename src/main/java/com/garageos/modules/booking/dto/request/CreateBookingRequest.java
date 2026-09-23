@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -52,4 +53,12 @@ public class CreateBookingRequest {
     @DecimalMin(value = "-180.0", message = "Pickup longitude must be between -180 and 180.")
     @DecimalMax(value = "180.0", message = "Pickup longitude must be between -180 and 180.")
     private BigDecimal pickupLongitude;
+
+    /**
+     * Mission backlog #2 — optional alternate contact number for pickup
+     * (a driver/POC present at the location, if different from the
+     * account holder). Descriptive only, never used for authentication.
+     */
+    @Pattern(regexp = "^$|^[0-9+][0-9+\\-\\s]{6,19}$", message = "Please enter a valid contact number.")
+    private String pickupContactNumber;
 }

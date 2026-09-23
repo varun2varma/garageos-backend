@@ -3,6 +3,7 @@ package com.garageos.modules.customer.service.impl;
 import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.customer.dto.request.portal.UpdateCustomerProfileRequest;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.mapper.CustomerPortalMapper;
@@ -72,6 +73,25 @@ public class CustomerPortalServiceImpl
 
         return mapper.toProfile(getCurrentCustomer());
 
+    }
+
+    @Override
+    @Transactional
+    public CustomerProfileResponse updateProfile(UpdateCustomerProfileRequest request) {
+
+        Customer customer = getCurrentCustomer();
+
+        customer.setFirstName(request.getFirstName());
+        customer.setLastName(request.getLastName());
+        customer.setEmail(request.getEmail());
+        customer.setAddress(request.getAddress());
+        customer.setCity(request.getCity());
+        customer.setState(request.getState());
+        customer.setPincode(request.getPincode());
+
+        customer = customerRepository.save(customer);
+
+        return mapper.toProfile(customer);
     }
 
     private Customer getCurrentCustomer() {

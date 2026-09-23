@@ -3,6 +3,7 @@ package com.garageos.modules.vehicle.entity;
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.FuelType;
 import com.garageos.core.enums.TransmissionType;
+import com.garageos.core.enums.vehicle.RcVerificationStatus;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.vehiclemaster.entity.VehicleBrand;
 import com.garageos.modules.vehiclemaster.entity.VehicleModel;
@@ -58,4 +59,24 @@ public class Vehicle extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    /**
+     * Mission backlog #1 — RC (registration certificate) verification.
+     * [rcDocumentReference] is deliberately a reference/key, not a stored
+     * document blob (mission: "do not store unnecessary sensitive
+     * documents") - if a real document upload is ever added, it belongs
+     * in the existing media infrastructure, not a new store.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rc_verification_status", nullable = false)
+    private RcVerificationStatus rcVerificationStatus = RcVerificationStatus.NOT_SUBMITTED;
+
+    @Column(name = "rc_document_reference", length = 500)
+    private String rcDocumentReference;
+
+    @Column(name = "rc_verified_by")
+    private Long rcVerifiedBy;
+
+    @Column(name = "rc_verified_at")
+    private java.time.LocalDateTime rcVerifiedAt;
 }

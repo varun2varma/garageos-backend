@@ -51,4 +51,10 @@ public interface VariantService {
             Long variantId,
             FuelType fuelType
     );
+
+    /** Every FuelType value - for manual (non-catalog) vehicle entry. */
+    List<EnumDropdownResponse> getAllFuelTypes();
+
+    /** Every TransmissionType value - for manual (non-catalog) vehicle entry. */
+    List<EnumDropdownResponse> getAllTransmissionTypes();
 }

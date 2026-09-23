@@ -268,4 +268,30 @@ public class VariantServiceImpl implements VariantService {
                 )
                 .toList();
     }
+
+    // =========================================================
+    // MANUAL (NON-CATALOG) VEHICLE ENTRY - full enum, no cascade
+    // =========================================================
+
+    @Override
+    public List<EnumDropdownResponse> getAllFuelTypes() {
+
+        return java.util.Arrays.stream(FuelType.values())
+                .map(type -> EnumDropdownResponse.builder()
+                        .id(type.name())
+                        .name(type.name())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public List<EnumDropdownResponse> getAllTransmissionTypes() {
+
+        return java.util.Arrays.stream(TransmissionType.values())
+                .map(type -> EnumDropdownResponse.builder()
+                        .id(type.name())
+                        .name(type.name())
+                        .build())
+                .toList();
+    }
 }

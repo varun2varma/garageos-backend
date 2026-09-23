@@ -49,4 +49,17 @@ public class HandoverController {
                 handoverService.getStatus(tripId)
         );
     }
+
+    /**
+     * Customer only (Mission Part L): records that they reviewed the
+     * evidence photos before confirming handover - an auditable
+     * evidence-review event, not a legal waiver.
+     */
+    @PostMapping("/evidence-viewed")
+    public ResponseEntity<ApiResponse<Void>> evidenceViewed(@PathVariable Long tripId) {
+
+        handoverService.recordEvidenceViewed(tripId);
+
+        return ApiResponseUtil.success("Evidence review recorded.");
+    }
 }

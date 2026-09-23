@@ -160,6 +160,8 @@ public class GarageServiceImpl implements GarageService {
         garage.setPincode(request.getPincode());
         garage.setGstNumber(request.getGstNumber());
         garage.setPanNumber(request.getPanNumber());
+        garage.setLatitude(request.getLatitude());
+        garage.setLongitude(request.getLongitude());
 
         return garageMapper.toResponse(
                 garageRepository.save(garage)

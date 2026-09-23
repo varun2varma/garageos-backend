@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,6 +39,10 @@ public class GarageResponse {
     String gstNumber;
 
     String panNumber;
+
+    BigDecimal latitude;
+
+    BigDecimal longitude;
 
     GarageStatus status;
 

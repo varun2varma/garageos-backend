@@ -2,6 +2,7 @@ package com.garageos.modules.repairtask.entity;
 
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.core.enums.RepairTaskPriority;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.jobassignment.entity.JobAssignment;
@@ -46,6 +47,11 @@ public class RepairTask extends BaseEntity {
 
     @Column(length = 100)
     private String technicianName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    @Builder.Default
+    private RepairTaskPriority priority = RepairTaskPriority.NORMAL;
 
     /**
      * Authoritative current technician ownership for this RepairTask,

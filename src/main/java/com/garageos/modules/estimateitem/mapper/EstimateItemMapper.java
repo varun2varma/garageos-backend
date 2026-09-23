@@ -22,6 +22,9 @@ public interface EstimateItemMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "inspectionFinding", ignore = true)
+    // Defaults to true via the entity's own field initializer; changed
+    // only via EstimateItemService.setItemSelection, never at creation.
+    @Mapping(target = "selected", ignore = true)
     EstimateItem toEntity(CreateEstimateItemRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
@@ -38,6 +41,7 @@ public interface EstimateItemMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "inspectionFinding", ignore = true)
+    @Mapping(target = "selected", ignore = true)
     void updateEntity(
             CreateEstimateItemRequest request,
             @MappingTarget EstimateItem item);

@@ -86,6 +86,24 @@ public class LocalMediaStorageService
         return "/media/" + storageKey;
     }
 
+    @Override
+    public byte[] readBytes(String storageKey) {
+
+        try {
+
+            Path target = Paths.get(storagePath, storageKey);
+
+            return Files.readAllBytes(target);
+
+        } catch (IOException e) {
+
+            throw new IllegalStateException(
+                    "Unable to read stored media file: " + storageKey,
+                    e
+            );
+        }
+    }
+
     private String extractExtension(
             String fileName) {
 

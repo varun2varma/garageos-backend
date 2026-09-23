@@ -1,6 +1,7 @@
 package com.garageos.modules.navigation.service;
 
 import com.garageos.modules.navigation.dto.request.CreateNavigationTripRequest;
+import com.garageos.modules.navigation.dto.response.FleetTripResponse;
 import com.garageos.modules.navigation.dto.response.NavigationTripResponse;
 
 import java.util.List;
@@ -69,4 +70,13 @@ public interface NavigationTripService {
             Long tripId,
             Long driverId
     );
+
+    /**
+     * Manager fleet map (Mission Part O) - every ASSIGNED/ACCEPTED/
+     * IN_PROGRESS trip for the caller's own garage, with driver identity
+     * and last-known GPS position. Caller must be operational staff of
+     * {@code garageId} (same check assignDriver uses) - never another
+     * garage's fleet.
+     */
+    List<FleetTripResponse> getGarageFleet(Long garageId);
 }

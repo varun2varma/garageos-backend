@@ -1,10 +1,15 @@
 package com.garageos.modules.navigation.controller;
 
+import com.garageos.core.enums.navigation.TripMediaShotType;
 import com.garageos.core.enums.navigation.TripMediaStage;
 import com.garageos.modules.navigation.dto.response.NavigationTripMediaResponse;
 import com.garageos.modules.navigation.service.NavigationTripMediaService;
+import com.garageos.modules.navigation.service.TripMediaContent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +36,9 @@ public class NavigationTripMediaController {
 
             @RequestParam TripMediaStage stage,
 
+            @RequestParam(required = false)
+            TripMediaShotType shotType,
+
             @RequestParam MultipartFile file,
 
             @RequestParam(required = false)
@@ -43,6 +51,7 @@ public class NavigationTripMediaController {
                 tripId,
                 driverId,
                 stage,
+                shotType,
                 file,
                 latitude,
                 longitude
@@ -72,5 +81,24 @@ public class NavigationTripMediaController {
                         tripId,
                         stage
                 );
+    }
+
+
+    /**
+     * Serves the actual photo bytes — mirrors MediaController's job-card
+     * content endpoint. Previously nothing served this at all: getUrl()
+     * returned a "/media/..." path with no resource handler mapped to it.
+     */
+    @GetMapping("/{tripId}/media/{mediaId}/content")
+    public ResponseEntity<byte[]> getMediaContent(
+            @PathVariable Long tripId,
+            @PathVariable Long mediaId) {
+
+        TripMediaContent content = mediaService.getMediaContent(tripId, mediaId);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(content.contentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + content.fileName() + "\"")
+                .body(content.content());
     }
 }

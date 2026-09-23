@@ -1,5 +1,6 @@
 package com.garageos.modules.booking.dto.response;
 
+import com.garageos.core.enums.booking.BookingSource;
 import com.garageos.core.enums.booking.BookingStatus;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +38,11 @@ public class BookingResponse {
      */
     private BigDecimal pickupLatitude;
     private BigDecimal pickupLongitude;
+    private String pickupContactNumber;
+
+    private BookingSource source;
+    private Long createdByEmployeeId;
+    private String notes;
 
     private BookingStatus status;
     private String garageRemarks;

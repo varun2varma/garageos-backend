@@ -3,12 +3,14 @@ package com.garageos.modules.vehicle.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.vehicle.dto.request.CreateVehicleRequest;
+import com.garageos.modules.vehicle.dto.request.SetRcVerificationRequest;
 import com.garageos.modules.vehicle.dto.response.VehicleResponse;
 import com.garageos.modules.vehicle.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +19,31 @@ import org.springframework.web.bind.annotation.*;
 public class VehicleController {
 
     private final VehicleService service;
+
+    /**
+     * Mission backlog #1 — RC verification is a garage-staff action, not
+     * a technician or customer one. Matches the ASSIGNMENT_ROLES pattern
+     * used elsewhere (RepairTaskController, JobAssignmentController).
+     */
+    private static final String RC_VERIFICATION_ROLES = """
+            hasAnyRole(
+                'MANAGER',
+                'SERVICE_ADVISOR',
+                'OWNER'
+            )
+            """;
+
+    @PutMapping("/{id}/rc-verification")
+    @PreAuthorize(RC_VERIFICATION_ROLES)
+    public ResponseEntity<ApiResponse<VehicleResponse>> setRcVerification(
+            @PathVariable Long id,
+            @Valid @RequestBody SetRcVerificationRequest request) {
+
+        return ApiResponseUtil.success(
+                "RC verification status updated successfully.",
+                service.setRcVerification(id, request.getStatus(), request.getDocumentReference())
+        );
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<VehicleResponse>> createVehicle(

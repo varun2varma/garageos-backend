@@ -1,6 +1,7 @@
 package com.garageos.modules.repairtask.dto.response;
 
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.core.enums.RepairTaskPriority;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,8 @@ public class RepairTaskResponse {
     private RepairStatus status;
 
     private String technicianName;
+
+    private RepairTaskPriority priority;
 
     private LocalDateTime assignedAt;
 

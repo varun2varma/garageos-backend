@@ -1,5 +1,6 @@
 package com.garageos.modules.booking.entity;
 
+import com.garageos.core.enums.booking.BookingSource;
 import com.garageos.core.enums.booking.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -88,6 +89,33 @@ public class Booking {
 
     @Column(name = "pickup_longitude", precision = 10, scale = 7)
     private BigDecimal pickupLongitude;
+
+    /**
+     * Mission backlog #2 — an alternate contact number for pickup, when
+     * different from the account holder's own mobile (e.g. a driver/POC
+     * who will actually be present at the pickup point). Optional;
+     * descriptive metadata for the driver to call, never used for
+     * authentication or notifications.
+     */
+    @Column(name = "pickup_contact_number", length = 20)
+    private String pickupContactNumber;
+
+    /**
+     * Mission backlog #6 — phone-call booking. CUSTOMER_APP for every
+     * booking a customer creates themselves; PHONE plus
+     * [createdByEmployeeId] for one an employee creates on their behalf
+     * (see BookingServiceImpl.createPhoneBooking).
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private BookingSource source = BookingSource.CUSTOMER_APP;
+
+    @Column(name = "created_by_employee_id")
+    private Long createdByEmployeeId;
+
+    @Column(length = 1000)
+    private String notes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

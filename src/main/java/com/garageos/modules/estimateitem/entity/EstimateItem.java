@@ -49,4 +49,17 @@ public class EstimateItem extends BaseEntity {
 
     @Column(nullable = false, precision = 12, scale = 2)
     BigDecimal totalPrice;
+
+    /**
+     * Customer selection state (Mission: item-level select/deselect
+     * before approval). A deselected item is excluded from
+     * subtotal/GST/grandTotal recalculation (EstimateItemServiceImpl)
+     * and from repair-task creation on approval
+     * (RepairTaskServiceImpl.createRepairTasks) - so "does not continue
+     * to repair/invoice" falls out naturally from the same total the
+     * invoice is generated from, rather than a second exclusion list.
+     * Defaults true so every existing item stays selected.
+     */
+    @Column(nullable = false)
+    Boolean selected = true;
 }

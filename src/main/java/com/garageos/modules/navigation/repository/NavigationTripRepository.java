@@ -4,6 +4,8 @@ import com.garageos.modules.navigation.entity.NavigationTrip;
 import com.garageos.core.enums.navigation.TripStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -63,5 +65,27 @@ public interface NavigationTripRepository
     findByVehicleIdInAndStatusIn(
             List<Long> vehicleIds,
             List<TripStatus> statuses
+    );
+
+    /**
+     * Manager fleet map (Mission Part O). NavigationTrip has no JPA
+     * relationship to NavigationRequest (both use plain Long ids by
+     * design, matching this module's existing style - see
+     * NavigationTripServiceImpl's own doc comments), so garage scoping is
+     * done via a subquery on the request's garageId rather than a join
+     * column that doesn't exist. Newest first, same convention as
+     * findByDriverIdAndStatusInOrderByIdDesc.
+     */
+    @Query("""
+            SELECT nt FROM NavigationTrip nt
+            WHERE nt.navigationRequestId IN (
+                SELECT nr.id FROM NavigationRequest nr WHERE nr.garageId = :garageId
+            )
+            AND nt.status IN :statuses
+            ORDER BY nt.id DESC
+            """)
+    List<NavigationTrip> findActiveByGarageId(
+            @Param("garageId") Long garageId,
+            @Param("statuses") List<TripStatus> statuses
     );
 }

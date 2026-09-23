@@ -106,7 +106,23 @@ public class ServiceWorkflowServiceImpl
         return null;
     }
 
+    /**
+     * Corrective fix: this orchestrates two independently-transactional
+     * writes (InspectionServiceImpl.completeInspection, which saves every
+     * Inspection row, then JobCardServiceImpl.completeInspection, which
+     * validates and transitions JobCardStatus) but was not itself
+     * @Transactional. Without a shared transaction boundary, the first
+     * call's writes commit on its own method return; if the JobCard
+     * transition then throws (e.g. the JobCard was not actually at
+     * INSPECTION_PENDING), the customer's "Save All Inspections" action
+     * ends up with every inspection finding persisted as COMPLETED while
+     * the JobCard itself never advances - an inconsistent, silently
+     * half-applied state a retry cannot cleanly undo. Wrapping both calls
+     * in one transaction makes the whole action atomic: either both
+     * succeed, or neither is persisted.
+     */
     @Override
+    @Transactional
     public WorkflowResponse completeInspection(
             String jobCardNumber,
             List<CreateInspectionRequest> request) {

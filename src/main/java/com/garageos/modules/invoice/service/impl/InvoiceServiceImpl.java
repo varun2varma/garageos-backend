@@ -30,6 +30,7 @@ import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -394,7 +395,19 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setPaymentStatus(PaymentStatus.PAID);
 
-        invoice = invoiceRepository.save(invoice);
+        /*
+         * saveAndFlush (not save) so a lost optimistic-lock race is
+         * detected synchronously, right here, rather than deferred to
+         * commit - where it would surface outside this try/catch as an
+         * opaque 500. Invoice.version (V55) is what makes this race
+         * detectable at all: two concurrent requests could otherwise both
+         * read PENDING and both write PAID.
+         */
+        try {
+            invoice = invoiceRepository.saveAndFlush(invoice);
+        } catch (ObjectOptimisticLockingFailureException raced) {
+            throw new BusinessException("Invoice already paid.");
+        }
 
         if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
             jobCardService.readyForDelivery(jobCardNumber);

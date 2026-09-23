@@ -1,10 +1,13 @@
 package com.garageos.modules.handover.service.impl;
 
+import com.garageos.core.enums.audit.AuditEventType;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.navigation.HandoverStatus;
+import com.garageos.core.enums.navigation.TripType;
 import com.garageos.core.enums.navigation.TripStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.audit.service.AuditService;
 import com.garageos.modules.customer.entity.Customer;
 import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.modules.handover.dto.response.HandoverCodeResponse;
@@ -47,6 +50,7 @@ public class HandoverServiceImpl implements HandoverService {
     private final NavigationRequestRepository navigationRequestRepository;
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -93,6 +97,16 @@ public class HandoverServiceImpl implements HandoverService {
                 .build();
 
         handoverRepository.save(handover);
+
+        // Never include the code itself in audit metadata - it is
+        // security-sensitive material, same as a password.
+        auditService.record(
+                AuditEventType.OTP_GENERATED,
+                "VehicleHandover",
+                handover.getId(),
+                navigationRequest.getGarageId(),
+                java.util.Map.of("tripId", tripId, "direction", trip.getTripType())
+        );
 
         return HandoverCodeResponse.builder()
                 .tripId(tripId)
@@ -163,6 +177,24 @@ public class HandoverServiceImpl implements HandoverService {
 
         handoverRepository.save(handover);
 
+        auditService.record(
+                AuditEventType.OTP_VERIFIED,
+                "VehicleHandover",
+                handover.getId(),
+                navigationRequest.getGarageId(),
+                java.util.Map.of("tripId", tripId, "direction", handover.getDirection(), "verifiedByDriverId", driverId)
+        );
+
+        auditService.record(
+                handover.getDirection() == TripType.DELIVERY
+                        ? AuditEventType.VEHICLE_CUSTODY_RETURNED
+                        : AuditEventType.VEHICLE_CUSTODY_TRANSFERRED_TO_GARAGE,
+                "NavigationTrip",
+                tripId,
+                navigationRequest.getGarageId(),
+                java.util.Map.of()
+        );
+
         return toStatusResponse(handover);
     }
 
@@ -193,6 +225,39 @@ public class HandoverServiceImpl implements HandoverService {
                         "No handover has been issued for this trip yet."));
 
         return toStatusResponse(handover);
+    }
+
+    @Override
+    @Transactional
+    public void recordEvidenceViewed(Long tripId) {
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        if (!principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+            throw new ResourceNotFoundException("Trip not found : " + tripId);
+        }
+
+        Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
+                .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
+
+        NavigationTrip trip = navigationTripRepository.findById(tripId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
+
+        NavigationRequest navigationRequest = navigationRequestRepository
+                .findById(trip.getNavigationRequestId())
+                .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
+
+        if (!navigationRequest.getCustomerId().equals(customer.getId())) {
+            throw new ResourceNotFoundException("Trip not found : " + tripId);
+        }
+
+        auditService.record(
+                AuditEventType.CUSTOMER_VIEWED_EVIDENCE,
+                "NavigationTrip",
+                tripId,
+                navigationRequest.getGarageId(),
+                java.util.Map.of("direction", trip.getTripType())
+        );
     }
 
     private void expireExistingActiveCode(Long tripId) {

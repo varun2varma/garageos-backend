@@ -3,6 +3,7 @@ package com.garageos.modules.estimateitem.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.estimateitem.dto.request.CreateEstimateItemRequest;
+import com.garageos.modules.estimateitem.dto.request.SetSelectionRequest;
 import com.garageos.modules.estimateitem.dto.response.EstimateItemResponse;
 import com.garageos.modules.estimateitem.service.EstimateItemService;
 import jakarta.validation.Valid;
@@ -74,6 +75,22 @@ public class EstimateItemController {
         return ApiResponseUtil.success(
                 "Estimate item updated successfully.",
                 service.updateItem(id, request)
+        );
+    }
+
+    /**
+     * Mission: customer select/deselect of an individual estimate item,
+     * before approval — role/ownership/approval-state checked in
+     * EstimateItemServiceImpl.setItemSelection.
+     */
+    @PutMapping("/estimate-items/{id}/selection")
+    public ResponseEntity<ApiResponse<EstimateItemResponse>> setSelection(
+            @PathVariable Long id,
+            @Valid @RequestBody SetSelectionRequest request) {
+
+        return ApiResponseUtil.success(
+                "Selection updated successfully.",
+                service.setItemSelection(id, request.getSelected())
         );
     }
 

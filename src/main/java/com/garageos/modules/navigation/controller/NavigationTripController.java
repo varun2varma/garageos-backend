@@ -1,6 +1,7 @@
 package com.garageos.modules.navigation.controller;
 
 import com.garageos.modules.navigation.dto.request.CreateNavigationTripRequest;
+import com.garageos.modules.navigation.dto.response.FleetTripResponse;
 import com.garageos.modules.navigation.dto.response.NavigationTripResponse;
 import com.garageos.modules.navigation.dto.response.TripLocationResponse;
 import com.garageos.modules.navigation.service.DriverLocationService;
@@ -64,6 +65,21 @@ public class NavigationTripController {
         return driverLocationService.getCurrentLocation(
                 tripId
         );
+    }
+
+
+    /**
+     * MANAGER fleet map (Mission Part O) - every active trip for the
+     * caller's own garage, with driver identity and last-known GPS
+     * position. Garage-scoping is enforced in
+     * NavigationTripServiceImpl.requireOperationalStaffOfGarage, the same
+     * check assignDriver already uses.
+     */
+    @GetMapping("/garage/{garageId}/fleet")
+    public List<FleetTripResponse> getGarageFleet(
+            @PathVariable Long garageId) {
+
+        return navigationTripService.getGarageFleet(garageId);
     }
 
 

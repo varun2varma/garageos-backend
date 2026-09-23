@@ -1,23 +1,28 @@
 package com.garageos.modules.navigation.service.impl;
 
+import com.garageos.core.enums.audit.AuditEventType;
 import com.garageos.core.enums.identity.RoleCode;
+import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.enums.navigation.*;
 import com.garageos.core.exception.ResourceNotFoundException;
-import com.garageos.modules.customer.entity.Customer;
-import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.core.exception.BusinessException;
+import com.garageos.modules.audit.service.AuditService;
 import com.garageos.modules.garage.repository.GarageRepository;
-import com.garageos.modules.identity.entity.User;
 import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.handover.repository.VehicleHandoverRepository;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.request.CreateNavigationTripRequest;
+import com.garageos.modules.navigation.dto.response.FleetTripResponse;
 import com.garageos.modules.navigation.dto.response.NavigationTripResponse;
+import com.garageos.modules.navigation.entity.DriverCurrentLocation;
 import com.garageos.modules.navigation.entity.NavigationRequest;
 import com.garageos.modules.navigation.entity.NavigationTrip;
+import com.garageos.modules.navigation.entity.NavigationTripMedia;
+import com.garageos.modules.navigation.repository.DriverCurrentLocationRepository;
 import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.navigation.repository.NavigationTripMediaRepository;
 import com.garageos.modules.navigation.repository.NavigationTripRepository;
+import com.garageos.modules.navigation.security.NavigationTripAccessGuard;
 import com.garageos.modules.navigation.service.NavigationTripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,14 +52,20 @@ public class NavigationTripServiceImpl
     private final VehicleHandoverRepository
             vehicleHandoverRepository;
 
-    private final CustomerRepository
-            customerRepository;
-
     private final GarageRepository
             garageRepository;
 
     private final UserRepository
             userRepository;
+
+    private final NavigationTripAccessGuard
+            accessGuard;
+
+    private final DriverCurrentLocationRepository
+            driverCurrentLocationRepository;
+
+    private final AuditService
+            auditService;
 
 
     @Override
@@ -213,6 +224,13 @@ public class NavigationTripServiceImpl
                 navigationRequest
         );
 
+        auditService.record(
+                AuditEventType.DRIVER_ASSIGNED,
+                "NavigationTrip",
+                savedTrip.getId(),
+                navigationRequest.getGarageId(),
+                java.util.Map.of("driverId", savedTrip.getDriverId(), "tripType", savedTrip.getTripType())
+        );
 
         return toResponse(savedTrip);
     }
@@ -287,37 +305,15 @@ public class NavigationTripServiceImpl
 
     /**
      * The request's own customer, its assigned driver, or garage-matched
-     * operational staff only - mirrors
-     * DriverLocationServiceImpl.authorizeViewer's three-way split.
+     * operational staff only. Delegates to NavigationTripAccessGuard, the
+     * single shared home for this rule (also used by
+     * DriverLocationServiceImpl, NavigationTripMediaServiceImpl, and the
+     * STOMP subscribe-time interceptor) - kept as a local wrapper so the
+     * two call sites below didn't need to change.
      */
     private void authorizeViewer(NavigationTrip trip, NavigationRequest navigationRequest) {
 
-        GarageUserPrincipal principal = (GarageUserPrincipal) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
-
-            Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
-                    .orElseThrow(() -> new ResourceNotFoundException("Trip not found."));
-
-            if (!navigationRequest.getCustomerId().equals(customer.getId())) {
-                throw new ResourceNotFoundException("Trip not found.");
-            }
-
-            return;
-        }
-
-        boolean isAssignedDriver = trip.getDriverId() != null
-                && trip.getDriverId().equals(principal.getId());
-
-        boolean isSameGarageEmployee = principal.getGarageId() != null
-                && principal.getGarageId().equals(navigationRequest.getGarageId());
-
-        if (!isAssignedDriver && !isSameGarageEmployee) {
-            throw new ResourceNotFoundException("Trip not found.");
-        }
+        accessGuard.authorizeViewer(currentPrincipal(), trip, navigationRequest);
     }
 
     /**
@@ -408,10 +404,17 @@ public class NavigationTripServiceImpl
                 LocalDateTime.now()
         );
 
+        NavigationTrip acceptedTrip = navigationTripRepository.save(trip);
 
-        return toResponse(
-                navigationTripRepository.save(trip)
+        auditService.record(
+                AuditEventType.DRIVER_ACCEPTED,
+                "NavigationTrip",
+                acceptedTrip.getId(),
+                resolveGarageId(acceptedTrip),
+                java.util.Map.of("driverId", driverId)
         );
+
+        return toResponse(acceptedTrip);
     }
 
 
@@ -445,10 +448,17 @@ public class NavigationTripServiceImpl
                 LocalDateTime.now()
         );
 
+        NavigationTrip startedTrip = navigationTripRepository.save(trip);
 
-        return toResponse(
-                navigationTripRepository.save(trip)
+        auditService.record(
+                AuditEventType.TRIP_STARTED,
+                "NavigationTrip",
+                startedTrip.getId(),
+                resolveGarageId(startedTrip),
+                java.util.Map.of("tripType", startedTrip.getTripType(), "currentLeg", startedTrip.getCurrentLeg())
         );
+
+        return toResponse(startedTrip);
     }
 
 
@@ -476,6 +486,14 @@ public class NavigationTripServiceImpl
 
         trip.setArrivedAt(
                 LocalDateTime.now()
+        );
+
+        auditService.record(
+                AuditEventType.DRIVER_ARRIVED,
+                "NavigationTrip",
+                trip.getId(),
+                resolveGarageId(trip),
+                java.util.Map.of("tripType", trip.getTripType(), "currentLeg", trip.getCurrentLeg())
         );
 
 
@@ -578,10 +596,17 @@ public class NavigationTripServiceImpl
 
         trip.setArrivedAt(null);
 
+        NavigationTrip returningTrip = navigationTripRepository.save(trip);
 
-        return toResponse(
-                navigationTripRepository.save(trip)
+        auditService.record(
+                AuditEventType.RETURN_TRIP_STARTED,
+                "NavigationTrip",
+                returningTrip.getId(),
+                resolveGarageId(returningTrip),
+                java.util.Map.of()
         );
+
+        return toResponse(returningTrip);
     }
 
 
@@ -655,10 +680,97 @@ public class NavigationTripServiceImpl
                 LocalDateTime.now()
         );
 
+        NavigationTrip completedTrip = navigationTripRepository.save(trip);
 
-        return toResponse(
-                navigationTripRepository.save(trip)
+        auditService.record(
+                completedTrip.getTripType() == TripType.DELIVERY
+                        ? AuditEventType.DELIVERY_COMPLETED
+                        : AuditEventType.PICKUP_COMPLETED,
+                "NavigationTrip",
+                completedTrip.getId(),
+                resolveGarageId(completedTrip),
+                java.util.Map.of()
         );
+
+        return toResponse(completedTrip);
+    }
+
+    /**
+     * Garage id for a trip, resolved via its owning NavigationRequest —
+     * trips have no garage_id column of their own (see
+     * NavigationTripRepository.findActiveByGarageId's own doc comment for
+     * why). Used only for audit context; returns null rather than
+     * throwing if the request can't be found, since a missing garage
+     * context must never block the audit write for the transition itself.
+     */
+    private Long resolveGarageId(NavigationTrip trip) {
+
+        if (trip.getNavigationRequestId() == null) {
+            return null;
+        }
+
+        return navigationRequestRepository.findById(trip.getNavigationRequestId())
+                .map(NavigationRequest::getGarageId)
+                .orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<FleetTripResponse> getGarageFleet(Long garageId) {
+
+        requireOperationalStaffOfGarage(garageId);
+
+        List<NavigationTrip> trips = navigationTripRepository.findActiveByGarageId(
+                garageId,
+                List.of(TripStatus.ASSIGNED, TripStatus.ACCEPTED, TripStatus.IN_PROGRESS)
+        );
+
+        return trips.stream().map(this::toFleetResponse).toList();
+    }
+
+    private FleetTripResponse toFleetResponse(NavigationTrip trip) {
+
+        NavigationRequest request = trip.getNavigationRequestId() == null
+                ? null
+                : navigationRequestRepository.findById(trip.getNavigationRequestId()).orElse(null);
+
+        BigDecimal destinationLatitude = null;
+        BigDecimal destinationLongitude = null;
+
+        if (request != null) {
+            boolean pickup = trip.getTripType() == TripType.PICKUP;
+            destinationLatitude = pickup ? request.getPickupLatitude() : request.getDeliveryLatitude();
+            destinationLongitude = pickup ? request.getPickupLongitude() : request.getDeliveryLongitude();
+        }
+
+        String driverName = trip.getDriverId() == null
+                ? null
+                : userRepository.findById(trip.getDriverId())
+                        .map(driver -> (driver.getFirstName() == null ? "" : driver.getFirstName())
+                                + (driver.getLastName() == null ? "" : " " + driver.getLastName()))
+                        .map(String::trim)
+                        .orElse(null);
+
+        DriverCurrentLocation location = driverCurrentLocationRepository.findByTripId(trip.getId()).orElse(null);
+
+        return FleetTripResponse.builder()
+                .id(trip.getId())
+                .tripType(trip.getTripType())
+                .currentLeg(trip.getCurrentLeg())
+                .status(trip.getStatus())
+                .driverId(trip.getDriverId())
+                .driverName(driverName)
+                .vehicleId(trip.getVehicleId())
+                .destinationAddress(trip.getDestinationAddress())
+                .destinationLatitude(destinationLatitude)
+                .destinationLongitude(destinationLongitude)
+                .currentLatitude(location == null ? null : location.getLatitude())
+                .currentLongitude(location == null ? null : location.getLongitude())
+                .lastLocationUpdate(location == null ? null : location.getLastUpdated())
+                .acceptedAt(trip.getAcceptedAt())
+                .startedAt(trip.getStartedAt())
+                .arrivedAt(trip.getArrivedAt())
+                .build();
     }
 
     /**
@@ -688,25 +800,43 @@ public class NavigationTripServiceImpl
         }
     }
 
+    /**
+     * Mission Part I: configurable evidence requirements, not a hardcoded
+     * "at least one photo" check. A garage-configurable requirement set
+     * would be the natural next step (e.g. per-workshop-type or a settings
+     * table) - this constant is the deliberately named, single place that
+     * would be swapped for one, not scattered logic.
+     */
+    private static final java.util.Set<TripMediaShotType> REQUIRED_PICKUP_DELIVERY_SHOT_TYPES = java.util.Set.of(
+            TripMediaShotType.FRONT,
+            TripMediaShotType.REAR,
+            TripMediaShotType.LEFT,
+            TripMediaShotType.RIGHT,
+            TripMediaShotType.ODOMETER
+    );
+
     private void validateRequiredMedia(
             Long tripId,
             TripMediaStage stage) {
 
-        boolean exists =
-                !navigationTripMediaRepository
-                        .findByTripIdAndMediaStageOrderByCapturedAtAsc(
-                                tripId,
-                                stage
-                        )
-                        .isEmpty();
+        List<NavigationTripMedia> captured = navigationTripMediaRepository
+                .findByTripIdAndMediaStageOrderByCapturedAtAsc(tripId, stage);
 
+        java.util.Set<TripMediaShotType> capturedShotTypes = captured.stream()
+                .map(NavigationTripMedia::getShotType)
+                .filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
 
-        if (!exists) {
+        java.util.Set<TripMediaShotType> missing = new java.util.LinkedHashSet<>(REQUIRED_PICKUP_DELIVERY_SHOT_TYPES);
+        missing.removeAll(capturedShotTypes);
+
+        if (!missing.isEmpty()) {
 
             throw new IllegalStateException(
                     "Required "
                             + stage
-                            + " photos are missing."
+                            + " photos are missing: "
+                            + missing
             );
         }
     }
@@ -784,17 +914,28 @@ public class NavigationTripServiceImpl
         }
     }
 
+    /**
+     * Corrective fix: this previously only checked that the nominated
+     * user's garageId matched - an inactive account, or an employee who
+     * doesn't actually hold the DRIVER role, could still be assigned to a
+     * pickup/delivery trip. Now reuses the exact same query
+     * UserServiceImpl.getDrivers(garageId) already uses to populate the
+     * assignable-driver list the Flutter AssignDriverSheet shows, so the
+     * write path (this check) can never accept an id the read path
+     * wouldn't itself have offered - avoiding a second, drifting
+     * definition of "eligible driver".
+     */
     private void requireDriverOfGarage(Long driverId, Long garageId) {
 
-        User driver = userRepository.findById(driverId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Driver not found."));
+        boolean eligible = userRepository
+                .findByGarageIdAndRoleAndStatus(garageId, RoleCode.DRIVER, UserStatus.ACTIVE)
+                .stream()
+                .anyMatch(driver -> driver.getId().equals(driverId));
 
-        if (driver.getGarageId() == null
-                || !driver.getGarageId().equals(garageId)) {
+        if (!eligible) {
 
             throw new BusinessException(
-                    "That driver does not belong to this garage."
+                    "That driver is not an active driver of this garage."
             );
         }
     }

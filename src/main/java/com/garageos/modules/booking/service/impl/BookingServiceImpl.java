@@ -4,8 +4,12 @@ import com.garageos.core.enums.booking.BookingStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.navigation.NavigationRequestType;
 import com.garageos.core.exception.BusinessException;
+import com.garageos.core.enums.audit.AuditEventType;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.audit.service.AuditService;
+import com.garageos.core.enums.booking.BookingSource;
 import com.garageos.modules.booking.dto.request.CreateBookingRequest;
+import com.garageos.modules.booking.dto.request.CreatePhoneBookingRequest;
 import com.garageos.modules.booking.dto.response.BookingResponse;
 import com.garageos.modules.booking.entity.Booking;
 import com.garageos.modules.booking.repository.BookingRepository;
@@ -43,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
     private final VehicleRepository vehicleRepository;
     private final GarageRepository garageRepository;
     private final NavigationRequestService navigationRequestService;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -98,10 +103,96 @@ public class BookingServiceImpl implements BookingService {
                         ? request.getPickupLatitude() : null)
                 .pickupLongitude(request.isPickupRequested()
                         ? request.getPickupLongitude() : null)
+                .pickupContactNumber(request.isPickupRequested()
+                        ? request.getPickupContactNumber() : null)
                 .status(BookingStatus.REQUESTED)
                 .build();
 
         booking = bookingRepository.save(booking);
+
+        auditService.record(
+                AuditEventType.BOOKING_CREATED,
+                "Booking",
+                booking.getId(),
+                booking.getGarageId(),
+                java.util.Map.of("pickupRequested", booking.isPickupRequested())
+        );
+
+        return toResponse(booking, customer, vehicle, garage);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse createPhoneBooking(CreatePhoneBookingRequest request) {
+
+        Long garageId = currentEmployeeGarageId();
+
+        // Deliberately never creates a customer - "do not create
+        // duplicate customers unnecessarily" is satisfied by requiring
+        // one to already exist (via the existing employee customer-CRUD
+        // flow, features/customer/) rather than this endpoint guessing
+        // whether a phone number is a genuinely new customer.
+        Customer customer = customerRepository.findByMobileNumber(request.getCustomerMobile().trim())
+                .orElseThrow(() -> new BusinessException(
+                        "No customer found with mobile number " + request.getCustomerMobile()
+                                + ". Please create the customer first."));
+
+        Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Vehicle not found with id : " + request.getVehicleId()));
+
+        if (vehicle.getCustomer() == null
+                || !vehicle.getCustomer().getId().equals(customer.getId())) {
+            throw new ResourceNotFoundException(
+                    "Vehicle not found with id : " + request.getVehicleId());
+        }
+
+        Garage garage = garageRepository.findById(garageId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Garage not found with id : " + garageId));
+
+        if (request.isPickupRequested()
+                && (request.getPickupLatitude() == null || request.getPickupLongitude() == null)) {
+
+            throw new BusinessException(
+                    "A pickup location must be selected when pickup is requested.");
+        }
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        Booking booking = Booking.builder()
+                .customerId(customer.getId())
+                .vehicleId(vehicle.getId())
+                .garageId(garage.getId())
+                .serviceDescription(request.getServiceDescription())
+                .concerns(request.getConcerns())
+                .requestedAt(request.getRequestedAt())
+                .pickupRequested(request.isPickupRequested())
+                .pickupAddress(request.getPickupAddress())
+                .pickupLatitude(request.isPickupRequested() ? request.getPickupLatitude() : null)
+                .pickupLongitude(request.isPickupRequested() ? request.getPickupLongitude() : null)
+                .pickupContactNumber(request.isPickupRequested() ? request.getPickupContactNumber() : null)
+                .source(BookingSource.PHONE)
+                .createdByEmployeeId(principal.getId())
+                .notes(request.getNotes())
+                .status(BookingStatus.REQUESTED)
+                .build();
+
+        booking = bookingRepository.save(booking);
+
+        auditService.record(
+                AuditEventType.BOOKING_CREATED,
+                "Booking",
+                booking.getId(),
+                booking.getGarageId(),
+                java.util.Map.of(
+                        "pickupRequested", booking.isPickupRequested(),
+                        "source", BookingSource.PHONE,
+                        "createdByEmployeeId", principal.getId()
+                )
+        );
 
         return toResponse(booking, customer, vehicle, garage);
     }
@@ -200,6 +291,14 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepository.save(booking);
 
+        auditService.record(
+                AuditEventType.BOOKING_CONFIRMED,
+                "Booking",
+                booking.getId(),
+                booking.getGarageId(),
+                java.util.Map.of("navigationRequestId", booking.getNavigationRequestId() == null ? -1 : booking.getNavigationRequestId())
+        );
+
         return toResponse(booking);
     }
 
@@ -215,6 +314,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setGarageRemarks(remarks);
 
         booking = bookingRepository.save(booking);
+
+        auditService.record(
+                AuditEventType.BOOKING_REJECTED,
+                "Booking",
+                booking.getId(),
+                booking.getGarageId(),
+                remarks == null ? java.util.Map.of() : java.util.Map.of("remarks", remarks)
+        );
 
         return toResponse(booking);
     }
@@ -239,6 +346,14 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
 
         booking = bookingRepository.save(booking);
+
+        auditService.record(
+                AuditEventType.BOOKING_CANCELLED,
+                "Booking",
+                booking.getId(),
+                booking.getGarageId(),
+                java.util.Map.of()
+        );
 
         return toResponse(booking);
     }
@@ -322,6 +437,10 @@ public class BookingServiceImpl implements BookingService {
                 .pickupAddress(booking.getPickupAddress())
                 .pickupLatitude(booking.getPickupLatitude())
                 .pickupLongitude(booking.getPickupLongitude())
+                .pickupContactNumber(booking.getPickupContactNumber())
+                .source(booking.getSource())
+                .createdByEmployeeId(booking.getCreatedByEmployeeId())
+                .notes(booking.getNotes())
                 .status(booking.getStatus())
                 .garageRemarks(booking.getGarageRemarks())
                 .navigationRequestId(booking.getNavigationRequestId())

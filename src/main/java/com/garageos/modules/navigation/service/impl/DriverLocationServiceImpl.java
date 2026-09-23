@@ -1,10 +1,7 @@
 package com.garageos.modules.navigation.service.impl;
 
-import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.navigation.TripStatus;
 import com.garageos.core.exception.ResourceNotFoundException;
-import com.garageos.modules.customer.entity.Customer;
-import com.garageos.modules.customer.repository.CustomerRepository;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.navigation.dto.DriverLocationRequest;
 import com.garageos.modules.navigation.dto.response.TripLocationResponse;
@@ -16,6 +13,7 @@ import com.garageos.modules.navigation.repository.DriverCurrentLocationRepositor
 import com.garageos.modules.navigation.repository.DriverLocationHistoryRepository;
 import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.navigation.repository.NavigationTripRepository;
+import com.garageos.modules.navigation.security.NavigationTripAccessGuard;
 import com.garageos.modules.navigation.service.DriverLocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +43,7 @@ public class DriverLocationServiceImpl
 
     private final NavigationRequestRepository navigationRequestRepository;
 
-    private final CustomerRepository customerRepository;
+    private final NavigationTripAccessGuard accessGuard;
 
     @Override
     public Long resolveAuthenticatedDriverId(Authentication authentication) {
@@ -155,6 +153,36 @@ public class DriverLocationServiceImpl
                                 DriverCurrentLocation::new
                         );
 
+        LocalDateTime incomingTimestamp =
+                convertTimestamp(request.getTimestamp());
+
+        // Root-cause fix (MASTER_E2E_COVERAGE.md Known Issue #3): STOMP's
+        // default multi-threaded inbound dispatch gives no per-trip
+        // ordering guarantee, so a late-arriving-but-older update could
+        // otherwise overwrite a newer one here and make the driver's
+        // marker visibly jump backward on the map. The point is still
+        // recorded in history by the caller either way - only this
+        // "current position" projection ignores an update that is older
+        // than what it already has.
+        boolean isStaleUpdate =
+                currentLocation.getId() != null
+                        && currentLocation.getLastUpdated() != null
+                        && incomingTimestamp.isBefore(
+                                currentLocation.getLastUpdated()
+                        );
+
+        if (isStaleUpdate) {
+
+            log.debug(
+                    "Dropping stale location update: tripId={}, incoming={}, current={}",
+                    request.getTripId(),
+                    incomingTimestamp,
+                    currentLocation.getLastUpdated()
+            );
+
+            return currentLocation;
+        }
+
         currentLocation.setDriverId(request.getDriverId());
         currentLocation.setTripId(request.getTripId());
 
@@ -165,9 +193,7 @@ public class DriverLocationServiceImpl
         currentLocation.setHeading(request.getHeading());
         currentLocation.setAccuracy(request.getAccuracy());
 
-        currentLocation.setLastUpdated(
-                convertTimestamp(request.getTimestamp())
-        );
+        currentLocation.setLastUpdated(incomingTimestamp);
 
         return currentLocationRepository.save(currentLocation);
     }
@@ -255,8 +281,10 @@ public class DriverLocationServiceImpl
     /**
      * Never trust a client-supplied tripId alone: only the trip's own
      * customer, its assigned driver, or garage-matched operational staff
-     * may read its location - the same three-way viewer split
-     * JobCardProjectionServiceImpl already uses for JobCard visibility.
+     * may read its location. Delegates to NavigationTripAccessGuard, the
+     * single shared home for this rule (also used by
+     * NavigationTripServiceImpl, NavigationTripMediaServiceImpl, and the
+     * STOMP subscribe-time interceptor).
      */
     private void authorizeViewer(NavigationTrip trip, NavigationRequest navigationRequest) {
 
@@ -265,28 +293,7 @@ public class DriverLocationServiceImpl
                 .getAuthentication()
                 .getPrincipal();
 
-        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
-
-            Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Trip not found : " + trip.getId()));
-
-            if (!navigationRequest.getCustomerId().equals(customer.getId())) {
-                throw new ResourceNotFoundException("Trip not found : " + trip.getId());
-            }
-
-            return;
-        }
-
-        boolean isAssignedDriver = trip.getDriverId() != null
-                && trip.getDriverId().equals(principal.getId());
-
-        boolean isSameGarageEmployee = principal.getGarageId() != null
-                && principal.getGarageId().equals(navigationRequest.getGarageId());
-
-        if (!isAssignedDriver && !isSameGarageEmployee) {
-            throw new ResourceNotFoundException("Trip not found : " + trip.getId());
-        }
+        accessGuard.authorizeViewer(principal, trip, navigationRequest);
     }
 
     private void validate(DriverLocationRequest request) {

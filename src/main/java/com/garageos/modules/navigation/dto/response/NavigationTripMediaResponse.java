@@ -1,5 +1,6 @@
 package com.garageos.modules.navigation.dto.response;
 
+import com.garageos.core.enums.navigation.TripMediaShotType;
 import com.garageos.core.enums.navigation.TripMediaStage;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,8 @@ public class NavigationTripMediaResponse {
     private Long tripId;
 
     private TripMediaStage mediaStage;
+
+    private TripMediaShotType shotType;
 
     private String fileName;
 

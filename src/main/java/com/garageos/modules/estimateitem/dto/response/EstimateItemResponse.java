@@ -25,4 +25,6 @@ public class EstimateItemResponse {
 
     private BigDecimal totalPrice;
 
+    private Boolean selected;
+
 }

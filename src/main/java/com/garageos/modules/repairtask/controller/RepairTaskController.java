@@ -3,6 +3,7 @@ package com.garageos.modules.repairtask.controller;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.repairtask.dto.request.AssignTechnicianRequest;
+import com.garageos.modules.repairtask.dto.request.SetPriorityRequest;
 import com.garageos.modules.repairtask.dto.response.RepairTaskResponse;
 import com.garageos.modules.repairtask.service.RepairTaskService;
 import jakarta.validation.Valid;
@@ -86,6 +87,22 @@ public class RepairTaskController {
         return ApiResponseUtil.success(
                 "Repair completed successfully.",
                 service.completeRepair(id)
+        );
+    }
+
+    /**
+     * Mission backlog #20 — Service Advisor/Manager/Owner only. A
+     * technician cannot set the priority of their own work.
+     */
+    @PutMapping("/{id}/priority")
+    @PreAuthorize(ASSIGNMENT_ROLES)
+    public ResponseEntity<ApiResponse<RepairTaskResponse>> setPriority(
+            @PathVariable Long id,
+            @Valid @RequestBody SetPriorityRequest request) {
+
+        return ApiResponseUtil.success(
+                "Priority updated successfully.",
+                service.setPriority(id, request.getPriority())
         );
     }
 

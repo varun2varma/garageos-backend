@@ -1,6 +1,7 @@
 package com.garageos.modules.booking.service;
 
 import com.garageos.modules.booking.dto.request.CreateBookingRequest;
+import com.garageos.modules.booking.dto.request.CreatePhoneBookingRequest;
 import com.garageos.modules.booking.dto.response.BookingResponse;
 
 import java.util.List;
@@ -8,6 +9,13 @@ import java.util.List;
 public interface BookingService {
 
     BookingResponse createBooking(CreateBookingRequest request);
+
+    /**
+     * Mission backlog #6 — phone-call booking. Employee-only
+     * (Manager/Service Advisor/Owner, enforced at the controller); always
+     * for the calling employee's own garage, never a client-supplied one.
+     */
+    BookingResponse createPhoneBooking(CreatePhoneBookingRequest request);
 
     List<BookingResponse> getMyBookings();
 

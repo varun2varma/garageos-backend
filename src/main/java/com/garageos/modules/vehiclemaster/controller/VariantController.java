@@ -134,4 +134,32 @@ public class VariantController {
         );
     }
 
+    /**
+     * Every FuelType value, independent of any vehicle-master model/variant
+     * - for "manual vehicle entry" (brand/model/variant not in the master
+     * catalog), where {@link #getFuelTypeDropdown} cannot be used because
+     * there is no modelId/variantId to cascade from. Garage-owner-reported
+     * gap: manual entry previously fell back to a free-text field for fuel
+     * type/transmission, letting a value outside the Vehicle entity's own
+     * governed enum be typed in.
+     */
+    @GetMapping("/fuel-types/all")
+    public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getAllFuelTypes() {
+
+        return ApiResponseUtil.success(
+                "Fuel types fetched successfully.",
+                variantService.getAllFuelTypes()
+        );
+    }
+
+    /** See {@link #getAllFuelTypes()} - the transmission-side equivalent. */
+    @GetMapping("/transmissions/all")
+    public ResponseEntity<ApiResponse<List<EnumDropdownResponse>>> getAllTransmissionTypes() {
+
+        return ApiResponseUtil.success(
+                "Transmission types fetched successfully.",
+                variantService.getAllTransmissionTypes()
+        );
+    }
+
 }

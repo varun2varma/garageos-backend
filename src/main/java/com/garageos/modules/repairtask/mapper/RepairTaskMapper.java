@@ -26,6 +26,10 @@ public interface RepairTaskMapper {
 //    @Mapping(target = "createdAt", ignore = true)
 //    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "remarks", ignore = true)
+    // Defaults to RepairTaskPriority.NORMAL via the entity's own
+    // @Builder.Default - set explicitly afterward via
+    // RepairTaskService.setPriority, never at creation time.
+    @Mapping(target = "priority", ignore = true)
     RepairTask toEntity(CreateRepairTaskRequest request);
 
     @Mapping(target = "jobCardId", source = "jobCard.id")
@@ -54,6 +58,7 @@ public interface RepairTaskMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "remarks", ignore = true)
+    @Mapping(target = "priority", ignore = true)
     void updateEntity(
             CreateRepairTaskRequest request,
             @MappingTarget RepairTask entity);

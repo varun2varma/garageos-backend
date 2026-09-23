@@ -2,6 +2,7 @@ package com.garageos.modules.customer.controller;
 
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
+import com.garageos.modules.customer.dto.request.portal.UpdateCustomerProfileRequest;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.customer.service.CustomerPortalService;
 import com.garageos.modules.customer.service.CustomerVehicleJourneyService;
@@ -11,6 +12,7 @@ import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
 import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.vehicle.dto.response.VehicleResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -50,6 +52,17 @@ public class CustomerPortalController {
         return ApiResponseUtil.success(
                 "Customer profile fetched successfully.",
                 service.getProfile()
+        );
+    }
+
+    /** Mission backlog #14 — self-service profile edit, for the calling customer only. */
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse<CustomerProfileResponse>> updateProfile(
+            @Valid @RequestBody UpdateCustomerProfileRequest request) {
+
+        return ApiResponseUtil.success(
+                "Profile updated successfully.",
+                service.updateProfile(request)
         );
     }
 

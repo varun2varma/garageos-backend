@@ -1,5 +1,6 @@
 package com.garageos.modules.navigation.entity;
 
+import com.garageos.core.enums.navigation.TripMediaShotType;
 import com.garageos.core.enums.navigation.TripMediaStage;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +46,11 @@ public class NavigationTripMedia {
             nullable = false
     )
     private TripMediaStage mediaStage;
+
+    /** Null for rows captured before this field existed (V47). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "shot_type")
+    private TripMediaShotType shotType;
 
     @Column(
             name = "storage_key",

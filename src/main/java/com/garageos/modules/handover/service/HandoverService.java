@@ -13,4 +13,12 @@ public interface HandoverService {
 
     /** Garage-scoped operational visibility - never exposes the code. */
     HandoverStatusResponse getStatus(Long tripId);
+
+    /**
+     * Mission Part L: customer-only, records that they reviewed the
+     * pickup/delivery evidence for this trip before providing the
+     * confirmation code. An auditable evidence-review event, not a legal
+     * waiver - see CUSTOMER_VIEWED_EVIDENCE's own doc comment.
+     */
+    void recordEvidenceViewed(Long tripId);
 }

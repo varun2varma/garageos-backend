@@ -63,6 +63,18 @@ public interface JobAssignmentMapper {
             source = "estimateItem.description"
     )
 
+    /**
+     * Root-cause fix: this field previously had no source mapped at all,
+     * so it was always null at runtime (see MyAssignmentResponse's own
+     * field) — Mission backlog #20's "technician receives repair tasks
+     * with assigned priority" was silently unimplementable until
+     * RepairTask actually had a priority field (V49) to map from.
+     */
+    @Mapping(
+            target = "priority",
+            source = "repairTask.priority"
+    )
+
     MyAssignmentResponse toMyAssignment(
             JobAssignment jobAssignment
     );
