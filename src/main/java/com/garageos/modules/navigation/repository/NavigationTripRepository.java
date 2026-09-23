@@ -51,4 +51,17 @@ public interface NavigationTripRepository
     findFirstByNavigationRequestIdOrderByIdDesc(
             Long navigationRequestId
     );
+
+    /**
+     * Batched across a customer's whole vehicle list (Customer Live
+     * Vehicle Journey, see CustomerVehicleJourneyServiceImpl) - one query
+     * for every vehicle rather than one query per vehicle. TripStatus
+     * (not NavigationRequestStatus) is the authority on whether a trip is
+     * still actually active - see that class for why.
+     */
+    List<NavigationTrip>
+    findByVehicleIdInAndStatusIn(
+            List<Long> vehicleIds,
+            List<TripStatus> statuses
+    );
 }

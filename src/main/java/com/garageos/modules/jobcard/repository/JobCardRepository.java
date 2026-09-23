@@ -46,4 +46,24 @@ public interface JobCardRepository extends JpaRepository<JobCard, Long> {
 
     boolean existsByBookingId(Long bookingId);
 
+    /**
+     * The JobCard a given Booking led to, if a staff member supplied
+     * bookingId when creating it (JobCardServiceImpl.createJobCard) -
+     * optional and never automatic. Used only for Customer Live Vehicle
+     * Journey lookups; not exposed on any response DTO.
+     */
+    Optional<JobCard> findByBookingId(Long bookingId);
+
+    /**
+     * Batched across a customer's whole vehicle list (Customer Live
+     * Vehicle Journey, see CustomerVehicleJourneyServiceImpl) - one query
+     * for every vehicle rather than one query per vehicle. Status
+     * exclusion (not inclusion) mirrors JobCardController's own "active"
+     * bucket: everything except CLOSED/CANCELLED.
+     */
+    List<JobCard> findByVehicle_IdInAndStatusNotIn(
+            List<Long> vehicleIds,
+            List<JobCardStatus> statuses
+    );
+
 }

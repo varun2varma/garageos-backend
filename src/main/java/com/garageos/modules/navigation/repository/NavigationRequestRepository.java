@@ -26,4 +26,20 @@ public interface NavigationRequestRepository
     findByVehicleIdOrderByCreatedAtDesc(
             Long vehicleId
     );
+
+    /**
+     * Batched across a customer's whole vehicle list (Customer Live
+     * Vehicle Journey, see CustomerVehicleJourneyServiceImpl) - used only
+     * for the REQUESTED status, i.e. "pickup confirmed but no driver
+     * assigned yet". ASSIGNED/IN_PROGRESS/COMPLETED are deliberately not
+     * queried here: once a driver is assigned, a NavigationTrip exists
+     * and that trip's own TripStatus (not this request's status, which
+     * never advances past ASSIGNED again - see NavigationTripServiceImpl)
+     * is the authoritative signal for anything after this point.
+     */
+    List<NavigationRequest>
+    findByVehicleIdInAndStatusIn(
+            List<Long> vehicleIds,
+            List<NavigationRequestStatus> statuses
+    );
 }

@@ -1,5 +1,6 @@
 package com.garageos.modules.booking.repository;
 
+import com.garageos.core.enums.booking.BookingStatus;
 import com.garageos.modules.booking.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByIdAndCustomerId(Long id, Long customerId);
 
     Optional<Booking> findByIdAndGarageId(Long id, Long garageId);
+
+    /**
+     * Batched across a customer's whole vehicle list (Customer Live
+     * Vehicle Journey, see CustomerVehicleJourneyServiceImpl) - one query
+     * for every vehicle rather than one query per vehicle.
+     */
+    List<Booking> findByVehicleIdInAndStatusIn(
+            List<Long> vehicleIds,
+            List<BookingStatus> statuses
+    );
 }

@@ -4,6 +4,7 @@ import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.customer.service.CustomerPortalService;
+import com.garageos.modules.customer.service.CustomerVehicleJourneyService;
 import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
@@ -24,6 +25,24 @@ import java.util.List;
 public class CustomerPortalController {
 
     private final CustomerPortalService service;
+
+    private final CustomerVehicleJourneyService vehicleJourneyService;
+
+    /**
+     * The unified "what is happening with my vehicle right now" card feed
+     * for Customer Home. Aggregates Booking/NavigationTrip/JobCard - see
+     * CustomerVehicleJourneyServiceImpl for the full derivation and
+     * priority rules. Returns an empty array (never 404) when the
+     * customer has no vehicle with an active journey.
+     */
+    @GetMapping("/vehicle-journeys/active")
+    public ResponseEntity<ApiResponse<List<CustomerLiveVehicleJourneySummary>>> getActiveVehicleJourneys() {
+
+        return ApiResponseUtil.success(
+                "Active vehicle journeys fetched successfully.",
+                vehicleJourneyService.getActiveJourneys()
+        );
+    }
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<CustomerProfileResponse>> getProfile() {

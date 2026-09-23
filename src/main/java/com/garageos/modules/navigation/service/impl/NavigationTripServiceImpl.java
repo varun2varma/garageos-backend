@@ -218,6 +218,20 @@ public class NavigationTripServiceImpl
     }
 
 
+    /**
+     * Corrective security fix: this previously had no authorization at
+     * all - any authenticated caller of any role could fetch any trip by
+     * guessing its id (e.g. GET /api/v1/navigation/trips/1,2,3...),
+     * including another customer's pickup/delivery trip. This is also the
+     * exact endpoint the customer app's ActiveTripScreen and the new
+     * Live Vehicle Journey feature both resolve a trip through, so it is
+     * fixed here rather than left as a known-but-unaddressed gap. Applies
+     * the same three-way ownership check {@link #getTripByRequest} and
+     * {@link com.garageos.modules.navigation.service.impl.DriverLocationServiceImpl#getCurrentLocation}
+     * already use - the request's own customer, its assigned driver, or
+     * garage-matched operational staff. No other behavior of this method
+     * changes.
+     */
     @Override
     @Transactional(readOnly = true)
     public NavigationTripResponse getTrip(
@@ -232,6 +246,21 @@ public class NavigationTripServiceImpl
                                                 + tripId
                                 )
                         );
+
+        NavigationRequest navigationRequest =
+                trip.getNavigationRequestId() == null
+                        ? null
+                        : navigationRequestRepository
+                                .findById(trip.getNavigationRequestId())
+                                .orElse(null);
+
+        if (navigationRequest == null) {
+            // Cannot verify ownership without the owning request - fail
+            // closed rather than silently allowing access.
+            throw new ResourceNotFoundException("Navigation trip not found: " + tripId);
+        }
+
+        authorizeViewer(trip, navigationRequest);
 
         return toResponse(trip);
     }
