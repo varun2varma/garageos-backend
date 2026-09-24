@@ -15,6 +15,9 @@ public interface GarageMapper {
     @Mapping(target = "garageCode", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "nextEmployeeSequence", ignore = true)
+    // Never client-suppliable - GarageServiceImpl.createGarage sets this
+    // from the authenticated caller's own userId, not the request body.
+    @Mapping(target = "ownerUserId", ignore = true)
     Garage toEntity(CreateGarageRequest request);
 
     GarageResponse toResponse(Garage garage);

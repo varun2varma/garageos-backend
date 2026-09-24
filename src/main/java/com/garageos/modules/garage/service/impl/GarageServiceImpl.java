@@ -52,6 +52,13 @@ public class GarageServiceImpl implements GarageService {
 
         garage.setStatus(GarageStatus.ACTIVE);
         garage.setNextEmployeeSequence(1);
+        // Corrective fix: Garage.ownerUserId (see its own doc comment) was
+        // given an entity field but never actually populated here, so it
+        // stayed permanently null exactly as before - the same bug that
+        // comment described as already fixed. Never taken from the
+        // request body: ownership is who is actually calling this
+        // (authenticated userId), not client-suppliable data.
+        garage.setOwnerUserId(userId);
 
         garage = garageRepository.save(garage);
 
