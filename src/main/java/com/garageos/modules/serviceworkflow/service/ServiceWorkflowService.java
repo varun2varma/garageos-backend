@@ -36,6 +36,7 @@ public interface ServiceWorkflowService {
             String jobCardNumber,
             List<CreateInspectionRequest> request);
     InvoiceResponse generateInvoice(String jobCardNumber);
+    InvoiceResponse acceptInvoice(String jobCardNumber);
     WorkflowResponse receivePayment(String jobCardNumber);
     List<RepairTaskResponse> getRepairTasks(String jobCardNumber);
     WorkflowStatusResponse getWorkflowStatus(

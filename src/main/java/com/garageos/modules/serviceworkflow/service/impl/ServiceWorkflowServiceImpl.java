@@ -249,6 +249,13 @@ public class ServiceWorkflowServiceImpl
     }
 
     @Override
+    public InvoiceResponse acceptInvoice(
+            String jobCardNumber) {
+
+        return invoiceService.acceptInvoice(jobCardNumber);
+    }
+
+    @Override
     public WorkflowResponse receivePayment(
             String jobCardNumber) {
 

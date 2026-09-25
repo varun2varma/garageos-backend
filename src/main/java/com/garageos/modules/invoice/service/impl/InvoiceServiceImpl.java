@@ -393,6 +393,27 @@ public class InvoiceServiceImpl implements InvoiceService {
                     "Invoice already paid.");
         }
 
+        /*
+         * New gate, CUSTOMER callers only: Invoice Generated -> Customer
+         * accepts (acceptInvoice) -> Payment becomes available. Staff
+         * callers (MANAGER/SERVICE_ADVISOR/OWNER, e.g. recording an
+         * in-person/cash payment at the counter) are deliberately exempt
+         * so the pre-existing staff payment flow is not blocked on the
+         * customer ever having opened the app.
+         */
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())
+                && invoice.getInvoiceStatus() != InvoiceStatus.ACCEPTED) {
+
+            throw new BusinessException(
+                    "Invoice must be accepted before payment can be received.");
+        }
+
         invoice.setPaymentStatus(PaymentStatus.PAID);
 
         /*
@@ -417,17 +438,42 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     /**
-     * receivePayment()'s own authorization - deliberately separate from
-     * authorizeInvoiceAction(), which stays exactly as-is for
-     * generateInvoice() and every staff caller. A CUSTOMER principal is
-     * not a garage employee (no meaningful principal.getGarageId() to
+     * Shared CUSTOMER-ownership check, extracted from what was previously
+     * only inlined in authorizePaymentAction: a CUSTOMER principal is not
+     * a garage employee (no meaningful principal.getGarageId() to
      * compare), so the garage-match check does not apply to them at all;
      * they are authorized instead by owning the Job Card itself, the same
      * Customer-by-mobile-number lookup JobCardProjectionServiceImpl
      * already uses for the customer job-card view. A customer who does
      * not own this Job Card gets the same ResourceNotFoundException the
      * rest of the app already uses to avoid confirming another
-     * customer's Job Card/invoice exists.
+     * customer's Job Card/invoice exists. Now reused by both
+     * acceptInvoice() and authorizePaymentAction() so the two customer
+     * self-service steps enforce ownership identically.
+     */
+    private void authorizeCustomerOwnsJobCard(
+            JobCard jobCard,
+            GarageUserPrincipal principal) {
+
+        Customer customer = customerRepository
+                .findByMobileNumber(principal.getMobile())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : "
+                                        + jobCard.getJobCardNumber()));
+
+        if (jobCard.getCustomer() == null
+                || !jobCard.getCustomer().getId().equals(customer.getId())) {
+
+            throw new ResourceNotFoundException(
+                    "Job Card not found : " + jobCard.getJobCardNumber());
+        }
+    }
+
+    /**
+     * receivePayment()'s own authorization - deliberately separate from
+     * authorizeInvoiceAction(), which stays exactly as-is for
+     * generateInvoice() and every staff caller.
      */
     private void authorizePaymentAction(JobCard jobCard) {
 
@@ -439,24 +485,74 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
 
-            Customer customer = customerRepository
-                    .findByMobileNumber(principal.getMobile())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "Job Card not found : "
-                                            + jobCard.getJobCardNumber()));
-
-            if (jobCard.getCustomer() == null
-                    || !jobCard.getCustomer().getId().equals(customer.getId())) {
-
-                throw new ResourceNotFoundException(
-                        "Job Card not found : " + jobCard.getJobCardNumber());
-            }
-
+            authorizeCustomerOwnsJobCard(jobCard, principal);
             return;
         }
 
         authorizeInvoiceAction(jobCard);
+    }
+
+    /**
+     * CUSTOMER-only acceptance step inserted between invoice generation
+     * and payment (Invoice Generated -> Customer accepts -> Payment
+     * becomes available). Role is already enforced at the controller
+     * (@PreAuthorize hasRole('CUSTOMER')); this method enforces ownership
+     * of the specific Job Card via authorizeCustomerOwnsJobCard, the same
+     * check receivePayment() already relies on for its CUSTOMER branch.
+     * Idempotent: re-accepting an already-ACCEPTED invoice is a no-op
+     * that returns the current state rather than erroring, so a retried
+     * request (e.g. after a dropped response) does not surface a
+     * confusing failure. Uses saveAndFlush + @Version, mirroring
+     * receivePayment()'s own optimistic-locking race handling, so two
+     * concurrent accept requests cannot both "win".
+     */
+    @Override
+    @Transactional
+    public InvoiceResponse acceptInvoice(String jobCardNumber) {
+
+        JobCard jobCard = jobCardRepository
+                .findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        authorizeCustomerOwnsJobCard(jobCard, principal);
+
+        Invoice invoice = invoiceRepository
+                .findByEstimateJobCardId(jobCard.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Invoice not found for Job Card : "
+                                        + jobCardNumber));
+
+        if (invoice.getInvoiceStatus() == InvoiceStatus.ACCEPTED) {
+            return invoiceMapper.toResponse(invoice);
+        }
+
+        if (invoice.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new BusinessException("Invoice already paid.");
+        }
+
+        if (invoice.getInvoiceStatus() != InvoiceStatus.GENERATED) {
+            throw new BusinessException(
+                    "Invoice must be generated before it can be accepted.");
+        }
+
+        invoice.setInvoiceStatus(InvoiceStatus.ACCEPTED);
+
+        try {
+            invoice = invoiceRepository.saveAndFlush(invoice);
+        } catch (ObjectOptimisticLockingFailureException raced) {
+            throw new BusinessException("Invoice already accepted.");
+        }
+
+        return invoiceMapper.toResponse(invoice);
     }
 
     @Override

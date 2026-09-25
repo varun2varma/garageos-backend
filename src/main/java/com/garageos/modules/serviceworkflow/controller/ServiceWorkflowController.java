@@ -145,6 +145,30 @@ public class ServiceWorkflowController {
                 workflowService.generateInvoice(jobCardNumber));
     }
     /**
+     * New customer-only acceptance gate, inserted between invoice
+     * generation and payment: Invoice Generated -> Customer accepts ->
+     * Payment becomes available. CUSTOMER-only (not
+     * WORKFLOW_OPERATIONAL_ROLES) because this is a customer self-service
+     * step; staff never need to "accept" an invoice on a customer's
+     * behalf. Ownership (this job card is actually the caller's) is
+     * enforced in InvoiceServiceImpl.acceptInvoice the same way it is for
+     * receivePayment below. Staff-recorded in-person payments
+     * (MANAGER/SERVICE_ADVISOR/OWNER via receivePayment) do not go through
+     * this endpoint at all, so the existing counter/cash flow is
+     * unaffected; InvoiceServiceImpl.receivePayment only requires
+     * ACCEPTED when the caller is a CUSTOMER.
+     */
+    @PostMapping("/{jobCardNumber}/invoice/accept")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<ApiResponse<InvoiceResponse>> acceptInvoice(
+            @PathVariable String jobCardNumber) {
+
+        return ApiResponseUtil.success(
+                "Invoice accepted successfully.",
+                workflowService.acceptInvoice(jobCardNumber));
+    }
+
+    /**
      * Deliberately NOT WORKFLOW_OPERATIONAL_ROLES: unlike every other
      * action on this controller, paying an invoice is a customer
      * self-service action, not a staff operation - the legacy static
@@ -153,7 +177,12 @@ public class ServiceWorkflowController {
      * not to the shared constant, so no other action on this controller
      * is affected. Ownership for a CUSTOMER caller (this job card is
      * actually theirs) is enforced in InvoiceServiceImpl.receivePayment,
-     * since @PreAuthorize only checks role, not which job card.
+     * since @PreAuthorize only checks role, not which job card. For a
+     * CUSTOMER caller specifically, InvoiceServiceImpl.receivePayment also
+     * now requires the invoice to already be InvoiceStatus.ACCEPTED (see
+     * acceptInvoice above) - staff callers are exempt from that gate so
+     * an in-person/cash payment recorded by staff is not blocked on the
+     * customer ever having opened the app.
      */
     @PostMapping("/{jobCardNumber}/payment")
     @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER', 'CUSTOMER')")

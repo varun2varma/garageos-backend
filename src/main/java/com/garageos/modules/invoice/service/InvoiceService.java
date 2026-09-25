@@ -26,6 +26,7 @@ public interface InvoiceService {
             String invoiceNumber);
 
     InvoiceResponse generateInvoice(String jobCardNumber);
+    InvoiceResponse acceptInvoice(String jobCardNumber);
     InvoiceResponse receivePayment(String jobCardNumber);
     InvoiceResponse generateInvoiceByEstimateId(Long estimateId);
 
