@@ -474,6 +474,23 @@ public class InvoiceServiceImpl implements InvoiceService {
      * receivePayment()'s own authorization - deliberately separate from
      * authorizeInvoiceAction(), which stays exactly as-is for
      * generateInvoice() and every staff caller.
+     *
+     * Identity-first, not role-first: the branch used to be "does this
+     * principal currently hold the CUSTOMER role" - correct in the common
+     * case, but it makes payment authorization depend on role-assignment
+     * state (assignCustomerRole()/activateCustomer()) rather than on the
+     * canonical Customer<->JobCard relationship the domain already has.
+     * This now asks the real question directly: is this principal
+     * (by mobile number) the Customer this Job Card actually belongs to?
+     * If so, that is authorization on its own - regardless of whatever
+     * roles happen to be assigned to their account right now. Only a
+     * principal with NO matching Customer record at all (i.e. genuinely
+     * not a customer) falls through to the garage-membership check, which
+     * remains completely unchanged for staff. This does not weaken
+     * anything: a mismatched customer (mobile matches a Customer, but not
+     * this Job Card's Customer) still gets rejected exactly as before,
+     * with the same not-found response used everywhere else to avoid
+     * confirming another customer's data exists.
      */
     private void authorizePaymentAction(JobCard jobCard) {
 
@@ -483,9 +500,20 @@ public class InvoiceServiceImpl implements InvoiceService {
                         .getAuthentication()
                         .getPrincipal();
 
-        if (principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+        Optional<Customer> maybeCustomer =
+                customerRepository.findByMobileNumber(principal.getMobile());
 
-            authorizeCustomerOwnsJobCard(jobCard, principal);
+        if (maybeCustomer.isPresent()) {
+
+            Customer customer = maybeCustomer.get();
+
+            if (jobCard.getCustomer() == null
+                    || !jobCard.getCustomer().getId().equals(customer.getId())) {
+
+                throw new ResourceNotFoundException(
+                        "Job Card not found : " + jobCard.getJobCardNumber());
+            }
+
             return;
         }
 
