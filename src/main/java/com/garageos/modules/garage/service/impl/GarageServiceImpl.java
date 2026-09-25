@@ -1,14 +1,17 @@
 package com.garageos.modules.garage.service.impl;
 
 import com.garageos.core.enums.identity.RoleCode;
+import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.garage.dto.request.CreateGarageRequest;
+import com.garageos.modules.garage.dto.request.UpdateGarageLocationRequest;
 import com.garageos.modules.garage.dto.response.GarageResponse;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.core.enums.garage.GarageStatus;
 import com.garageos.modules.garage.mapper.GarageMapper;
 import com.garageos.modules.garage.repository.GarageRepository;
 import com.garageos.modules.garage.service.GarageService;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.core.enums.garagemembership.GarageMembershipStatus;
 import com.garageos.modules.garagemembership.entity.GarageMembership;
 import com.garageos.modules.garagemembership.repository.GarageMembershipRepository;
@@ -167,6 +170,40 @@ public class GarageServiceImpl implements GarageService {
         garage.setPincode(request.getPincode());
         garage.setGstNumber(request.getGstNumber());
         garage.setPanNumber(request.getPanNumber());
+        garage.setLatitude(request.getLatitude());
+        garage.setLongitude(request.getLongitude());
+
+        return garageMapper.toResponse(
+                garageRepository.save(garage)
+        );
+    }
+
+    /**
+     * Owner-only add/edit of a garage's map location. Ownership is
+     * enforced the same way every other garage-scoped mutation in this
+     * codebase does it (InvoiceServiceImpl.authorizeInvoiceAction,
+     * DeliveryServiceImpl, EstimateServiceImpl, etc.): the authenticated
+     * principal's garageId must equal the target garage's id - never
+     * trusted from the request body. Role (OWNER) is enforced separately
+     * at the controller.
+     */
+    @Override
+    public GarageResponse updateGarageLocation(
+            GarageUserPrincipal principal,
+            Long id,
+            UpdateGarageLocationRequest request) {
+
+        Garage garage = garageRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Garage not found."));
+
+        if (principal.getGarageId() == null
+                || !principal.getGarageId().equals(garage.getId())) {
+
+            throw new BusinessException(
+                    "This garage does not belong to you.");
+        }
+
         garage.setLatitude(request.getLatitude());
         garage.setLongitude(request.getLongitude());
 

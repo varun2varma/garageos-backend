@@ -37,4 +37,18 @@ public class PlacesController {
                 "Places fetched successfully.",
                 placesService.search(query, lat, lng));
     }
+
+    /**
+     * Resolves a Google-suggestion placeId to coordinates - the client
+     * calls this only once, for the suggestion the user actually taps, not
+     * per keystroke (cost control - see GooglePlacesProvider doc comment).
+     */
+    @GetMapping("/details")
+    public ResponseEntity<?> details(@RequestParam("placeId") String placeId) {
+
+        return placesService.details(placeId)
+                .<ResponseEntity<?>>map(place ->
+                        ApiResponseUtil.success("Place details fetched successfully.", place))
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
 }

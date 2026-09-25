@@ -46,4 +46,9 @@ public class PlacesServiceImpl implements PlacesService {
                 .search(query.trim(), biasLatitude, biasLongitude)
                 .orElse(List.of());
     }
+
+    @Override
+    public Optional<PlaceSearchResult> details(String placeId) {
+        return googlePlacesProvider.details(placeId);
+    }
 }
