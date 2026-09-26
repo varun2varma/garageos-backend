@@ -614,7 +614,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
 
             throw new BusinessException(
-                    "This Job Card does not belong to your garage.");
+                    "E3: This Job Card does not belong to your garage.");
         }
     }
 

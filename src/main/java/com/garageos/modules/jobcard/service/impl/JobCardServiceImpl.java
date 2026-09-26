@@ -624,7 +624,7 @@ public class JobCardServiceImpl implements JobCardService {
                 || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
 
             throw new BusinessException(
-                    "This Job Card does not belong to your garage.");
+                    "E1: This Job Card does not belong to your garage.");
         }
     }
 

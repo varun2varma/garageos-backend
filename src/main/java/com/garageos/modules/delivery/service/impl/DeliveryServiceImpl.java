@@ -185,7 +185,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
 
             throw new BusinessException(
-                    "This Job Card does not belong to your garage.");
+                    "E2: This Job Card does not belong to your garage.");
         }
     }
 }

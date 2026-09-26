@@ -217,7 +217,7 @@ public class QualityCheckServiceImpl
                 || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
 
             throw new BusinessException(
-                    "This Job Card does not belong to your garage.");
+                    "E4: This Job Card does not belong to your garage.");
         }
     }
 
