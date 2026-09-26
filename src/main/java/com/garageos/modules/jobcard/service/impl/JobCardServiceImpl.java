@@ -549,8 +549,12 @@ public class JobCardServiceImpl implements JobCardService {
     @Override
     @Transactional
     public JobCardResponse readyForDelivery(String jobCardNumber) {
-
-        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+//         Commenting out for MVP, reopen at payment gate way time
+//        JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+        JobCard jobCard = jobCardRepository.findByJobCardNumber(jobCardNumber)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found : " + jobCardNumber));
 
         statusValidator.validate(
                 jobCard.getStatus(),
