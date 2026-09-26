@@ -378,8 +378,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
+//        commenting this for MVP purpose when the payment gateway is been setup we need to open this flow.
+//        authorizePaymentAction(jobCard);
 
-        authorizePaymentAction(jobCard);
 
         Invoice invoice = invoiceRepository
                 .findByEstimateJobCardId(jobCard.getId())
