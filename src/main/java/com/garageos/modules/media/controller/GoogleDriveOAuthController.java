@@ -3,6 +3,7 @@ package com.garageos.modules.media.controller;
 import com.garageos.modules.media.service.GoogleDriveClientService;
 import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.media.service.GoogleDriveOAuthService;
+import com.garageos.modules.media.service.MediaUploadRetryService;
 import com.google.api.services.drive.Drive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,15 +22,18 @@ public class GoogleDriveOAuthController {
     private final GoogleDriveOAuthService oauthService;
     private final GoogleDriveClientService driveClientService;
     private final GoogleDriveFolderService folderService;
+    private final MediaUploadRetryService mediaUploadRetryService;
 
     public GoogleDriveOAuthController(
             GoogleDriveOAuthService oauthService,
             GoogleDriveClientService driveClientService,
-            GoogleDriveFolderService folderService) {
+            GoogleDriveFolderService folderService,
+            MediaUploadRetryService mediaUploadRetryService) {
 
         this.oauthService = oauthService;
         this.driveClientService = driveClientService;
         this.folderService = folderService;
+        this.mediaUploadRetryService = mediaUploadRetryService;
     }
 
     @GetMapping("/authorize")
@@ -52,8 +56,19 @@ public class GoogleDriveOAuthController {
 
         oauthService.exchangeCode(code);
 
+        // Root-cause follow-through for MEDIA_DRIVE_AUTH_FAILED/AUTH_REQUIRED:
+        // any job-card media row stuck in AUTH_REQUIRED never auto-retries
+        // (by design - see MediaUploadStatus), so without this it would stay
+        // stuck even after the authorization problem that caused it is
+        // fixed right here. Wakes them back to PENDING for the next
+        // scheduler pass.
+        int woken = mediaUploadRetryService.wakeAuthRequiredRows();
+
         return ResponseEntity.ok(
                 "Google Drive authorization successful."
+                        + (woken > 0
+                        ? " " + woken + " pending media upload(s) queued for retry."
+                        : "")
         );
     }
 

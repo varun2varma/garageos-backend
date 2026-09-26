@@ -34,7 +34,13 @@ public class ServiceWorkflowController {
      * .authorizeEmployeeEstimateApproval, MANAGER-only) so the business
      * operation cannot be bypassed by another controller/entry point;
      * duplicating a different role set here would risk the two checks
-     * drifting out of sync.
+     * drifting out of sync. repair/start is the same: it is the
+     * manager-only "Proceed to Repair" confirmation gate between
+     * customer estimate approval and REPAIR_IN_PROGRESS, enforced
+     * MANAGER-only at the service layer
+     * (JobCardServiceImpl.authorizeProceedToRepair) for the identical
+     * reason — it is reachable from this controller and from
+     * JobCardController.
      */
     private static final String WORKFLOW_OPERATIONAL_ROLES = """
             hasAnyRole(

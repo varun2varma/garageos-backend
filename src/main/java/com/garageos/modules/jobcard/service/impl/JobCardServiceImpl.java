@@ -1,8 +1,10 @@
 package com.garageos.modules.jobcard.service.impl;
 
 import com.garageos.core.enums.ComplaintStatus;
+import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.booking.BookingStatus;
+import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.JobCardNumberGenerator;
@@ -28,6 +30,7 @@ import com.garageos.modules.qualitycheck.dto.request.CreateQualityCheckRequest;
 import com.garageos.modules.qualitycheck.service.QualityCheckService;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.estimate.service.EstimateService;
 import com.garageos.modules.vehicle.entity.Vehicle;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
@@ -385,11 +388,72 @@ public class JobCardServiceImpl implements JobCardService {
 
         return jobCardMapper.toResponse(jobCard);
     }
+    /**
+     * "Proceed to Repair" is intentionally MANAGER-only, mirroring the
+     * identical locked decision already made for employee estimate
+     * approval (see EstimateServiceImpl
+     * .authorizeEmployeeEstimateApproval — not OWNER, not
+     * SERVICE_ADVISOR). It is enforced here at the service layer rather
+     * than via @PreAuthorize on either controller, following the exact
+     * pattern already documented on both JobCardController and
+     * ServiceWorkflowController for estimate/approve: startRepair is
+     * exposed from both controllers and both delegate to this one
+     * method, so a single service-layer check can't drift out of sync
+     * the way two independently-maintained @PreAuthorize role lists
+     * could. Tenant/garage scoping for jobCard is already guaranteed by
+     * the caller (getJobCardByNumberOrThrow -> authorizeJobCardGarage),
+     * so this only needs to check the role.
+     */
+    private void authorizeProceedToRepair() {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        if (!principal.getRoles().contains(RoleCode.MANAGER.name())) {
+            throw new BusinessException(
+                    "Only a Manager can proceed a Job Card to repair.");
+        }
+    }
+
+    /**
+     * Server-side "Proceed to Repair" gate. Customer estimate approval
+     * (EstimateServiceImpl.approveEstimateCanonical) already stops at
+     * JobCardStatus.REPAIR_PENDING — it does not itself advance the
+     * JobCard to REPAIR_IN_PROGRESS. This method is the explicit manager
+     * confirmation step that performs that further transition, and it
+     * re-validates the gate itself (not just the caller's role) so a
+     * direct API call can never move a JobCard into repair on an
+     * Estimate that was never actually customer-approved, regardless of
+     * what any client sends.
+     *
+     * Idempotent: if the JobCard is already REPAIR_IN_PROGRESS, the
+     * current state is returned as-is rather than re-running validation
+     * and throwing — a duplicate "Proceed to Repair" call is a no-op,
+     * not an error.
+     */
     @Override
     @Transactional
     public JobCardResponse startRepair(String jobCardNumber) {
 
         JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
+
+        authorizeProceedToRepair();
+
+        if (jobCard.getStatus() == JobCardStatus.REPAIR_IN_PROGRESS) {
+            return jobCardMapper.toResponse(jobCard);
+        }
+
+        EstimateResponse estimate =
+                estimateService.getEstimateByJobCard(jobCard.getId());
+
+        if (estimate == null
+                || !EstimateStatus.APPROVED.name().equals(estimate.getStatus())) {
+            throw new BusinessException(
+                    "Estimate must be customer-approved before repair can start.");
+        }
 
         statusValidator.validate(
                 jobCard.getStatus(),

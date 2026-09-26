@@ -55,11 +55,54 @@ public class JobCardMedia {
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
 
-    @Column(name = "drive_file_id", nullable = false, length = 255)
+    /**
+     * Nullable as of V56: a row is now inserted before the Drive attempt
+     * runs (see MediaServiceImpl.uploadMedia), so this is unset while
+     * {@code uploadStatus} is PENDING/UPLOADING/RETRY_WAIT/AUTH_REQUIRED and
+     * only becomes authoritative once {@code uploadStatus} is COMPLETED.
+     */
+    @Column(name = "drive_file_id", length = 255)
     private String driveFileId;
 
     @Column(name = "drive_web_view_link")
     private String driveWebViewLink;
+
+    /**
+     * Durability state of the Drive upload for this row. See
+     * {@link com.garageos.core.enums.media.MediaUploadStatus}. Stored as a
+     * plain string, matching every other enum-backed column on this entity
+     * (mediaType, mediaStage, visibility).
+     */
+    @Column(name = "upload_status", nullable = false, length = 20)
+    @Builder.Default
+    private String uploadStatus = "COMPLETED";
+
+    /** Number of failed Drive attempts so far (drives the backoff schedule). */
+    @Column(name = "retry_count", nullable = false)
+    @Builder.Default
+    private Integer retryCount = 0;
+
+    /** When the next backoff retry is eligible to run; null once COMPLETED/FAILED/AUTH_REQUIRED. */
+    @Column(name = "next_retry_at")
+    private LocalDateTime nextRetryAt;
+
+    /**
+     * Sanitized failure summary from the most recent Drive attempt (never a
+     * token value or raw Google exception message — see
+     * MediaServiceImpl.toMediaException/classifyDriveFailure).
+     */
+    @Column(name = "last_error", length = 500)
+    private String lastError;
+
+    /**
+     * Path/key into {@link com.garageos.modules.navigation.storage.MediaStorageService}
+     * where the original uploaded bytes are durably buffered until the
+     * Drive upload completes — so a failed/retried attempt re-uploads the
+     * same bytes the caller actually sent, not a re-request from the
+     * client. Cleared once uploadStatus is COMPLETED.
+     */
+    @Column(name = "local_storage_path", length = 500)
+    private String localStoragePath;
 
     @Column(name = "media_type", nullable = false, length = 20)
     private String mediaType;

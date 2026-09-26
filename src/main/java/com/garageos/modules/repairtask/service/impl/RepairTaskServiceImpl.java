@@ -367,17 +367,20 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 //                    "Repair Task must be assigned before starting.");
 //        }
 
-        // Start the Job Card repair workflow, but only on the first
-        // Repair Task started for this Job Card. A second (or later)
-        // RepairTask starting while the Job Card is already
-        // REPAIR_IN_PROGRESS must not re-attempt that same transition —
-        // JobCardStatusValidator has no REPAIR_IN_PROGRESS -> REPAIR_IN_
-        // PROGRESS entry, so calling this unconditionally throws on every
-        // RepairTask after the first.
+        // Manager confirmation gate (approved product requirement): the
+        // JobCard only advances from REPAIR_PENDING to REPAIR_IN_PROGRESS
+        // via the manager's explicit "Proceed to Repair" action
+        // (JobCardServiceImpl.startRepair). A technician starting an
+        // individual RepairTask must not itself drive that transition —
+        // this used to auto-flip the JobCard on the first RepairTask
+        // started, silently bypassing the manager gate. Starting a
+        // RepairTask is now only allowed once the manager has already
+        // moved the JobCard to REPAIR_IN_PROGRESS.
         JobCard jobCard = task.getJobCard();
 
         if (jobCard.getStatus() == JobCardStatus.REPAIR_PENDING) {
-            task.getJobCard().setStatus(JobCardStatus.REPAIR_IN_PROGRESS);
+            throw new BusinessException(
+                    "A manager must proceed this Job Card to repair before a Repair Task can be started.");
         }
 
         // Start the actual Repair Task

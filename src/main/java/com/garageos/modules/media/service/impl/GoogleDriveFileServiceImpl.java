@@ -2,6 +2,7 @@ package com.garageos.modules.media.service.impl;
 
 import com.garageos.modules.media.service.GoogleDriveFileService;
 import com.garageos.modules.media.service.GoogleDriveClientService;
+import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -78,23 +79,6 @@ public class GoogleDriveFileServiceImpl
             );
         }
 
-        log.debug(
-                "[DRIVE] Requesting Drive client. fileName={}",
-                fileName
-        );
-
-        Drive drive =
-                driveClientService.getDriveClient();
-
-        log.info(
-                "[DRIVE] Drive client obtained. Starting upload. fileName={}",
-                fileName
-        );
-
-        File fileMetadata = new File()
-                .setName(fileName)
-                .setParents(List.of(parentFolderId));
-
         String contentType =
                 multipartFile.getContentType();
 
@@ -112,57 +96,113 @@ public class GoogleDriveFileServiceImpl
                 parentFolderId
         );
 
-        try (InputStream inputStream =
-                     multipartFile.getInputStream()) {
+        String finalContentType = contentType;
 
-            InputStreamContent mediaContent =
-                    new InputStreamContent(
-                            contentType,
-                            inputStream
-                    );
+        log.info(
+                "[DRIVE] Executing Drive file upload. fileName={}, contentType={}, size={}",
+                fileName,
+                contentType,
+                multipartFile.getSize()
+        );
 
-            mediaContent.setLength(
-                    multipartFile.getSize()
-            );
+        File uploadedFile =
+                driveClientService.executeWithAuthRetry(drive -> {
 
-            log.info(
-                    "[DRIVE] Executing Drive file upload. fileName={}, contentType={}, size={}",
-                    fileName,
-                    contentType,
-                    multipartFile.getSize()
-            );
+                    File fileMetadata = new File()
+                            .setName(fileName)
+                            .setParents(List.of(parentFolderId));
 
-            File uploadedFile =
-                    drive.files()
-                            .create(
-                                    fileMetadata,
-                                    mediaContent
-                            )
+                    try (InputStream inputStream =
+                                 multipartFile.getInputStream()) {
+
+                        InputStreamContent mediaContent =
+                                new InputStreamContent(
+                                        finalContentType,
+                                        inputStream
+                                );
+
+                        mediaContent.setLength(
+                                multipartFile.getSize()
+                        );
+
+                        return drive.files()
+                                .create(
+                                        fileMetadata,
+                                        mediaContent
+                                )
+                                .setFields(
+                                        "id,name,mimeType,size,parents,webViewLink,createdTime"
+                                )
+                                .execute();
+                    }
+                });
+
+        log.info(
+                "[DRIVE] Drive file upload successful. fileName={}, driveFileId={}",
+                fileName,
+                uploadedFile.getId()
+        );
+
+        return uploadedFile;
+    }
+
+    @Override
+    public File uploadBytes(
+            byte[] content,
+            String contentType,
+            String fileName,
+            String parentFolderId)
+            throws GeneralSecurityException, IOException {
+
+        log.info(
+                "[DRIVE] Preparing buffered-bytes upload (retry path). fileName={}, parentFolderId={}, size={}",
+                fileName,
+                parentFolderId,
+                content != null ? content.length : null
+        );
+
+        if (content == null || content.length == 0) {
+            throw new IllegalArgumentException("File content is required.");
+        }
+
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException("File name is required.");
+        }
+
+        if (parentFolderId == null || parentFolderId.isBlank()) {
+            throw new IllegalArgumentException("Parent folder ID is required.");
+        }
+
+        String effectiveContentType =
+                (contentType == null || contentType.isBlank())
+                        ? "application/octet-stream"
+                        : contentType;
+
+        File uploadedFile =
+                driveClientService.executeWithAuthRetry(drive -> {
+
+                    File fileMetadata = new File()
+                            .setName(fileName)
+                            .setParents(List.of(parentFolderId));
+
+                    ByteArrayContent mediaContent =
+                            new ByteArrayContent(effectiveContentType, content);
+
+                    return drive.files()
+                            .create(fileMetadata, mediaContent)
                             .setFields(
                                     "id,name,mimeType,size,parents,webViewLink,createdTime"
                             )
                             .execute();
+                });
 
-            log.info(
-                    "[DRIVE] Drive file upload successful. fileName={}, driveFileId={}",
-                    fileName,
-                    uploadedFile.getId()
-            );
+        log.info(
+                "[DRIVE] Buffered-bytes upload successful. fileName={}, driveFileId={}",
+                fileName,
+                uploadedFile.getId()
+        );
 
-            return uploadedFile;
-
-        } catch (IOException ex) {
-
-            log.error(
-                    "[DRIVE] Drive file upload failed. fileName={}, parentFolderId={}, error={}",
-                    fileName,
-                    parentFolderId,
-                    ex.getMessage(),
-                    ex
-            );
-
-            throw ex;
-        }
+        return uploadedFile;
     }
 
     @Override
@@ -186,44 +226,33 @@ public class GoogleDriveFileServiceImpl
             );
         }
 
-        Drive drive =
-                driveClientService.getDriveClient();
-
         log.info(
-                "[DRIVE] Drive client obtained. Starting download. driveFileId={}",
+                "[DRIVE] Starting download with auth-retry. driveFileId={}",
                 driveFileId
         );
 
-        try (InputStream mediaStream =
-                     drive.files()
-                             .get(driveFileId)
-                             .executeMediaAsInputStream();
-             ByteArrayOutputStream buffer =
-                     new ByteArrayOutputStream()) {
+        byte[] content =
+                driveClientService.executeWithAuthRetry(drive -> {
 
-            mediaStream.transferTo(buffer);
+                    try (InputStream mediaStream =
+                                 drive.files()
+                                         .get(driveFileId)
+                                         .executeMediaAsInputStream();
+                         ByteArrayOutputStream buffer =
+                                 new ByteArrayOutputStream()) {
 
-            byte[] content =
-                    buffer.toByteArray();
+                        mediaStream.transferTo(buffer);
 
-            log.info(
-                    "[DRIVE] Drive file download successful. driveFileId={}, size={}",
-                    driveFileId,
-                    content.length
-            );
+                        return buffer.toByteArray();
+                    }
+                });
 
-            return content;
+        log.info(
+                "[DRIVE] Drive file download successful. driveFileId={}, size={}",
+                driveFileId,
+                content.length
+        );
 
-        } catch (IOException ex) {
-
-            log.error(
-                    "[DRIVE] Drive file download failed. driveFileId={}, error={}",
-                    driveFileId,
-                    ex.getMessage(),
-                    ex
-            );
-
-            throw ex;
-        }
+        return content;
     }
 }

@@ -38,7 +38,11 @@ public class JobCardController {
      * Locked operational-access decision: OWNER/MANAGER/SERVICE_ADVISOR
      * for general operational JobCard actions on this controller.
      * estimate/approve is deliberately NOT annotated here — see the
-     * identical note in ServiceWorkflowController.
+     * identical note in ServiceWorkflowController. repair/start is the
+     * same: it is the manager-only "Proceed to Repair" confirmation
+     * gate, enforced MANAGER-only at the service layer
+     * (JobCardServiceImpl.authorizeProceedToRepair) rather than here,
+     * for the same reason.
      */
     private static final String JOBCARD_OPERATIONAL_ROLES = """
             hasAnyRole(

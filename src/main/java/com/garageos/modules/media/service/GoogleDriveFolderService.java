@@ -1,7 +1,6 @@
 package com.garageos.modules.media.service;
 
 import com.garageos.core.config.GoogleDriveProperties;
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,14 +38,6 @@ public class GoogleDriveFolderService {
                 parentFolderId
         );
 
-        Drive drive =
-                driveClientService.getDriveClient();
-
-        log.debug(
-                "[DRIVE] Drive client obtained for folder lookup. folderName={}",
-                folderName
-        );
-
         String escapedFolderName =
                 folderName.replace("'", "\\'");
 
@@ -56,59 +47,73 @@ public class GoogleDriveFolderService {
                         + " and trashed = false"
                         + " and '" + parentFolderId + "' in parents";
 
-        log.debug(
-                "[DRIVE] Searching for folder. folderName={}, parentFolderId={}",
-                folderName,
-                parentFolderId
-        );
+        // Routed through the same executeWithAuthRetry wrapper the file
+        // upload/download calls use (GoogleDriveFileServiceImpl), instead
+        // of the raw getDriveClient() this used to call directly. Folder
+        // resolution runs on every upload attempt before the file upload
+        // itself, so an access token that merely expired between requests
+        // used to skip the silent refresh-and-retry and go straight to
+        // MediaUploadRetryServiceImpl's outer classifier, which cannot tell
+        // "expired, refresh would have fixed it" apart from "genuinely
+        // revoked" - unnecessarily landing on AUTH_REQUIRED instead of
+        // transparently refreshing. Reuses the existing wrapper; no new
+        // OAuth logic.
+        return driveClientService.executeWithAuthRetry(drive -> {
 
-        List<File> folders = drive.files()
-                .list()
-                .setQ(query)
-                .setSpaces("drive")
-                .setFields("files(id,name,parents,webViewLink)")
-                .setPageSize(10)
-                .execute()
-                .getFiles();
-
-        if (folders != null && !folders.isEmpty()) {
-
-            File existingFolder =
-                    folders.get(0);
-
-            log.info(
-                    "[DRIVE] Existing folder found. folderName={}, folderId={}",
+            log.debug(
+                    "[DRIVE] Searching for folder. folderName={}, parentFolderId={}",
                     folderName,
-                    existingFolder.getId()
+                    parentFolderId
             );
 
-            return existingFolder;
-        }
+            List<File> folders = drive.files()
+                    .list()
+                    .setQ(query)
+                    .setSpaces("drive")
+                    .setFields("files(id,name,parents,webViewLink)")
+                    .setPageSize(10)
+                    .execute()
+                    .getFiles();
 
-        log.info(
-                "[DRIVE] Folder not found. Creating folder. folderName={}, parentFolderId={}",
-                folderName,
-                parentFolderId
-        );
+            if (folders != null && !folders.isEmpty()) {
 
-        File folderMetadata = new File()
-                .setName(folderName)
-                .setMimeType(FOLDER_MIME_TYPE)
-                .setParents(List.of(parentFolderId));
+                File existingFolder =
+                        folders.get(0);
 
-        File createdFolder =
-                drive.files()
-                        .create(folderMetadata)
-                        .setFields("id,name,parents,webViewLink")
-                        .execute();
+                log.info(
+                        "[DRIVE] Existing folder found. folderName={}, folderId={}",
+                        folderName,
+                        existingFolder.getId()
+                );
 
-        log.info(
-                "[DRIVE] Folder created successfully. folderName={}, folderId={}",
-                folderName,
-                createdFolder.getId()
-        );
+                return existingFolder;
+            }
 
-        return createdFolder;
+            log.info(
+                    "[DRIVE] Folder not found. Creating folder. folderName={}, parentFolderId={}",
+                    folderName,
+                    parentFolderId
+            );
+
+            File folderMetadata = new File()
+                    .setName(folderName)
+                    .setMimeType(FOLDER_MIME_TYPE)
+                    .setParents(List.of(parentFolderId));
+
+            File createdFolder =
+                    drive.files()
+                            .create(folderMetadata)
+                            .setFields("id,name,parents,webViewLink")
+                            .execute();
+
+            log.info(
+                    "[DRIVE] Folder created successfully. folderName={}, folderId={}",
+                    folderName,
+                    createdFolder.getId()
+            );
+
+            return createdFolder;
+        });
     }
 
     public File getOrCreateGarageFolder(

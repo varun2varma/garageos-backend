@@ -37,6 +37,16 @@ public class MediaException extends RuntimeException {
         /** Drive accepted the credential but the operation itself failed. */
         MEDIA_DRIVE_UPLOAD_FAILED(HttpStatus.BAD_GATEWAY),
 
+        /**
+         * A transient Drive failure (timeout/429/5xx) on the synchronous
+         * upload attempt. Distinguishable from MEDIA_DRIVE_UPLOAD_FAILED:
+         * the file bytes and the JobCardMedia row are already durably
+         * persisted (uploadStatus=RETRY_WAIT) and a backoff retry is
+         * already scheduled — this is not a terminal failure requiring the
+         * caller to resend the file.
+         */
+        MEDIA_UPLOAD_RETRY_SCHEDULED(HttpStatus.SERVICE_UNAVAILABLE),
+
         /** The file reached Drive but its metadata could not be persisted. */
         MEDIA_METADATA_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
 

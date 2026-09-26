@@ -16,12 +16,12 @@ import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.service.GoogleDriveFileService;
-import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.media.service.MediaService;
+import com.garageos.modules.media.service.MediaUploadRetryService;
+import com.garageos.modules.navigation.storage.MediaStorageService;
 import com.garageos.modules.repairtask.entity.RepairTask;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
-import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -51,12 +51,15 @@ public class MediaServiceImpl implements MediaService {
     private static final String VISIBILITY_CUSTOMER_VISIBLE =
             "CUSTOMER_VISIBLE";
 
+    private static final String PENDING_UPLOAD_FOLDER = "job-card-media/pending";
+
     private final JobCardRepository jobCardRepository;
     private final JobCardMediaRepository jobCardMediaRepository;
     private final RepairTaskRepository repairTaskRepository;
     private final JobAssignmentRepository jobAssignmentRepository;
-    private final GoogleDriveFolderService folderService;
     private final GoogleDriveFileService googleDriveFileService;
+    private final MediaUploadRetryService mediaUploadRetryService;
+    private final MediaStorageService mediaStorageService;
 
     @Override
     public JobCardMedia uploadMedia(
@@ -245,9 +248,6 @@ public class MediaServiceImpl implements MediaService {
                 sequence
         );
 
-        String garageCode =
-                jobCard.getGarage().getGarageCode();
-
         String jobCardNumber =
                 jobCard.getJobCardNumber();
 
@@ -278,102 +278,108 @@ public class MediaServiceImpl implements MediaService {
                 visibility
         );
 
-        try {
+        /*
+         * -------------------------------------------------------------
+         * DURABLE ACCEPTANCE (fix for symptom (B))
+         * -------------------------------------------------------------
+         * The bytes are buffered to local storage and the JobCardMedia row
+         * is created and saved BEFORE any Drive call is attempted. This is
+         * the actual fix for "no error, but the media doesn't reliably end
+         * up saved/visible": previously nothing was persisted until AFTER
+         * the Drive upload had already fully succeeded, so a transient
+         * Drive failure, or the client's connection dropping mid-upload on
+         * a large before/after video over a mobile network, left no
+         * durable record of the attempt at all - the request simply failed
+         * (or never got an acknowledged response) and the media was gone.
+         * From this point on, a failure is recoverable: the bytes and a
+         * row exist, and the retry queue (MediaUploadRetryService /
+         * MediaUploadRetryScheduler) owns getting it into Drive.
+         */
 
-            log.info(
-                    "[DRIVE] Resolving stage folder. garageCode={}, jobCardNumber={}, stage={}",
-                    garageCode,
-                    jobCardNumber,
-                    mediaStage
+        String localStorageKey =
+                mediaStorageService.upload(
+                        file,
+                        PENDING_UPLOAD_FOLDER
+                );
+
+        log.info(
+                "[MEDIA] File buffered locally pending Drive upload. jobCardId={}, localStorageKey={}",
+                jobCardId,
+                localStorageKey
+        );
+
+        JobCardMedia media =
+                JobCardMedia.builder()
+                        .jobCardId(jobCardId)
+                        .repairTaskId(repairTaskId)
+                        .fileName(generatedFileName)
+                        .mediaType(mediaType.name())
+                        .mediaStage(mediaStage.name())
+                        .contentType(contentType)
+                        .fileSize(file.getSize())
+                        .uploadedBy(principal.getId())
+                        .visibility(visibility)
+                        .createdAt(LocalDateTime.now())
+                        .uploadStatus("PENDING")
+                        .retryCount(0)
+                        // Set even though the synchronous attempt below
+                        // runs immediately: if the process dies between
+                        // this save and that attempt, the row is still
+                        // immediately eligible for the backoff scheduler's
+                        // findByUploadStatusInAndNextRetryAtLessThanEqual
+                        // scan instead of being stuck with a null
+                        // nextRetryAt that query would never match.
+                        .nextRetryAt(LocalDateTime.now())
+                        .localStoragePath(localStorageKey)
+                        .build();
+
+        JobCardMedia savedMedia =
+                jobCardMediaRepository.save(media);
+
+        log.info(
+                "[MEDIA] Media row durably accepted. mediaId={}, jobCardId={}, repairTaskId={}, visibility={}",
+                savedMedia.getId(),
+                jobCardId,
+                repairTaskId,
+                visibility
+        );
+
+        /*
+         * -------------------------------------------------------------
+         * FIRST DRIVE ATTEMPT (same request, same code path the backoff
+         * retry job later reuses via MediaUploadRetryService)
+         * -------------------------------------------------------------
+         */
+
+        JobCardMedia afterAttempt =
+                mediaUploadRetryService.attemptUpload(savedMedia);
+
+        return switch (afterAttempt.getUploadStatus()) {
+
+            case "COMPLETED" -> afterAttempt;
+
+            case "AUTH_REQUIRED" -> throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_DRIVE_AUTH_FAILED,
+                    "Google Drive rejected the stored authorization. "
+                            + "Reauthorize Google Drive and try again. "
+                            + "This media has been saved and will be uploaded "
+                            + "automatically once Drive is reauthorized.",
+                    null
             );
 
-            File driveFolder =
-                    folderService.getOrCreateStageFolder(
-                            garageCode,
-                            jobCardNumber,
-                            mediaStage.name()
-                    );
-
-            log.info(
-                    "[DRIVE] Stage folder resolved. folderId={}, folderName={}",
-                    driveFolder.getId(),
-                    driveFolder.getName()
+            case "RETRY_WAIT" -> throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_UPLOAD_RETRY_SCHEDULED,
+                    "Google Drive could not be reached right now. This media "
+                            + "has been saved and will be uploaded automatically.",
+                    null
             );
 
-            log.info(
-                    "[DRIVE] Starting file upload. jobCardId={}, fileName={}, folderId={}",
-                    jobCardId,
-                    generatedFileName,
-                    driveFolder.getId()
+            default -> throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_DRIVE_UPLOAD_FAILED,
+                    "Google Drive could not store this file.",
+                    null
             );
-
-            File driveFile =
-                    googleDriveFileService.uploadFile(
-                            file,
-                            generatedFileName,
-                            driveFolder.getId()
-                    );
-
-            log.info(
-                    "[DRIVE] File upload successful. jobCardId={}, driveFileId={}, fileName={}",
-                    jobCardId,
-                    driveFile.getId(),
-                    generatedFileName
-            );
-
-            JobCardMedia media =
-                    JobCardMedia.builder()
-                            .jobCardId(jobCardId)
-                            .repairTaskId(repairTaskId)
-                            .fileName(generatedFileName)
-                            .driveFileId(driveFile.getId())
-                            .driveWebViewLink(
-                                    driveFile.getWebViewLink())
-                            .mediaType(mediaType.name())
-                            .mediaStage(mediaStage.name())
-                            .contentType(contentType)
-                            .fileSize(file.getSize())
-                            .uploadedBy(principal.getId())
-                            .visibility(visibility)
-                            .createdAt(LocalDateTime.now())
-                            .build();
-
-            log.info(
-                    "[MEDIA] Saving media metadata to database. jobCardId={}, repairTaskId={}, driveFileId={}, visibility={}",
-                    jobCardId,
-                    repairTaskId,
-                    driveFile.getId(),
-                    visibility
-            );
-
-            JobCardMedia savedMedia =
-                    jobCardMediaRepository.save(media);
-
-            log.info(
-                    "[MEDIA] Media metadata saved successfully. mediaId={}, jobCardId={}, repairTaskId={}, driveFileId={}, visibility={}",
-                    savedMedia.getId(),
-                    jobCardId,
-                    repairTaskId,
-                    driveFile.getId(),
-                    visibility
-            );
-
-            return savedMedia;
-
-        } catch (GeneralSecurityException | IOException ex) {
-
-            log.error(
-                    "[DRIVE_UPLOAD_FAILURE] Google Drive operation failed. "
-                            + "jobCardId={}, stage={}, fileName={}, error={}",
-                    jobCardId,
-                    mediaStage,
-                    generatedFileName,
-                    ex.getMessage(),
-                    ex
-            );
-
-            throw toMediaException(ex);
-        }
+        };
     }
 
     /**

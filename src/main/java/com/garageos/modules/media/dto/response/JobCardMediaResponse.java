@@ -46,4 +46,17 @@ public class JobCardMediaResponse {
     private String visibility;
 
     private LocalDateTime createdAt;
+
+    /**
+     * Durability state of the Drive upload — see
+     * {@link com.garageos.core.enums.media.MediaUploadStatus}. Added so a
+     * client can tell "safely received, still uploading/retrying" apart
+     * from "fully in Drive" instead of assuming every listed row is done.
+     */
+    private String uploadStatus;
+
+    private Integer retryCount;
+
+    /** Sanitized last failure summary, or null if there hasn't been one. */
+    private String lastError;
 }

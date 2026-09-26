@@ -513,11 +513,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 throw new ResourceNotFoundException(
                         "Job Card not found : " + jobCard.getJobCardNumber());
             }
-
-            return;
+        } else {
+            authorizeInvoiceAction(jobCard);
         }
-
-        authorizeInvoiceAction(jobCard);
     }
 
     /**
