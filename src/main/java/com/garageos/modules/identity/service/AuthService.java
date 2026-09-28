@@ -49,4 +49,16 @@ public interface AuthService {
      */
     void deleteAccount();
 
+    /**
+     * Google Play external account-deletion requirement: called from the
+     * public, unauthenticated /delete-account web form. Accepts a
+     * self-reported email/mobile/username identifier from an anonymous
+     * visitor and, if it matches a real account, records a deletion
+     * request. Deliberately generic in outcome either way (see this
+     * method's implementation) to avoid account enumeration, and never
+     * itself deletes anything - see AuthServiceImpl's own doc comment for
+     * why the actual destructive step is a separate, not-yet-built path.
+     */
+    void requestAccountDeletion(String identifier, String clientIp);
+
 }

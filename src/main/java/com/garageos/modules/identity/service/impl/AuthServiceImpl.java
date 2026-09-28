@@ -1,5 +1,6 @@
 package com.garageos.modules.identity.service.impl;
 
+import com.garageos.core.enums.identity.AccountDeletionRequestStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.exception.BusinessException;
@@ -12,11 +13,13 @@ import com.garageos.modules.identity.dto.request.ResetPasswordRequest;
 import com.garageos.modules.identity.dto.response.LoginResponse;
 import com.garageos.modules.identity.dto.response.RegisterResponse;
 import com.garageos.modules.identity.dto.response.UserProfileResponse;
+import com.garageos.modules.identity.entity.AccountDeletionRequest;
 import com.garageos.modules.identity.entity.PasswordResetToken;
 import com.garageos.modules.identity.entity.Role;
 import com.garageos.modules.identity.entity.User;
 import com.garageos.modules.identity.entity.UserRole;
 import com.garageos.modules.identity.entity.UserSession;
+import com.garageos.modules.identity.repository.AccountDeletionRequestRepository;
 import com.garageos.modules.identity.repository.PasswordResetTokenRepository;
 import com.garageos.modules.identity.repository.RoleRepository;
 import com.garageos.modules.identity.repository.UserRepository;
@@ -41,8 +44,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -51,6 +57,18 @@ public class AuthServiceImpl implements AuthService {
 
     private static final int RESET_TOKEN_LENGTH_BYTES = 24;
     private static final int RESET_TOKEN_EXPIRY_MINUTES = 30;
+
+    // Minimal in-memory throttle for the public, unauthenticated
+    // account-deletion-request form - not a general-purpose rate-limiting
+    // framework (none exists in this codebase; see this class's own
+    // requestAccountDeletion doc comment), just enough to stop a single
+    // caller from hammering the identifier-lookup query. Per-process only;
+    // resets on restart and isn't shared across instances, which is
+    // acceptable for this small, non-critical protection.
+    private static final int DELETION_REQUEST_MAX_PER_WINDOW = 5;
+    private static final Duration DELETION_REQUEST_WINDOW = Duration.ofMinutes(15);
+    private final ConcurrentHashMap<String, Deque<LocalDateTime>> deletionRequestAttemptsByIp =
+            new ConcurrentHashMap<>();
 
     private final AuthenticationManager authenticationManager;
 
@@ -69,6 +87,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     private final PasswordResetNotificationService passwordResetNotificationService;
+
+    private final AccountDeletionRequestRepository accountDeletionRequestRepository;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -260,6 +280,93 @@ public class AuthServiceImpl implements AuthService {
         // matching changePassword/resetPassword's own session-revocation
         // step.
         userSessionRepository.revokeAllByUserId(user.getId());
+    }
+
+    /**
+     * Google Play external account-deletion requirement. This method ONLY
+     * records a request row (status REQUESTED) against the matched
+     * account's id - it deliberately does NOT call deleteAccount(). Two
+     * reasons:
+     *
+     * 1. Security: the caller here is an anonymous website visitor who has
+     *    typed an email/mobile into a public HTML form (no authentication
+     *    at all). Knowing someone else's email or phone number must never
+     *    be enough to destroy their account - the actual destructive
+     *    operation stays behind DELETE /api/v1/auth/account, which can only
+     *    ever act on the calling user's own authenticated session.
+     * 2. There is no real verification/notification channel in this
+     *    codebase yet to confirm the request came from the account owner -
+     *    see LoggingPasswordResetNotificationService's own doc comment,
+     *    which documents the same gap for password-reset delivery. Wiring
+     *    up real verification (e.g. emailing/texting a confirmation link
+     *    that, once clicked, calls deleteAccount() on this request's
+     *    userId) and/or an admin review step is a deliberately separate,
+     *    not-yet-built follow-on - out of scope here.
+     *
+     * Outcome is intentionally identical whether or not the identifier
+     * matches an account, an already-deleted account, or a rate-limited
+     * caller - same account-enumeration reasoning as forgotPassword.
+     */
+    @Override
+    @Transactional
+    public void requestAccountDeletion(String identifier, String clientIp) {
+
+        if (!withinRateLimit(clientIp)) {
+            return;
+        }
+
+        if (identifier == null || identifier.isBlank()) {
+            return;
+        }
+
+        String trimmed = identifier.trim();
+
+        User user = userRepository.findByUsername(trimmed)
+                .or(() -> userRepository.findByEmail(trimmed))
+                .or(() -> userRepository.findByMobile(trimmed))
+                .orElse(null);
+
+        if (user == null || user.getStatus() == UserStatus.DELETED) {
+            log.debug("Account deletion requested for unknown/already-deleted identifier.");
+            return;
+        }
+
+        boolean alreadyPending = accountDeletionRequestRepository
+                .existsByUserIdAndStatus(user.getId(), AccountDeletionRequestStatus.REQUESTED);
+
+        if (alreadyPending) {
+            return;
+        }
+
+        AccountDeletionRequest deletionRequest = AccountDeletionRequest.builder()
+                .userId(user.getId())
+                .build();
+
+        accountDeletionRequestRepository.save(deletionRequest);
+    }
+
+    private boolean withinRateLimit(String clientIp) {
+
+        String key = (clientIp == null || clientIp.isBlank()) ? "unknown" : clientIp;
+        LocalDateTime now = LocalDateTime.now();
+
+        Deque<LocalDateTime> attempts =
+                deletionRequestAttemptsByIp.computeIfAbsent(key, k -> new ArrayDeque<>());
+
+        synchronized (attempts) {
+
+            while (!attempts.isEmpty()
+                    && attempts.peekFirst().isBefore(now.minus(DELETION_REQUEST_WINDOW))) {
+                attempts.pollFirst();
+            }
+
+            if (attempts.size() >= DELETION_REQUEST_MAX_PER_WINDOW) {
+                return false;
+            }
+
+            attempts.addLast(now);
+            return true;
+        }
     }
 
     @Override

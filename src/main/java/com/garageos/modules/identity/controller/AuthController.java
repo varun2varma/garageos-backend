@@ -2,6 +2,7 @@ package com.garageos.modules.identity.controller;
 
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
+import com.garageos.modules.identity.dto.request.AccountDeletionRequestForm;
 import com.garageos.modules.identity.dto.request.ChangePasswordRequest;
 import com.garageos.modules.identity.dto.request.ForgotPasswordRequest;
 import com.garageos.modules.identity.dto.request.LoginRequest;
@@ -15,9 +16,12 @@ import com.garageos.modules.identity.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -119,6 +123,32 @@ public class AuthController {
         authService.deleteAccount();
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Google Play external account-deletion requirement: the plain-HTML,
+     * no-JS form on the public /delete-account page posts here directly
+     * (standard browser form submission, application/x-www-form-urlencoded -
+     * no fetch/AJAX). Publicly reachable (covered by SecurityConfig's
+     * existing "/api/v1/auth/**" permitAll matcher - no security-config
+     * change needed for this endpoint itself), but see
+     * AuthServiceImpl.requestAccountDeletion's own doc comment: this never
+     * deletes anything by itself, only records a request. Redirects
+     * (rather than returning JSON) since the caller is a browser following
+     * a plain form submission, to a static, deliberately generic
+     * confirmation page that reveals nothing about whether the submitted
+     * identifier matched a real account.
+     */
+    @PostMapping(value = "/account-deletion-request", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<Void> requestAccountDeletion(
+            @Valid @ModelAttribute AccountDeletionRequestForm form,
+            HttpServletRequest request) {
+
+        authService.requestAccountDeletion(form.getIdentifier(), request.getRemoteAddr());
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("/delete-account-requested.html"))
+                .build();
     }
 
     @PostMapping("/refresh")
