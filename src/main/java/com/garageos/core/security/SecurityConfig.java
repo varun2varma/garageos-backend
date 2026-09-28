@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/",
                                 "/*.html",
                                 "/delete-account",
+                                "/privacy-policy",
 
                                 "/css/**",
                                 "/js/**",
