@@ -326,8 +326,17 @@ public class InvoiceServiceImpl implements InvoiceService {
             Invoice invoice,
             Estimate estimate) {
 
+        // Invoice Source of Truth: only items the customer actually kept
+        // selected may become billable InvoiceItems - matches the same
+        // `selected` filter EstimateItemServiceImpl.recalculateEstimate and
+        // RepairTaskServiceImpl.createRepairTasks already apply. Previously
+        // this copied every EstimateItem unfiltered, so a customer-rejected
+        // item reappeared on the generated invoice.
         List<EstimateItem> estimateItems =
-                estimateItemRepository.findByEstimateId(estimate.getId());
+                estimateItemRepository.findByEstimateId(estimate.getId())
+                        .stream()
+                        .filter(item -> Boolean.TRUE.equals(item.getSelected()))
+                        .toList();
 
         List<InvoiceItem> invoiceItems = new ArrayList<>();
 

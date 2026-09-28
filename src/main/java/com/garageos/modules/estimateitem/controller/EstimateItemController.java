@@ -94,6 +94,23 @@ public class EstimateItemController {
         );
     }
 
+    /**
+     * Mission: the customer approval boundary is the Complaint, not the
+     * individual EstimateItem - reuses the existing per-item `selected`
+     * field/endpoint's semantics, applied to every item under one
+     * Complaint at once (see EstimateItemServiceImpl.setComplaintItemsSelection).
+     */
+    @PutMapping("/complaints/{complaintId}/estimate-items/selection")
+    public ResponseEntity<ApiResponse<List<EstimateItemResponse>>> setComplaintSelection(
+            @PathVariable Long complaintId,
+            @Valid @RequestBody SetSelectionRequest request) {
+
+        return ApiResponseUtil.success(
+                "Selection updated successfully.",
+                service.setComplaintItemsSelection(complaintId, request.getSelected())
+        );
+    }
+
     @DeleteMapping("/estimate-items/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteItem(
             @PathVariable Long id) {

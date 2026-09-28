@@ -31,4 +31,16 @@ public interface EstimateItemService {
      */
     EstimateItemResponse setItemSelection(Long itemId, boolean selected);
 
+    /**
+     * Mission: the customer approval boundary is the Complaint, not the
+     * individual EstimateItem - rejecting "AC not cooling" must reject all
+     * of its parts/labour/other items together. Reuses the existing
+     * `selected` field per item (no new boolean); also cancels any
+     * RepairTask already created for this complaint when rejecting, per
+     * the same "don't physically delete history" rule as everywhere else.
+     */
+    List<EstimateItemResponse> setComplaintItemsSelection(
+            Long complaintId,
+            boolean selected);
+
 }

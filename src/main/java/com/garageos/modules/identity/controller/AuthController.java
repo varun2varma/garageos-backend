@@ -107,6 +107,20 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Self-service account deletion. Identifies the account to delete from
+     * the caller's own JWT/SecurityContext (never a client-supplied id), so
+     * a caller can only ever delete their own account. Idempotent — see
+     * AuthServiceImpl.deleteAccount's own doc comment.
+     */
+    @DeleteMapping("/account")
+    public ResponseEntity<Void> deleteAccount() {
+
+        authService.deleteAccount();
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<LoginResponse>> refresh(
             @RequestBody Map<String, String> request) {

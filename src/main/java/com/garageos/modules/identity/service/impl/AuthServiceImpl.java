@@ -1,6 +1,7 @@
 package com.garageos.modules.identity.service.impl;
 
 import com.garageos.core.enums.identity.RoleCode;
+import com.garageos.core.enums.identity.UserStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.identity.dto.request.ChangePasswordRequest;
@@ -41,6 +42,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -213,6 +215,51 @@ public class AuthServiceImpl implements AuthService {
 
         userSessionRepository.revokeAllByUserId(
                 user.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount() {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        // Idempotent: a second call against an already-deleted account is a
+        // no-op rather than an error - the account is already inaccessible
+        // and re-anonymizing already-cleared fields would be pointless.
+        if (user.getStatus() == UserStatus.DELETED) {
+            return;
+        }
+
+        // username has a NOT NULL + unique DB constraint, so it can't be
+        // cleared outright - anonymize it to a value that's guaranteed
+        // unique (derived from the user's own id) instead. email/mobile are
+        // nullable with unique constraints, so those are simply cleared,
+        // freeing that email/mobile for a future registration.
+        user.setUsername("deleted_user_" + user.getId());
+        user.setEmail(null);
+        user.setMobile(null);
+        user.setFirstName("Deleted");
+        user.setLastName(null);
+        user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setStatus(UserStatus.DELETED);
+
+        userRepository.save(user);
+
+        // Belt-and-braces alongside the status change: GarageUserPrincipal
+        // already treats DELETED as disabled/locked (blocking both fresh
+        // login and any still-valid access token on its next per-request
+        // reload), and this also invalidates outstanding refresh tokens,
+        // matching changePassword/resetPassword's own session-revocation
+        // step.
+        userSessionRepository.revokeAllByUserId(user.getId());
     }
 
     @Override

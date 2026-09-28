@@ -2,6 +2,7 @@ package com.garageos.modules.estimateitem.service.impl;
 
 import com.garageos.core.enums.EstimateItemType;
 import com.garageos.core.enums.EstimateStatus;
+import com.garageos.core.enums.RepairStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -19,6 +20,7 @@ import com.garageos.modules.estimateitem.mapper.EstimateItemMapper;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
 import com.garageos.modules.estimateitem.service.EstimateItemService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ public class EstimateItemServiceImpl
     private final ComplaintRepository complaintRepository;
     private final EstimateItemMapper mapper;
     private final CustomerRepository customerRepository;
+    private final RepairTaskRepository repairTaskRepository;
 
     @Override
     public EstimateItemResponse addItem(
@@ -253,6 +256,77 @@ public class EstimateItemServiceImpl
         recalculateEstimate(estimate);
 
         return mapper.toResponse(item);
+    }
+
+    @Override
+    @Transactional
+    public List<EstimateItemResponse> setComplaintItemsSelection(
+            Long complaintId,
+            boolean selected) {
+
+        List<EstimateItem> items = repository.findByComplaintId(complaintId);
+
+        if (items.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Estimate items not found for complaint id : " + complaintId);
+        }
+
+        Estimate estimate = items.get(0).getEstimate();
+
+        GarageUserPrincipal principal = (GarageUserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!principal.getRoles().contains(RoleCode.CUSTOMER.name())) {
+            throw new ResourceNotFoundException(
+                    "Complaint not found with id : " + complaintId);
+        }
+
+        Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Complaint not found with id : " + complaintId));
+
+        if (estimate.getJobCard().getCustomer() == null
+                || !estimate.getJobCard().getCustomer().getId().equals(customer.getId())) {
+
+            throw new ResourceNotFoundException(
+                    "Complaint not found with id : " + complaintId);
+        }
+
+        if (estimate.getStatus() == EstimateStatus.APPROVED) {
+            throw new BusinessException(
+                    "This estimate has already been approved and can no longer be changed.");
+        }
+
+        for (EstimateItem item : items) {
+            item.setSelected(selected);
+        }
+
+        items = repository.saveAll(items);
+
+        recalculateEstimate(estimate);
+
+        // Mission: a rejected complaint's repair work must not remain
+        // active. Any RepairTask already created for this complaint (e.g.
+        // the customer changes their selection after an earlier approval
+        // cycle already spawned one) is cancelled, never deleted -
+        // preserving history exactly as RepairStatus.CANCELLED already
+        // does for every other cancellation path in this codebase.
+        if (!selected) {
+            repairTaskRepository
+                    .findByJobCardIdAndComplaintId(
+                            estimate.getJobCard().getId(),
+                            complaintId)
+                    .filter(task -> task.getStatus() != RepairStatus.COMPLETED
+                            && task.getStatus() != RepairStatus.CANCELLED)
+                    .ifPresent(task -> {
+                        task.setStatus(RepairStatus.CANCELLED);
+                        repairTaskRepository.save(task);
+                    });
+        }
+
+        return items.stream().map(mapper::toResponse).toList();
     }
 
 }

@@ -38,4 +38,15 @@ public interface AuthService {
 
     RegisterResponse register(RegisterRequest request);
 
+    /**
+     * Soft-deletes the calling user's own account: marks it DELETED (which
+     * GarageUserPrincipal already treats as disabled/locked, blocking both
+     * fresh login and any still-valid JWT on re-check), revokes all
+     * sessions, and clears/anonymizes directly-identifying fields. Business
+     * records owned by other aggregates (customers, vehicles, job cards,
+     * invoices, etc.) are untouched. Idempotent: calling this again on an
+     * already-deleted account is a no-op.
+     */
+    void deleteAccount();
+
 }

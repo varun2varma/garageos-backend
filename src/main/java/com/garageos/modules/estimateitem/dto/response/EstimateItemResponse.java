@@ -15,6 +15,14 @@ public class EstimateItemResponse {
 
     private Long complaintId;
 
+    /**
+     * The linked Complaint's own text (e.g. "AC not cooling"). Additive:
+     * needed so the customer approval UI can group/label items by
+     * Complaint - the actual customer approval boundary - rather than by
+     * a bare numeric complaintId.
+     */
+    private String complaintText;
+
     private String itemType;
 
     private String description;

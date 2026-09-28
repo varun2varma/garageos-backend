@@ -15,7 +15,15 @@ public interface JobAssignmentMapper {
     @Mapping(target = "jobCardNumber", source = "jobCard.jobCardNumber")
     @Mapping(target = "estimateItemId", source = "estimateItem.id")
     @Mapping(target = "repairTaskId", source = "repairTask.id")
-    @Mapping(target = "serviceName", source = "estimateItem.description")
+    // Root-cause fix: RepairTask is per-Complaint (one task can cover
+    // several PART/LABOUR items), so the linked estimateItem is only ever
+    // a single "representative" line item kept for backward traceability
+    // (see RepairTaskServiceImpl.createRepairTasks) and is frequently null
+    // on the JobAssignment itself - sourcing serviceName from it produced
+    // a null name, which the UI then displayed as a generic "Repair task"
+    // placeholder. The Complaint's own text is what every task under it
+    // actually represents.
+    @Mapping(target = "serviceName", source = "repairTask.complaint.complaint")
     @Mapping(target = "employeeId", source = "user.id")
 
     @Mapping(
@@ -58,9 +66,11 @@ public interface JobAssignmentMapper {
             source = "jobCard.vehicle.registrationNumber"
     )
 
+    // See toResponse()'s serviceName mapping above for why this sources
+    // from the Complaint rather than the (often-null) representative item.
     @Mapping(
             target = "serviceName",
-            source = "estimateItem.description"
+            source = "repairTask.complaint.complaint"
     )
 
     /**

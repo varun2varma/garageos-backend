@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/*.html",
+                                "/delete-account",
 
                                 "/css/**",
                                 "/js/**",

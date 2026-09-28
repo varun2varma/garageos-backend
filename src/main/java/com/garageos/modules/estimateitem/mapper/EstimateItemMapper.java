@@ -29,6 +29,7 @@ public interface EstimateItemMapper {
 
     @Mapping(source = "estimate.id", target = "estimateId")
     @Mapping(source = "complaint.id", target = "complaintId")
+    @Mapping(source = "complaint.complaint", target = "complaintText")
     @Mapping(target = "itemType",
             expression = "java(item.getItemType().name())")
     EstimateItemResponse toResponse(EstimateItem item);
