@@ -713,16 +713,21 @@ public class MediaServiceImpl implements MediaService {
 
         JobCardMedia savedMedia = jobCardMediaRepository.save(media);
 
-        Long garageId = jobCard.getGarage().getId();
-
-        // Backend-generated, never client-supplied — see the object-key
-        // design principle in this feature's own architecture notes:
-        // deterministic, garage/job-card/media-id scoped, safe.
+        // Backend-generated, never client-supplied. Human-readable and
+        // scoped by garage code / job-card number / stage — mirrors the
+        // existing Google Drive folder convention (GarageST/{garageCode}/
+        // {jobCardNumber}/{stage}/{fileName}) rather than the raw numeric
+        // IDs used previously, so an object browsed directly in the R2
+        // bucket is identifiable without a database lookup. Existing R2
+        // objects created under the old garage/{id}/jobcard/{id}/media/
+        // {id}/ convention are unaffected — storageKey is read from the DB
+        // per-row, never reconstructed from IDs elsewhere.
+        String garageCode = jobCard.getGarage().getGarageCode();
         String storageKey =
-                "garage/" + garageId
-                        + "/jobcard/" + jobCardId
-                        + "/media/" + savedMedia.getId()
-                        + "/original." + extension;
+                "GarageST/" + garageCode
+                        + "/" + jobCard.getJobCardNumber()
+                        + "/" + request.getStage().name()
+                        + "/" + generatedFileName;
 
         savedMedia.setStorageKey(storageKey);
         savedMedia = jobCardMediaRepository.save(savedMedia);
@@ -863,6 +868,12 @@ public class MediaServiceImpl implements MediaService {
         GarageUserPrincipal principal = currentPrincipal();
 
         authorizeEmployeeAccess(jobCard, principal);
+
+        return resolvePlaybackAccess(media, variant);
+    }
+
+    @Override
+    public MediaAccessResponse resolvePlaybackAccess(JobCardMedia media, String variant) {
 
         StorageProvider providerType =
                 StorageProvider.valueOf(media.getStorageProvider());

@@ -10,6 +10,7 @@ import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.dto.response.MediaAccessResponse;
 import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.vehicle.dto.response.VehicleResponse;
 import jakarta.validation.Valid;
@@ -173,6 +174,26 @@ public class CustomerPortalController {
                         HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + content.fileName() + "\"")
                 .body(content.content());
+    }
+
+    /**
+     * Provider-aware equivalent of the employee-side {@code /media/{id}/
+     * access} endpoint, scoped to a job card the calling customer owns.
+     * Returns a presigned R2 URL (thumbnail/original/evidence) or the
+     * legacy Drive proxy URL, so customer-facing media viewing works for
+     * R2-backed media the same way {@code getJobCardMediaContent} above
+     * already does for Drive-backed media.
+     */
+    @GetMapping("/jobcards/{jobCardNumber}/media/{mediaId}/access")
+    public ResponseEntity<ApiResponse<MediaAccessResponse>> getJobCardMediaAccess(
+            @PathVariable String jobCardNumber,
+            @PathVariable Long mediaId,
+            @RequestParam(defaultValue = "original") String variant) {
+
+        return ApiResponseUtil.success(
+                "Media access resolved successfully.",
+                service.getJobCardMediaAccess(jobCardNumber, mediaId, variant)
+        );
     }
 
 }

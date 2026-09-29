@@ -327,10 +327,23 @@ public class MediaProcessingScheduler {
         return resized;
     }
 
-    /** "garage/.../media/{id}/original.jpg" -> "garage/.../media/{id}/{fileName}" */
-    private String deriveDerivedKey(String storageKey, String fileName) {
+    /**
+     * ".../{jobCardNumber}_{stage}_{seq}.jpg" -> ".../{jobCardNumber}_{stage}
+     * _{seq}_thumbnail.jpg" (or "..._evidence.jpg") - inserts the suffix
+     * before the original file's extension rather than replacing the whole
+     * filename. Under the human-readable R2 key convention (GarageST/
+     * {garageCode}/{jobCardNumber}/{stage}/{fileName}, no per-media-id
+     * subdirectory), replacing the filename outright would collide: every
+     * media item in the same job-card/stage folder would derive the same
+     * literal "thumbnail.jpg" key and overwrite each other's derived asset.
+     */
+    private String deriveDerivedKey(String storageKey, String suffixFileName) {
         int lastSlash = storageKey.lastIndexOf('/');
-        return storageKey.substring(0, lastSlash + 1) + fileName;
+        String directory = storageKey.substring(0, lastSlash + 1);
+        String originalFileName = storageKey.substring(lastSlash + 1);
+        int lastDot = originalFileName.lastIndexOf('.');
+        String stem = lastDot >= 0 ? originalFileName.substring(0, lastDot) : originalFileName;
+        return directory + stem + "_" + suffixFileName;
     }
 
     private MediaStorageProvider resolveProvider(StorageProvider type) {

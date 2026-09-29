@@ -3,6 +3,7 @@ package com.garageos.modules.customer.service;
 import com.garageos.modules.customer.dto.request.portal.UpdateCustomerProfileRequest;
 import com.garageos.modules.customer.dto.response.portal.*;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.dto.response.MediaAccessResponse;
 import com.garageos.modules.media.service.MediaContent;
 
 import java.util.List;
@@ -44,5 +45,17 @@ public interface CustomerPortalService {
      * the media id happens to belong to that job card.
      */
     MediaContent getJobCardMediaContent(String jobCardNumber, Long mediaId);
+
+    /**
+     * Provider-aware playback access for one media item on a job card the
+     * calling customer owns — a presigned R2 URL, or (for legacy Drive rows)
+     * the existing proxied content path. Same ownership/visibility
+     * authorization as {@link #getJobCardMediaContent}; the difference is
+     * this resolves through {@code MediaService.resolvePlaybackAccess}, so
+     * R2-backed media (thumbnail/original/evidence) works for customers the
+     * same way it already does for employees, instead of only through the
+     * Drive-only {@code downloadContent} path.
+     */
+    MediaAccessResponse getJobCardMediaAccess(String jobCardNumber, Long mediaId, String variant);
 
 }

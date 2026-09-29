@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.garageos.core.api.error.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -158,6 +159,25 @@ public class GlobalExceptionHandler {
         log.warn("Rejected request: {}", ex.getMessage());
 
         return ResponseEntity.badRequest().body(buildError(ex.getMessage()));
+    }
+
+    /**
+     * Corrective fix: a request body exceeding Spring's configured
+     * multipart limits (application.properties: spring.servlet.multipart.
+     * max-file-size/max-request-size) had no handler, so it fell through
+     * to the generic catch-all below and reached the client as a bare 500
+     * "Something went wrong." - indistinguishable from a real server
+     * failure and easy to misdiagnose as a video-upload bug rather than a
+     * client payload that was simply too large for this endpoint.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex) {
+
+        log.warn("Rejected request: upload exceeds the configured size limit");
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(buildError("File exceeds the maximum upload size for this endpoint."));
     }
 
     /**

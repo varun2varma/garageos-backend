@@ -91,6 +91,20 @@ public interface MediaService {
     MediaAccessResponse getPlaybackAccess(Long mediaId, String variant);
 
     /**
+     * The provider/variant resolution half of {@link #getPlaybackAccess} —
+     * same R2-presigned-vs-Drive-proxy branching, same thumbnail/evidence/
+     * original fallback rules — but takes an already-authorized
+     * {@link JobCardMedia} and performs no authorization of its own.
+     * Authorization and provider resolution are deliberately separate calls:
+     * {@link #getPlaybackAccess} does employee authorization before
+     * delegating here; a customer-facing caller (CustomerPortalServiceImpl)
+     * does its own customer/job-card-ownership authorization first, then
+     * calls this directly, so the two access paths never share (or bypass)
+     * each other's authorization rules.
+     */
+    MediaAccessResponse resolvePlaybackAccess(JobCardMedia media, String variant);
+
+    /**
      * Deletes a media row and best-effort deletes its underlying object
      * (R2) or logs the known Drive limitation (no Drive delete capability —
      * see GoogleDriveMediaStorageProvider). Restricted to privileged roles

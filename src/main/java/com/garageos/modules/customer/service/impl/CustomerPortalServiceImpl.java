@@ -21,6 +21,7 @@ import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.dto.response.MediaAccessResponse;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.mapper.JobCardMediaMapper;
 import com.garageos.modules.media.repository.JobCardMediaRepository;
@@ -372,13 +373,42 @@ public class CustomerPortalServiceImpl
                                 VISIBILITY_CUSTOMER_VISIBLE
                         );
 
-        return jobCardMediaMapper.toResponseList(media);
+        // Customer-specific mapping: excludes uploadedBy (internal employee
+        // user id) and lastError (internal diagnostic text), neither of
+        // which a customer needs — mirrors the same "narrower DTO for a
+        // narrower audience" pattern already used for the employee-only
+        // JobCardMediaAuditResponse.
+        return jobCardMediaMapper.toCustomerResponseList(media);
     }
 
     @Override
     public MediaContent getJobCardMediaContent(
             String jobCardNumber,
             Long mediaId) {
+
+        JobCardMedia media = ownedCustomerVisibleMedia(jobCardNumber, mediaId);
+
+        return mediaService.downloadContent(media);
+    }
+
+    @Override
+    public MediaAccessResponse getJobCardMediaAccess(
+            String jobCardNumber,
+            Long mediaId,
+            String variant) {
+
+        JobCardMedia media = ownedCustomerVisibleMedia(jobCardNumber, mediaId);
+
+        return mediaService.resolvePlaybackAccess(media, variant);
+    }
+
+    /**
+     * Shared authorization for both {@link #getJobCardMediaContent} and
+     * {@link #getJobCardMediaAccess}: the media id must belong to a job card
+     * this customer owns, and must be {@code CUSTOMER_VISIBLE}, even if it
+     * belongs to an owned job card. Never trust mediaId alone.
+     */
+    private JobCardMedia ownedCustomerVisibleMedia(String jobCardNumber, Long mediaId) {
 
         JobCard jobCard =
                 ownedJobCard(jobCardNumber);
@@ -389,8 +419,6 @@ public class CustomerPortalServiceImpl
                                 new ResourceNotFoundException(
                                         "Media not found with id : " + mediaId));
 
-        // Never trust mediaId alone: it must belong to a job card this
-        // customer owns, and it must be customer-visible even if it does.
         if (!jobCard.getId().equals(media.getJobCardId())
                 || !VISIBILITY_CUSTOMER_VISIBLE.equals(media.getVisibility())) {
 
@@ -398,7 +426,7 @@ public class CustomerPortalServiceImpl
                     "Media not found with id : " + mediaId);
         }
 
-        return mediaService.downloadContent(media);
+        return media;
     }
 
     /**
