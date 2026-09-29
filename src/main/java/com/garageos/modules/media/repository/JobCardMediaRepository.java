@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface JobCardMediaRepository
         extends JpaRepository<JobCardMedia, Long> {
@@ -52,4 +53,18 @@ public interface JobCardMediaRepository
     @Query("UPDATE JobCardMedia m SET m.uploadStatus = 'PENDING', "
             + "m.nextRetryAt = :now WHERE m.uploadStatus = 'AUTH_REQUIRED'")
     int wakeAuthRequiredRows(LocalDateTime now);
+
+    /**
+     * Idempotency lookup for the direct-upload completion endpoint — a
+     * retried completion request with the same session id must return the
+     * existing row rather than create a duplicate. Backed by the partial
+     * unique index from V58.
+     */
+    Optional<JobCardMedia> findByUploadSessionId(String uploadSessionId);
+
+    /** MediaProcessingScheduler's scan: R2 rows whose bytes are confirmed but not yet fully processed. */
+    List<JobCardMedia> findByStorageProviderAndUploadStatus(
+            String storageProvider,
+            String uploadStatus
+    );
 }

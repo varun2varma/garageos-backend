@@ -3,7 +3,9 @@ package com.garageos.modules.media.service.impl;
 import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.media.MediaStage;
 import com.garageos.core.enums.media.MediaType;
+import com.garageos.core.enums.media.MediaUploadStatus;
 import com.garageos.core.enums.media.MediaVisibility;
+import com.garageos.core.enums.media.StorageProvider;
 import com.garageos.core.exception.MediaException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -13,12 +15,20 @@ import com.garageos.modules.jobassignment.entity.JobAssignment;
 import com.garageos.modules.jobassignment.repository.JobAssignmentRepository;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
+import com.garageos.modules.media.dto.request.UploadCompleteRequest;
+import com.garageos.modules.media.dto.request.UploadIntentRequest;
+import com.garageos.modules.media.dto.response.MediaAccessResponse;
+import com.garageos.modules.media.dto.response.UploadIntentResponse;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.service.GoogleDriveFileService;
 import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.media.service.MediaService;
 import com.garageos.modules.media.service.MediaUploadRetryService;
+import com.garageos.modules.media.storage.MediaStorageProvider;
+import com.garageos.modules.media.storage.PlaybackAccess;
+import com.garageos.modules.media.storage.R2MediaStorageProvider;
+import com.garageos.modules.media.storage.UploadAuthorization;
 import com.garageos.modules.navigation.storage.MediaStorageService;
 import com.garageos.modules.repairtask.entity.RepairTask;
 import com.garageos.modules.repairtask.repository.RepairTaskRepository;
@@ -27,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -34,6 +45,7 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +65,14 @@ public class MediaServiceImpl implements MediaService {
 
     private static final String PENDING_UPLOAD_FOLDER = "job-card-media/pending";
 
+    /**
+     * Server-side ceiling for a direct-upload intent's declared file size.
+     * Direct-to-R2 uploads never pass through Spring's multipart limits
+     * (spring.servlet.multipart.max-*), since the bytes never reach this
+     * server at all — this is the equivalent guard for that path.
+     */
+    private static final long MAX_DIRECT_UPLOAD_BYTES = 500L * 1024 * 1024;
+
     private final JobCardRepository jobCardRepository;
     private final JobCardMediaRepository jobCardMediaRepository;
     private final RepairTaskRepository repairTaskRepository;
@@ -60,6 +80,7 @@ public class MediaServiceImpl implements MediaService {
     private final GoogleDriveFileService googleDriveFileService;
     private final MediaUploadRetryService mediaUploadRetryService;
     private final MediaStorageService mediaStorageService;
+    private final List<MediaStorageProvider> mediaStorageProviders;
 
     @Override
     public JobCardMedia uploadMedia(
@@ -586,6 +607,419 @@ public class MediaServiceImpl implements MediaService {
         );
 
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public UploadIntentResponse createUploadIntent(
+            Long jobCardId,
+            UploadIntentRequest request) {
+
+        JobCard jobCard =
+                jobCardRepository.findById(jobCardId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Job Card not found with id : " + jobCardId));
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        authorizeEmployeeAccess(jobCard, principal);
+
+        validateRepairTaskRequirement(jobCardId, request.getStage(), request.getRepairTaskId());
+
+        if (request.getRepairTaskId() != null) {
+
+            RepairTask repairTask =
+                    repairTaskRepository.findById(request.getRepairTaskId())
+                            .orElseThrow(() -> new ResourceNotFoundException(
+                                    "Repair Task not found with id : " + request.getRepairTaskId()));
+
+            if (repairTask.getJobCard() == null
+                    || repairTask.getJobCard().getId() == null
+                    || !jobCardId.equals(repairTask.getJobCard().getId())) {
+
+                throw new IllegalArgumentException(
+                        "Repair Task does not belong to this Job Card."
+                );
+            }
+        }
+
+        MediaStorageProvider r2 = resolveProvider(StorageProvider.R2);
+
+        if (!r2.isAvailable()) {
+
+            throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_STORAGE_NOT_CONFIGURED,
+                    "Direct media upload is not available yet. Use the standard upload endpoint instead."
+            );
+        }
+
+        if (request.getFileSize() > MAX_DIRECT_UPLOAD_BYTES) {
+
+            throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_INVALID_REQUEST,
+                    "File is too large."
+            );
+        }
+
+        MediaType mediaType = resolveMediaType(request.getContentType());
+
+        String extension = resolveExtension(null, request.getContentType());
+
+        int sequence = getNextSequence(jobCardId, request.getStage());
+
+        String generatedFileName =
+                String.format(
+                        "%s_%s_%03d.%s",
+                        jobCard.getJobCardNumber(),
+                        request.getStage().name(),
+                        sequence,
+                        extension
+                );
+
+        String visibility = resolveInitialVisibility(request.getStage());
+
+        String uploadSessionId = UUID.randomUUID().toString();
+
+        JobCardMedia media =
+                JobCardMedia.builder()
+                        .jobCardId(jobCardId)
+                        .repairTaskId(request.getRepairTaskId())
+                        .fileName(generatedFileName)
+                        .mediaType(mediaType.name())
+                        .mediaStage(request.getStage().name())
+                        .contentType(request.getContentType())
+                        .fileSize(request.getFileSize())
+                        .uploadedBy(principal.getId())
+                        .visibility(visibility)
+                        .createdAt(LocalDateTime.now())
+                        .uploadStatus(MediaUploadStatus.PENDING.name())
+                        .retryCount(0)
+                        .storageProvider(StorageProvider.R2.name())
+                        .checksum(request.getChecksum())
+                        .uploadSessionId(uploadSessionId)
+                        // Backend-authoritative: WHO captured this media is
+                        // the currently-authenticated principal, never a
+                        // client-supplied identity (see this method's own
+                        // doc comment / MediaServiceImpl class-level notes
+                        // on audit-metadata immutability).
+                        .capturedByUserId(principal.getId())
+                        .capturedByNameSnapshot(principalDisplayName(principal))
+                        .capturedAt(parseCapturedAt(request.getCapturedAt()))
+                        .latitude(request.getLatitude())
+                        .longitude(request.getLongitude())
+                        .locationAccuracyMeters(request.getLocationAccuracyMeters())
+                        .locationName(request.getLocationName())
+                        .build();
+
+        JobCardMedia savedMedia = jobCardMediaRepository.save(media);
+
+        Long garageId = jobCard.getGarage().getId();
+
+        // Backend-generated, never client-supplied — see the object-key
+        // design principle in this feature's own architecture notes:
+        // deterministic, garage/job-card/media-id scoped, safe.
+        String storageKey =
+                "garage/" + garageId
+                        + "/jobcard/" + jobCardId
+                        + "/media/" + savedMedia.getId()
+                        + "/original." + extension;
+
+        savedMedia.setStorageKey(storageKey);
+        savedMedia = jobCardMediaRepository.save(savedMedia);
+
+        UploadAuthorization authorization =
+                r2.createUploadAuthorization(storageKey, request.getContentType());
+
+        log.info(
+                "[MEDIA][R2] Upload intent created. mediaId={}, jobCardId={}, storageKey={}",
+                savedMedia.getId(),
+                jobCardId,
+                storageKey
+        );
+
+        return UploadIntentResponse.builder()
+                .mediaId(savedMedia.getId())
+                .uploadUrl(authorization.uploadUrl())
+                .method(authorization.method())
+                .requiredHeaders(authorization.requiredHeaders())
+                .storageProvider(StorageProvider.R2.name())
+                .storageKey(storageKey)
+                .expiresAt(authorization.expiresAt())
+                .uploadSessionId(uploadSessionId)
+                .status(savedMedia.getUploadStatus())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public JobCardMedia completeUpload(
+            Long mediaId,
+            UploadCompleteRequest request) {
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Media not found with id : " + mediaId));
+
+        JobCard jobCard =
+                jobCardRepository.findById(media.getJobCardId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Job Card not found with id : " + media.getJobCardId()));
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        authorizeEmployeeAccess(jobCard, principal);
+
+        if (media.getUploadSessionId() == null
+                || !media.getUploadSessionId().equals(request.getUploadSessionId())) {
+
+            throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_INVALID_REQUEST,
+                    "Upload session does not match this media item."
+            );
+        }
+
+        MediaUploadStatus currentStatus =
+                MediaUploadStatus.valueOf(media.getUploadStatus());
+
+        // Idempotent: a retried completion call (lost response, duplicate
+        // tap, app-restart re-send) for an already-completed/completing row
+        // returns the existing row rather than reprocessing it.
+        if (currentStatus == MediaUploadStatus.UPLOADED
+                || currentStatus == MediaUploadStatus.PROCESSING
+                || currentStatus == MediaUploadStatus.COMPLETED) {
+
+            return media;
+        }
+
+        if (!StorageProvider.R2.name().equals(media.getStorageProvider())) {
+
+            throw new MediaException(
+                    MediaException.MediaErrorCode.MEDIA_INVALID_REQUEST,
+                    "This media item was not created through the direct-upload flow."
+            );
+        }
+
+        MediaStorageProvider r2 = resolveProvider(StorageProvider.R2);
+
+        Long actualSize = r2.confirmUpload(media.getStorageKey());
+
+        if (request.getFileSize() != null
+                && actualSize != null
+                && !actualSize.equals(request.getFileSize())) {
+
+            log.warn(
+                    "[MEDIA][R2] Declared file size does not match stored object size. "
+                            + "mediaId={}, declared={}, actual={}",
+                    mediaId,
+                    request.getFileSize(),
+                    actualSize
+            );
+        }
+
+        if (actualSize != null) {
+            media.setFileSize(actualSize);
+        }
+
+        if (request.getChecksum() != null) {
+            media.setChecksum(request.getChecksum());
+        }
+
+        if (request.getDurationSeconds() != null) {
+            media.setDurationSeconds(request.getDurationSeconds());
+        }
+
+        media.setUploadedAt(LocalDateTime.now());
+        media.setUploadedByNameSnapshot(principalDisplayName(principal));
+
+        media.setUploadStatus(MediaUploadStatus.UPLOADED.name());
+        media.setRetryCount(0);
+        media.setNextRetryAt(null);
+
+        JobCardMedia saved = jobCardMediaRepository.save(media);
+
+        log.info(
+                "[MEDIA][R2] Upload completed and confirmed. mediaId={}, jobCardId={}",
+                mediaId,
+                media.getJobCardId()
+        );
+
+        return saved;
+    }
+
+    @Override
+    public MediaAccessResponse getPlaybackAccess(Long mediaId, String variant) {
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Media not found with id : " + mediaId));
+
+        JobCard jobCard =
+                jobCardRepository.findById(media.getJobCardId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Job Card not found with id : " + media.getJobCardId()));
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        authorizeEmployeeAccess(jobCard, principal);
+
+        StorageProvider providerType =
+                StorageProvider.valueOf(media.getStorageProvider());
+
+        boolean wantsThumbnail = "thumbnail".equalsIgnoreCase(variant);
+        boolean wantsEvidence = "evidence".equalsIgnoreCase(variant);
+
+        PlaybackAccess access;
+
+        if (wantsThumbnail && media.getThumbnailKey() != null && providerType == StorageProvider.R2) {
+
+            // A real, generated thumbnail exists — always prefer it,
+            // regardless of media type.
+            access = ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
+                    .createPlaybackAccessForKey(media.getThumbnailKey());
+
+        } else if (wantsThumbnail && "VIDEO".equals(media.getMediaType())) {
+
+            // No generated video thumbnail exists (not implemented this
+            // pass) — never fall back to the full video for a grid tile.
+            access = PlaybackAccess.unavailable();
+
+        } else if (wantsEvidence && media.getEvidenceKey() != null && providerType == StorageProvider.R2) {
+
+            access = ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
+                    .createPlaybackAccessForKey(media.getEvidenceKey());
+
+        } else if (wantsEvidence) {
+
+            // No evidence variant exists (video, legacy Drive row, or still
+            // PROCESSING) — never silently substitute the original under
+            // the "evidence" label; the caller should fall back to
+            // requesting "original" explicitly if it wants that.
+            access = PlaybackAccess.unavailable();
+
+        } else {
+
+            // Image with no thumbnail yet (still PROCESSING, or a legacy
+            // Drive row that predates thumbnails), or an "original" request
+            // — the existing per-provider original-access path is safe to
+            // use directly (a photo is small; Drive playback is unchanged).
+            access = resolveProvider(providerType).createPlaybackAccess(media);
+        }
+
+        return MediaAccessResponse.builder()
+                .mediaId(media.getId())
+                .url(access.url())
+                .direct(access.direct())
+                .headers(access.headers())
+                .expiresAt(access.expiresAt())
+                .available(access.available())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteMedia(Long mediaId) {
+
+        JobCardMedia media =
+                jobCardMediaRepository.findById(mediaId)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Media not found with id : " + mediaId));
+
+        JobCard jobCard =
+                jobCardRepository.findById(media.getJobCardId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Job Card not found with id : " + media.getJobCardId()));
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        // Defense in depth — the controller already restricts this endpoint
+        // to privileged roles (same VISIBILITY_UPDATE_ROLES gate), but
+        // garage isolation is still enforced here directly, same reasoning
+        // as updateVisibility.
+        authorizeEmployeeAccess(jobCard, principal);
+
+        StorageProvider providerType =
+                StorageProvider.valueOf(media.getStorageProvider());
+
+        try {
+
+            resolveProvider(providerType).delete(media);
+
+        } catch (Exception ex) {
+
+            log.error(
+                    "[MEDIA] Failed to delete underlying storage object; deleting metadata row anyway. "
+                            + "mediaId={}, provider={}, error={}",
+                    mediaId,
+                    providerType,
+                    ex.getMessage(),
+                    ex
+            );
+        }
+
+        jobCardMediaRepository.delete(media);
+
+        log.info(
+                "[MEDIA] Media deleted. mediaId={}, jobCardId={}, provider={}",
+                mediaId,
+                media.getJobCardId(),
+                providerType
+        );
+    }
+
+    private MediaStorageProvider resolveProvider(StorageProvider type) {
+
+        return mediaStorageProviders.stream()
+                .filter(provider -> provider.getProviderType() == type)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No MediaStorageProvider registered for " + type));
+    }
+
+    private GarageUserPrincipal currentPrincipal() {
+
+        return (GarageUserPrincipal)
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+    }
+
+    private String principalDisplayName(GarageUserPrincipal principal) {
+
+        String first = principal.getFirstName() == null ? "" : principal.getFirstName().trim();
+        String last = principal.getLastName() == null ? "" : principal.getLastName().trim();
+        String full = (first + " " + last).trim();
+
+        return full.isEmpty() ? principal.getUsername() : full;
+    }
+
+    /**
+     * Client-reported capture timestamp — trusted for audit context (see
+     * this class's own notes on captured-by/captured-at immutability), but
+     * never allowed to crash the request if malformed. Falls back to the
+     * server's own received-time, which is an honest "this is when we know
+     * it existed" fallback, not a fabricated historical value.
+     */
+    private LocalDateTime parseCapturedAt(String isoTimestamp) {
+
+        if (isoTimestamp == null || isoTimestamp.isBlank()) {
+            return LocalDateTime.now();
+        }
+
+        try {
+            return java.time.OffsetDateTime.parse(isoTimestamp).toLocalDateTime();
+        } catch (Exception ex) {
+
+            try {
+                return LocalDateTime.parse(isoTimestamp);
+            } catch (Exception ex2) {
+
+                log.warn("[MEDIA] Unparseable capturedAt value, falling back to now. value={}", isoTimestamp);
+                return LocalDateTime.now();
+            }
+        }
     }
 
     @Override

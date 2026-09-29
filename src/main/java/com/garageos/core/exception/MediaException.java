@@ -51,7 +51,10 @@ public class MediaException extends RuntimeException {
         MEDIA_METADATA_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR),
 
         /** The request itself is wrong - missing stage, empty file, bad content type. */
-        MEDIA_INVALID_REQUEST(HttpStatus.BAD_REQUEST);
+        MEDIA_INVALID_REQUEST(HttpStatus.BAD_REQUEST),
+
+        /** R2 upload/playback was requested but R2 environment variables are not set yet. */
+        MEDIA_STORAGE_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE);
 
         private final HttpStatus status;
 

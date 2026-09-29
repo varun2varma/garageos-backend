@@ -4,7 +4,9 @@ import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.core.enums.media.MediaStage;
 import com.garageos.modules.media.dto.request.UpdateMediaVisibilityRequest;
+import com.garageos.modules.media.dto.request.UploadIntentRequest;
 import com.garageos.modules.media.dto.response.JobCardMediaResponse;
+import com.garageos.modules.media.dto.response.UploadIntentResponse;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.mapper.JobCardMediaMapper;
 import com.garageos.modules.media.service.MediaContent;
@@ -113,9 +115,47 @@ public class MediaController {
         }
     }
 
+    /**
+     * Step 1 of the direct-to-R2 upload flow (see MediaServiceImpl's own
+     * doc comments). Returns MEDIA_STORAGE_NOT_CONFIGURED (503) if R2 isn't
+     * provisioned yet — callers should fall back to the legacy
+     * {@code POST /{jobCardId}/media} endpoint above in that case.
+     */
+    @PostMapping("/{jobCardId}/media/upload-intent")
+    @PreAuthorize(MEDIA_ROLES)
+    public ResponseEntity<ApiResponse<UploadIntentResponse>> createUploadIntent(
+            @PathVariable Long jobCardId,
+            @Valid @RequestBody UploadIntentRequest request) {
+
+        log.info(
+                "[MEDIA] Upload intent requested. jobCardId={}, stage={}, contentType={}, fileSize={}",
+                jobCardId,
+                request.getStage(),
+                request.getContentType(),
+                request.getFileSize()
+        );
+
+        UploadIntentResponse response =
+                mediaService.createUploadIntent(jobCardId, request);
+
+        return ApiResponseUtil.created(
+                "Upload authorized.",
+                response
+        );
+    }
+
+    /**
+     * Employee/technician/owner-side listing — returns the richer
+     * {@link com.garageos.modules.media.dto.response.JobCardMediaAuditResponse}
+     * (includes WHO/WHEN/WHERE capture metadata). The customer-portal
+     * listing endpoint (CustomerPortalController) is a separate endpoint
+     * entirely and still returns the plain {@link JobCardMediaResponse} —
+     * see JobCardMediaAuditResponse's own doc comment for why that's a
+     * deliberate privacy decision, not an oversight.
+     */
     @GetMapping("/{jobCardId}/media")
     @PreAuthorize(MEDIA_ROLES)
-    public ResponseEntity<ApiResponse<List<JobCardMediaResponse>>> listMedia(
+    public ResponseEntity<ApiResponse<List<com.garageos.modules.media.dto.response.JobCardMediaAuditResponse>>> listMedia(
             @PathVariable Long jobCardId) {
 
         log.info(
@@ -128,7 +168,7 @@ public class MediaController {
 
         return ApiResponseUtil.success(
                 "Media fetched successfully.",
-                mediaMapper.toResponseList(media)
+                mediaMapper.toAuditResponseList(media)
         );
     }
 

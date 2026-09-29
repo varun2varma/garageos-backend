@@ -1,5 +1,8 @@
 package com.garageos.modules.media.service;
 
+import com.garageos.modules.media.dto.request.UploadIntentRequest;
+import com.garageos.modules.media.dto.response.MediaAccessResponse;
+import com.garageos.modules.media.dto.response.UploadIntentResponse;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.core.enums.media.MediaStage;
 import com.garageos.core.enums.media.MediaVisibility;
@@ -47,4 +50,51 @@ public interface MediaService {
      * initial-visibility logic in {@link #uploadMedia} at all.
      */
     JobCardMedia updateVisibility(Long jobCardId, Long mediaId, MediaVisibility visibility);
+
+    /**
+     * Step 1 of the direct-to-R2 upload flow: authorizes the caller (same
+     * garage-isolation + technician-assignment check as {@link #uploadMedia}),
+     * reserves a {@link JobCardMedia} row (status UPLOADED-pending, i.e.
+     * PENDING) with a generated, provider-neutral object key, and returns a
+     * short-lived R2 upload authorization. Never used for GOOGLE_DRIVE —
+     * that provider has no direct-upload capability, so this method throws
+     * MEDIA_STORAGE_NOT_CONFIGURED if R2 isn't set up yet, telling the
+     * client to fall back to the existing {@link #uploadMedia} endpoint.
+     */
+    UploadIntentResponse createUploadIntent(Long jobCardId, UploadIntentRequest request);
+
+    /**
+     * Step 2: the client reports it finished uploading directly to R2.
+     * Idempotent by {@code uploadSessionId} — a retried call with the same
+     * session id returns the already-completed row rather than reprocessing.
+     * Verifies the object actually exists in R2 before marking the row
+     * UPLOADED and enqueuing it for async processing.
+     */
+    JobCardMedia completeUpload(Long mediaId, com.garageos.modules.media.dto.request.UploadCompleteRequest request);
+
+    /**
+     * Returns how the client should fetch this media's bytes — a direct R2
+     * presigned URL, or (for legacy GOOGLE_DRIVE rows) the existing proxied
+     * content endpoint. Authorizes the same way as {@link #getMediaContent}.
+     *
+     * @param variant "original" (default) or "thumbnail". Requesting
+     *                "thumbnail" for a video with no generated thumbnail
+     *                (always true today — see MediaProcessingScheduler)
+     *                returns {@code available=false} rather than ever
+     *                falling back to the full video, so a gallery grid never
+     *                accidentally downloads an entire video just to show a
+     *                tile. Requesting "thumbnail" for an image with no
+     *                thumbnail yet (still PROCESSING, or a legacy Drive row)
+     *                falls back to the original — acceptable since a photo
+     *                is small.
+     */
+    MediaAccessResponse getPlaybackAccess(Long mediaId, String variant);
+
+    /**
+     * Deletes a media row and best-effort deletes its underlying object
+     * (R2) or logs the known Drive limitation (no Drive delete capability —
+     * see GoogleDriveMediaStorageProvider). Restricted to privileged roles
+     * at the controller level, same as {@link #updateVisibility}.
+     */
+    void deleteMedia(Long mediaId);
 }

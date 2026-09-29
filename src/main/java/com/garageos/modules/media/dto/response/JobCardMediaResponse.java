@@ -59,4 +59,10 @@ public class JobCardMediaResponse {
 
     /** Sanitized last failure summary, or null if there hasn't been one. */
     private String lastError;
+
+    /** GOOGLE_DRIVE or R2 — see {@link com.garageos.core.enums.media.StorageProvider}. */
+    private String storageProvider;
+
+    /** Video duration, once known (null for images and not-yet-processed videos). */
+    private Integer durationSeconds;
 }

@@ -21,7 +21,21 @@ public enum MediaUploadStatus {
     /** A Drive attempt is currently in flight for this row. */
     UPLOADING,
 
-    /** Drive accepted the file; {@code driveFileId} is set and authoritative. */
+    /**
+     * R2 path only: the client has confirmed a direct-to-storage upload and
+     * the backend has verified the object exists at {@code storageKey}, but
+     * derived assets (thumbnail, duration) have not been generated yet. The
+     * original is already safely stored and could be served as-is; this
+     * state exists so the UI can distinguish "bytes are safe" from "fully
+     * ready", not because the media is unusable. See
+     * MediaProcessingScheduler.
+     */
+    UPLOADED,
+
+    /** R2 path only: a processing attempt (thumbnail/derived-asset generation) is in flight. */
+    PROCESSING,
+
+    /** Drive accepted the file (driveFileId set); or R2 processing finished. Fully ready either way. */
     COMPLETED,
 
     /** A Drive attempt failed with a transient error; a backoff retry is scheduled. */

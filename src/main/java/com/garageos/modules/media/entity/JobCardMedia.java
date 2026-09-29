@@ -125,4 +125,114 @@ public class JobCardMedia {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    /**
+     * Which storage backend actually holds this media's bytes — see
+     * {@link com.garageos.core.enums.media.StorageProvider}. Stored as a
+     * plain string, matching every other enum-backed column on this entity.
+     * Defaults GOOGLE_DRIVE (V58 migration) so every row that existed before
+     * this column was added keeps working through the existing Drive path
+     * unchanged.
+     */
+    @Column(name = "storage_provider", nullable = false, length = 20)
+    @Builder.Default
+    private String storageProvider = "GOOGLE_DRIVE";
+
+    /**
+     * Provider-neutral object key (R2's equivalent of {@code driveFileId}).
+     * Null for GOOGLE_DRIVE rows, where {@code driveFileId} remains
+     * authoritative instead.
+     */
+    @Column(name = "storage_key", length = 500)
+    private String storageKey;
+
+    /** Client-reported checksum for the uploaded object, where available. */
+    @Column(name = "checksum", length = 128)
+    private String checksum;
+
+    /**
+     * Correlates a direct-upload's intent/complete request pair, and is the
+     * idempotency key {@code completeUpload} dedups on — a retried
+     * completion call with the same session id returns the existing row
+     * rather than creating a duplicate. Null for GOOGLE_DRIVE rows (the
+     * legacy multipart endpoint has no separate intent/complete steps).
+     */
+    @Column(name = "upload_session_id", length = 100)
+    private String uploadSessionId;
+
+    /** Object key of a generated thumbnail, once async processing has produced one. Null until then. */
+    @Column(name = "thumbnail_key", length = 500)
+    private String thumbnailKey;
+
+    /** Video duration, once known. Null for images and for not-yet-processed videos. */
+    @Column(name = "duration_seconds")
+    private Integer durationSeconds;
+
+    // -----------------------------------------------------------------
+    // AUDIT / EVIDENCE METADATA (V59) — WHO/WHEN/WHERE this media was
+    // actually captured, distinct from WHEN/WHO it was uploaded (a
+    // technician may capture media offline and the queue uploads it much
+    // later — see MediaUploadQueueService). NULL on every row that
+    // predates this column set (all legacy Drive rows, and any R2 row from
+    // before this feature) — never fabricated retroactively.
+    //
+    // Immutability: there is deliberately no endpoint that updates any of
+    // these fields after creation — they are set once, at
+    // MediaServiceImpl.createUploadIntent/completeUpload, and never
+    // touched again by any other code path. This is the actual enforcement
+    // mechanism (no route to reach), not a runtime check.
+    // -----------------------------------------------------------------
+
+    /**
+     * When the media was actually captured/selected on the device — NOT
+     * when the upload completed. Client-reported (the device's own clock
+     * at the moment of picking); trusted for audit context the same way a
+     * camera's own EXIF timestamp would be, not treated as a
+     * security-sensitive identity claim.
+     */
+    @Column(name = "captured_at")
+    private LocalDateTime capturedAt;
+
+    /**
+     * Backend-authoritative — set from the authenticated principal at
+     * upload-intent creation time, never accepted from the client request
+     * body. See MediaServiceImpl.createUploadIntent.
+     */
+    @Column(name = "captured_by_user_id")
+    private Long capturedByUserId;
+
+    /** Name snapshot at capture time, so the display name survives the user later being renamed/deactivated. */
+    @Column(name = "captured_by_name_snapshot", length = 200)
+    private String capturedByNameSnapshot;
+
+    /** Client-reported GPS latitude at capture time. Null if location was unavailable/denied — never fabricated. */
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "location_accuracy_meters")
+    private Double locationAccuracyMeters;
+
+    /** Human-readable reverse-geocoded snapshot (e.g. "Gachibowli, Hyderabad"). Coordinates remain authoritative. */
+    @Column(name = "location_name", length = 255)
+    private String locationName;
+
+    /** When the upload actually completed (server clock) — set in MediaServiceImpl.completeUpload. */
+    @Column(name = "uploaded_at")
+    private LocalDateTime uploadedAt;
+
+    /** Name snapshot of {@code uploadedBy} at completion time, same reasoning as {@code capturedByNameSnapshot}. */
+    @Column(name = "uploaded_by_name_snapshot", length = 200)
+    private String uploadedByNameSnapshot;
+
+    /**
+     * Object key of a generated "evidence" image — the original with a
+     * tasteful metadata footer overlay (location/time/captured-by/stage),
+     * NEVER a modification of {@code original}. Null until generated (or
+     * for video, where this isn't generated — see MediaProcessingScheduler).
+     */
+    @Column(name = "evidence_key", length = 500)
+    private String evidenceKey;
 }
