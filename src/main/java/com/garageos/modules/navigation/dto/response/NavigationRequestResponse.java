@@ -36,6 +36,8 @@ public class NavigationRequestResponse {
     private BigDecimal deliveryLatitude;
     private BigDecimal deliveryLongitude;
 
+    private Long jobCardId;
+
     private LocalDateTime scheduledAt;
 
     private NavigationRequestStatus status;

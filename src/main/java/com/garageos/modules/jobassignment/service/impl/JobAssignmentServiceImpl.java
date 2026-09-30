@@ -4,6 +4,7 @@ import com.garageos.core.enums.JobAssignmentStatus;
 import com.garageos.core.enums.JobAssignmentType;
 import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.estimateitem.entity.EstimateItem;
 import com.garageos.modules.estimateitem.repository.EstimateItemRepository;
@@ -282,6 +283,23 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         "Repair Task must be ASSIGNED before starting."
                 );
             }
+
+            /*
+             * A technician starting a RepairTask never moves the overall
+             * JobCard. Only the manager's explicit confirmation
+             * (JobCardServiceImpl.startRepair: REPAIR_PENDING ->
+             * REPAIR_IN_PROGRESS) opens the repair phase; until then a task
+             * cannot be started. (This method used to flip the JobCard
+             * itself, bypassing that gate.)
+             */
+            if (task.getJobCard() != null
+                    && task.getJobCard().getStatus()
+                    != JobCardStatus.REPAIR_IN_PROGRESS) {
+
+                throw new BusinessException(
+                        "A manager must proceed this Job Card to repair before a Repair Task can be started."
+                );
+            }
         }
 
         /*
@@ -302,8 +320,8 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         }
 
         /*
-         * Start the RepairTask and JobCard as part of
-         * the same transaction.
+         * Start the RepairTask as part of the same
+         * transaction (the JobCard is untouched - see guard above).
          */
         if (assignment.getAssignmentType()
                 == JobAssignmentType.TECHNICIAN) {
@@ -315,22 +333,6 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             task.setStartedAt(
                     LocalDateTime.now()
             );
-
-            JobCard jobCard =
-                    task.getJobCard();
-
-            if (jobCard != null
-                    && jobCard.getStatus()
-                    == JobCardStatus.REPAIR_PENDING) {
-
-                jobCard.setStatus(
-                        JobCardStatus.REPAIR_IN_PROGRESS
-                );
-
-                jobCardRepository.save(
-                        jobCard
-                );
-            }
 
             repairTaskRepository.save(
                     task

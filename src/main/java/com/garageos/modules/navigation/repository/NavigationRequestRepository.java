@@ -37,6 +37,23 @@ public interface NavigationRequestRepository
      * never advances past ASSIGNED again - see NavigationTripServiceImpl)
      * is the authoritative signal for anything after this point.
      */
+    boolean existsByJobCardIdAndRequestType(
+            Long jobCardId,
+            com.garageos.core.enums.navigation.NavigationRequestType requestType
+    );
+
+    boolean existsByJobCardIdAndRequestTypeAndStatusNot(
+            Long jobCardId,
+            com.garageos.core.enums.navigation.NavigationRequestType requestType,
+            NavigationRequestStatus status
+    );
+
+    java.util.Optional<NavigationRequest>
+    findFirstByJobCardIdAndRequestTypeOrderByIdDesc(
+            Long jobCardId,
+            com.garageos.core.enums.navigation.NavigationRequestType requestType
+    );
+
     List<NavigationRequest>
     findByVehicleIdInAndStatusIn(
             List<Long> vehicleIds,

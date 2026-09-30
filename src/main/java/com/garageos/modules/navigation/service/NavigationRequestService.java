@@ -23,4 +23,8 @@ public interface NavigationRequestService {
     List<NavigationRequestResponse> getGarageRequests(
             Long garageId
     );
+
+    NavigationRequestResponse getDeliveryRequestForJobCard(
+            Long jobCardId
+    );
 }

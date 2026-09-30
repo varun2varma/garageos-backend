@@ -48,6 +48,9 @@ public class NavigationTripResponse {
     /** Customer id behind this trip, so the driver need not search. */
     private Long customerId;
 
+    /** The JobCard this trip serves (delivery: the job being delivered; pickup: the job created from its booking); null if unknown. */
+    private Long jobCardId;
+
     private LocalDateTime acceptedAt;
 
     private LocalDateTime startedAt;

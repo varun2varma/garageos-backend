@@ -63,6 +63,14 @@ public class NavigationRequestController {
                 .getGarageRequests(garageId);
     }
 
+    /** The delivery request of a JobCard (404 if none yet) - garage staff only. */
+    @GetMapping("/job-card/{jobCardId}/delivery")
+    public NavigationRequestResponse getDeliveryRequestForJobCard(
+            @PathVariable Long jobCardId) {
+        return navigationRequestService
+                .getDeliveryRequestForJobCard(jobCardId);
+    }
+
     /**
      * Lets a customer who only knows their Booking's navigationRequestId
      * (from BookingResponse.navigationRequestId) find the actual trip to

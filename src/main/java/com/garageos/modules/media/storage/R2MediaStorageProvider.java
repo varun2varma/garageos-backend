@@ -209,18 +209,32 @@ public class R2MediaStorageProvider implements MediaStorageProvider {
 
         requireConfigured();
 
-        if (media.getStorageKey() == null) {
-            return;
+        // The main object plus any derived evidence/thumbnail object — under
+        // the evidence-only model these are the only objects; for legacy rows
+        // they would otherwise be orphaned in the bucket.
+        java.util.Set<String> keys = new java.util.LinkedHashSet<>();
+        if (media.getStorageKey() != null) keys.add(media.getStorageKey());
+        if (media.getEvidenceKey() != null) keys.add(media.getEvidenceKey());
+        if (media.getThumbnailKey() != null) keys.add(media.getThumbnailKey());
+
+        for (String key : keys) {
+            deleteKey(key);
         }
+    }
+
+    @Override
+    public void deleteKey(String storageKey) {
+
+        requireConfigured();
 
         s3Client().deleteObject(
                 DeleteObjectRequest.builder()
                         .bucket(properties.getBucketName())
-                        .key(media.getStorageKey())
+                        .key(storageKey)
                         .build()
         );
 
-        log.info("[MEDIA][R2] Object deleted. storageKey={}", media.getStorageKey());
+        log.info("[MEDIA][R2] Object deleted. storageKey={}", storageKey);
     }
 
     @Override

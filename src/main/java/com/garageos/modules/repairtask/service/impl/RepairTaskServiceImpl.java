@@ -422,11 +422,11 @@ public class RepairTaskServiceImpl implements RepairTaskService {
 
         JobCard jobCard = task.getJobCard();
 
-//        if (jobCard.getStatus() != JobCardStatus.REPAIR_IN_PROGRESS) {
-//            throw new BusinessException(
-//                    "Job Card must be in REPAIR_IN_PROGRESS before a "
-//                            + "Repair Task can be completed.");
-//        }
+        if (jobCard.getStatus() != JobCardStatus.REPAIR_IN_PROGRESS) {
+            throw new BusinessException(
+                    "Job Card must be in REPAIR_IN_PROGRESS before a "
+                            + "Repair Task can be completed.");
+        }
 
         task.setStatus(RepairStatus.COMPLETED);
         task.setCompletedAt(LocalDateTime.now());

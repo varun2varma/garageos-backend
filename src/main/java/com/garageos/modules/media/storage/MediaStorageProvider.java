@@ -71,6 +71,11 @@ public interface MediaStorageProvider {
 
     boolean exists(String storageKey);
 
+    /** Deletes one object by key (temporary staging sources, derived assets). Not supported by every provider. */
+    default void deleteKey(String storageKey) {
+        throw new UnsupportedOperationException("deleteKey is not supported by " + getProviderType());
+    }
+
     /**
      * Whether this provider can actually be used right now. R2 overrides
      * this to check its environment configuration; Drive (never chosen for

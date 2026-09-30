@@ -306,6 +306,15 @@ public class ServiceWorkflowServiceImpl
 
     }
 
+    /**
+     * Step position in the Flutter WorkflowShellScreen numbering (1 Search,
+     * 2 Job Card, 3 Inspection, 4 Completed, 5 Estimate, 6 Estimate Items,
+     * 7 Estimate Summary, 8 Approval, 9 Repair, 10 Quality Check, 11 Invoice,
+     * 12 Payment, 13 Delivery). Flutter derives its actual position from
+     * completedSteps; this value is informational and kept consistent.
+     * REPAIR_PENDING is still the Approval step: the customer has approved
+     * but the manager has not confirmed (see JobCardServiceImpl.startRepair).
+     */
     private int resolveStep(JobCardStatus status) {
 
         return switch (status) {
@@ -314,26 +323,27 @@ public class ServiceWorkflowServiceImpl
                     INSPECTION_PENDING -> 3;   // Inspection
 
             case INSPECTION_COMPLETED,
-                    ESTIMATE_PENDING -> 4;     // Estimate
+                    ESTIMATE_PENDING -> 5;     // Estimate
 
-            case WAITING_FOR_APPROVAL -> 6; // Estimate Summary
+            case WAITING_FOR_APPROVAL,
+                    ESTIMATE_APPROVED,
+                    REPAIR_PENDING -> 8;       // Approval (customer / manager confirmation)
 
-            case ESTIMATE_APPROVED,
-                    REPAIR_PENDING,
-                    REPAIR_IN_PROGRESS -> 8;   // Repair
+            case REPAIR_IN_PROGRESS,
+                    REPAIR_COMPLETED -> 9;     // Repair
 
-            case REPAIR_COMPLETED -> 9;     // Quality Check
+            case QUALITY_CHECK -> 10;          // Quality Check
 
-            case QUALITY_CHECK,
-                    READY_FOR_INVOICE -> 10;   // Invoice
+            case READY_FOR_INVOICE -> 11;      // Invoice
 
             case INVOICE_GENERATED,
-                    PAYMENT_PENDING -> 11;     // Payment
+                    INVOICED,
+                    PAYMENT_PENDING -> 12;     // Payment
 
             case PAYMENT_COMPLETED,
                     READY_FOR_DELIVERY,
                     DELIVERED,
-                    CLOSED -> 12;              // Delivery
+                    CLOSED -> 13;              // Delivery
 
             default -> 1;
         };
@@ -403,8 +413,23 @@ public class ServiceWorkflowServiceImpl
                 steps.add("ESTIMATE_SUMMARY");
                 break;
 
+            /*
+             * Customer has approved (Estimate APPROVED, RepairTasks created)
+             * but the MANAGER has not confirmed yet. APPROVAL is deliberately
+             * NOT completed here: the manager must still see the Approval
+             * step and explicitly confirm (POST /workflow/{n}/repair/start,
+             * JobCardServiceImpl.startRepair) - customer approval is not
+             * manager confirmation.
+             */
             case ESTIMATE_APPROVED:
             case REPAIR_PENDING:
+                steps.add("INSPECTION");
+                steps.add("ESTIMATE");
+                steps.add("ESTIMATE_ITEMS");
+                steps.add("ESTIMATE_SUMMARY");
+                break;
+
+            /* Manager confirmed: Approval is completed, Repair is active. */
             case REPAIR_IN_PROGRESS:
                 steps.add("INSPECTION");
                 steps.add("ESTIMATE");

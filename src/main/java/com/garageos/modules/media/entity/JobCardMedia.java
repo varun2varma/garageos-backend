@@ -235,4 +235,14 @@ public class JobCardMedia {
      */
     @Column(name = "evidence_key", length = 500)
     private String evidenceKey;
+
+    /**
+     * True for rows created under the final evidence-only model (no
+     * permanent original). While true and {@code evidenceKey} is still null
+     * (image still being rendered), {@code storageKey} points at a temporary
+     * staging source that must never be served. Legacy rows are false.
+     */
+    @Column(name = "evidence_only", nullable = false)
+    @Builder.Default
+    private boolean evidenceOnly = false;
 }

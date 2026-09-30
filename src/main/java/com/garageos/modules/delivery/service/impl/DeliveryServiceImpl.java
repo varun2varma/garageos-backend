@@ -3,6 +3,8 @@ package com.garageos.modules.delivery.service.impl;
 import com.garageos.core.enums.DeliveryStatus;
 import com.garageos.core.enums.InvoiceStatus;
 import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.enums.navigation.NavigationRequestType;
+import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.core.enums.PaymentStatus;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -34,6 +36,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final JobCardRepository jobCardRepository;
     private final InvoiceRepository invoiceRepository;
     private final DeliveryMapper mapper;
+    private final NavigationRequestRepository navigationRequestRepository;
     private final JobCardStatusValidator statusValidator;
 
     /**
@@ -63,6 +66,23 @@ public class DeliveryServiceImpl implements DeliveryService {
                         new ResourceNotFoundException(
                                 "Invoice not found with id : "
                                         + request.getInvoiceId()));
+
+        // The invoice must be THIS job card's own invoice - a caller-supplied
+        // invoiceId must never mark a different job delivered.
+        if (invoice.getEstimate() == null
+                || invoice.getEstimate().getJobCard() == null
+                || !jobCard.getId().equals(invoice.getEstimate().getJobCard().getId())) {
+            throw new BusinessException(
+                    "This invoice does not belong to the Job Card.");
+        }
+
+        // One completion path: once a delivery has been requested for the job,
+        // it is completed by the delivery trip (OTP + evidence), not by hand.
+        if (navigationRequestRepository.existsByJobCardIdAndRequestType(
+                jobCard.getId(), NavigationRequestType.DELIVERY)) {
+            throw new BusinessException(
+                    "A delivery trip exists for this Job Card - delivery completes when the driver completes the trip.");
+        }
 
         if (repository.existsByJobCardId(jobCard.getId())) {
             throw new BusinessException(
@@ -102,6 +122,63 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         jobCard.setStatus(JobCardStatus.DELIVERED);
 
+        jobCardRepository.save(jobCard);
+
+        return mapper.toResponse(delivery);
+    }
+
+    /**
+     * The delivery TRIP is the business completion of a delivery: called by
+     * NavigationTripServiceImpl.completeTrip once evidence and the customer
+     * OTP are verified. Creates the Delivery record (deliveredBy = driver,
+     * receivedBy = the OTP-verified customer) and moves the JobCard
+     * READY_FOR_DELIVERY -> DELIVERED, atomically with the trip completion.
+     */
+    @Override
+    @Transactional
+    public DeliveryResponse completeDeliveryFromTrip(
+            Long jobCardId,
+            String deliveredBy,
+            String receivedBy) {
+
+        JobCard jobCard = jobCardRepository.findById(jobCardId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Job Card not found with id : " + jobCardId));
+
+        authorizeDeliveryAction(jobCard);
+
+        if (repository.existsByJobCardId(jobCard.getId())) {
+            throw new BusinessException(
+                    "Delivery already exists for this Job Card.");
+        }
+
+        Invoice invoice = invoiceRepository
+                .findByEstimateJobCardId(jobCard.getId())
+                .orElseThrow(() ->
+                        new BusinessException(
+                                "The Job Card has no invoice to deliver against."));
+
+        if (invoice.getInvoiceStatus() != InvoiceStatus.GENERATED
+                || invoice.getPaymentStatus() != PaymentStatus.PAID) {
+            throw new BusinessException(
+                    "Invoice must be generated and paid before delivery can be completed.");
+        }
+
+        Delivery delivery = new Delivery();
+        delivery.setJobCard(jobCard);
+        delivery.setInvoice(invoice);
+        delivery.setDeliveryDateTime(LocalDateTime.now());
+        delivery.setDeliveredBy(deliveredBy);
+        delivery.setReceivedBy(receivedBy);
+        delivery.setStatus(DeliveryStatus.DELIVERED);
+        delivery = repository.save(delivery);
+
+        statusValidator.validate(
+                jobCard.getStatus(),
+                JobCardStatus.DELIVERED);
+
+        jobCard.setStatus(JobCardStatus.DELIVERED);
         jobCardRepository.save(jobCard);
 
         return mapper.toResponse(delivery);

@@ -26,6 +26,8 @@ import com.garageos.modules.media.service.MediaContent;
 import com.garageos.modules.media.service.MediaService;
 import com.garageos.modules.media.service.MediaUploadRetryService;
 import com.garageos.modules.media.storage.MediaStorageProvider;
+import com.garageos.modules.media.util.MediaEvidenceText;
+import com.garageos.modules.media.util.MediaKeys;
 import com.garageos.modules.media.storage.PlaybackAccess;
 import com.garageos.modules.media.storage.R2MediaStorageProvider;
 import com.garageos.modules.media.storage.UploadAuthorization;
@@ -709,6 +711,8 @@ public class MediaServiceImpl implements MediaService {
                         .longitude(request.getLongitude())
                         .locationAccuracyMeters(request.getLocationAccuracyMeters())
                         .locationName(request.getLocationName())
+                        // Final model: no permanent original is ever kept.
+                        .evidenceOnly(true)
                         .build();
 
         JobCardMedia savedMedia = jobCardMediaRepository.save(media);
@@ -723,17 +727,36 @@ public class MediaServiceImpl implements MediaService {
         // {id}/ convention are unaffected — storageKey is read from the DB
         // per-row, never reconstructed from IDs elsewhere.
         String garageCode = jobCard.getGarage().getGarageCode();
-        String storageKey =
+        String folder =
                 "GarageST/" + garageCode
                         + "/" + jobCard.getJobCardNumber()
                         + "/" + request.getStage().name()
-                        + "/" + generatedFileName;
+                        + "/";
+
+        // IMAGE: the client uploads a temporary "_source" object that the
+        // backend replaces with "_evidence.jpg" (MediaProcessingScheduler)
+        // and then deletes — it is never served. VIDEO: the client has
+        // already burned the evidence in on-device, so the uploaded object
+        // IS the permanent "_evidence.mp4".
+        boolean isVideo = mediaType == MediaType.VIDEO;
+        String storageKey = MediaKeys.derive(
+                folder + generatedFileName,
+                isVideo ? MediaKeys.EVIDENCE : MediaKeys.SOURCE,
+                extension);
 
         savedMedia.setStorageKey(storageKey);
         savedMedia = jobCardMediaRepository.save(savedMedia);
 
         UploadAuthorization authorization =
                 r2.createUploadAuthorization(storageKey, request.getContentType());
+
+        UploadAuthorization thumbnailAuthorization = null;
+
+        if (isVideo) {
+            thumbnailAuthorization = r2.createUploadAuthorization(
+                    MediaKeys.derive(storageKey, MediaKeys.THUMBNAIL, "jpg"),
+                    "image/jpeg");
+        }
 
         log.info(
                 "[MEDIA][R2] Upload intent created. mediaId={}, jobCardId={}, storageKey={}",
@@ -743,6 +766,9 @@ public class MediaServiceImpl implements MediaService {
         );
 
         return UploadIntentResponse.builder()
+                .thumbnailUploadUrl(thumbnailAuthorization != null ? thumbnailAuthorization.uploadUrl() : null)
+                .thumbnailRequiredHeaders(thumbnailAuthorization != null ? thumbnailAuthorization.requiredHeaders() : null)
+                .evidenceLines(MediaEvidenceText.lines(savedMedia))
                 .mediaId(savedMedia.getId())
                 .uploadUrl(authorization.uploadUrl())
                 .method(authorization.method())
@@ -834,6 +860,28 @@ public class MediaServiceImpl implements MediaService {
             media.setDurationSeconds(request.getDurationSeconds());
         }
 
+        if (media.isEvidenceOnly() && "VIDEO".equals(media.getMediaType())) {
+
+            // The confirmed upload is already the final burned-in evidence.
+            media.setEvidenceKey(media.getStorageKey());
+
+            if (Boolean.TRUE.equals(request.getThumbnailUploaded())) {
+
+                String thumbnailKey =
+                        MediaKeys.derive(media.getStorageKey(), MediaKeys.THUMBNAIL, "jpg");
+
+                if (r2.exists(thumbnailKey)) {
+                    media.setThumbnailKey(thumbnailKey);
+                } else {
+                    log.warn(
+                            "[MEDIA][R2] Client reported a video thumbnail upload but the object is missing. mediaId={}, key={}",
+                            mediaId,
+                            thumbnailKey
+                    );
+                }
+            }
+        }
+
         media.setUploadedAt(LocalDateTime.now());
         media.setUploadedByNameSnapshot(principalDisplayName(principal));
 
@@ -879,42 +927,43 @@ public class MediaServiceImpl implements MediaService {
                 StorageProvider.valueOf(media.getStorageProvider());
 
         boolean wantsThumbnail = "thumbnail".equalsIgnoreCase(variant);
-        boolean wantsEvidence = "evidence".equalsIgnoreCase(variant);
-
+        boolean r2Backed = providerType == StorageProvider.R2;
         PlaybackAccess access;
 
-        if (wantsThumbnail && media.getThumbnailKey() != null && providerType == StorageProvider.R2) {
+        if (wantsThumbnail) {
 
-            // A real, generated thumbnail exists — always prefer it,
-            // regardless of media type.
-            access = ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
-                    .createPlaybackAccessForKey(media.getThumbnailKey());
+            if (r2Backed && media.getThumbnailKey() != null) {
+                access = signedR2Access(media.getThumbnailKey());
+            } else if ("VIDEO".equals(media.getMediaType()) || media.isEvidenceOnly()) {
+                // Never fall back to a full video (or a temporary staging
+                // source) for a grid tile.
+                access = PlaybackAccess.unavailable();
+            } else {
+                // Legacy image with no thumbnail yet / Drive row.
+                access = resolveProvider(providerType).createPlaybackAccess(media);
+            }
 
-        } else if (wantsThumbnail && "VIDEO".equals(media.getMediaType())) {
+        } else if (media.isEvidenceOnly()) {
 
-            // No generated video thumbnail exists (not implemented this
-            // pass) — never fall back to the full video for a grid tile.
-            access = PlaybackAccess.unavailable();
+            // Evidence-only rows have exactly one full-size asset: the
+            // evidence. Every non-thumbnail variant (including a stale
+            // "original" request) resolves to it; while an image is still
+            // being rendered the staging source is never signed.
+            access = (r2Backed && media.getEvidenceKey() != null)
+                    ? signedR2Access(media.getEvidenceKey())
+                    : PlaybackAccess.unavailable();
 
-        } else if (wantsEvidence && media.getEvidenceKey() != null && providerType == StorageProvider.R2) {
+        } else if ("evidence".equalsIgnoreCase(variant)
+                && r2Backed && media.getEvidenceKey() != null) {
 
-            access = ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
-                    .createPlaybackAccessForKey(media.getEvidenceKey());
-
-        } else if (wantsEvidence) {
-
-            // No evidence variant exists (video, legacy Drive row, or still
-            // PROCESSING) — never silently substitute the original under
-            // the "evidence" label; the caller should fall back to
-            // requesting "original" explicitly if it wants that.
-            access = PlaybackAccess.unavailable();
+            // Legacy image that has a rendered evidence object.
+            access = signedR2Access(media.getEvidenceKey());
 
         } else {
 
-            // Image with no thumbnail yet (still PROCESSING, or a legacy
-            // Drive row that predates thumbnails), or an "original" request
-            // — the existing per-provider original-access path is safe to
-            // use directly (a photo is small; Drive playback is unchanged).
+            // Legacy media without evidence (old original-only R2 rows, Drive
+            // rows, legacy videos), or an explicit "original" request for a
+            // legacy row — served exactly as before.
             access = resolveProvider(providerType).createPlaybackAccess(media);
         }
 
@@ -977,6 +1026,11 @@ public class MediaServiceImpl implements MediaService {
                 media.getJobCardId(),
                 providerType
         );
+    }
+
+    private PlaybackAccess signedR2Access(String key) {
+        return ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
+                .createPlaybackAccessForKey(key);
     }
 
     private MediaStorageProvider resolveProvider(StorageProvider type) {

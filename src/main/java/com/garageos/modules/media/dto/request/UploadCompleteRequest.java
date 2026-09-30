@@ -31,4 +31,11 @@ public class UploadCompleteRequest {
      * (never blocks the upload).
      */
     private Integer durationSeconds;
+
+    /**
+     * VIDEO only: the client has uploaded the thumbnail JPEG to the
+     * thumbnail URL returned by the upload intent. The backend verifies the
+     * object exists before recording it.
+     */
+    private Boolean thumbnailUploaded;
 }

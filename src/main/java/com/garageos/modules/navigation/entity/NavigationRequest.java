@@ -77,6 +77,14 @@ public class NavigationRequest {
     private String deliveryAddress;
 
     /**
+     * The JobCard this request belongs to: the JobCard being delivered
+     * (DELIVERY) or the JobCard created from the request's Booking (PICKUP).
+     * Null for legacy rows and for a pickup whose job has not been created.
+     */
+    @Column(name = "job_card_id")
+    private Long jobCardId;
+
+    /**
      * Corrective fix: these four columns were added in V30 but never
      * mapped onto this entity, so every coordinate supplied upstream was
      * silently dropped and the columns stayed permanently null. A driver

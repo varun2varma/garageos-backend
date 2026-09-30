@@ -151,7 +151,25 @@ public class CustomerVehicleJourneyServiceImpl
             Booking booking = activeBookingByVehicle.get(vehicleId);
             NavigationRequest pendingRequest = pendingRequestByVehicle.get(vehicleId);
 
-            JourneyDerivation derivation = deriveStage(trip, jobCard, booking, pendingRequest);
+            // A PICKUP trip whose request is already linked to this JobCard is
+            // finished business as far as the journey goes: the vehicle is at
+            // the garage and the job card is the truthful stage. (Uses the
+            // direct NavigationRequest.jobCardId link, not vehicle heuristics;
+            // a trip without that link keeps the previous behaviour.)
+            NavigationTrip tripForStage = trip;
+            if (trip != null && jobCard != null
+                    && trip.getTripType() == TripType.PICKUP
+                    && trip.getNavigationRequestId() != null) {
+                boolean linkedToJob = navigationRequestRepository
+                        .findById(trip.getNavigationRequestId())
+                        .map(r -> jobCard.getId().equals(r.getJobCardId()))
+                        .orElse(false);
+                if (linkedToJob) {
+                    tripForStage = null;
+                }
+            }
+
+            JourneyDerivation derivation = deriveStage(tripForStage, jobCard, booking, pendingRequest);
 
             if (derivation == null) {
                 // Nothing relevant is happening with this vehicle right

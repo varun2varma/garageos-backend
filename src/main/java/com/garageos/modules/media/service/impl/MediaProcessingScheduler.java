@@ -5,6 +5,8 @@ import com.garageos.core.enums.media.StorageProvider;
 import com.garageos.modules.media.entity.JobCardMedia;
 import com.garageos.modules.media.repository.JobCardMediaRepository;
 import com.garageos.modules.media.storage.MediaStorageProvider;
+import com.garageos.modules.media.util.MediaEvidenceText;
+import com.garageos.modules.media.util.MediaKeys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,10 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Drives R2-backed media from UPLOADED to COMPLETED, mirroring
@@ -83,15 +82,26 @@ public class MediaProcessingScheduler {
             try {
 
                 if ("IMAGE".equals(media.getMediaType())) {
-                    generateImageThumbnail(media);
+
+                    if (media.isEvidenceOnly()) {
+                        // Final model: source -> evidence.jpg + thumbnail.jpg,
+                        // source deleted. Throws on failure so the row stays
+                        // UPLOADED for a safe retry (see processEvidenceOnlyImage).
+                        processEvidenceOnlyImage(media);
+                    } else {
+                        generateImageThumbnail(media);
+                    }
                 }
-                // VIDEO: duration is captured client-side at upload-complete
-                // time (see MediaServiceImpl.completeUpload); no thumbnail
-                // frame is extracted — see this class's own doc comment.
+                // VIDEO: the uploaded object is already the burned-in evidence
+                // MP4 and its thumbnail was uploaded by the client (both
+                // recorded at /complete); nothing to render server-side.
 
                 media.setUploadStatus(MediaUploadStatus.COMPLETED.name());
+                media.setLastError(null);
 
                 jobCardMediaRepository.save(media);
+
+                deleteStagingSource(media);
 
                 log.info(
                         "[MEDIA_PROCESSING_SCHEDULER] Media finalized. mediaId={}, jobCardId={}, hasThumbnail={}",
@@ -108,7 +118,122 @@ public class MediaProcessingScheduler {
                         ex.getMessage(),
                         ex
                 );
+
+                recordProcessingFailure(media, ex);
             }
+        }
+    }
+
+    /** Bounded retries for evidence rendering; afterwards the row is FAILED and the source is kept. */
+    private static final int MAX_PROCESSING_ATTEMPTS = 5;
+
+    /** mediaId -> staging source key awaiting deletion once the row is saved as COMPLETED. */
+    private final java.util.Map<Long, String> pendingSourceDeletes = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The row stays UPLOADED (picked up again on the next poll) until the
+     * attempt budget is spent, then becomes FAILED. The staging source is
+     * never deleted on failure, so nothing is lost and a retry is safe.
+     */
+    private void recordProcessingFailure(JobCardMedia media, Exception ex) {
+
+        try {
+            media.setRetryCount((media.getRetryCount() == null ? 0 : media.getRetryCount()) + 1);
+            media.setLastError("Processing failed: " + ex.getMessage());
+
+            if (media.isEvidenceOnly() && media.getRetryCount() >= MAX_PROCESSING_ATTEMPTS) {
+                media.setUploadStatus(MediaUploadStatus.FAILED.name());
+            }
+
+            jobCardMediaRepository.save(media);
+
+        } catch (RuntimeException saveEx) {
+            log.error(
+                    "[MEDIA_PROCESSING_SCHEDULER] Could not record processing failure. mediaId={}",
+                    media.getId(),
+                    saveEx
+            );
+        }
+    }
+
+    /**
+     * Final-model image pipeline: the client-uploaded staging source is
+     * rendered into the evidence image (the ONLY full-size asset), a thumbnail
+     * is derived from that evidence image, storageKey is repointed at the
+     * evidence object, and the staging source is deleted.
+     *
+     * Retry/idempotency: evidence/thumbnail keys are deterministic and
+     * uploads overwrite, so a retry after a partial failure simply redoes the
+     * work from the still-present source. The DB is saved (by the caller)
+     * BEFORE the source is deleted, so a crash in between can only leave an
+     * orphaned staging object, never a row pointing at a missing one.
+     */
+    private void processEvidenceOnlyImage(JobCardMedia media) throws IOException {
+
+        MediaStorageProvider r2 = resolveProvider(StorageProvider.R2);
+
+        String sourceKey = media.getStorageKey();
+
+        if (media.getEvidenceKey() != null && !media.getEvidenceKey().equals(sourceKey)) {
+            // Already rendered by an earlier run whose row save was lost —
+            // just make the row consistent again.
+            media.setStorageKey(media.getEvidenceKey());
+            return;
+        }
+
+        BufferedImage sourceImage = ImageIO.read(new ByteArrayInputStream(r2.downloadBytes(sourceKey)));
+
+        if (sourceImage == null) {
+            throw new IOException("Source is not a decodable image.");
+        }
+
+        BufferedImage evidence = renderEvidenceImage(sourceImage, media);
+
+        ByteArrayOutputStream evidenceBytes = new ByteArrayOutputStream();
+        writeJpeg(evidence, evidenceBytes);
+
+        ByteArrayOutputStream thumbnailBytes = new ByteArrayOutputStream();
+        writeJpeg(resize(evidence, THUMBNAIL_MAX_DIMENSION), thumbnailBytes);
+
+        String evidenceKey = MediaKeys.derive(sourceKey, MediaKeys.EVIDENCE, "jpg");
+        String thumbnailKey = MediaKeys.derive(sourceKey, MediaKeys.THUMBNAIL, "jpg");
+
+        r2.uploadBytes(evidenceKey, evidenceBytes.toByteArray(), "image/jpeg");
+        r2.uploadBytes(thumbnailKey, thumbnailBytes.toByteArray(), "image/jpeg");
+
+        media.setEvidenceKey(evidenceKey);
+        media.setThumbnailKey(thumbnailKey);
+        media.setStorageKey(evidenceKey);
+        media.setContentType("image/jpeg");
+        media.setFileSize((long) evidenceBytes.size());
+
+        pendingSourceDeletes.put(media.getId(), sourceKey);
+    }
+
+    /** Runs after the row has been saved as COMPLETED; best-effort by design (see processEvidenceOnlyImage). */
+    private void deleteStagingSource(JobCardMedia media) {
+
+        String sourceKey = pendingSourceDeletes.remove(media.getId());
+
+        if (sourceKey == null) {
+            return;
+        }
+
+        try {
+            resolveProvider(StorageProvider.R2).deleteKey(sourceKey);
+        } catch (RuntimeException ex) {
+            log.warn(
+                    "[MEDIA_PROCESSING_SCHEDULER] Could not delete staging source (orphaned object). mediaId={}, key={}, error={}",
+                    media.getId(),
+                    sourceKey,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    private void writeJpeg(BufferedImage image, ByteArrayOutputStream out) throws IOException {
+        if (!ImageIO.write(image, "jpg", out)) {
+            throw new IOException("No JPEG writer available.");
         }
     }
 
@@ -167,7 +292,7 @@ public class MediaProcessingScheduler {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             ImageIO.write(thumbnail, "jpg", output);
 
-            String thumbnailKey = deriveDerivedKey(media.getStorageKey(), "thumbnail.jpg");
+            String thumbnailKey = MediaKeys.derive(media.getStorageKey(), MediaKeys.THUMBNAIL, "jpg");
 
             r2.uploadBytes(thumbnailKey, output.toByteArray(), "image/jpeg");
 
@@ -189,7 +314,7 @@ public class MediaProcessingScheduler {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             ImageIO.write(evidence, "jpg", output);
 
-            String evidenceKey = deriveDerivedKey(media.getStorageKey(), "evidence.jpg");
+            String evidenceKey = MediaKeys.derive(media.getStorageKey(), MediaKeys.EVIDENCE, "jpg");
 
             r2.uploadBytes(evidenceKey, output.toByteArray(), "image/jpeg");
 
@@ -220,11 +345,13 @@ public class MediaProcessingScheduler {
         int width = source.getWidth();
         int height = source.getHeight();
 
-        List<String> lines = buildEvidenceLines(media);
+        List<String> lines = MediaEvidenceText.lines(media);
 
-        int lineHeight = Math.max(16, height / 40);
+        int lineHeight = Math.max(16, Math.min(width, height) / 32);
         int padding = lineHeight / 2;
-        int footerHeight = lines.isEmpty() ? 0 : (lines.size() * lineHeight) + (padding * 2);
+        // Always at least one row so the GarageST brand mark is present even
+        // when no capture metadata exists.
+        int footerHeight = (Math.max(lines.size(), 1) * lineHeight) + (padding * 2);
 
         BufferedImage evidence = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -233,7 +360,7 @@ public class MediaProcessingScheduler {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.drawImage(source, 0, 0, null);
 
-            if (footerHeight > 0) {
+            {
 
                 // Subtle bottom gradient (transparent -> dark), not a solid
                 // block — tasteful rather than a "cheap watermark" look.
@@ -248,8 +375,15 @@ public class MediaProcessingScheduler {
                 g.setFont(new Font("SansSerif", Font.PLAIN, (int) (lineHeight * 0.7)));
 
                 int y = height - footerHeight + lineHeight - (lineHeight / 3);
+                int maxTextWidth = width - (padding * 2) - (int) (lineHeight * 5.5);
                 for (String line : lines) {
-                    g.drawString(line, padding, y);
+                    String fitted = line;
+                    while (fitted.length() > 4 && g.getFontMetrics().stringWidth(fitted) > maxTextWidth) {
+                        fitted = fitted.substring(0, fitted.length() - 2).stripTrailing() + "…";
+                        if (g.getFontMetrics().stringWidth(fitted) <= maxTextWidth) break;
+                        fitted = fitted.substring(0, fitted.length() - 1);
+                    }
+                    g.drawString(fitted, padding, y);
                     y += lineHeight;
                 }
 
@@ -265,43 +399,6 @@ public class MediaProcessingScheduler {
         }
 
         return evidence;
-    }
-
-    private static final DateTimeFormatter EVIDENCE_TIMESTAMP_FORMAT =
-            DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a", Locale.ENGLISH);
-
-    private List<String> buildEvidenceLines(JobCardMedia media) {
-
-        List<String> lines = new ArrayList<>();
-
-        if (media.getMediaStage() != null) {
-            lines.add(stageLabel(media.getMediaStage()));
-        }
-
-        if (media.getCapturedAt() != null) {
-            lines.add("Captured: " + EVIDENCE_TIMESTAMP_FORMAT.format(media.getCapturedAt()));
-        }
-
-        if (media.getCapturedByNameSnapshot() != null) {
-            lines.add("By: " + media.getCapturedByNameSnapshot());
-        }
-
-        if (media.getLocationName() != null) {
-            lines.add("Location: " + media.getLocationName());
-        } else if (media.getLatitude() != null && media.getLongitude() != null) {
-            lines.add(String.format(Locale.ENGLISH, "Location: %.4f, %.4f", media.getLatitude(), media.getLongitude()));
-        }
-
-        return lines;
-    }
-
-    private String stageLabel(String stage) {
-        return switch (stage) {
-            case "BEFORE_SERVICE" -> "Before Service";
-            case "DURING_REPAIR" -> "During Repair";
-            case "AFTER_REPAIR" -> "After Repair";
-            default -> stage;
-        };
     }
 
     private BufferedImage resize(BufferedImage source, int maxDimension) {
@@ -325,25 +422,6 @@ public class MediaProcessingScheduler {
         }
 
         return resized;
-    }
-
-    /**
-     * ".../{jobCardNumber}_{stage}_{seq}.jpg" -> ".../{jobCardNumber}_{stage}
-     * _{seq}_thumbnail.jpg" (or "..._evidence.jpg") - inserts the suffix
-     * before the original file's extension rather than replacing the whole
-     * filename. Under the human-readable R2 key convention (GarageST/
-     * {garageCode}/{jobCardNumber}/{stage}/{fileName}, no per-media-id
-     * subdirectory), replacing the filename outright would collide: every
-     * media item in the same job-card/stage folder would derive the same
-     * literal "thumbnail.jpg" key and overwrite each other's derived asset.
-     */
-    private String deriveDerivedKey(String storageKey, String suffixFileName) {
-        int lastSlash = storageKey.lastIndexOf('/');
-        String directory = storageKey.substring(0, lastSlash + 1);
-        String originalFileName = storageKey.substring(lastSlash + 1);
-        int lastDot = originalFileName.lastIndexOf('.');
-        String stem = lastDot >= 0 ? originalFileName.substring(0, lastDot) : originalFileName;
-        return directory + stem + "_" + suffixFileName;
     }
 
     private MediaStorageProvider resolveProvider(StorageProvider type) {

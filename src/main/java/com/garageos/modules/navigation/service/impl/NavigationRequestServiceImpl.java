@@ -7,7 +7,14 @@ import com.garageos.modules.navigation.dto.response.NavigationRequestResponse;
 import com.garageos.modules.navigation.entity.NavigationRequest;
 import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.navigation.service.NavigationRequestService;
+import com.garageos.core.enums.JobCardStatus;
+import com.garageos.core.exception.BusinessException;
+import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.jobcard.entity.JobCard;
+import com.garageos.modules.jobcard.repository.JobCardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +28,8 @@ public class NavigationRequestServiceImpl
     private final NavigationRequestRepository
             navigationRequestRepository;
 
+    private final JobCardRepository jobCardRepository;
+
     @Override
     @Transactional
     public NavigationRequestResponse createRequest(
@@ -28,6 +37,12 @@ public class NavigationRequestServiceImpl
             CreateNavigationRequest request) {
 
         validateRequest(request);
+
+        Long jobCardId = null;
+
+        if (request.getRequestType() == NavigationRequestType.DELIVERY) {
+            jobCardId = validateDeliveryRequest(customerId, request);
+        }
 
         NavigationRequest navigationRequest =
                 NavigationRequest.builder()
@@ -45,6 +60,7 @@ public class NavigationRequestServiceImpl
                         .requestType(
                                 request.getRequestType()
                         )
+                        .jobCardId(jobCardId)
 
                         .pickupAddress(
                                 request.getPickupAddress()
@@ -157,6 +173,7 @@ public class NavigationRequestServiceImpl
                 .requestType(
                         request.getRequestType()
                 )
+                .jobCardId(request.getJobCardId())
 
                 .pickupAddress(
                         request.getPickupAddress()
@@ -195,6 +212,97 @@ public class NavigationRequestServiceImpl
                 )
 
                 .build();
+    }
+
+    /**
+     * A DELIVERY request is the start of the delivery lifecycle for one
+     * specific JobCard: it must reference a READY_FOR_DELIVERY JobCard of the
+     * caller's own garage, for that JobCard's own customer/vehicle, carry the
+     * chosen destination (address + coordinates), and be the only live
+     * delivery request for that JobCard. Returns the validated JobCard id.
+     */
+    private Long validateDeliveryRequest(
+            Long customerId,
+            CreateNavigationRequest request) {
+
+        if (request.getJobCardId() == null) {
+            throw new BusinessException(
+                    "A delivery request must reference the Job Card being delivered.");
+        }
+
+        if (request.getDeliveryLatitude() == null
+                || request.getDeliveryLongitude() == null
+                || isBlank(request.getDeliveryAddress())) {
+            throw new BusinessException(
+                    "A delivery request requires a delivery address with coordinates.");
+        }
+
+        JobCard jobCard = jobCardRepository.findById(request.getJobCardId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Job Card not found with id : " + request.getJobCardId()));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext().getAuthentication().getPrincipal();
+
+        if (jobCard.getGarage() == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(jobCard.getGarage().getId())
+                || !jobCard.getGarage().getId().equals(request.getGarageId())) {
+            throw new BusinessException(
+                    "This Job Card does not belong to your garage.");
+        }
+
+        if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
+            throw new BusinessException(
+                    "Delivery can only be requested once the Job Card is ready for delivery.");
+        }
+
+        if (jobCard.getVehicle() == null
+                || !jobCard.getVehicle().getId().equals(request.getVehicleId())
+                || jobCard.getCustomer() == null
+                || !jobCard.getCustomer().getId().equals(customerId)) {
+            throw new BusinessException(
+                    "The delivery request does not match the Job Card's vehicle and customer.");
+        }
+
+        if (navigationRequestRepository.existsByJobCardIdAndRequestTypeAndStatusNot(
+                jobCard.getId(),
+                NavigationRequestType.DELIVERY,
+                NavigationRequestStatus.CANCELLED)) {
+            throw new BusinessException(
+                    "A delivery has already been requested for this Job Card.");
+        }
+
+        return jobCard.getId();
+    }
+
+    /** The JobCard's delivery request (latest), for rediscovery when the Delivery step is reopened. */
+    @Override
+    @Transactional(readOnly = true)
+    public NavigationRequestResponse getDeliveryRequestForJobCard(Long jobCardId) {
+
+        JobCard jobCard = jobCardRepository.findById(jobCardId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Job Card not found with id : " + jobCardId));
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext().getAuthentication().getPrincipal();
+
+        if (jobCard.getGarage() == null
+                || principal.getGarageId() == null
+                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+            throw new ResourceNotFoundException(
+                    "Job Card not found with id : " + jobCardId);
+        }
+
+        return navigationRequestRepository
+                .findFirstByJobCardIdAndRequestTypeOrderByIdDesc(
+                        jobCardId, NavigationRequestType.DELIVERY)
+                .map(this::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No delivery request exists for this Job Card."));
     }
 
     private void validateRequest(

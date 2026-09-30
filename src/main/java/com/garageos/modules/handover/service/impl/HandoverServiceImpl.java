@@ -3,6 +3,7 @@ package com.garageos.modules.handover.service.impl;
 import com.garageos.core.enums.audit.AuditEventType;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.enums.navigation.HandoverStatus;
+import com.garageos.core.enums.navigation.TripLeg;
 import com.garageos.core.enums.navigation.TripType;
 import com.garageos.core.enums.navigation.TripStatus;
 import com.garageos.core.exception.BusinessException;
@@ -78,6 +79,12 @@ public class HandoverServiceImpl implements HandoverService {
             throw new ResourceNotFoundException("Trip not found : " + tripId);
         }
 
+        if (trip.getTripType() == TripType.PICKUP
+                && trip.getCurrentLeg() == TripLeg.CUSTOMER_TO_GARAGE) {
+            throw new BusinessException(
+                    "The vehicle handover was already confirmed - the pickup trip is on its way to the garage.");
+        }
+
         if (trip.getArrivedAt() == null || trip.getStatus() != TripStatus.IN_PROGRESS) {
             throw new BusinessException(
                     "Handover is not available yet - your driver hasn't arrived.");
@@ -138,6 +145,12 @@ public class HandoverServiceImpl implements HandoverService {
                 || !navigationRequest.getGarageId().equals(principal.getGarageId())) {
 
             throw new ResourceNotFoundException("Trip not found for driver.");
+        }
+
+        if (trip.getTripType() == TripType.PICKUP
+                && trip.getCurrentLeg() == TripLeg.CUSTOMER_TO_GARAGE) {
+            throw new BusinessException(
+                    "The vehicle handover was already confirmed - complete the pickup trip at the garage.");
         }
 
         VehicleHandover handover = handoverRepository

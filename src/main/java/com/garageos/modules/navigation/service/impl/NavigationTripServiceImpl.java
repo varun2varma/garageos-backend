@@ -7,6 +7,7 @@ import com.garageos.core.enums.navigation.*;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.modules.audit.service.AuditService;
+import com.garageos.modules.delivery.service.DeliveryService;
 import com.garageos.modules.garage.repository.GarageRepository;
 import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.handover.repository.VehicleHandoverRepository;
@@ -66,6 +67,8 @@ public class NavigationTripServiceImpl
 
     private final AuditService
             auditService;
+
+    private final DeliveryService deliveryService;
 
 
     @Override
@@ -450,6 +453,8 @@ public class NavigationTripServiceImpl
 
         NavigationTrip startedTrip = navigationTripRepository.save(trip);
 
+        setRequestStatus(startedTrip, NavigationRequestStatus.IN_PROGRESS);
+
         auditService.record(
                 AuditEventType.TRIP_STARTED,
                 "NavigationTrip",
@@ -649,9 +654,16 @@ public class NavigationTripServiceImpl
 
             if (trip.getCurrentLeg()
                     != TripLeg.CUSTOMER_TO_GARAGE) {
-
                 throw new IllegalStateException(
                         "Pickup trip must return to garage before completion."
+                );
+            }
+
+            // The driver must have marked arrival at the garage (continueTrip
+            // resets arrivedAt to null for the return leg).
+            if (trip.getArrivedAt() == null) {
+                throw new IllegalStateException(
+                        "Mark arrival at the garage before completing the pickup trip."
                 );
             }
 
@@ -682,6 +694,24 @@ public class NavigationTripServiceImpl
 
         NavigationTrip completedTrip = navigationTripRepository.save(trip);
 
+        NavigationRequest completedRequest =
+                setRequestStatus(completedTrip, NavigationRequestStatus.COMPLETED);
+
+        // The delivery trip IS the delivery's business completion: it creates
+        // the Delivery record and moves the JobCard READY_FOR_DELIVERY ->
+        // DELIVERED in the same transaction. Requests created before
+        // NavigationRequest.jobCardId existed have no job to complete.
+        if (completedTrip.getTripType() == TripType.DELIVERY
+                && completedRequest != null
+                && completedRequest.getJobCardId() != null) {
+
+            deliveryService.completeDeliveryFromTrip(
+                    completedRequest.getJobCardId(),
+                    driverDisplayName(completedTrip.getDriverId()),
+                    "Customer (OTP verified)"
+            );
+        }
+
         auditService.record(
                 completedTrip.getTripType() == TripType.DELIVERY
                         ? AuditEventType.DELIVERY_COMPLETED
@@ -703,6 +733,34 @@ public class NavigationTripServiceImpl
      * throwing if the request can't be found, since a missing garage
      * context must never block the audit write for the transition itself.
      */
+    /** Keeps the owning NavigationRequest in step with its trip's lifecycle. */
+    private NavigationRequest setRequestStatus(
+            NavigationTrip trip,
+            NavigationRequestStatus status) {
+
+        if (trip.getNavigationRequestId() == null) {
+            return null;
+        }
+
+        return navigationRequestRepository.findById(trip.getNavigationRequestId())
+                .map(request -> {
+                    request.setStatus(status);
+                    return navigationRequestRepository.save(request);
+                })
+                .orElse(null);
+    }
+
+    private String driverDisplayName(Long driverId) {
+        return userRepository.findById(driverId)
+                .map(driver -> {
+                    String first = driver.getFirstName() == null ? "" : driver.getFirstName().trim();
+                    String last = driver.getLastName() == null ? "" : driver.getLastName().trim();
+                    String full = (first + " " + last).trim();
+                    return full.isEmpty() ? driver.getUsername() : full;
+                })
+                .orElse(null);
+    }
+
     private Long resolveGarageId(NavigationTrip trip) {
 
         if (trip.getNavigationRequestId() == null) {
@@ -1004,10 +1062,12 @@ public class NavigationTripServiceImpl
         BigDecimal destinationLatitude = null;
         BigDecimal destinationLongitude = null;
         Long customerId = null;
+        Long jobCardId = null;
 
         if (request != null) {
 
             customerId = request.getCustomerId();
+            jobCardId = request.getJobCardId();
 
             boolean pickup = trip.getTripType() == TripType.PICKUP;
 
@@ -1027,6 +1087,7 @@ public class NavigationTripServiceImpl
                 .destinationLongitude(destinationLongitude)
 
                 .customerId(customerId)
+                .jobCardId(jobCardId)
 
                 .id(trip.getId())
 

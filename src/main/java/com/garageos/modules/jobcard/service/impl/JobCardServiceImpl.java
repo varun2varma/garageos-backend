@@ -22,6 +22,7 @@ import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
+import com.garageos.modules.navigation.repository.NavigationRequestRepository;
 import com.garageos.modules.jobcard.mapper.JobCardMapper;
 import com.garageos.modules.jobcard.repository.JobCardRepository;
 import com.garageos.modules.jobcard.service.JobCardService;
@@ -61,6 +62,7 @@ public class JobCardServiceImpl implements JobCardService {
     private final RepairTaskRepository repairTaskRepository;
     private final EstimateService estimateService;
     private final BookingRepository bookingRepository;
+    private final NavigationRequestRepository navigationRequestRepository;
     private final GarageMembershipRepository garageMembershipRepository;
 
     @Override
@@ -131,6 +133,19 @@ public class JobCardServiceImpl implements JobCardService {
         if (booking != null) {
             booking.setStatus(BookingStatus.COMPLETED);
             bookingRepository.save(booking);
+
+            // Direct link from the booking's pickup request to this JobCard,
+            // so the service journey never has to guess by vehicle.
+            final Long savedJobCardId = jobCard.getId();
+
+            if (booking.getNavigationRequestId() != null) {
+                navigationRequestRepository
+                        .findById(booking.getNavigationRequestId())
+                        .ifPresent(navigationRequest -> {
+                            navigationRequest.setJobCardId(savedJobCardId);
+                            navigationRequestRepository.save(navigationRequest);
+                        });
+            }
         }
 
         return jobCardMapper.toResponse(jobCard);

@@ -226,6 +226,14 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
                         .delivery(deliveryResponseOrNull(jobCard.getId()));
 
                 allowedActions.addAll(resolveOperationalActions(jobCard.getStatus()));
+
+                // "start_repair" is the manager-only confirmation gate
+                // (JobCardServiceImpl.authorizeProceedToRepair). Offering it
+                // to other operational roles would put a button on screen
+                // that the backend then refuses.
+                if (!principal.getRoles().contains(RoleCode.MANAGER.name())) {
+                    allowedActions.remove("start_repair");
+                }
             }
         }
 
