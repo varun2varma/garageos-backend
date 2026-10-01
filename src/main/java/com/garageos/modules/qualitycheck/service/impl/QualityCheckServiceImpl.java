@@ -23,11 +23,18 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class QualityCheckServiceImpl
         implements QualityCheckService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final QualityCheckRepository repository;
 
@@ -142,6 +149,9 @@ public class QualityCheckServiceImpl
 
         jobCard.setStatus(JobCardStatus.READY_FOR_INVOICE);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.QUALITY_CHECK_PASSED, jobCard, System.currentTimeMillis());
+
         repository.save(qualityCheck);
         jobCardRepository.save(jobCard);
 
@@ -179,6 +189,22 @@ public class QualityCheckServiceImpl
 
         List<RepairTask> repairTasks =
                 repairTaskRepository.findByJobCardIdOrderById(jobCard.getId());
+
+        // Capture the assigned technicians BEFORE the reset below clears the assignments.
+        java.util.List<Long> reworkTechnicianUserIds = repairTasks.stream()
+                .map(RepairTask::getJobAssignment)
+                .filter(java.util.Objects::nonNull)
+                .filter(a -> a.getStatus() != com.garageos.core.enums.JobAssignmentStatus.CANCELLED)
+                .map(a -> a.getUser().getId())
+                .distinct()
+                .toList();
+
+        if (notificationEventPublisher != null) {
+            notificationEventPublisher.publish(
+                    NotificationEvents.jobCardEvent(NotificationEventType.QUALITY_CHECK_FAILED,
+                                    jobCard, jobCard.getId(), System.currentTimeMillis())
+                            .technicianUserIds(reworkTechnicianUserIds));
+        }
 
         for (RepairTask task : repairTasks) {
             task.setStatus(RepairStatus.PENDING);

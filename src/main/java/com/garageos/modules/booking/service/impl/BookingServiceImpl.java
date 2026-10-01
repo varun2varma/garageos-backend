@@ -30,6 +30,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.garageos.modules.notification.event.NotificationEvent;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.modules.notification.event.NotificationFacts;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Customer service-request intent, kept deliberately separate from
@@ -41,6 +47,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final BookingRepository bookingRepository;
     private final CustomerRepository customerRepository;
@@ -118,6 +127,11 @@ public class BookingServiceImpl implements BookingService {
                 java.util.Map.of("pickupRequested", booking.isPickupRequested())
         );
 
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.BOOKING_REQUESTED, booking.getGarageId(), booking.getId(), null, "1")
+                        .fact(NotificationFacts.CUSTOMER_ID, booking.getCustomerId())
+                        .fact(NotificationFacts.BOOKING_ID, booking.getId()));
+
         return toResponse(booking, customer, vehicle, garage);
     }
 
@@ -193,6 +207,11 @@ public class BookingServiceImpl implements BookingService {
                         "createdByEmployeeId", principal.getId()
                 )
         );
+
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.BOOKING_CREATED_BY_STAFF, booking.getGarageId(), booking.getId(), null, "1")
+                        .fact(NotificationFacts.CUSTOMER_ID, booking.getCustomerId())
+                        .fact(NotificationFacts.BOOKING_ID, booking.getId()));
 
         return toResponse(booking, customer, vehicle, garage);
     }
@@ -299,6 +318,11 @@ public class BookingServiceImpl implements BookingService {
                 java.util.Map.of("navigationRequestId", booking.getNavigationRequestId() == null ? -1 : booking.getNavigationRequestId())
         );
 
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.BOOKING_CONFIRMED, booking.getGarageId(), booking.getId(), null, "1")
+                        .fact(NotificationFacts.CUSTOMER_ID, booking.getCustomerId())
+                        .fact(NotificationFacts.BOOKING_ID, booking.getId()));
+
         return toResponse(booking);
     }
 
@@ -322,6 +346,11 @@ public class BookingServiceImpl implements BookingService {
                 booking.getGarageId(),
                 remarks == null ? java.util.Map.of() : java.util.Map.of("remarks", remarks)
         );
+
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.BOOKING_REJECTED, booking.getGarageId(), booking.getId(), null, "1")
+                        .fact(NotificationFacts.CUSTOMER_ID, booking.getCustomerId())
+                        .fact(NotificationFacts.BOOKING_ID, booking.getId()));
 
         return toResponse(booking);
     }
@@ -354,6 +383,11 @@ public class BookingServiceImpl implements BookingService {
                 booking.getGarageId(),
                 java.util.Map.of()
         );
+
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.BOOKING_CANCELLED, booking.getGarageId(), booking.getId(), null, "1")
+                        .fact(NotificationFacts.CUSTOMER_ID, booking.getCustomerId())
+                        .fact(NotificationFacts.BOOKING_ID, booking.getId()));
 
         return toResponse(booking);
     }

@@ -29,6 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import com.garageos.modules.notification.event.NotificationEvent;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.modules.notification.event.NotificationFacts;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Secure vehicle handover confirmation for a NavigationTrip's pickup or
@@ -41,6 +47,9 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class HandoverServiceImpl implements HandoverService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private static final int CODE_LENGTH = 6;
     private static final int EXPIRY_MINUTES = 10;
@@ -114,6 +123,13 @@ public class HandoverServiceImpl implements HandoverService {
                 navigationRequest.getGarageId(),
                 java.util.Map.of("tripId", tripId, "direction", trip.getTripType())
         );
+
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.HANDOVER_CODE_GENERATED,
+                                navigationRequest.getGarageId(), tripId, navigationRequest.getJobCardId(), handover.getId())
+                        .fact(NotificationFacts.CUSTOMER_ID, navigationRequest.getCustomerId())
+                        .fact(NotificationFacts.DRIVER_USER_ID, trip.getDriverId())
+                        .fact(NotificationFacts.TRIP_ID, tripId));
 
         return HandoverCodeResponse.builder()
                 .tripId(tripId)
@@ -197,6 +213,12 @@ public class HandoverServiceImpl implements HandoverService {
                 navigationRequest.getGarageId(),
                 java.util.Map.of("tripId", tripId, "direction", handover.getDirection(), "verifiedByDriverId", driverId)
         );
+
+        NotificationEvents.publish(notificationEventPublisher,
+                NotificationEvent.of(NotificationEventType.HANDOVER_VERIFIED,
+                                navigationRequest.getGarageId(), tripId, navigationRequest.getJobCardId(), handover.getId())
+                        .fact(NotificationFacts.CUSTOMER_ID, navigationRequest.getCustomerId())
+                        .fact(NotificationFacts.TRIP_ID, tripId));
 
         auditService.record(
                 handover.getDirection() == TripType.DELIVERY

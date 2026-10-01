@@ -27,10 +27,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final DeliveryRepository repository;
     private final JobCardRepository jobCardRepository;
@@ -122,6 +129,9 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         jobCard.setStatus(JobCardStatus.DELIVERED);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.VEHICLE_DELIVERED, jobCard, "1");
+
         jobCardRepository.save(jobCard);
 
         return mapper.toResponse(delivery);
@@ -179,6 +189,9 @@ public class DeliveryServiceImpl implements DeliveryService {
                 JobCardStatus.DELIVERED);
 
         jobCard.setStatus(JobCardStatus.DELIVERED);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.VEHICLE_DELIVERED, jobCard, "1");
         jobCardRepository.save(jobCard);
 
         return mapper.toResponse(delivery);

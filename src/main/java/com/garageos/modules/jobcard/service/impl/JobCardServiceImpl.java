@@ -37,7 +37,6 @@ import com.garageos.modules.vehicle.entity.Vehicle;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -45,10 +44,17 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class JobCardServiceImpl implements JobCardService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final JobCardRepository jobCardRepository;
     private final VehicleRepository vehicleRepository;
@@ -147,6 +153,9 @@ public class JobCardServiceImpl implements JobCardService {
                         });
             }
         }
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.JOB_CARD_CREATED, jobCard, "1");
 
         return jobCardMapper.toResponse(jobCard);
     }
@@ -346,6 +355,9 @@ public class JobCardServiceImpl implements JobCardService {
 
         jobCard.setStatus(JobCardStatus.INSPECTION_PENDING);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.INSPECTION_STARTED, jobCard, "1");
+
         jobCardRepository.save(jobCard);
         inspectionFindingService.loadInspectionTemplate(jobCard.getId());
         return jobCardMapper.toResponse(jobCard);
@@ -362,6 +374,9 @@ public class JobCardServiceImpl implements JobCardService {
         );
 
         jobCard.setStatus(JobCardStatus.INSPECTION_COMPLETED);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.INSPECTION_COMPLETED, jobCard, "1");
 
         jobCardRepository.save(jobCard);
 
@@ -477,6 +492,9 @@ public class JobCardServiceImpl implements JobCardService {
 
         jobCard.setStatus(JobCardStatus.REPAIR_IN_PROGRESS);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.JOB_REPAIR_STARTED, jobCard, System.currentTimeMillis());
+
         jobCardRepository.save(jobCard);
 
         return jobCardMapper.toResponse(jobCard);
@@ -531,6 +549,9 @@ public class JobCardServiceImpl implements JobCardService {
 
             jobCard.setStatus(JobCardStatus.REPAIR_COMPLETED);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.JOB_REPAIR_COMPLETED, jobCard, System.currentTimeMillis());
+
             jobCardRepository.save(jobCard);
 
 //            qualityCheckService.createQualityCheck(jobCard);
@@ -578,6 +599,9 @@ public class JobCardServiceImpl implements JobCardService {
 
         jobCard.setStatus(JobCardStatus.READY_FOR_DELIVERY);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.VEHICLE_READY_FOR_DELIVERY, jobCard, System.currentTimeMillis());
+
         jobCardRepository.save(jobCard);
 
         return jobCardMapper.toResponse(jobCard);
@@ -613,6 +637,9 @@ public class JobCardServiceImpl implements JobCardService {
         );
 
         jobCard.setStatus(JobCardStatus.CLOSED);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.JOB_CLOSED, jobCard, "1");
 
         jobCardRepository.save(jobCard);
 

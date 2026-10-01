@@ -35,11 +35,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.garageos.modules.notification.event.NotificationEvent;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.modules.notification.event.NotificationFacts;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class NavigationTripServiceImpl
         implements NavigationTripService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final NavigationRequestRepository
             navigationRequestRepository;
@@ -235,6 +244,8 @@ public class NavigationTripServiceImpl
                 java.util.Map.of("driverId", savedTrip.getDriverId(), "tripType", savedTrip.getTripType())
         );
 
+        publishTripNotification(NotificationEventType.PICKUP_DRIVER_ASSIGNED, savedTrip, "1");
+
         return toResponse(savedTrip);
     }
 
@@ -417,6 +428,8 @@ public class NavigationTripServiceImpl
                 java.util.Map.of("driverId", driverId)
         );
 
+        publishTripNotification(NotificationEventType.TRIP_ACCEPTED, acceptedTrip, "1");
+
         return toResponse(acceptedTrip);
     }
 
@@ -463,6 +476,8 @@ public class NavigationTripServiceImpl
                 java.util.Map.of("tripType", startedTrip.getTripType(), "currentLeg", startedTrip.getCurrentLeg())
         );
 
+        publishTripNotification(NotificationEventType.TRIP_STARTED, startedTrip, "out");
+
         return toResponse(startedTrip);
     }
 
@@ -500,6 +515,12 @@ public class NavigationTripServiceImpl
                 resolveGarageId(trip),
                 java.util.Map.of("tripType", trip.getTripType(), "currentLeg", trip.getCurrentLeg())
         );
+
+        // Arrival at the garage on a pickup's return leg is not a customer-facing event.
+        if (!(trip.getTripType() == TripType.PICKUP
+                && trip.getCurrentLeg() == TripLeg.CUSTOMER_TO_GARAGE)) {
+            publishTripNotification(NotificationEventType.DRIVER_ARRIVED, trip, String.valueOf(trip.getCurrentLeg()));
+        }
 
 
         /*
@@ -610,6 +631,8 @@ public class NavigationTripServiceImpl
                 resolveGarageId(returningTrip),
                 java.util.Map.of()
         );
+
+        publishTripNotification(NotificationEventType.TRIP_STARTED, returningTrip, "return");
 
         return toResponse(returningTrip);
     }
@@ -722,6 +745,8 @@ public class NavigationTripServiceImpl
                 java.util.Map.of()
         );
 
+        publishTripNotification(NotificationEventType.TRIP_COMPLETED, completedTrip, "1");
+
         return toResponse(completedTrip);
     }
 
@@ -759,6 +784,24 @@ public class NavigationTripServiceImpl
                     return full.isEmpty() ? driver.getUsername() : full;
                 })
                 .orElse(null);
+    }
+
+    /**
+     * Queues a trip notification in this transaction (transactional outbox).
+     * Garage/customer/job card come from the owning NavigationRequest.
+     */
+    private void publishTripNotification(NotificationEventType type, NavigationTrip trip, String discriminator) {
+
+        if (notificationEventPublisher == null || trip.getNavigationRequestId() == null) {
+            return;
+        }
+
+        navigationRequestRepository.findById(trip.getNavigationRequestId()).ifPresent(request ->
+                NotificationEvents.publish(notificationEventPublisher,
+                        NotificationEvent.of(type, request.getGarageId(), trip.getId(), request.getJobCardId(), discriminator)
+                                .fact(NotificationFacts.CUSTOMER_ID, request.getCustomerId())
+                                .fact(NotificationFacts.DRIVER_USER_ID, trip.getDriverId())
+                                .fact(NotificationFacts.TRIP_ID, trip.getId())));
     }
 
     private Long resolveGarageId(NavigationTrip trip) {

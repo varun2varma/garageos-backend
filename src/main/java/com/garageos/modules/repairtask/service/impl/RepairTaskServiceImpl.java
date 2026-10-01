@@ -32,7 +32,6 @@ import com.garageos.modules.repairtask.repository.RepairTaskRepository;
 import com.garageos.modules.repairtask.service.RepairTaskService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -42,10 +41,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class RepairTaskServiceImpl implements RepairTaskService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final RepairTaskRepository repository;
     private final EstimateItemRepository estimateItemRepository;
@@ -387,6 +393,9 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         task.setStatus(RepairStatus.IN_PROGRESS);
         task.setStartedAt(LocalDateTime.now());
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.REPAIR_TASK_STARTED, task.getJobCard(), task.getId(), String.valueOf(task.getStartedAt()));
+
         task = repository.save(task);
 
         // Phase H reconciliation (Known Issue #1): RepairTask is the
@@ -431,6 +440,9 @@ public class RepairTaskServiceImpl implements RepairTaskService {
         task.setStatus(RepairStatus.COMPLETED);
         task.setCompletedAt(LocalDateTime.now());
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.REPAIR_TASK_COMPLETED, task.getJobCard(), task.getId(), String.valueOf(task.getCompletedAt()));
+
         task = repository.save(task);
 
         // Phase H reconciliation (Known Issue #1) - see startRepair's own
@@ -453,6 +465,9 @@ public class RepairTaskServiceImpl implements RepairTaskService {
             );
 
             jobCard.setStatus(JobCardStatus.REPAIR_COMPLETED);
+
+            NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                    NotificationEventType.JOB_REPAIR_COMPLETED, jobCard, System.currentTimeMillis());
 
             jobCardRepository.save(jobCard);
 

@@ -35,11 +35,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class JobAssignmentServiceImpl implements JobAssignmentService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final JobAssignmentRepository jobAssignmentRepository;
 
@@ -155,6 +162,15 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                 );
 
         linkRepairTaskToAssignment(assignment);
+
+        if (assignment.getRepairTask() != null
+                && assignment.getAssignmentType() == JobAssignmentType.TECHNICIAN
+                && notificationEventPublisher != null) {
+            notificationEventPublisher.publish(
+                    NotificationEvents.jobCardEvent(NotificationEventType.REPAIR_TASK_ASSIGNED,
+                                    assignment.getJobCard(), assignment.getRepairTask().getId(), assignment.getId())
+                            .technicianUserIds(java.util.List.of(assignment.getUser().getId())));
+        }
 
         return jobAssignmentMapper.toResponse(
                 assignment
@@ -337,6 +353,9 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
             repairTaskRepository.save(
                     task
             );
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.REPAIR_TASK_STARTED, task.getJobCard(), task.getId(), String.valueOf(task.getStartedAt()));
         }
 
         assignment =
@@ -432,6 +451,9 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
             repairTaskRepository.save(task);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.REPAIR_TASK_COMPLETED, task.getJobCard(), task.getId(), String.valueOf(task.getCompletedAt()));
+
             /*
              * Check whether all RepairTasks belonging to this
              * JobCard are now completed.
@@ -474,6 +496,9 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                     jobCardRepository.save(
                             jobCard
                     );
+
+                    NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                            NotificationEventType.JOB_REPAIR_COMPLETED, jobCard, System.currentTimeMillis());
                 }
             }
         }
@@ -600,6 +625,15 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         linkRepairTaskToAssignment(
                 newAssignment
         );
+
+        if (newAssignment.getRepairTask() != null
+                && newAssignment.getAssignmentType() == JobAssignmentType.TECHNICIAN
+                && notificationEventPublisher != null) {
+            notificationEventPublisher.publish(
+                    NotificationEvents.jobCardEvent(NotificationEventType.REPAIR_TASK_ASSIGNED,
+                                    newAssignment.getJobCard(), newAssignment.getRepairTask().getId(), newAssignment.getId())
+                            .technicianUserIds(java.util.List.of(newAssignment.getUser().getId())));
+        }
 
         return jobAssignmentMapper.toResponse(
                 newAssignment

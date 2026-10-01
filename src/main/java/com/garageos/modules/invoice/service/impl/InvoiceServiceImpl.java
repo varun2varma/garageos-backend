@@ -38,10 +38,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final InvoiceRepository invoiceRepository;
     private final EstimateRepository estimateRepository;
@@ -126,6 +133,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice = invoiceRepository.save(invoice);
 
         transitionJobCardToInvoiceGenerated(jobCard);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.INVOICE_GENERATED, jobCard, invoice.getId(), "1");
 
         return invoiceMapper.toResponse(invoice);
     }
@@ -253,6 +263,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice = invoiceRepository.save(invoice);
 
         transitionJobCardToInvoiceGenerated(jobCard);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.INVOICE_GENERATED, jobCard, invoice.getId(), "1");
 
         return invoiceMapper.toResponse(invoice);
     }
@@ -440,6 +453,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new BusinessException("Invoice already paid.");
         }
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.PAYMENT_RECEIVED, jobCard, invoice.getId(), "1");
+
         if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
             jobCardService.readyForDelivery(jobCardNumber);
         }
@@ -587,6 +603,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         } catch (ObjectOptimisticLockingFailureException raced) {
             throw new BusinessException("Invoice already accepted.");
         }
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.INVOICE_ACCEPTED, invoice.getEstimate().getJobCard(), invoice.getId(), "1");
 
         return invoiceMapper.toResponse(invoice);
     }

@@ -36,11 +36,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class ServiceWorkflowServiceImpl
         implements ServiceWorkflowService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final JobCardService jobCardService;
     private final InspectionService inspectionService;
@@ -210,6 +217,9 @@ public class ServiceWorkflowServiceImpl
         );
 
         jobCard.setStatus(JobCardStatus.QUALITY_CHECK);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.QUALITY_CHECK_STARTED, jobCard, System.currentTimeMillis());
         jobCardRepository.save(jobCard);
 
         qualityCheckService.createQualityCheck(jobCard);

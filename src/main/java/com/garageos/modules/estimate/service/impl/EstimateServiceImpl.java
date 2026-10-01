@@ -35,10 +35,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.garageos.modules.notification.event.NotificationEventPublisher;
+import com.garageos.core.enums.notification.NotificationEventType;
+import com.garageos.modules.notification.event.NotificationEvents;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
 public class EstimateServiceImpl implements EstimateService {
+
+    @Autowired(required = false)
+    private NotificationEventPublisher notificationEventPublisher;
 
     private final EstimateRepository estimateRepository;
     private final JobCardRepository jobCardRepository;
@@ -144,6 +151,10 @@ public class EstimateServiceImpl implements EstimateService {
 
             jobCard.setStatus(JobCardStatus.WAITING_FOR_APPROVAL);
 
+            NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                    NotificationEventType.ESTIMATE_READY_FOR_APPROVAL, jobCard, estimate.getId(),
+                    System.currentTimeMillis());
+
             jobCardRepository.save(jobCard);
         }
 
@@ -245,6 +256,10 @@ public class EstimateServiceImpl implements EstimateService {
 
         jobCard.setStatus(JobCardStatus.REPAIR_PENDING);
 
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.ESTIMATE_APPROVED, jobCard, estimate.getId(),
+                System.currentTimeMillis());
+
         jobCardRepository.save(jobCard);
 
         estimate = estimateRepository.save(estimate);
@@ -262,6 +277,7 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
+    @Transactional
     public EstimateResponse rejectEstimate(Long id) {
 
         Estimate estimate = getOwnedCustomerEstimate(id);
@@ -272,6 +288,10 @@ public class EstimateServiceImpl implements EstimateService {
         }
 
         estimate.setStatus(EstimateStatus.REJECTED);
+
+        NotificationEvents.publishJobCardEvent(notificationEventPublisher,
+                NotificationEventType.ESTIMATE_REJECTED, estimate.getJobCard(), estimate.getId(),
+                System.currentTimeMillis());
 
         estimate = estimateRepository.save(estimate);
 
