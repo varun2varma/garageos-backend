@@ -28,6 +28,7 @@ public interface JobCardMapper {
     @Mapping(target = "bookingId", ignore = true)
     JobCard toEntity(CreateJobCardRequest request);
 
+    @Mapping(source = "garage.id", target = "garageId")
     @Mapping(source = "customer.id", target = "customerId")
     @Mapping(expression =
             "java(jobCard.getCustomer().getFirstName() + " +

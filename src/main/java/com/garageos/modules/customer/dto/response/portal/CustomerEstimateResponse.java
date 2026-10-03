@@ -16,6 +16,8 @@ public class CustomerEstimateResponse {
 
     private String jobCardNumber;
 
+    private Long garageId;
+
     private EstimateStatus status;
 
     private BigDecimal grandTotal;

@@ -6,6 +6,7 @@ import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.garage.dto.request.CreateGarageRequest;
 import com.garageos.modules.garage.dto.request.UpdateGarageLocationRequest;
 import com.garageos.modules.garage.dto.response.GarageResponse;
+import com.garageos.modules.garage.dto.response.GarageSummaryResponse;
 import com.garageos.modules.garage.entity.Garage;
 import com.garageos.core.enums.garage.GarageStatus;
 import com.garageos.modules.garage.mapper.GarageMapper;
@@ -142,23 +143,30 @@ public class GarageServiceImpl implements GarageService {
 
     @Override
     @Transactional(readOnly = true)
-    public GarageResponse getGarage(Long id) {
+    public GarageSummaryResponse getGarage(GarageUserPrincipal principal, Long id) {
 
         Garage garage = garageRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Garage not found."));
 
-        return garageMapper.toResponse(garage);
+        if (isGarageStaff(principal, garage)) {
+            return garageMapper.toResponse(garage);
+        }
+
+        return garageMapper.toSummary(garage);
     }
 
     @Override
     public GarageResponse updateGarage(
+            GarageUserPrincipal principal,
             Long id,
             CreateGarageRequest request) {
 
         Garage garage = garageRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Garage not found."));
+
+        requireOwnerOf(principal, garage);
 
         garage.setGarageName(request.getGarageName());
         garage.setWorkshopType(request.getWorkshopType());
@@ -212,12 +220,54 @@ public class GarageServiceImpl implements GarageService {
         );
     }
 
+    /**
+     * Only the OWNER of THIS garage may modify or delete it. The OWNER role
+     * alone is not enough (an owner of Garage A must not touch Garage B):
+     * the caller must also belong to, or be the registered owner of, the
+     * target garage - never trusted from the request.
+     */
+    /** Member (any status) or registered owner of this garage. */
+    private boolean isGarageStaff(GarageUserPrincipal principal, Garage garage) {
+
+        if (principal == null) {
+            return false;
+        }
+
+        if (principal.getGarageId() != null
+                && principal.getGarageId().equals(garage.getId())) {
+            return true;
+        }
+
+        if (principal.getId() == null) {
+            return false;
+        }
+
+        return principal.getId().equals(garage.getOwnerUserId())
+                || garageMembershipRepository.existsByGarage_IdAndUser_Id(
+                garage.getId(), principal.getId());
+    }
+
+    private void requireOwnerOf(GarageUserPrincipal principal, Garage garage) {
+
+        boolean owns =
+                (principal.getGarageId() != null
+                        && principal.getGarageId().equals(garage.getId()))
+                        || (principal.getId() != null
+                        && principal.getId().equals(garage.getOwnerUserId()));
+
+        if (!owns) {
+            throw new BusinessException("This garage does not belong to you.");
+        }
+    }
+
     @Override
-    public void deleteGarage(Long id) {
+    public void deleteGarage(GarageUserPrincipal principal, Long id) {
 
         Garage garage = garageRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Garage not found."));
+
+        requireOwnerOf(principal, garage);
 
         garageRepository.delete(garage);
     }
@@ -264,12 +314,12 @@ public class GarageServiceImpl implements GarageService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<GarageResponse> getAllGarages() {
+    public List<GarageSummaryResponse> getAllGarages() {
 
         return garageRepository
                 .findAll()
                 .stream()
-                .map(garageMapper::toResponse)
+                .map(garageMapper::toSummary)
                 .toList();
 
     }

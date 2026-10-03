@@ -15,6 +15,9 @@ public class JobCardResponse {
 
     private String jobCardNumber;
 
+    /** Garage this job card belongs to - the key for garage branding resolution. */
+    private Long garageId;
+
     private Long customerId;
 
     private String customerName;

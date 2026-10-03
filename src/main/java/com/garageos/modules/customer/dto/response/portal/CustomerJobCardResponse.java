@@ -14,6 +14,8 @@ public class CustomerJobCardResponse {
 
     private String jobCardNumber;
 
+    private Long garageId;
+
     private String registrationNumber;
 
     private LocalDate serviceDate;

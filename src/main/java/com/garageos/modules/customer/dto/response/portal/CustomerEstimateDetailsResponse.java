@@ -13,6 +13,8 @@ public class CustomerEstimateDetailsResponse {
 
     private EstimateResponse estimate;
 
+    private Long garageId;
+
     private List<EstimateItemResponse> items;
 
 }

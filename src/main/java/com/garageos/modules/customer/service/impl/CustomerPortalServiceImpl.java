@@ -202,11 +202,18 @@ public class CustomerPortalServiceImpl
                         .remarks(invoice.getRemarks())
                         .build();
 
+        // Invoice Source of Truth: only items the customer kept selected
+        // are billable. Items the customer removed from the estimate
+        // (selected=false) must never reappear on the invoice view.
         List<EstimateItemResponse> items =
-                estimateItemService.getItems(estimateId);
+                estimateItemService.getItems(estimateId)
+                        .stream()
+                        .filter(item -> !Boolean.FALSE.equals(item.getSelected()))
+                        .toList();
 
         return CustomerInvoiceDetailsResponse.builder()
                 .invoice(invoiceResponse)
+                .garageId(invoice.getEstimate().getJobCard().getGarage().getId())
                 .jobCardNumber(
                         invoice.getEstimate()
                                 .getJobCard()
@@ -354,6 +361,7 @@ public class CustomerPortalServiceImpl
 
         return CustomerEstimateDetailsResponse.builder()
                 .estimate(estimate)
+                .garageId(estimateEntity.getJobCard().getGarage().getId())
                 .items(items)
                 .build();
 

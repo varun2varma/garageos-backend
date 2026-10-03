@@ -33,6 +33,13 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     long countByEstimateJobCardCustomer(Customer customer);
 
+    /** Garage-scoped / customer-scoped listings (no cross-tenant reads). */
+    org.springframework.data.domain.Page<Invoice> findByEstimateJobCardGarageId(
+            Long garageId, org.springframework.data.domain.Pageable pageable);
+
+    org.springframework.data.domain.Page<Invoice> findByEstimateJobCardCustomerId(
+            Long customerId, org.springframework.data.domain.Pageable pageable);
+
     Optional<Invoice> findTopByEstimateJobCardGarageIdOrderByIdDesc(
             Long garageId);
 

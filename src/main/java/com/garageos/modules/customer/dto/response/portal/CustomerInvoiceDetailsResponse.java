@@ -15,6 +15,8 @@ public class CustomerInvoiceDetailsResponse {
 
     private String jobCardNumber;
 
+    private Long garageId;
+
     private List<EstimateItemResponse> items;
 
 }

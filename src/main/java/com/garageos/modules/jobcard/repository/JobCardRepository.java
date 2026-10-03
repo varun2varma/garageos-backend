@@ -15,6 +15,9 @@ public interface JobCardRepository extends JpaRepository<JobCard, Long> {
 
     boolean existsByJobCardNumber(String jobCardNumber);
 
+    /** Branding read-authorization: does this customer have any job card at this garage? */
+    boolean existsByGarage_IdAndCustomer_Id(Long garageId, Long customerId);
+
     Optional<JobCard> findByJobCardNumber(String jobCardNumber);
 
     Optional<JobCard> findTopByGarageIdOrderByIdDesc(Long garageId);

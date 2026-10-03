@@ -104,6 +104,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         JobCard jobCard = estimate.getJobCard();
 
+        authorizeInvoiceAction(jobCard);
+
         Long garageId = jobCard.getGarage().getId();
 
         Optional<Invoice> latestInvoice =
@@ -148,6 +150,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Invoice not found with id : " + id));
 
+        authorizeInvoiceAccess(invoice);
+
         return invoiceMapper.toResponse(invoice);
     }
 
@@ -164,8 +168,21 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return invoiceRepository.findAll(pageable)
-                .map(invoiceMapper::toResponse);
+        // Never list invoices across garages or customers: staff see their
+        // own garage invoices, a customer sees only their own, anyone else none.
+        GarageUserPrincipal principal = currentPrincipal();
+
+        if (principal.getGarageId() != null) {
+            return invoiceRepository
+                    .findByEstimateJobCardGarageId(principal.getGarageId(), pageable)
+                    .map(invoiceMapper::toResponse);
+        }
+
+        return customerRepository.findByMobileNumber(principal.getMobile())
+                .map(customer -> invoiceRepository
+                        .findByEstimateJobCardCustomerId(customer.getId(), pageable)
+                        .map(invoiceMapper::toResponse))
+                .orElseGet(() -> Page.empty(pageable));
     }
 
 //    @Override
@@ -185,6 +202,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Invoice not found with id : " + id));
 
+        // Deleting is a staff operation on the caller own garage only.
+        authorizeInvoiceAction(invoice.getEstimate().getJobCard());
+
         invoiceRepository.delete(invoice);
     }
 
@@ -196,6 +216,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Invoice not found : " + invoiceNumber));
+
+        authorizeInvoiceAccess(invoice);
 
         return invoiceMapper.toResponse(invoice);
     }
@@ -262,6 +284,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setGeneratedAt(LocalDateTime.now());
         invoice = invoiceRepository.save(invoice);
 
+        // Snapshot the FINAL billable lines (customer-selected only) so the
+        // invoice owns its own line items; removed items never appear.
+        copyEstimateItems(invoice, estimate);
+
         transitionJobCardToInvoiceGenerated(jobCard);
 
         NotificationEvents.publishJobCardEvent(notificationEventPublisher,
@@ -290,6 +316,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
 
         JobCard jobCard = estimate.getJobCard();
+
+        authorizeInvoiceAction(jobCard);
 
         Long garageId = jobCard.getGarage().getId();
 
@@ -618,6 +646,46 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .findByEstimateJobCardId(jobCardId)
                 .map(invoiceMapper::toResponse)
                 .orElse(null);
+    }
+
+    private GarageUserPrincipal currentPrincipal() {
+
+        return (GarageUserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
+    /**
+     * Read access to ONE invoice: staff of the invoice garage, or the
+     * customer who owns its job card. Anyone else gets the same not-found
+     * used elsewhere, so another garage or customer invoice is never
+     * confirmed to exist just because an id was guessed.
+     */
+    private void authorizeInvoiceAccess(Invoice invoice) {
+
+        JobCard jobCard = invoice.getEstimate().getJobCard();
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        if (principal.getGarageId() != null
+                && jobCard.getGarage() != null
+                && principal.getGarageId().equals(jobCard.getGarage().getId())) {
+            return;
+        }
+
+        if (principal.getMobile() != null && jobCard.getCustomer() != null) {
+
+            Optional<Customer> customer =
+                    customerRepository.findByMobileNumber(principal.getMobile());
+
+            if (customer.isPresent()
+                    && jobCard.getCustomer().getId().equals(customer.get().getId())) {
+                return;
+            }
+        }
+
+        throw new ResourceNotFoundException("Invoice not found.");
     }
 
     /**

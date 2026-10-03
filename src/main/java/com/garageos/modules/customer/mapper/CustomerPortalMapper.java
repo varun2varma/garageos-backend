@@ -23,12 +23,16 @@ public interface CustomerPortalMapper {
 
     @Mapping(target = "registrationNumber",
             source = "vehicle.registrationNumber")
+    @Mapping(target = "garageId", source = "garage.id")
     CustomerJobCardResponse toJobCard(JobCard jobCard);
 
     @Mapping(target = "jobCardNumber",
             source = "jobCard.jobCardNumber")
+    @Mapping(target = "garageId", source = "jobCard.garage.id")
     CustomerEstimateResponse toEstimate(Estimate estimate);
 
+    @Mapping(target = "garageId",
+            source = "estimate.jobCard.garage.id")
     @Mapping(target = "estimateNumber",
             source = "estimate.estimateNumber")
     @Mapping(

@@ -4,12 +4,18 @@ import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.invoice.dto.request.CreateInvoiceRequest;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.invoice.service.InvoicePdfService;
 import com.garageos.modules.invoice.service.InvoiceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 public class InvoiceController {
 
     private final InvoiceService service;
+
+    private final InvoicePdfService pdfService;
 
     /**
      * Locked operational-access decision: generating an invoice is an
@@ -52,6 +60,25 @@ public class InvoiceController {
         );
     }
 
+    /**
+     * Backend-generated tax-invoice PDF. Authorization (own-garage staff or
+     * the owning customer) is enforced in InvoicePdfServiceImpl; branding
+     * comes from the invoice's job card garage, never from the caller.
+     */
+    @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getInvoicePdf(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @PathVariable Long id) {
+
+        InvoicePdfService.InvoicePdf pdf = pdfService.generate(user, id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(pdf.fileName()).build().toString())
+                .body(pdf.content());
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<InvoiceResponse>> getInvoiceByInvoiceNumber(
             @RequestParam String invoiceNumber) {
@@ -76,6 +103,7 @@ public class InvoiceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER', 'OWNER')")
     public ResponseEntity<ApiResponse<Void>> deleteInvoice(
             @PathVariable Long id) {
 

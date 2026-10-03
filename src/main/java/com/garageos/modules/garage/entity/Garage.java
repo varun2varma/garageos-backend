@@ -16,6 +16,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -120,5 +121,21 @@ public class Garage extends BaseEntity {
             nullable = false
     )
     Integer nextEmployeeSequence;
+
+
+    /**
+     * Garage-specific logo (V63). The logo belongs to the garage, never to
+     * a user. {@code logoStorageKey} is a key in MediaStorageService, never
+     * a public URL; all three are null for a garage that has not uploaded
+     * one, in which case callers fall back to GarageST default branding.
+     */
+    @Column(name = "logo_storage_key", length = 500)
+    String logoStorageKey;
+
+    @Column(name = "logo_content_type", length = 100)
+    String logoContentType;
+
+    @Column(name = "logo_updated_at")
+    LocalDateTime logoUpdatedAt;
 
 }

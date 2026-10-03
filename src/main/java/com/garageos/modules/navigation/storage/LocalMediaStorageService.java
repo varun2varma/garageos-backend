@@ -104,6 +104,49 @@ public class LocalMediaStorageService
         }
     }
 
+    @Override
+    public String uploadBytes(
+            byte[] content,
+            String folder,
+            String extension) {
+
+        if (content == null || content.length == 0) {
+            throw new IllegalArgumentException("Media file is required");
+        }
+
+        try {
+
+            Path folderPath = Paths.get(storagePath, folder);
+
+            Files.createDirectories(folderPath);
+
+            String fileName = UUID.randomUUID() + extension;
+
+            Files.write(folderPath.resolve(fileName), content);
+
+            return folder + "/" + fileName;
+
+        } catch (IOException e) {
+
+            throw new IllegalStateException(
+                    "Unable to store media file", e);
+        }
+    }
+
+    @Override
+    public void delete(String storageKey) {
+
+        if (storageKey == null || storageKey.isBlank()) {
+            return;
+        }
+
+        try {
+            Files.deleteIfExists(Paths.get(storagePath, storageKey));
+        } catch (IOException ignored) {
+            // best-effort: an orphaned old logo file is harmless
+        }
+    }
+
     private String extractExtension(
             String fileName) {
 

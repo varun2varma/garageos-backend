@@ -3,6 +3,7 @@ package com.garageos.modules.garage.service;
 import com.garageos.modules.garage.dto.request.CreateGarageRequest;
 import com.garageos.modules.garage.dto.request.UpdateGarageLocationRequest;
 import com.garageos.modules.garage.dto.response.GarageResponse;
+import com.garageos.modules.garage.dto.response.GarageSummaryResponse;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 
 import java.util.List;
@@ -14,9 +15,14 @@ public interface GarageService {
             CreateGarageRequest request
     );
 
-    GarageResponse getGarage(Long id);
+    /**
+     * Full record (with PAN/GSTIN) for the garage's own staff/owner; a
+     * summary without business identifiers for everyone else.
+     */
+    GarageSummaryResponse getGarage(GarageUserPrincipal principal, Long id);
 
     GarageResponse updateGarage(
+            GarageUserPrincipal principal,
             Long id,
             CreateGarageRequest request
     );
@@ -34,8 +40,9 @@ public interface GarageService {
             UpdateGarageLocationRequest request
     );
 
-    void deleteGarage(Long id);
+    void deleteGarage(GarageUserPrincipal principal, Long id);
 
-    List<GarageResponse> getAllGarages();
+    /** Directory listing: summaries only, never PAN/GSTIN. */
+    List<GarageSummaryResponse> getAllGarages();
 
 }

@@ -20,6 +20,8 @@ public class CustomerInvoiceResponse {
 
     private String jobCardNumber;
 
+    private Long garageId;
+
     private InvoiceStatus invoiceStatus;
 
     private PaymentStatus paymentStatus;
