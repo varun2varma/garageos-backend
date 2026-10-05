@@ -14,4 +14,8 @@ public interface DeliveryRepository
 
     Optional<Delivery> findByJobCardId(Long jobCardId);
 
+
+    org.springframework.data.domain.Page<Delivery> findByJobCardGarageIdIn(
+            java.util.Collection<Long> garageIds,
+            org.springframework.data.domain.Pageable pageable);
 }

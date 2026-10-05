@@ -42,7 +42,7 @@ public interface GarageService {
 
     void deleteGarage(GarageUserPrincipal principal, Long id);
 
-    /** Directory listing: summaries only, never PAN/GSTIN. */
+    /** Directory listing of ACTIVE garages: summaries only, never PAN/GSTIN. */
     List<GarageSummaryResponse> getAllGarages();
 
 }

@@ -20,6 +20,8 @@ import com.garageos.modules.garage.repository.GarageRepository;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.inspectionfinding.service.InspectionFindingService;
 import com.garageos.modules.jobcard.dto.request.CreateJobCardRequest;
+import com.garageos.modules.jobcard.event.JobCardClosedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import com.garageos.modules.jobcard.dto.response.JobCardResponse;
 import com.garageos.modules.jobcard.entity.JobCard;
 import com.garageos.modules.navigation.repository.NavigationRequestRepository;
@@ -52,6 +54,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Service
 @RequiredArgsConstructor
 public class JobCardServiceImpl implements JobCardService {
+
+    @Autowired(required = false)
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    /** Relationship bookkeeping only; optional so the job card flow never depends on it. */
+    @Autowired(required = false)
+    private com.garageos.modules.customer.service.CustomerGarageService customerGarageService;
 
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
@@ -135,6 +144,12 @@ public class JobCardServiceImpl implements JobCardService {
         });
         jobCard.setComplaints(complaints);
         jobCard = jobCardRepository.save(jobCard);
+
+        // An actual job card is the strongest verified customer<->garage event.
+        if (customerGarageService != null && vehicle.getCustomer() != null) {
+            customerGarageService.link(vehicle.getCustomer().getId(), garageId,
+                    com.garageos.core.enums.customer.CustomerGarageSource.JOB_CARD);
+        }
 
         if (booking != null) {
             booking.setStatus(BookingStatus.COMPLETED);
@@ -642,6 +657,12 @@ public class JobCardServiceImpl implements JobCardService {
                 NotificationEventType.JOB_CLOSED, jobCard, "1");
 
         jobCardRepository.save(jobCard);
+
+        // Handled AFTER_COMMIT on a background thread (final report generation), so it can
+        // never make closure fail or roll it back.
+        if (applicationEventPublisher != null) {
+            applicationEventPublisher.publishEvent(new JobCardClosedEvent(jobCard.getId()));
+        }
 
         return jobCardMapper.toResponse(jobCard);
     }

@@ -39,6 +39,10 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Field-injected so existing constructor-built tests are unaffected. */
+    @Autowired
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final DeliveryRepository repository;
     private final JobCardRepository jobCardRepository;
     private final InvoiceRepository invoiceRepository;
@@ -200,10 +204,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public DeliveryResponse getDelivery(Long id) {
 
-        Delivery delivery = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Delivery not found with id : " + id));
+        Delivery delivery = requireAccessibleDelivery(id);
 
         return mapper.toResponse(delivery);
     }
@@ -221,7 +222,21 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return repository.findAll(pageable)
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return repository.findAll(pageable).map(mapper::toResponse);
+        }
+
+        java.util.Set<Long> garageIds = garageScope.allowedGarageIds(principal);
+
+        // Deliveries are garage operations data: never listed across garages
+        // (a pure customer has no staff garage scope and gets none).
+        if (garageIds.isEmpty() || garageScope.isCustomerOnly(principal)) {
+            return Page.empty(pageable);
+        }
+
+        return repository.findByJobCardGarageIdIn(garageIds, pageable)
                 .map(mapper::toResponse);
     }
 
@@ -230,10 +245,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             Long id,
             CreateDeliveryRequest request) {
 
-        Delivery delivery = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Delivery not found with id : " + id));
+        Delivery delivery = requireAccessibleDelivery(id);
 
         mapper.updateEntity(request, delivery);
 
@@ -245,10 +257,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Override
     public void deleteDelivery(Long id) {
 
-        Delivery delivery = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Delivery not found with id : " + id));
+        Delivery delivery = requireAccessibleDelivery(id);
 
         repository.delete(delivery);
     }
@@ -277,5 +286,39 @@ public class DeliveryServiceImpl implements DeliveryService {
             throw new BusinessException(
                     "E2: This Job Card does not belong to your garage.");
         }
+    }
+
+    /** Garage staff (or owner) of the delivery garage, or the owning customer; everyone else gets not-found. */
+    private Delivery requireAccessibleDelivery(Long id) {
+
+        Delivery delivery = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Delivery not found with id : " + id));
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return delivery;
+        }
+
+        JobCard jobCard = delivery.getJobCard();
+
+        boolean staffAllowed = jobCard != null
+                && jobCard.getGarage() != null
+                && !garageScope.isCustomerOnly(principal)
+                && garageScope.canAccessGarage(principal, jobCard.getGarage().getId());
+
+        boolean ownCustomer = jobCard != null
+                && jobCard.getCustomer() != null
+                && principal.getMobile() != null
+                && principal.getMobile().equals(jobCard.getCustomer().getMobileNumber())
+                && garageScope.isCustomerOnly(principal);
+
+        if (!staffAllowed && !ownCustomer) {
+            throw new ResourceNotFoundException("Delivery not found with id : " + id);
+        }
+
+        return delivery;
     }
 }

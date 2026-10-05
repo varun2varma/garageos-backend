@@ -1,5 +1,7 @@
 package com.garageos.modules.garage.service.impl;
 
+import com.garageos.core.enums.otp.OtpPurpose;
+import com.garageos.modules.otp.service.OtpService;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
@@ -41,6 +43,7 @@ public class GarageServiceImpl implements GarageService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final GarageMembershipRepository garageMembershipRepository;
+    private final OtpService otpService;
 
     @Override
     @Transactional
@@ -51,6 +54,12 @@ public class GarageServiceImpl implements GarageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User not found."));
+
+        if (otpService.isEnabled()) {
+            // Always the authenticated user's own registered number, never client input.
+            otpService.verifyAndConsume(
+                    OtpPurpose.GARAGE_REGISTRATION, user.getMobile(), request.getOtp());
+        }
 
         Garage garage = garageMapper.toEntity(request);
 
@@ -316,8 +325,10 @@ public class GarageServiceImpl implements GarageService {
     @Transactional(readOnly = true)
     public List<GarageSummaryResponse> getAllGarages() {
 
+        // ACTIVE garages only: a closed/inactive garage must never be offered
+        // as a directory entry (join-garage, discovery).
         return garageRepository
-                .findAll()
+                .findByStatus(GarageStatus.ACTIVE)
                 .stream()
                 .map(garageMapper::toSummary)
                 .toList();

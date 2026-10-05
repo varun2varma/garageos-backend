@@ -51,6 +51,10 @@ public class BookingServiceImpl implements BookingService {
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Field-injected so constructor-built tests are unaffected. */
+    @Autowired
+    private com.garageos.modules.customer.service.CustomerGarageService customerGarageService;
+
     private final BookingRepository bookingRepository;
     private final CustomerRepository customerRepository;
     private final VehicleRepository vehicleRepository;
@@ -81,6 +85,8 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Garage not found with id : " + request.getGarageId()));
+
+        validateGarageForCustomerBooking(customer, garage, request.isFindAnotherGarage());
 
         if (request.isPickupRequested()) {
 
@@ -310,6 +316,12 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepository.save(booking);
 
+        // A garage-confirmed booking is a verified customer<->garage relationship.
+        if (customerGarageService != null) {
+            customerGarageService.link(booking.getCustomerId(), booking.getGarageId(),
+                    com.garageos.core.enums.customer.CustomerGarageSource.BOOKING_CONFIRMED);
+        }
+
         auditService.record(
                 AuditEventType.BOOKING_CONFIRMED,
                 "Booking",
@@ -395,6 +407,31 @@ public class BookingServiceImpl implements BookingService {
     // -------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------
+
+    /**
+     * Server-side garage eligibility for a customer booking - never trusts
+     * the client: the garage must be ACTIVE; a customer who already has
+     * garages must pick one of them unless they explicitly chose "Find
+     * another garage"; a customer with no garages may use discovery freely.
+     */
+    private void validateGarageForCustomerBooking(
+            Customer customer, Garage garage, boolean findAnotherGarage) {
+
+        if (garage.getStatus() != com.garageos.core.enums.garage.GarageStatus.ACTIVE) {
+            throw new BusinessException(
+                    "This garage is not available for bookings right now.");
+        }
+
+        boolean hasGarages = customerGarageService.hasServiceRelationship(customer.getId());
+
+        if (hasGarages
+                && !findAnotherGarage
+                && !customerGarageService.hasServiceRelationship(customer.getId(), garage.getId())) {
+
+            throw new BusinessException(
+                    "Please choose one of your garages, or use \"Find another garage\" to book with a new one.");
+        }
+    }
 
     private void requireStatus(Booking booking, BookingStatus expected) {
 

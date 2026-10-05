@@ -15,7 +15,10 @@ import com.garageos.modules.identity.repository.RoleRepository;
 import com.garageos.modules.identity.repository.UserRepository;
 import com.garageos.modules.identity.repository.UserRoleRepository;
 import com.garageos.modules.identity.service.UserService;
+import com.garageos.core.security.GarageScope;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +42,10 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserRoleRepository userRoleRepository;
+
+    /** Field-injected so existing constructor-built tests are unaffected. */
+    @Autowired
+    private GarageScope garageScope;
 
     @Override
     @Transactional
@@ -138,14 +145,48 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public UserResponse getUser(Long id) {
+    /**
+     * Users are tenant data: a caller may only touch themselves or users
+     * of a garage they can access. Anything else is reported as not found.
+     */
+    private User requireAccessibleUser(Long id) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "User not found : " + id));
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)
+                || id.equals(principal.getId())
+                || garageScope.canAccessGarage(principal, user.getGarageId())) {
+            return user;
+        }
+
+        throw new ResourceNotFoundException("User not found : " + id);
+    }
+
+    private List<User> accessibleGarageUsers() {
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return userRepository.findAll();
+        }
+
+        java.util.Set<Long> garageIds = garageScope.allowedGarageIds(principal);
+
+        return garageIds.isEmpty()
+                ? List.of()
+                : userRepository.findByGarageIdIn(garageIds);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUser(Long id) {
+
+        User user = requireAccessibleUser(id);
 
         return buildResponse(user);
     }
@@ -154,10 +195,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long id) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found : " + id));
+        User user = requireAccessibleUser(id);
 
         userRepository.delete(user);
     }
@@ -175,8 +213,18 @@ public class UserServiceImpl implements UserService {
         Pageable pageable =
                 PageRequest.of(page, size, sort);
 
-        Page<User> users =
-                userRepository.findAll(pageable);
+        GarageUserPrincipal principal = garageScope.principal();
+
+        Page<User> users;
+
+        if (garageScope.isUnrestricted(principal)) {
+            users = userRepository.findAll(pageable);
+        } else {
+            java.util.Set<Long> garageIds = garageScope.allowedGarageIds(principal);
+            users = garageIds.isEmpty()
+                    ? Page.empty(pageable)
+                    : userRepository.findByGarageIdIn(garageIds, pageable);
+        }
 
         return users.map(this::buildResponse);
     }
@@ -187,10 +235,7 @@ public class UserServiceImpl implements UserService {
             Long id,
             UpdateUserRequest request) {
 
-        User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found : " + id));
+        User user = requireAccessibleUser(id);
 
         mapper.updateEntity(request, user);
 
@@ -231,8 +276,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getTechnicians() {
 
-        return userRepository
-                .findAll()
+        return accessibleGarageUsers()
                 .stream()
 
                 .filter(user ->
@@ -261,8 +305,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getRepairEmployees() {
 
-        return userRepository
-                .findAll()
+        return accessibleGarageUsers()
                 .stream()
 
                 .filter(user ->

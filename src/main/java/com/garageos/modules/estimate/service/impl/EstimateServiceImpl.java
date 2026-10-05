@@ -47,6 +47,10 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Field-injected so existing constructor-built tests are unaffected. */
+    @Autowired
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final EstimateRepository estimateRepository;
     private final JobCardRepository jobCardRepository;
     private final EstimateMapper estimateMapper;
@@ -103,14 +107,60 @@ public class EstimateServiceImpl implements EstimateService {
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
 
+        requireAccessible(estimate);
+
         return estimateMapper.toResponse(estimate);
+    }
+
+    /** Staff of the estimate garage (or owner of it), or the customer it belongs to. */
+    private void requireAccessible(Estimate estimate) {
+
+        com.garageos.modules.identity.security.principal.GarageUserPrincipal principal =
+                garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return;
+        }
+
+        JobCard jobCard = estimate.getJobCard();
+
+        boolean staffAllowed = jobCard != null
+                && jobCard.getGarage() != null
+                && garageScope.canAccessGarage(principal, jobCard.getGarage().getId());
+
+        boolean ownCustomer = jobCard != null
+                && jobCard.getCustomer() != null
+                && principal.getMobile() != null
+                && principal.getMobile().equals(jobCard.getCustomer().getMobileNumber());
+
+        if (!staffAllowed && !ownCustomer) {
+            throw new ResourceNotFoundException(
+                    "Estimate not found with id : " + estimate.getId());
+        }
     }
 
     @Override
     public List<EstimateResponse> getAllEstimates() {
 
-        return estimateRepository.findAll()
-                .stream()
+        com.garageos.modules.identity.security.principal.GarageUserPrincipal principal =
+                garageScope.principal();
+
+        List<Estimate> estimates;
+
+        if (garageScope.isUnrestricted(principal)) {
+            estimates = estimateRepository.findAll();
+        } else if (garageScope.isCustomerOnly(principal)) {
+            estimates = principal.getMobile() == null
+                    ? List.of()
+                    : estimateRepository.findByJobCardCustomerMobileNumber(principal.getMobile());
+        } else {
+            java.util.Set<Long> garageIds = garageScope.allowedGarageIds(principal);
+            estimates = garageIds.isEmpty()
+                    ? List.of()
+                    : estimateRepository.findByJobCardGarageIdIn(garageIds);
+        }
+
+        return estimates.stream()
                 .map(estimateMapper::toResponse)
                 .toList();
     }

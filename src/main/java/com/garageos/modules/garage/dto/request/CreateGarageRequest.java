@@ -69,6 +69,13 @@ public class CreateGarageRequest {
     @DecimalMax(value = "90.0", message = "Latitude must be between -90 and 90.")
     BigDecimal latitude;
 
+    /**
+     * SMS OTP for the registering user's own mobile (POST /otp/send, purpose
+     * GARAGE_REGISTRATION). Required on create only while otp.enabled; ignored on update.
+     */
+    @Pattern(regexp = "^$|^[0-9]{4,8}$", message = "Invalid OTP.")
+    String otp;
+
     @DecimalMin(value = "-180.0", message = "Longitude must be between -180 and 180.")
     @DecimalMax(value = "180.0", message = "Longitude must be between -180 and 180.")
     BigDecimal longitude;

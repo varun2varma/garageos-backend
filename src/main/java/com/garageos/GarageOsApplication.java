@@ -2,6 +2,7 @@ package com.garageos;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -15,6 +16,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
+// Background reaction to committed domain events (final report generation after Job Card closure).
+@EnableAsync
 public class GarageOsApplication {
 
 	public static void main(String[] args) {

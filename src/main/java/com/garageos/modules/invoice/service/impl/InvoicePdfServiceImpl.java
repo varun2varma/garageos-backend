@@ -79,11 +79,19 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
                 join(" ", vehicle.getBrand(), vehicle.getModel(), vehicle.getVariant()),
                 vehicleDetails(vehicle, jobCard),
                 invoice.getRemarks(),
+                invoice.getPaymentStatus() == null ? null : invoice.getPaymentStatus().name(),
                 breakdown);
 
         return new InvoicePdf(
                 renderer.render(data),
                 "Invoice-" + invoice.getInvoiceNumber().replaceAll("[^A-Za-z0-9._-]", "_") + ".pdf");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InvoiceTaxCalculator.Breakdown breakdownFor(Invoice invoice) {
+        return InvoiceTaxCalculator.calculate(
+                finalBillableLines(invoice, invoice.getEstimate()), invoice.getDiscount());
     }
 
     /**

@@ -14,7 +14,9 @@ import com.garageos.modules.vehicle.mapper.VehicleMapper;
 import com.garageos.modules.vehicle.repository.VehicleRepository;
 import com.garageos.modules.vehicle.service.VehicleService;
 import com.garageos.modules.vehicle.validator.VehicleRegistrationNumberValidator;
+import com.garageos.core.security.GarageScope;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,57 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository repository;
     private final CustomerRepository customerRepository;
     private final VehicleMapper mapper;
+
+    /** Field-injected (not in the constructor) so existing constructor-built tests are unaffected. */
+    @Autowired
+    private GarageScope garageScope;
+
+    @Autowired
+    private com.garageos.modules.customer.service.CustomerGarageService customerGarageService;
+
+    /**
+     * A vehicle belongs to a customer, so access to a vehicle is access to
+     * its customer: the customer themselves, staff of a garage the customer
+     * is related to (owners: any of their garages), or SUPER_ADMIN. Anything
+     * else is reported as not found, so an id or registration number alone
+     * never reveals another garage's/customer's vehicle.
+     */
+    private void requireCustomerAccess(Customer customer, String notFoundMessage) {
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return;
+        }
+
+        boolean self = principal.getMobile() != null
+                && principal.getMobile().equals(customer.getMobileNumber());
+
+        if (self) {
+            return;
+        }
+
+        boolean staffAllowed = !garageScope.isCustomerOnly(principal)
+                && customerGarageService.isVisibleToAny(
+                customer.getId(), garageScope.allowedGarageIds(principal));
+
+        if (!staffAllowed) {
+            throw new ResourceNotFoundException(notFoundMessage);
+        }
+    }
+
+    private void requireVehicleAccess(Vehicle vehicle, String notFoundMessage) {
+
+        if (vehicle.getCustomer() == null) {
+            // an ownerless vehicle is only reachable by SUPER_ADMIN
+            if (!garageScope.isUnrestricted(garageScope.principal())) {
+                throw new ResourceNotFoundException(notFoundMessage);
+            }
+            return;
+        }
+
+        requireCustomerAccess(vehicle.getCustomer(), notFoundMessage);
+    }
 
     @Override
     public VehicleResponse createVehicle(CreateVehicleRequest request) {
@@ -48,6 +101,9 @@ public class VehicleServiceImpl implements VehicleService {
                         new ResourceNotFoundException(
                                 "Customer not found with id : " + request.getCustomerId()));
 
+        requireCustomerAccess(customer,
+                "Customer not found with id : " + request.getCustomerId());
+
         Vehicle vehicle = mapper.toEntity(request);
 
         vehicle.setCustomer(customer);
@@ -65,6 +121,8 @@ public class VehicleServiceImpl implements VehicleService {
                         new ResourceNotFoundException(
                                 "Vehicle not found with id : " + id));
 
+        requireVehicleAccess(vehicle, "Vehicle not found with id : " + id);
+
         return mapper.toResponse(vehicle);
     }
 
@@ -75,6 +133,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Vehicle not found with id : " + id));
+
+        requireVehicleAccess(vehicle, "Vehicle not found with id : " + id);
 
         repository.delete(vehicle);
     }
@@ -90,6 +150,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Vehicle not found with id : " + id));
+
+        requireVehicleAccess(vehicle, "Vehicle not found with id : " + id);
 
         // A customer may only edit their own vehicle, and may not use this
         // call to reassign it to a different customer. Employee roles keep
@@ -126,6 +188,9 @@ public class VehicleServiceImpl implements VehicleService {
                         new ResourceNotFoundException(
                                 "Customer not found with id : " + request.getCustomerId()));
 
+        // Re-pointing a vehicle at a customer requires access to that customer too.
+        requireCustomerAccess(customer, "Customer not found with id : " + request.getCustomerId());
+
         mapper.updateEntity(request, vehicle);
 
         vehicle.setCustomer(customer);
@@ -145,6 +210,9 @@ public class VehicleServiceImpl implements VehicleService {
                                 "Vehicle not found with registration number : "
                                         + registrationNumber));
 
+        requireVehicleAccess(vehicle,
+                "Vehicle not found with registration number : " + registrationNumber);
+
         return mapper.toResponse(vehicle);
     }
 
@@ -158,6 +226,8 @@ public class VehicleServiceImpl implements VehicleService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Vehicle not found with id : " + id));
+
+        requireVehicleAccess(vehicle, "Vehicle not found with id : " + id);
 
         GarageUserPrincipal principal = (GarageUserPrincipal) SecurityContextHolder
                 .getContext()
@@ -193,7 +263,24 @@ public class VehicleServiceImpl implements VehicleService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Vehicle> vehicles = repository.findAll(pageable);
+        GarageUserPrincipal principal = garageScope.principal();
+
+        Page<Vehicle> vehicles;
+
+        if (garageScope.isUnrestricted(principal)) {
+            vehicles = repository.findAll(pageable);
+        } else if (garageScope.isCustomerOnly(principal)) {
+            // A customer only ever sees their own vehicles.
+            vehicles = customerRepository.findByMobileNumber(principal.getMobile())
+                    .map(c -> repository.findByCustomerId(c.getId(), pageable))
+                    .orElseGet(() -> Page.empty(pageable));
+        } else {
+            // Staff: only vehicles of customers related to an accessible garage.
+            java.util.Set<Long> garageIds = garageScope.allowedGarageIds(principal);
+            vehicles = garageIds.isEmpty()
+                    ? Page.empty(pageable)
+                    : repository.findVisibleToGarages(garageIds, pageable);
+        }
 
         return vehicles.map(mapper::toResponse);
     }

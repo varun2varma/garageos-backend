@@ -8,6 +8,8 @@ import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.identity.dto.request.ChangePasswordRequest;
 import com.garageos.modules.identity.dto.request.ForgotPasswordRequest;
 import com.garageos.modules.identity.dto.request.LoginRequest;
+import com.garageos.core.enums.otp.OtpPurpose;
+import com.garageos.modules.otp.service.OtpService;
 import com.garageos.modules.identity.dto.request.RegisterRequest;
 import com.garageos.modules.identity.dto.request.ResetPasswordRequest;
 import com.garageos.modules.identity.dto.response.LoginResponse;
@@ -75,6 +77,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
 
     private final UserRepository userRepository;
+
+    private final OtpService otpService;
 
     private final UserSessionRepository userSessionRepository;
 
@@ -558,6 +562,13 @@ public class AuthServiceImpl implements AuthService {
 
             throw new BusinessException(
                     "Mobile number already exists.");
+        }
+
+        // After the duplicate checks so a number that cannot register never burns an OTP;
+        // before any write so registration cannot complete without it.
+        if (otpService.isEnabled()) {
+            otpService.verifyAndConsume(
+                    OtpPurpose.USER_REGISTRATION, request.getMobile(), request.getOtp());
         }
 
         Role role =

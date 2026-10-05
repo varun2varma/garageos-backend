@@ -12,6 +12,8 @@ import java.time.LocalDate;
  *
  * {@code logoBytes} is null for a garage without a logo; the renderer then
  * falls back to the GarageST default mark.
+ *
+ * {@code paymentStatus} is the invoice's own payment status, or null when it has none.
  */
 public record InvoiceDocumentData(
         GarageBrandingResponse garage,
@@ -27,5 +29,6 @@ public record InvoiceDocumentData(
         String vehicleDescription,
         String vehicleDetails,
         String remarks,
+        String paymentStatus,
         InvoiceTaxCalculator.Breakdown breakdown) {
 }

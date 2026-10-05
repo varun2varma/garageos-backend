@@ -6,6 +6,10 @@ import com.garageos.modules.garage.dto.request.CreateGarageRequest;
 import com.garageos.modules.garage.dto.request.UpdateGarageLocationRequest;
 import com.garageos.modules.garage.dto.response.GarageBrandingResponse;
 import com.garageos.modules.garage.dto.response.GarageResponse;
+import com.garageos.modules.garage.dto.response.NearbyGarageResponse;
+import com.garageos.modules.garage.service.GarageDiscoveryService;
+import com.garageos.core.security.GarageScope;
+import org.springframework.security.access.AccessDeniedException;
 import com.garageos.modules.garage.dto.response.GarageSummaryResponse;
 import com.garageos.modules.garage.service.GarageBrandingService;
 import com.garageos.modules.garage.service.GarageService;
@@ -30,6 +34,10 @@ public class GarageController {
     private final GarageService service;
 
     private final GarageBrandingService brandingService;
+
+    private final GarageDiscoveryService discoveryService;
+
+    private final GarageScope garageScope;
 
     @PostMapping("/garages")
     public ResponseEntity<ApiResponse<GarageResponse>> createGarage(
@@ -151,14 +159,41 @@ public class GarageController {
         );
     }
 
+    /**
+     * ACTIVE garage directory for non-customer flows (e.g. an employee
+     * choosing a garage to join). Customers do NOT get the whole directory -
+     * they discover garages through /garages/nearby or their own My Garages.
+     */
     @GetMapping("/garages")
-    public ResponseEntity<ApiResponse<List<GarageSummaryResponse>>> getAllGarages() {
+    public ResponseEntity<ApiResponse<List<GarageSummaryResponse>>> getAllGarages(
+            @AuthenticationPrincipal GarageUserPrincipal user) {
+
+        if (garageScope.isCustomerOnly(user)) {
+            throw new AccessDeniedException(
+                    "Use nearby garage discovery to find a garage.");
+        }
 
         return ApiResponseUtil.success(
                 "Garages fetched successfully.",
                 service.getAllGarages()
         );
 
+    }
+
+    /**
+     * Customer garage discovery: ACTIVE garages with coordinates within
+     * radiusKm (configurable default) of the supplied point, nearest first.
+     */
+    @GetMapping("/garages/nearby")
+    public ResponseEntity<ApiResponse<List<NearbyGarageResponse>>> getNearbyGarages(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(required = false) Double radiusKm) {
+
+        return ApiResponseUtil.success(
+                "Nearby garages fetched successfully.",
+                discoveryService.findNearby(latitude, longitude, radiusKm)
+        );
     }
 
 }

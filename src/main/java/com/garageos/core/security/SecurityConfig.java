@@ -66,6 +66,9 @@ public class SecurityConfig {
                                 "/favicon.ico",
 
                                 "/api/v1/auth/**",
+                                // OTP issue: public for USER_REGISTRATION; the service itself
+                                // requires an authenticated user for GARAGE_REGISTRATION.
+                                "/api/v1/otp/send",
                                 "/api/v1/health/**",
 
                                 // Google Drive OAuth

@@ -4,7 +4,12 @@ import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
 import com.garageos.modules.customer.dto.request.portal.UpdateCustomerProfileRequest;
 import com.garageos.modules.customer.dto.response.portal.*;
+import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.modules.customer.repository.CustomerRepository;
+import com.garageos.modules.customer.service.CustomerGarageService;
 import com.garageos.modules.customer.service.CustomerPortalService;
+import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.garageos.modules.customer.service.CustomerVehicleJourneyService;
 import com.garageos.modules.estimate.dto.response.EstimateResponse;
 import com.garageos.modules.invoice.dto.response.InvoiceResponse;
@@ -31,6 +36,10 @@ public class CustomerPortalController {
 
     private final CustomerVehicleJourneyService vehicleJourneyService;
 
+    private final CustomerGarageService customerGarageService;
+
+    private final CustomerRepository customerRepository;
+
     /**
      * The unified "what is happening with my vehicle right now" card feed
      * for Customer Home. Aggregates Booking/NavigationTrip/JobCard - see
@@ -45,6 +54,40 @@ public class CustomerPortalController {
                 "Active vehicle journeys fetched successfully.",
                 vehicleJourneyService.getActiveJourneys()
         );
+    }
+
+    /**
+     * "My Garages": garages with an established service relationship (an
+     * actual job card, or a garage-confirmed booking) for the caller, with
+     * the default garage first. Browsing/selecting a garage never adds one.
+     */
+    @GetMapping("/garages")
+    public ResponseEntity<ApiResponse<List<MyGarageResponse>>> getMyGarages(
+            @AuthenticationPrincipal GarageUserPrincipal user) {
+
+        return ApiResponseUtil.success(
+                "My garages fetched successfully.",
+                customerGarageService.getMyGarages(currentCustomerId(user))
+        );
+    }
+
+    /** Marks one of My Garages as the (single) default / booking preselection. */
+    @PutMapping("/garages/{garageId}/default")
+    public ResponseEntity<ApiResponse<List<MyGarageResponse>>> setDefaultGarage(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @PathVariable Long garageId) {
+
+        return ApiResponseUtil.success(
+                "Default garage updated successfully.",
+                customerGarageService.setDefaultGarage(currentCustomerId(user), garageId)
+        );
+    }
+
+    private Long currentCustomerId(GarageUserPrincipal user) {
+
+        return customerRepository.findByMobileNumber(user.getMobile())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found."))
+                .getId();
     }
 
     @GetMapping("/profile")

@@ -61,4 +61,12 @@ public class CreateBookingRequest {
      */
     @Pattern(regexp = "^$|^[0-9+][0-9+\\-\\s]{6,19}$", message = "Please enter a valid contact number.")
     private String pickupContactNumber;
+
+    /**
+     * Explicit "Find another garage" intent. A customer who already has
+     * garages (My Garages) may only book one of them unless they
+     * deliberately choose to use a different garage; the garage must still
+     * be ACTIVE either way.
+     */
+    private boolean findAnotherGarage;
 }

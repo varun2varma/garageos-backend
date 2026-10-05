@@ -1,5 +1,6 @@
 package com.garageos.core.exception;
 
+import com.garageos.modules.otp.exception.OtpException;
 import com.garageos.core.api.error.ApiError;
 import com.garageos.core.api.response.ApiResponse;
 import com.garageos.core.api.response.ApiResponseUtil;
@@ -178,6 +179,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .body(buildError("File exceeds the maximum upload size for this endpoint."));
+    }
+
+    /**
+     * OTP failures carry a stable code (OTP_INVALID, OTP_EXPIRED, ...) and the
+     * status that fits (400 / 409 / 429 / 502 / 503). The message never
+     * contains the OTP or provider detail.
+     */
+    @ExceptionHandler(OtpException.class)
+    public ResponseEntity<ApiError> handleOtpException(OtpException ex) {
+
+        log.warn("[OTP] {}", ex.getCode());
+
+        return ResponseEntity.status(ex.getCode().status())
+                .body(buildError(ex.getMessage(), ex.getCode().name()));
     }
 
     /**

@@ -36,4 +36,11 @@ public class RegisterRequest {
     @Size(min = 8, max = 100)
     private String password;
 
+    /**
+     * SMS OTP sent to {@code mobile} via POST /otp/send (purpose USER_REGISTRATION).
+     * Required only while OTP verification is enabled (otp.enabled).
+     */
+    @Pattern(regexp = "^$|^[0-9]{4,8}$", message = "Invalid OTP.")
+    private String otp;
+
 }

@@ -50,6 +50,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Optional so existing constructor-built tests are unaffected; always present in the app. */
+    @Autowired(required = false)
+    private com.garageos.modules.payment.repository.PaymentRepository paymentRepository;
+
     private final InvoiceRepository invoiceRepository;
     private final EstimateRepository estimateRepository;
     private final InvoiceMapper invoiceMapper;
@@ -467,6 +471,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setPaymentStatus(PaymentStatus.PAID);
 
+        recordSettlementPayment(invoice, jobCard, principal);
+
         /*
          * saveAndFlush (not save) so a lost optimistic-lock race is
          * detected synchronously, right here, rather than deferred to
@@ -489,6 +495,40 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
 
         return invoiceMapper.toResponse(invoice);
+    }
+
+    /**
+     * The legacy "mark as paid" flow settles whatever balance is left. It
+     * now also writes that settlement into the payment ledger (method not
+     * captured, hence UNSPECIFIED) so collection reports never miss it.
+     * Existing behaviour and responses are unchanged.
+     */
+    private void recordSettlementPayment(
+            Invoice invoice, JobCard jobCard, GarageUserPrincipal principal) {
+
+        if (paymentRepository == null || jobCard.getGarage() == null) {
+            return;
+        }
+
+        java.math.BigDecimal alreadyPaid = paymentRepository.sumAmountByInvoiceId(invoice.getId());
+        java.math.BigDecimal remaining = invoice.getGrandTotal().subtract(
+                alreadyPaid == null ? java.math.BigDecimal.ZERO : alreadyPaid);
+
+        if (remaining.signum() <= 0) {
+            return;
+        }
+
+        com.garageos.modules.payment.entity.Payment payment =
+                new com.garageos.modules.payment.entity.Payment();
+        payment.setInvoice(invoice);
+        payment.setGarageId(jobCard.getGarage().getId());
+        payment.setAmount(remaining);
+        payment.setMethod(com.garageos.core.enums.payment.PaymentMethod.UNSPECIFIED);
+        payment.setReceivedByUserId(principal.getId());
+        payment.setPaidAt(LocalDateTime.now());
+        payment.setStatus(com.garageos.core.enums.payment.PaymentRecordStatus.COMPLETED);
+
+        paymentRepository.save(payment);
     }
 
     /**
