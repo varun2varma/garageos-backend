@@ -151,6 +151,10 @@ public class NotificationTemplateFactory {
             case JOB_CLOSED -> new Rendered(
                     "Job closed",
                     "A job card has been closed" + ref + ".");
+            // Deliberately generic: the message text never travels in a push payload.
+            case CHAT_MESSAGE_RECEIVED -> new Rendered(
+                    "New message",
+                    "You have a new message" + ref + ".");
         };
     }
 }

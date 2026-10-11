@@ -83,6 +83,19 @@ public class NavigationTripController {
     }
 
 
+    /**
+     * Fleet map by driver: every ACTIVE driver of the garage (with or without a trip), availability, last known
+     * position and its freshness. Owner/manager/service advisor of that garage only.
+     */
+    @GetMapping("/garage/{garageId}/drivers")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'SERVICE_ADVISOR')")
+    public List<com.garageos.modules.navigation.dto.response.FleetDriverResponse> getGarageFleetDrivers(
+            @PathVariable Long garageId) {
+
+        return navigationTripService.getGarageFleetDrivers(garageId);
+    }
+
+
     /*
      * DRIVER
      */

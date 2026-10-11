@@ -30,5 +30,28 @@ public record InvoiceDocumentData(
         String vehicleDetails,
         String remarks,
         String paymentStatus,
-        InvoiceTaxCalculator.Breakdown breakdown) {
+        InvoiceTaxCalculator.Breakdown breakdown,
+        InvoiceSnapshotView snapshot) {
+
+    /** Legacy invoice: no persisted tax snapshot, the renderer uses the breakdown only. */
+    public InvoiceDocumentData(
+            GarageBrandingResponse garage,
+            byte[] logoBytes,
+            String invoiceNumber,
+            LocalDate invoiceDate,
+            String jobCardNumber,
+            String vehicleNumber,
+            String serviceAdvisor,
+            String customerName,
+            String customerMobile,
+            String customerAddress,
+            String vehicleDescription,
+            String vehicleDetails,
+            String remarks,
+            String paymentStatus,
+            InvoiceTaxCalculator.Breakdown breakdown) {
+        this(garage, logoBytes, invoiceNumber, invoiceDate, jobCardNumber, vehicleNumber, serviceAdvisor,
+                customerName, customerMobile, customerAddress, vehicleDescription, vehicleDetails,
+                remarks, paymentStatus, breakdown, null);
+    }
 }

@@ -1,0 +1,40 @@
+{
+ "parts": 495,
+ "services": 238,
+ "imp": 703,
+ "excluded": 30,
+ "parts_status": {
+  "NEEDS_REVIEW": 388,
+  "CANDIDATE": 97,
+  "UNCLASSIFIED": 10
+ },
+ "svc_status": {
+  "NEEDS_REVIEW": 96,
+  "CANDIDATE": 130,
+  "UNCLASSIFIED": 12
+ },
+ "cls": {
+  "PART": 417,
+  "FLUID_LUBRICANT": 43,
+  "DETAILING_PRODUCT": 15,
+  "WORKSHOP_CONSUMABLE": 7,
+  "EV_SPECIALIST": 13,
+  "LABOUR_OPERATION": 211,
+  "OUTSOURCED_SERVICE": 16,
+  "SERVICE_PACKAGE": 11
+ },
+ "auto_hsn": 2555,
+ "auto_sac": 25,
+ "hsn": 21935,
+ "sac": 681,
+ "problems": 0,
+ "dups": 0,
+ "alias": 0,
+ "sha": "051108e31063f1ef0d6dfb005a622bcc848878fa2d94fae51a73e67f8916871e",
+ "size": 668474,
+ "starter_overlap": 19,
+ "excl_reasons": {
+  "Already seeded by migration V70 (name match)": 19,
+  "Garage-specific: package composition and pricing belong to each garage; the underlying operations are separate catalog services": 11
+ }
+}

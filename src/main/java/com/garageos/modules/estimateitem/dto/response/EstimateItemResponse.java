@@ -35,4 +35,19 @@ public class EstimateItemResponse {
 
     private Boolean selected;
 
+    private Long catalogItemId;
+
+    private String unit;
+
+    /** LEGACY, MASTER or MANUAL. */
+    private String entrySource;
+
+    /** NOT_REQUIRED, NEEDS_REVIEW or RESOLVED. */
+    private String reviewStatus;
+
+    private String manualNote;
+
+    private String hsnSacCode;
+
+    private BigDecimal gstRatePercent;
 }

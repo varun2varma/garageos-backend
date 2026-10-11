@@ -9,6 +9,7 @@ import com.garageos.modules.vehiclemaster.service.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class BrandController {
     private final BrandService brandService;
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleBrandResponse>> create(
             @Valid @RequestBody CreateVehicleBrandRequest request) {
 
@@ -50,6 +52,7 @@ public class BrandController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleBrandResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody CreateVehicleBrandRequest request) {
@@ -61,6 +64,7 @@ public class BrandController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable Long id) {
 

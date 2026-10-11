@@ -83,7 +83,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     /** [count, subtotal, discount, gst, grandTotal] of issued invoices generated in the period. */
     @Query("""
             SELECT COUNT(i), COALESCE(SUM(i.subtotal), 0), COALESCE(SUM(i.discount), 0),
-                   COALESCE(SUM(i.gst), 0), COALESCE(SUM(i.grandTotal), 0)
+                   COALESCE(SUM(COALESCE(i.taxTotal, i.gst)), 0), COALESCE(SUM(i.grandTotal), 0)
             FROM Invoice i
             WHERE i.estimate.jobCard.garage.id IN :garageIds
               AND i.invoiceStatus IN (

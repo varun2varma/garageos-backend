@@ -42,6 +42,10 @@ public class InventoryItem extends BaseEntity {
     @Column(nullable = false)
     boolean active = true;
 
+    /** Optional link to the central catalog; stock and prices stay garage-specific (V69). */
+    @Column(name = "catalog_item_id")
+    Long catalogItemId;
+
     public boolean isOutOfStock() {
         return quantity.signum() <= 0;
     }

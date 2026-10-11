@@ -17,6 +17,12 @@ import com.garageos.modules.identity.repository.UserRoleRepository;
 import com.garageos.modules.identity.service.UserService;
 import com.garageos.core.security.GarageScope;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.core.enums.audit.AuditEventType;
+import com.garageos.core.enums.garagemembership.GarageMembershipStatus;
+import com.garageos.modules.audit.service.AuditService;
+import com.garageos.modules.garagemembership.repository.GarageMembershipRepository;
+import com.garageos.modules.identity.repository.UserSessionRepository;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +51,21 @@ public class UserServiceImpl implements UserService {
 
     private final UserRoleRepository userRoleRepository;
 
+    private final AuditService auditService;
+
+    private final UserSessionRepository userSessionRepository;
+
+    private final GarageMembershipRepository membershipRepository;
+
+    /**
+     * Roles a garage owner may give an employee through user administration. Never OWNER, CUSTOMER, USER or
+     * SUPER_ADMIN: the platform-administrator role is granted only by the one-time, audited bootstrap
+     * ({@code PlatformAdminProvisioningService}) and by nothing else.
+     */
+    static final Set<RoleCode> EMPLOYEE_ROLES = Set.of(
+            RoleCode.MANAGER, RoleCode.SERVICE_ADVISOR, RoleCode.TECHNICIAN, RoleCode.DRIVER,
+            RoleCode.INVENTORY_MANAGER, RoleCode.ACCOUNTANT, RoleCode.CASHIER);
+
     /** Field-injected so existing constructor-built tests are unaffected. */
     @Autowired
     private GarageScope garageScope;
@@ -51,12 +74,53 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
 
+        GarageUserPrincipal principal = garageScope.principal();
+
+        boolean platformAdmin = garageScope.hasRole(principal, RoleCode.SUPER_ADMIN);
+
+        if (!platformAdmin && !garageScope.hasRole(principal, RoleCode.OWNER)) {
+            throw new AccessDeniedException("Only a garage owner or the platform administrator can create users.");
+        }
+
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException(
                     "Username already exists : " + request.getUsername());
         }
 
+        // The garage always comes from the caller's authority, never from the request alone.
+        Long garageId = request.getGarageId();
+
+        if (!platformAdmin) {
+            garageId = garageId == null ? principal.getGarageId() : garageId;
+
+            if (garageId == null || !garageScope.canAccessGarage(principal, garageId)) {
+                throw new ResourceNotFoundException("Garage not found with id : " + garageId);
+            }
+        }
+
+        List<Role> roles = List.of();
+
+        if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
+
+            roles = roleRepository.findAllById(request.getRoleIds());
+
+            if (roles.size() != request.getRoleIds().size()) {
+                throw new BusinessException("One or more roles are invalid.");
+            }
+
+            for (Role role : roles) {
+                boolean allowed = EMPLOYEE_ROLES.contains(role.getCode())
+                        || (platformAdmin && role.getCode() == RoleCode.OWNER);
+
+                if (!allowed) {
+                    throw new AccessDeniedException("This role cannot be assigned through user administration.");
+                }
+            }
+        }
+
         User user = mapper.toEntity(request);
+
+        user.setGarageId(garageId);
 
         user.setPasswordHash(
                 passwordEncoder.encode(request.getPassword()));
@@ -67,36 +131,20 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
 
-        /*
-         * Assign Roles
-         */
-        if (request.getRoleIds() != null &&
-                !request.getRoleIds().isEmpty()) {
-
-            List<Role> roles =
-                    roleRepository.findAllById(request.getRoleIds());
-
-            if (roles.size() != request.getRoleIds().size()) {
-                throw new BusinessException("One or more roles are invalid.");
-            }
+        if (!roles.isEmpty()) {
 
             User finalUser = user;
             List<UserRole> userRoles = roles.stream()
-
-                    .map(role -> UserRole.builder()
-
-                            .user(finalUser)
-
-                            .role(role)
-
-                            .build())
-
+                    .map(role -> UserRole.builder().user(finalUser).role(role).build())
                     .toList();
 
             userRoleRepository.saveAll(userRoles);
-
             user.setUserRoles(userRoles);
         }
+
+        auditService.record(
+                AuditEventType.USER_CREATED, "USER", user.getId(), user.getGarageId(),
+                Map.of("roles", roles.stream().map(r -> r.getCode().name()).sorted().toList()));
 
         return buildResponse(user);
     }
@@ -191,13 +239,70 @@ public class UserServiceImpl implements UserService {
         return buildResponse(user);
     }
 
+    /**
+     * Soft delete: the row is kept (job assignments, audit history and financial records reference users) but the
+     * account can no longer sign in, its sessions are revoked and its garage memberships end. Only an owner (of the
+     * user's garage) or the platform administrator may do it; nobody deletes themselves here (that is
+     * {@code DELETE /auth/account}); nobody but the platform administrator deletes an owner; a platform
+     * administrator account is never deleted through this endpoint.
+     */
     @Override
     @Transactional
     public void deleteUser(Long id) {
 
+        GarageUserPrincipal principal = garageScope.principal();
+
+        requireUserAdministrator(principal);
+
         User user = requireAccessibleUser(id);
 
-        userRepository.delete(user);
+        if (id.equals(principal.getId())) {
+            throw new AccessDeniedException("Use account deletion to remove your own account.");
+        }
+
+        requireMayManage(principal, user);
+
+        if (user.getStatus() == UserStatus.DELETED) {
+            return;
+        }
+
+        user.setStatus(UserStatus.DELETED);
+        userRepository.save(user);
+
+        userSessionRepository.revokeAllByUserId(user.getId());
+
+        membershipRepository.findByUser_Id(user.getId()).stream()
+                .filter(m -> m.getStatus() == GarageMembershipStatus.ACTIVE
+                        || m.getStatus() == GarageMembershipStatus.PENDING)
+                .forEach(m -> {
+                    m.setStatus(GarageMembershipStatus.REMOVED);
+                    membershipRepository.save(m);
+                });
+
+        auditService.record(AuditEventType.USER_DELETED, "USER", user.getId(), user.getGarageId(), Map.of());
+    }
+
+    private void requireUserAdministrator(GarageUserPrincipal principal) {
+
+        if (!garageScope.hasRole(principal, RoleCode.SUPER_ADMIN) && !garageScope.hasRole(principal, RoleCode.OWNER)) {
+            throw new AccessDeniedException("Only a garage owner or the platform administrator can do this.");
+        }
+    }
+
+    /**
+     * An owner manages employees. Another owner, and any platform administrator, are out of reach for an owner:
+     * only the platform administrator manages owners, and a platform-administrator account is never managed here.
+     */
+    private void requireMayManage(GarageUserPrincipal principal, User target) {
+
+        if (userRoleRepository.existsByUserIdAndRoleCode(target.getId(), RoleCode.SUPER_ADMIN)) {
+            throw new AccessDeniedException("This account cannot be managed through user administration.");
+        }
+
+        if (userRoleRepository.existsByUserIdAndRoleCode(target.getId(), RoleCode.OWNER)
+                && !garageScope.hasRole(principal, RoleCode.SUPER_ADMIN)) {
+            throw new AccessDeniedException("Only the platform administrator can manage an owner account.");
+        }
     }
 
     @Override
@@ -229,45 +334,80 @@ public class UserServiceImpl implements UserService {
         return users.map(this::buildResponse);
     }
 
+    /**
+     * Profile update. Roles are NOT changed here (a request carrying role ids is refused), the mobile number is the
+     * customer-identity key and is not changed here either, and the account status is changed only by an
+     * administrator for someone else. A user may edit their own name and e-mail; editing another user needs an
+     * owner (of that user's garage) or the platform administrator.
+     */
     @Override
     @Transactional
     public UserResponse updateUser(
             Long id,
             UpdateUserRequest request) {
 
+        GarageUserPrincipal principal = garageScope.principal();
+
         User user = requireAccessibleUser(id);
 
-        mapper.updateEntity(request, user);
-
-        user.getUserRoles().clear();
+        boolean self = id.equals(principal.getId());
 
         if (request.getRoleIds() != null) {
+            throw new BusinessException("Roles cannot be changed through this endpoint.");
+        }
 
-            List<Role> roles =
-                    roleRepository.findAllById(request.getRoleIds());
+        if (request.getMobile() != null && !request.getMobile().equals(user.getMobile())) {
+            throw new BusinessException("The mobile number cannot be changed here.");
+        }
 
-            if (roles.size() != request.getRoleIds().size()) {
-                throw new BusinessException("One or more roles are invalid.");
+        if (!self) {
+            requireUserAdministrator(principal);
+            requireMayManage(principal, user);
+        }
+
+        if (request.getActive() != null) {
+
+            boolean currentlyActive = user.getStatus() == UserStatus.ACTIVE;
+
+            if (request.getActive() != currentlyActive) {
+
+                if (self) {
+                    throw new AccessDeniedException("You cannot change your own account status.");
+                }
+
+                if (user.getStatus() == UserStatus.DELETED) {
+                    throw new BusinessException("A deleted account cannot be changed.");
+                }
+
+                user.setStatus(request.getActive() ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+
+                if (!request.getActive()) {
+                    userSessionRepository.revokeAllByUserId(user.getId());
+                }
+            }
+        }
+
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new BusinessException("Email already exists.");
             }
 
-            User finalUser = user;
-            List<UserRole> userRoles =
-                    roles.stream()
+            user.setEmail(request.getEmail());
+        }
 
-                            .map(role -> UserRole.builder()
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
 
-                                    .user(finalUser)
-
-                                    .role(role)
-
-                                    .build())
-
-                            .toList();
-
-            user.getUserRoles().addAll(userRoles);
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
         }
 
         user = userRepository.save(user);
+
+        auditService.record(AuditEventType.USER_UPDATED, "USER", user.getId(), user.getGarageId(),
+                Map.of("self", self));
 
         return buildResponse(user);
     }

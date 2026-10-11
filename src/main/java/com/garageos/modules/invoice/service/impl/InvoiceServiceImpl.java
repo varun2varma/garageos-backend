@@ -28,7 +28,10 @@ import com.garageos.modules.jobcard.service.JobCardService;
 import com.garageos.modules.jobcard.validator.JobCardStatusValidator;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import org.springframework.transaction.annotation.Transactional;
+import com.garageos.core.tax.TaxPolicy;
+import com.garageos.modules.invoice.service.InvoiceTaxAssembler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +48,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
+
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
+    /** Optional so constructor-built tests keep working; always present in the app. */
+    @Autowired(required = false)
+    private TaxPolicy taxPolicy;
 
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
@@ -87,7 +99,23 @@ public class InvoiceServiceImpl implements InvoiceService {
         jobCardRepository.save(jobCard);
     }
 
+    /**
+     * Takes the estimate row lock and then re-reads the stored status (a scalar query, never answered from the
+     * entity loaded before the lock), so an approval, rejection or edit committed while this request waited is seen.
+     */
+    private void requireApprovedUnderLock(Estimate estimate, String message) {
+
+        estimateRepository.findByIdForUpdate(estimate.getId());
+
+        EstimateStatus current = estimateRepository.findStatusById(estimate.getId()).orElse(estimate.getStatus());
+
+        if (current != EstimateStatus.APPROVED) {
+            throw new BusinessException(message);
+        }
+    }
+
     @Override
+    @Transactional
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
 
         Estimate estimate = estimateRepository.findById(request.getEstimateId())
@@ -95,6 +123,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Estimate not found with id : "
                                         + request.getEstimateId()));
+
+        requireApprovedUnderLock(estimate, "Only approved estimates can be converted to invoice.");
 
         if (estimate.getStatus() != EstimateStatus.APPROVED) {
             throw new BusinessException(
@@ -131,12 +161,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setInvoiceStatus(InvoiceStatus.GENERATED);
         invoice.setPaymentStatus(PaymentStatus.PENDING);
 
-        invoice.setSubtotal(estimate.getSubtotal());
-        invoice.setDiscount(estimate.getDiscount());
-        invoice.setGst(estimate.getGst());
-        invoice.setGrandTotal(estimate.getGrandTotal());
+        List<InvoiceItem> snapshotItems = applyCanonicalSnapshot(invoice, estimate);
 
         invoice = invoiceRepository.save(invoice);
+
+        invoiceItemRepository.saveAll(snapshotItems);
 
         transitionJobCardToInvoiceGenerated(jobCard);
 
@@ -198,7 +227,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 //                "Invoice update is not allowed after creation.");
 //    }
 
+    /**
+     * An issued invoice is a financial record: it is never physically deleted
+     * (payments, items and reports reference it). "Delete" cancels an unpaid
+     * invoice instead; one that has received any payment must be corrected
+     * through a separate refund/adjustment workflow.
+     */
     @Override
+    @Transactional
     public void deleteInvoice(Long id) {
 
         Invoice invoice = invoiceRepository.findById(id)
@@ -206,10 +242,27 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Invoice not found with id : " + id));
 
-        // Deleting is a staff operation on the caller own garage only.
+        // Cancelling is a staff operation on the caller own garage only.
         authorizeInvoiceAction(invoice.getEstimate().getJobCard());
 
-        invoiceRepository.delete(invoice);
+        if (invoice.getInvoiceStatus() == InvoiceStatus.CANCELLED) {
+            throw new BusinessException("Invoice is already cancelled.");
+        }
+
+        boolean hasPayments = (invoice.getPaymentStatus() != null && invoice.getPaymentStatus() != PaymentStatus.PENDING)
+                || invoice.getInvoiceStatus() == InvoiceStatus.PAID
+                || (paymentRepository != null
+                && paymentRepository.sumAmountByInvoiceId(invoice.getId()) != null
+                && paymentRepository.sumAmountByInvoiceId(invoice.getId()).signum() > 0);
+
+        if (hasPayments) {
+            throw new BusinessException(
+                    "An invoice that has received payments cannot be cancelled. Use a refund or adjustment.");
+        }
+
+        invoice.setInvoiceStatus(InvoiceStatus.CANCELLED);
+
+        invoiceRepository.save(invoice);
     }
 
     @Override
@@ -245,6 +298,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                                 "Estimate not found for Job Card : "
                                         + jobCardNumber));
 
+        requireApprovedUnderLock(estimate, "Estimate must be approved before invoice generation.");
+
         if (estimate.getStatus() != EstimateStatus.APPROVED) {
             throw new BusinessException(
                     "Estimate must be approved before invoice generation.");
@@ -278,19 +333,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setPaymentStatus(PaymentStatus.PENDING);
 
-        invoice.setSubtotal(estimate.getSubtotal());
+        // Snapshot the FINAL billable lines (customer-selected only) and the
+        // canonical tax figures so the invoice owns its own values; removed
+        // items never appear and later catalog or rule edits cannot change it.
+        List<InvoiceItem> snapshotItems = applyCanonicalSnapshot(invoice, estimate);
 
-        invoice.setDiscount(estimate.getDiscount());
-
-        invoice.setGst(estimate.getGst());
-
-        invoice.setGrandTotal(estimate.getGrandTotal());
         invoice.setGeneratedAt(LocalDateTime.now());
         invoice = invoiceRepository.save(invoice);
 
-        // Snapshot the FINAL billable lines (customer-selected only) so the
-        // invoice owns its own line items; removed items never appear.
-        copyEstimateItems(invoice, estimate);
+        invoiceItemRepository.saveAll(snapshotItems);
 
         transitionJobCardToInvoiceGenerated(jobCard);
 
@@ -308,6 +359,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found"));
+
+        requireApprovedUnderLock(estimate, "Only approved estimates can generate invoices.");
 
         if (estimate.getStatus() != EstimateStatus.APPROVED) {
             throw new BusinessException(
@@ -346,13 +399,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setPaymentStatus(PaymentStatus.PENDING);
 
-        invoice.setSubtotal(estimate.getSubtotal());
-
-        invoice.setDiscount(estimate.getDiscount());
-
-        invoice.setGst(estimate.getGst());
-
-        invoice.setGrandTotal(estimate.getGrandTotal());
+        List<InvoiceItem> snapshotItems = applyCanonicalSnapshot(invoice, estimate);
 
         invoice.setRemarks(estimate.getRemarks());
 
@@ -360,56 +407,42 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice = invoiceRepository.save(invoice);
 
-        copyEstimateItems(invoice, estimate);
+        invoiceItemRepository.saveAll(snapshotItems);
 
         transitionJobCardToInvoiceGenerated(jobCard);
 
         return invoiceMapper.toResponse(invoice);
     }
 
-    private void copyEstimateItems(
-            Invoice invoice,
-            Estimate estimate) {
+    private TaxPolicy taxPolicy() {
+        return taxPolicy != null ? taxPolicy : TaxPolicy.legacyCompatible();
+    }
 
-        // Invoice Source of Truth: only items the customer actually kept
-        // selected may become billable InvoiceItems - matches the same
-        // `selected` filter EstimateItemServiceImpl.recalculateEstimate and
-        // RepairTaskServiceImpl.createRepairTasks already apply. Previously
-        // this copied every EstimateItem unfiltered, so a customer-rejected
-        // item reappeared on the generated invoice.
-        List<EstimateItem> estimateItems =
-                estimateItemRepository.findByEstimateId(estimate.getId())
-                        .stream()
-                        .filter(item -> Boolean.TRUE.equals(item.getSelected()))
-                        .toList();
+    /**
+     * Computes the canonical tax snapshot for a new invoice (header totals set on
+     * {@code invoice}, unsaved lines returned) from the estimate's customer-kept
+     * lines. A persisted estimate total that disagrees with the recomputation is
+     * logged, never trusted: the invoice always carries the recomputed figures.
+     */
+    private List<InvoiceItem> applyCanonicalSnapshot(Invoice invoice, Estimate estimate) {
 
-        List<InvoiceItem> invoiceItems = new ArrayList<>();
+        List<EstimateItem> estimateItems = estimateItemRepository.findByEstimateId(estimate.getId());
 
-        for (EstimateItem estimateItem : estimateItems) {
+        JobCard jobCard = estimate.getJobCard();
 
-            InvoiceItem invoiceItem = new InvoiceItem();
+        List<InvoiceItem> lines = InvoiceTaxAssembler.assemble(
+                invoice, estimate, estimateItems,
+                jobCard == null ? null : jobCard.getGarage(),
+                jobCard == null ? null : jobCard.getCustomer(),
+                taxPolicy());
 
-            invoiceItem.setInvoice(invoice);
-
-            invoiceItem.setComplaint(estimateItem.getComplaint());
-
-//            invoiceItem.setInspectionFinding(
-//                    estimateItem.getInspectionFinding());
-
-            invoiceItem.setItemType(estimateItem.getItemType());
-
-            invoiceItem.setDescription(estimateItem.getDescription());
-
-            invoiceItem.setQuantity(estimateItem.getQuantity());
-
-            invoiceItem.setUnitPrice(estimateItem.getUnitPrice());
-
-            invoiceItem.setTotalPrice(estimateItem.getTotalPrice());
-
-            invoiceItems.add(invoiceItem);
+        if (estimate.getGrandTotal() != null
+                && estimate.getGrandTotal().compareTo(invoice.getGrandTotal()) != 0) {
+            log.warn("Estimate {} stored total {} differs from the recomputed invoice total {}; using the recomputed total.",
+                    estimate.getId(), estimate.getGrandTotal(), invoice.getGrandTotal());
         }
 
-        invoiceItemRepository.saveAll(invoiceItems);
+        return lines;
     }
 
     /**
@@ -442,6 +475,11 @@ public class InvoiceServiceImpl implements InvoiceService {
                         new ResourceNotFoundException(
                                 "Invoice not found for Job Card : "
                                         + jobCardNumber));
+
+        if (invoice.getInvoiceStatus() == InvoiceStatus.CANCELLED) {
+            throw new BusinessException(
+                    "This invoice has been cancelled and cannot receive payments.");
+        }
 
         if (invoice.getPaymentStatus() == PaymentStatus.PAID) {
             throw new BusinessException(
@@ -684,7 +722,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         return invoiceRepository
                 .findByEstimateJobCardId(jobCardId)
-                .map(invoiceMapper::toResponse)
+                .map(invoice -> {
+                    authorizeInvoiceAccess(invoice);
+                    return invoiceMapper.toResponse(invoice);
+                })
                 .orElse(null);
     }
 
@@ -708,9 +749,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         GarageUserPrincipal principal = currentPrincipal();
 
-        if (principal.getGarageId() != null
-                && jobCard.getGarage() != null
-                && principal.getGarageId().equals(jobCard.getGarage().getId())) {
+        if (jobCard.getGarage() != null
+                && com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
             return;
         }
 
@@ -746,8 +786,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                         .getPrincipal();
 
         if (jobCard.getGarage() == null
-                || principal.getGarageId() == null
-                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
 
             throw new BusinessException(
                     "E3: This Job Card does not belong to your garage.");

@@ -24,6 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InspectionServiceImpl implements InspectionService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final InspectionRepository inspectionRepository;
     private final ComplaintRepository complaintRepository;
     private final InspectionMapper inspectionMapper;
@@ -39,6 +43,8 @@ public class InspectionServiceImpl implements InspectionService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + complaintId));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, complaint.getJobCard(), "Complaint not found with id : " + complaintId);
 
         Inspection inspection = inspectionRepository
                 .findByComplaintId(complaintId)
@@ -69,11 +75,16 @@ public class InspectionServiceImpl implements InspectionService {
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, inspection.getComplaint() == null ? null : inspection.getComplaint().getJobCard(), "Inspection not found with id : " + id);
+
         return inspectionMapper.toResponse(inspection);
     }
 
     @Override
     public List<InspectionResponse> getInspections(Long complaintId) {
+
+        complaintRepository.findById(complaintId).ifPresent(c ->
+                com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, c.getJobCard(), "Complaint not found with id : " + complaintId));
 
         return inspectionRepository.findByComplaintId(complaintId)
                 .stream()
@@ -91,6 +102,8 @@ public class InspectionServiceImpl implements InspectionService {
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, inspection.getComplaint() == null ? null : inspection.getComplaint().getJobCard(), "Inspection not found with id : " + id);
+
         inspectionMapper.updateEntity(request, inspection);
 
         inspection.setStatus(InspectionStatus.COMPLETED);
@@ -107,6 +120,8 @@ public class InspectionServiceImpl implements InspectionService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Inspection not found with id : " + id));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, inspection.getComplaint() == null ? null : inspection.getComplaint().getJobCard(), "Inspection not found with id : " + id);
 
         inspectionRepository.delete(inspection);
     }
@@ -137,6 +152,9 @@ public class InspectionServiceImpl implements InspectionService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jobCard, "Job Card not found : " + jobCardNumber);
+
         // Prevent duplicate inspection creation
         List<Inspection> existingInspections =
                 inspectionRepository.findByComplaintJobCardId(jobCard.getId());
@@ -184,6 +202,8 @@ public class InspectionServiceImpl implements InspectionService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found : " + jobCardNumber));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jobCard, "Job Card not found : " + jobCardNumber);
 
         List<Complaint> complaints =
                 complaintRepository.findByJobCardId(jobCard.getId());
@@ -243,6 +263,9 @@ public class InspectionServiceImpl implements InspectionService {
     @Override
     @Transactional(readOnly = true)
     public List<InspectionResponse> getInspectionsByJobCard(Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, jc, "Job Card not found with id : " + jobCardId));
 
         return inspectionRepository
                 .findByComplaintJobCardId(jobCardId)

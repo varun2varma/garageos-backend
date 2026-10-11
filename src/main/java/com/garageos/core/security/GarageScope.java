@@ -112,6 +112,86 @@ public class GarageScope {
     }
 
     /**
+     * Membership-based access to a garage, WITHOUT the platform-administrator bypass: the garage on the principal,
+     * plus (for an OWNER only) every garage the owner holds an ACTIVE membership in. A manager, technician or any
+     * other employee is limited to the single garage on their own account; an owner's several garages never widen
+     * another person's access. {@code scope} may be null in unit tests that build a service by hand, in which case
+     * only the principal's own garage counts (the behaviour before multi-garage owners).
+     */
+    public static boolean isMemberOfGarage(GarageScope scope, GarageUserPrincipal principal, Long garageId) {
+
+        if (garageId == null || principal == null) {
+            return false;
+        }
+
+        if (scope == null) {
+            return garageId.equals(principal.getGarageId());
+        }
+
+        return scope.allowedGarageIds(principal).contains(garageId);
+    }
+
+    /**
+     * Read access to anything that hangs off a job card: staff of the job card's garage (membership model), a
+     * platform administrator, or the customer the job card belongs to. Anyone else, or a caller with no
+     * authenticated principal, gets the supplied not-found message (another tenant's data is never confirmed).
+     */
+    public static void requireJobCardRead(
+            GarageScope scope, com.garageos.modules.jobcard.entity.JobCard jobCard, String notFound) {
+
+        GarageUserPrincipal principal = currentOrNull();
+
+        if (principal != null && scope != null && scope.isUnrestricted(principal)) {
+            return;
+        }
+
+        boolean staff = principal != null
+                && jobCard != null
+                && jobCard.getGarage() != null
+                && isMemberOfGarage(scope, principal, jobCard.getGarage().getId());
+
+        boolean ownCustomer = principal != null
+                && jobCard != null
+                && jobCard.getCustomer() != null
+                && isOwnCustomer(principal, jobCard.getCustomer().getMobileNumber());
+
+        if (!staff && !ownCustomer) {
+            throw new com.garageos.core.exception.ResourceNotFoundException(notFound);
+        }
+    }
+
+    /** Write access: staff of the job card's garage only (never a customer, never the platform administrator). */
+    public static void requireJobCardStaff(
+            GarageScope scope, com.garageos.modules.jobcard.entity.JobCard jobCard, String notFound) {
+
+        GarageUserPrincipal principal = currentOrNull();
+
+        if (principal == null
+                || jobCard == null
+                || jobCard.getGarage() == null
+                || !isMemberOfGarage(scope, principal, jobCard.getGarage().getId())) {
+            throw new com.garageos.core.exception.ResourceNotFoundException(notFound);
+        }
+    }
+
+    /** The authenticated garage principal, or null when there is none (system thread, unauthenticated). */
+    public static GarageUserPrincipal currentOrNull() {
+
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return authentication != null && authentication.getPrincipal() instanceof GarageUserPrincipal p ? p : null;
+    }
+
+    /** True when the principal's registered mobile number is the given customer's mobile number. */
+    public static boolean isOwnCustomer(GarageUserPrincipal principal, String customerMobile) {
+
+        return principal != null
+                && principal.getMobile() != null
+                && customerMobile != null
+                && principal.getMobile().equals(customerMobile);
+    }
+
+    /**
      * The garage for a single-garage operation: the explicitly requested one
      * if the caller may access it, otherwise the principal's own garage.
      */

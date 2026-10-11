@@ -12,5 +12,6 @@ public enum NotificationCategory {
     INVOICE,
     PAYMENT,
     DELIVERY,
+    CHAT,
     SYSTEM
 }

@@ -13,6 +13,7 @@ import com.garageos.modules.vehiclemaster.service.VariantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class VariantController {
     private final VariantService variantService;
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleVariantResponse>> create(
             @Valid @RequestBody CreateVehicleVariantRequest request) {
 
@@ -55,6 +57,7 @@ public class VariantController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleVariantResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody CreateVehicleVariantRequest request) {
@@ -66,6 +69,7 @@ public class VariantController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable Long id) {
 

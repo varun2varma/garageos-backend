@@ -280,8 +280,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                         .getPrincipal();
 
         if (jobCard.getGarage() == null
-                || principal.getGarageId() == null
-                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
 
             throw new BusinessException(
                     "E2: This Job Card does not belong to your garage.");

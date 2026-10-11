@@ -1,0 +1,5714 @@
+{
+"PART|Cylinder Head": {
+"id": "PRT-0001",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Cylinder Head Gasket": {
+"id": "PRT-0002",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "848410"
+},
+"PART|Cylinder Head Bolt Set": {
+"id": "PRT-0003",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "731815"
+},
+"PART|Valve Cover": {
+"id": "PRT-0004",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Valve Cover Gasket": {
+"id": "PRT-0005",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Intake Valve": {
+"id": "PRT-0006",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Exhaust Valve": {
+"id": "PRT-0007",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Valve Spring": {
+"id": "PRT-0008",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "732020"
+},
+"PART|Valve Guide": {
+"id": "PRT-0009",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Valve Stem Seal": {
+"id": "PRT-0010",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Valve Seat Insert": {
+"id": "PRT-0011",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Tappet": {
+"id": "PRT-0012",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Rocker Arm": {
+"id": "PRT-0013",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Camshaft": {
+"id": "PRT-0014",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "CANDIDATE",
+"codes": "848310"
+},
+"PART|Camshaft Oil Seal": {
+"id": "PRT-0015",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Camshaft Phaser": {
+"id": "PRT-0016",
+"class": "PART",
+"cat": "Engine",
+"sub": "Cylinder Head & Valve Train",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Cylinder Block": {
+"id": "PRT-0017",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Cylinder Liner": {
+"id": "PRT-0018",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Piston": {
+"id": "PRT-0019",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Piston Ring Set": {
+"id": "PRT-0020",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Piston Pin": {
+"id": "PRT-0021",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Connecting Rod": {
+"id": "PRT-0022",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Connecting Rod Bearing Set": {
+"id": "PRT-0023",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "848330"
+},
+"PART|Crankshaft": {
+"id": "PRT-0024",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848310"
+},
+"PART|Main Bearing Set": {
+"id": "PRT-0025",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "848330"
+},
+"PART|Crankshaft Pulley": {
+"id": "PRT-0026",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848350"
+},
+"PART|Crankshaft Oil Seal": {
+"id": "PRT-0027",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Flywheel": {
+"id": "PRT-0028",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848350"
+},
+"PART|Dual Mass Flywheel": {
+"id": "PRT-0029",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848350"
+},
+"PART|Flywheel Ring Gear": {
+"id": "PRT-0030",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "848340"
+},
+"PART|Engine Mounting": {
+"id": "PRT-0031",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Engine Assembly - Petrol": {
+"id": "PRT-0032",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840731"
+},
+"PART|Engine Assembly - Diesel": {
+"id": "PRT-0033",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "840820"
+},
+"PART|Engine Gasket Set - Full": {
+"id": "PRT-0034",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848410"
+},
+"PART|Engine Gasket Set - Top End": {
+"id": "PRT-0035",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "848410"
+},
+"PART|Oil Pump": {
+"id": "PRT-0036",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|Oil Pan": {
+"id": "PRT-0037",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Oil Pan Gasket": {
+"id": "PRT-0038",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Oil Drain Plug": {
+"id": "PRT-0039",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "731815"
+},
+"PART|Oil Drain Plug Washer": {
+"id": "PRT-0040",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "731822"
+},
+"PART|Oil Filler Cap": {
+"id": "PRT-0041",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Oil Dipstick": {
+"id": "PRT-0042",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Crankcase Breather Valve": {
+"id": "PRT-0043",
+"class": "PART",
+"cat": "Engine",
+"sub": "Short Block & Rotating Assembly",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Timing Belt": {
+"id": "PRT-0044",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "401035"
+},
+"PART|Timing Belt Kit": {
+"id": "PRT-0045",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "401035"
+},
+"PART|Timing Chain": {
+"id": "PRT-0046",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "731511"
+},
+"PART|Timing Chain Kit": {
+"id": "PRT-0047",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "731511"
+},
+"PART|Timing Chain Tensioner": {
+"id": "PRT-0048",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Timing Chain Guide": {
+"id": "PRT-0049",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Timing Sprocket": {
+"id": "PRT-0050",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "848390"
+},
+"PART|Timing Belt Tensioner": {
+"id": "PRT-0051",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "848350"
+},
+"PART|Idler Pulley": {
+"id": "PRT-0052",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "CANDIDATE",
+"codes": "848350"
+},
+"PART|Timing Cover Gasket": {
+"id": "PRT-0053",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Turbocharger": {
+"id": "PRT-0054",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "841480"
+},
+"PART|Turbocharger Gasket Set": {
+"id": "PRT-0055",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "848410"
+},
+"PART|Intercooler": {
+"id": "PRT-0056",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "841950"
+},
+"PART|EGR Valve": {
+"id": "PRT-0057",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "848180"
+},
+"PART|Throttle Body": {
+"id": "PRT-0058",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Intake Manifold": {
+"id": "PRT-0059",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Intake Manifold Gasket": {
+"id": "PRT-0060",
+"class": "PART",
+"cat": "Engine",
+"sub": "Timing & Drive",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Engine Oil - Mineral": {
+"id": "PRT-0061",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Engine Oil - Semi-Synthetic": {
+"id": "PRT-0062",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Engine Oil - Fully Synthetic": {
+"id": "PRT-0063",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Engine Oil - Diesel Heavy Duty": {
+"id": "PRT-0064",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Engine Oil - Motorcycle 4T": {
+"id": "PRT-0065",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Two-Stroke Oil": {
+"id": "PRT-0066",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Engine Oils",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Manual Transmission Oil": {
+"id": "PRT-0067",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Automatic Transmission Fluid": {
+"id": "PRT-0068",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|CVT Fluid": {
+"id": "PRT-0069",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Dual Clutch Transmission Fluid": {
+"id": "PRT-0070",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Differential Oil": {
+"id": "PRT-0071",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Transfer Case Fluid": {
+"id": "PRT-0072",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Power Steering Fluid": {
+"id": "PRT-0073",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Motorcycle Fork Oil": {
+"id": "PRT-0074",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Transmission & Driveline Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|Brake Fluid DOT 4": {
+"id": "PRT-0075",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "CANDIDATE",
+"codes": "381900"
+},
+"PART|Brake Fluid DOT 5.1": {
+"id": "PRT-0076",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "CANDIDATE",
+"codes": "381900"
+},
+"PART|Brake Fluid DOT 3": {
+"id": "PRT-0077",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "CANDIDATE",
+"codes": "381900"
+},
+"PART|Coolant Concentrate": {
+"id": "PRT-0078",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "CANDIDATE",
+"codes": "382000"
+},
+"PART|Coolant Ready-Mix": {
+"id": "PRT-0079",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "CANDIDATE",
+"codes": "382000"
+},
+"PART|Radiator Flush": {
+"id": "PRT-0080",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "382000"
+},
+"PART|Radiator Stop Leak": {
+"id": "PRT-0081",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "382000"
+},
+"PART|Windscreen Washer Fluid": {
+"id": "PRT-0082",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "340290"
+},
+"PART|Diesel Exhaust Fluid": {
+"id": "PRT-0083",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Brake & Coolant Fluids",
+"status": "NEEDS_REVIEW",
+"codes": "310210"
+},
+"PART|Multipurpose Grease": {
+"id": "PRT-0084",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Wheel Bearing Grease": {
+"id": "PRT-0085",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|CV Joint Grease": {
+"id": "PRT-0086",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Copper Anti-Seize Paste": {
+"id": "PRT-0087",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Silicone Grease": {
+"id": "PRT-0088",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Brake Caliper Grease": {
+"id": "PRT-0089",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Chain Lubricant": {
+"id": "PRT-0090",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Penetrating Oil": {
+"id": "PRT-0091",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Greases & Lubricants",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Petrol System Cleaner": {
+"id": "PRT-0092",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Diesel System Cleaner": {
+"id": "PRT-0093",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Diesel Anti-Gel Additive": {
+"id": "PRT-0094",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Octane Booster": {
+"id": "PRT-0095",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Engine Oil Additive": {
+"id": "PRT-0096",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Engine Flush": {
+"id": "PRT-0097",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "Additives & Treatments",
+"status": "NEEDS_REVIEW",
+"codes": "381121"
+},
+"PART|Oil Filter - Spin-On": {
+"id": "PRT-0098",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842123"
+},
+"PART|Oil Filter - Cartridge": {
+"id": "PRT-0099",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842123"
+},
+"PART|Fuel Filter - Petrol": {
+"id": "PRT-0100",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842123"
+},
+"PART|Fuel Filter - Diesel": {
+"id": "PRT-0101",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842123"
+},
+"PART|Fuel Water Separator": {
+"id": "PRT-0102",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842129"
+},
+"PART|Air Filter - Engine Intake": {
+"id": "PRT-0103",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842131"
+},
+"PART|Air Filter - Heavy Duty": {
+"id": "PRT-0104",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842131"
+},
+"PART|Breather Filter": {
+"id": "PRT-0105",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842123"
+},
+"PART|Cabin Air Filter - Particulate": {
+"id": "PRT-0106",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842139"
+},
+"PART|Cabin Air Filter - Activated Carbon": {
+"id": "PRT-0107",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842139"
+},
+"PART|Transmission Oil Filter": {
+"id": "PRT-0108",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842123"
+},
+"PART|Hydraulic Oil Filter": {
+"id": "PRT-0109",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842123"
+},
+"PART|Fuel Pump Strainer": {
+"id": "PRT-0110",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "NEEDS_REVIEW",
+"codes": "842123"
+},
+"PART|Diesel Particulate Filter": {
+"id": "PRT-0111",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842132"
+},
+"PART|Motorcycle Air Filter": {
+"id": "PRT-0112",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842131"
+},
+"PART|Motorcycle Oil Filter": {
+"id": "PRT-0113",
+"class": "PART",
+"cat": "Filters",
+"sub": "Engine & Fuel Filters",
+"status": "CANDIDATE",
+"codes": "842123"
+},
+"PART|Brake Pad Set - Front": {
+"id": "PRT-0114",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Pad Set - Rear": {
+"id": "PRT-0115",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Disc - Front": {
+"id": "PRT-0116",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Disc - Rear": {
+"id": "PRT-0117",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Caliper": {
+"id": "PRT-0118",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Caliper Repair Kit": {
+"id": "PRT-0119",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Caliper Guide Pin Kit": {
+"id": "PRT-0120",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Pad Hardware Kit": {
+"id": "PRT-0121",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Pad Wear Sensor": {
+"id": "PRT-0122",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Disc Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Shoe Set": {
+"id": "PRT-0123",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Drum": {
+"id": "PRT-0124",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Wheel Cylinder": {
+"id": "PRT-0125",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Wheel Cylinder Repair Kit": {
+"id": "PRT-0126",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Drum Brake Spring Kit": {
+"id": "PRT-0127",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Adjuster": {
+"id": "PRT-0128",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Drum Brake Parts",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Master Cylinder": {
+"id": "PRT-0129",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Booster": {
+"id": "PRT-0130",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Hose - Flexible": {
+"id": "PRT-0131",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Pipe": {
+"id": "PRT-0132",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Handbrake Cable": {
+"id": "PRT-0133",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Brake Light Switch": {
+"id": "PRT-0134",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Proportioning Valve": {
+"id": "PRT-0135",
+"class": "PART",
+"cat": "Brakes",
+"sub": "Hydraulic & Control",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Wheel Speed Sensor": {
+"id": "PRT-0136",
+"class": "PART",
+"cat": "Brakes",
+"sub": "ABS & Stability",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|ABS Hydraulic Modulator": {
+"id": "PRT-0137",
+"class": "PART",
+"cat": "Brakes",
+"sub": "ABS & Stability",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|ABS Control Module": {
+"id": "PRT-0138",
+"class": "PART",
+"cat": "Brakes",
+"sub": "ABS & Stability",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Clutch Kit": {
+"id": "PRT-0139",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "CANDIDATE",
+"codes": "870893"
+},
+"PART|Clutch Disc": {
+"id": "PRT-0140",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Pressure Plate": {
+"id": "PRT-0141",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Release Bearing": {
+"id": "PRT-0142",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Master Cylinder": {
+"id": "PRT-0143",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Slave Cylinder": {
+"id": "PRT-0144",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Cable": {
+"id": "PRT-0145",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Clutch Fork": {
+"id": "PRT-0146",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Clutch",
+"status": "NEEDS_REVIEW",
+"codes": "870893"
+},
+"PART|Gearbox - Manual": {
+"id": "PRT-0147",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "870840"
+},
+"PART|Gearbox - Automatic": {
+"id": "PRT-0148",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "870840"
+},
+"PART|Gearbox Mounting": {
+"id": "PRT-0149",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Gear Shift Cable": {
+"id": "PRT-0150",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "870840"
+},
+"PART|Gear Set": {
+"id": "PRT-0151",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848340"
+},
+"PART|Torque Converter": {
+"id": "PRT-0152",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848340"
+},
+"PART|Differential Assembly": {
+"id": "PRT-0153",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "870850"
+},
+"PART|Crown Wheel and Pinion": {
+"id": "PRT-0154",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "870840"
+},
+"PART|Differential Bearing": {
+"id": "PRT-0155",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848220"
+},
+"PART|Drive Shaft Assembly": {
+"id": "PRT-0156",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "870850"
+},
+"PART|Propeller Shaft": {
+"id": "PRT-0157",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848310"
+},
+"PART|CV Joint": {
+"id": "PRT-0158",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848360"
+},
+"PART|CV Boot Kit": {
+"id": "PRT-0159",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Universal Joint": {
+"id": "PRT-0160",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "848360"
+},
+"PART|Centre Support Bearing": {
+"id": "PRT-0161",
+"class": "PART",
+"cat": "Clutch & Transmission",
+"sub": "Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "848210"
+},
+"PART|Shock Absorber - Front": {
+"id": "PRT-0162",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "CANDIDATE",
+"codes": "870880"
+},
+"PART|Shock Absorber - Rear": {
+"id": "PRT-0163",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "CANDIDATE",
+"codes": "870880"
+},
+"PART|Strut Assembly": {
+"id": "PRT-0164",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Strut Mount": {
+"id": "PRT-0165",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Strut Bearing": {
+"id": "PRT-0166",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Coil Spring": {
+"id": "PRT-0167",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "732020"
+},
+"PART|Leaf Spring": {
+"id": "PRT-0168",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "732010"
+},
+"PART|Spring Bump Stop": {
+"id": "PRT-0169",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Control Arm": {
+"id": "PRT-0170",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Ball Joint": {
+"id": "PRT-0171",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Suspension Bush": {
+"id": "PRT-0172",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Stabiliser Bar": {
+"id": "PRT-0173",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Stabiliser Link": {
+"id": "PRT-0174",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Stabiliser Bush": {
+"id": "PRT-0175",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Trailing Arm": {
+"id": "PRT-0176",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Air Spring": {
+"id": "PRT-0177",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Suspension",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Steering Rack": {
+"id": "PRT-0178",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "CANDIDATE",
+"codes": "870894"
+},
+"PART|Steering Rack Boot": {
+"id": "PRT-0179",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|Steering Wheel": {
+"id": "PRT-0180",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "CANDIDATE",
+"codes": "870894"
+},
+"PART|Steering Column": {
+"id": "PRT-0181",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "CANDIDATE",
+"codes": "870894"
+},
+"PART|Steering Gear Box": {
+"id": "PRT-0182",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "CANDIDATE",
+"codes": "870894"
+},
+"PART|Tie Rod End": {
+"id": "PRT-0183",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|Inner Tie Rod": {
+"id": "PRT-0184",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|Power Steering Pump": {
+"id": "PRT-0185",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "841360"
+},
+"PART|Power Steering Hose": {
+"id": "PRT-0186",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "400912"
+},
+"PART|Steering Idler Arm": {
+"id": "PRT-0187",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|Drag Link": {
+"id": "PRT-0188",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|King Pin Kit": {
+"id": "PRT-0189",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Steering",
+"status": "NEEDS_REVIEW",
+"codes": "870894"
+},
+"PART|Wheel Bearing - Front": {
+"id": "PRT-0190",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "848210"
+},
+"PART|Wheel Bearing - Rear": {
+"id": "PRT-0191",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "848210"
+},
+"PART|Wheel Hub Assembly": {
+"id": "PRT-0192",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "870870"
+},
+"PART|Wheel Stud": {
+"id": "PRT-0193",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "731815"
+},
+"PART|Wheel Nut": {
+"id": "PRT-0194",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "731816"
+},
+"PART|Wheel Bearing Seal": {
+"id": "PRT-0195",
+"class": "PART",
+"cat": "Suspension & Steering",
+"sub": "Wheel Bearings & Hubs",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Radiator": {
+"id": "PRT-0196",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "CANDIDATE",
+"codes": "870891"
+},
+"PART|Radiator Cap": {
+"id": "PRT-0197",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "870891"
+},
+"PART|Radiator Hose - Upper": {
+"id": "PRT-0198",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "400911"
+},
+"PART|Radiator Hose - Lower": {
+"id": "PRT-0199",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "400911"
+},
+"PART|Heater Hose": {
+"id": "PRT-0200",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "400911"
+},
+"PART|Coolant Expansion Tank": {
+"id": "PRT-0201",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "870891"
+},
+"PART|Water Pump": {
+"id": "PRT-0202",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|Thermostat": {
+"id": "PRT-0203",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "903210"
+},
+"PART|Thermostat Housing": {
+"id": "PRT-0204",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Radiator Fan": {
+"id": "PRT-0205",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "841459"
+},
+"PART|Radiator Fan Motor": {
+"id": "PRT-0206",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "850110"
+},
+"PART|Fan Clutch": {
+"id": "PRT-0207",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "841490"
+},
+"PART|Radiator Fan Shroud": {
+"id": "PRT-0208",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "870891"
+},
+"PART|Engine Oil Cooler": {
+"id": "PRT-0209",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "841950"
+},
+"PART|Heater Core": {
+"id": "PRT-0210",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "841950"
+},
+"PART|Coolant Temperature Sensor": {
+"id": "PRT-0211",
+"class": "PART",
+"cat": "Cooling System",
+"sub": "Cooling",
+"status": "NEEDS_REVIEW",
+"codes": "903289"
+},
+"PART|Fuel Pump - Electric": {
+"id": "PRT-0212",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|Fuel Pump Module": {
+"id": "PRT-0213",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|Fuel Pump - Mechanical": {
+"id": "PRT-0214",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|Diesel Injection Pump": {
+"id": "PRT-0215",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "CANDIDATE",
+"codes": "841330"
+},
+"PART|High Pressure Fuel Pump": {
+"id": "PRT-0216",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "841330"
+},
+"PART|Fuel Injector - Petrol": {
+"id": "PRT-0217",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Fuel Injector - Diesel": {
+"id": "PRT-0218",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "840999"
+},
+"PART|Injector Seal Kit": {
+"id": "PRT-0219",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Fuel Rail": {
+"id": "PRT-0220",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Fuel Pressure Regulator": {
+"id": "PRT-0221",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "848180"
+},
+"PART|Fuel Tank": {
+"id": "PRT-0222",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Fuel Tank Cap": {
+"id": "PRT-0223",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Fuel Hose": {
+"id": "PRT-0224",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "400911"
+},
+"PART|Carburettor": {
+"id": "PRT-0225",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Carburettor Repair Kit": {
+"id": "PRT-0226",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Fuel Level Sender": {
+"id": "PRT-0227",
+"class": "PART",
+"cat": "Fuel System",
+"sub": "Fuel Delivery",
+"status": "NEEDS_REVIEW",
+"codes": "902610"
+},
+"PART|Car Battery - Lead Acid": {
+"id": "PRT-0228",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "CANDIDATE",
+"codes": "850710"
+},
+"PART|Heavy Duty Battery": {
+"id": "PRT-0229",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "CANDIDATE",
+"codes": "850710"
+},
+"PART|Motorcycle Battery": {
+"id": "PRT-0230",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "850710"
+},
+"PART|AGM Start-Stop Battery": {
+"id": "PRT-0231",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "850710"
+},
+"PART|Battery Terminal": {
+"id": "PRT-0232",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "853690"
+},
+"PART|Battery Cable": {
+"id": "PRT-0233",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "854430"
+},
+"PART|Alternator": {
+"id": "PRT-0234",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "CANDIDATE",
+"codes": "851150"
+},
+"PART|Alternator Regulator": {
+"id": "PRT-0235",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "851190"
+},
+"PART|Alternator Rectifier": {
+"id": "PRT-0236",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "851190"
+},
+"PART|Alternator Pulley": {
+"id": "PRT-0237",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Battery & Charging",
+"status": "NEEDS_REVIEW",
+"codes": "848350"
+},
+"PART|Starter Motor": {
+"id": "PRT-0238",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "CANDIDATE",
+"codes": "851140"
+},
+"PART|Starter Solenoid": {
+"id": "PRT-0239",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "851190"
+},
+"PART|Starter Drive": {
+"id": "PRT-0240",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "851190"
+},
+"PART|Ignition Coil": {
+"id": "PRT-0241",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "CANDIDATE",
+"codes": "851130"
+},
+"PART|Spark Plug - Iridium": {
+"id": "PRT-0242",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "CANDIDATE",
+"codes": "851110"
+},
+"PART|Spark Plug - Platinum": {
+"id": "PRT-0243",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "CANDIDATE",
+"codes": "851110"
+},
+"PART|Spark Plug - Standard": {
+"id": "PRT-0244",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "CANDIDATE",
+"codes": "851110"
+},
+"PART|Glow Plug": {
+"id": "PRT-0245",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "851180"
+},
+"PART|HT Lead Set": {
+"id": "PRT-0246",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "854430"
+},
+"PART|Distributor Cap": {
+"id": "PRT-0247",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "851190"
+},
+"PART|Ignition Switch": {
+"id": "PRT-0248",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Magneto Coil": {
+"id": "PRT-0249",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Starting & Ignition",
+"status": "NEEDS_REVIEW",
+"codes": "851120"
+},
+"PART|Fuse - Blade": {
+"id": "PRT-0250",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "CANDIDATE",
+"codes": "853610"
+},
+"PART|Fuse - Cartridge": {
+"id": "PRT-0251",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "CANDIDATE",
+"codes": "853610"
+},
+"PART|Relay - Automotive": {
+"id": "PRT-0252",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "CANDIDATE",
+"codes": "853641"
+},
+"PART|Flasher Relay": {
+"id": "PRT-0253",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853641"
+},
+"PART|Wiring Harness": {
+"id": "PRT-0254",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "CANDIDATE",
+"codes": "85443000"
+},
+"PART|Fuse Box": {
+"id": "PRT-0255",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853690"
+},
+"PART|Combination Switch": {
+"id": "PRT-0256",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Headlamp Switch": {
+"id": "PRT-0257",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Hazard Switch": {
+"id": "PRT-0258",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Power Window Switch": {
+"id": "PRT-0259",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Reverse Lamp Switch": {
+"id": "PRT-0260",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853650"
+},
+"PART|Horn": {
+"id": "PRT-0261",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "CANDIDATE",
+"codes": "851230"
+},
+"PART|Horn Relay": {
+"id": "PRT-0262",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853641"
+},
+"PART|Power Window Motor": {
+"id": "PRT-0263",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "850110"
+},
+"PART|Window Regulator": {
+"id": "PRT-0264",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Central Locking Actuator": {
+"id": "PRT-0265",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "830120"
+},
+"PART|Wiper Motor": {
+"id": "PRT-0266",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Blower Motor": {
+"id": "PRT-0267",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "841451"
+},
+"PART|Blower Resistor": {
+"id": "PRT-0268",
+"class": "PART",
+"cat": "Electrical",
+"sub": "Wiring, Switches & Relays",
+"status": "NEEDS_REVIEW",
+"codes": "853340"
+},
+"PART|Crankshaft Position Sensor": {
+"id": "PRT-0269",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Camshaft Position Sensor": {
+"id": "PRT-0270",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Oxygen Sensor": {
+"id": "PRT-0271",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|NOx Sensor": {
+"id": "PRT-0272",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|MAP Sensor": {
+"id": "PRT-0273",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|MAF Sensor": {
+"id": "PRT-0274",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Throttle Position Sensor": {
+"id": "PRT-0275",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Knock Sensor": {
+"id": "PRT-0276",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Intake Air Temperature Sensor": {
+"id": "PRT-0277",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Oil Pressure Switch": {
+"id": "PRT-0278",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Fuel Rail Pressure Sensor": {
+"id": "PRT-0279",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Engine Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Parking Sensor": {
+"id": "PRT-0280",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Tyre Pressure Monitoring Sensor": {
+"id": "PRT-0281",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Steering Angle Sensor": {
+"id": "PRT-0282",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Rain Sensor": {
+"id": "PRT-0283",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Airbag Control Module": {
+"id": "PRT-0284",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Airbag Clock Spring": {
+"id": "PRT-0285",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Chassis & Body Sensors",
+"status": "NEEDS_REVIEW",
+"codes": "870895"
+},
+"PART|Engine Control Module": {
+"id": "PRT-0286",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Body Control Module": {
+"id": "PRT-0287",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Transmission Control Module": {
+"id": "PRT-0288",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Immobiliser Module": {
+"id": "PRT-0289",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Instrument Cluster": {
+"id": "PRT-0290",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "902910"
+},
+"PART|Speedometer": {
+"id": "PRT-0291",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "CANDIDATE",
+"codes": "902920"
+},
+"PART|Tachometer": {
+"id": "PRT-0292",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "CANDIDATE",
+"codes": "902920"
+},
+"PART|Speedometer Cable": {
+"id": "PRT-0293",
+"class": "PART",
+"cat": "Sensors & Control Modules",
+"sub": "Control Modules",
+"status": "NEEDS_REVIEW",
+"codes": "902990"
+},
+"PART|Headlamp Assembly": {
+"id": "PRT-0294",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "851220"
+},
+"PART|Tail Lamp Assembly": {
+"id": "PRT-0295",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "851220"
+},
+"PART|Fog Lamp Assembly": {
+"id": "PRT-0296",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "851220"
+},
+"PART|Indicator Lamp Assembly": {
+"id": "PRT-0297",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "851220"
+},
+"PART|Side Marker Lamp": {
+"id": "PRT-0298",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "851220"
+},
+"PART|Number Plate Lamp": {
+"id": "PRT-0299",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "851220"
+},
+"PART|Interior Lamp": {
+"id": "PRT-0300",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "851220"
+},
+"PART|Halogen Bulb": {
+"id": "PRT-0301",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "853921"
+},
+"PART|LED Bulb": {
+"id": "PRT-0302",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "CANDIDATE",
+"codes": "853952"
+},
+"PART|HID Xenon Bulb": {
+"id": "PRT-0303",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "853932"
+},
+"PART|Signal Bulb": {
+"id": "PRT-0304",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "853922"
+},
+"PART|Headlamp Ballast": {
+"id": "PRT-0305",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "850410"
+},
+"PART|Headlamp Levelling Motor": {
+"id": "PRT-0306",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Lamps",
+"status": "NEEDS_REVIEW",
+"codes": "851290"
+},
+"PART|Wiper Blade - Front": {
+"id": "PRT-0307",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Wiper Blade - Rear": {
+"id": "PRT-0308",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Wiper Arm": {
+"id": "PRT-0309",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Wiper Linkage": {
+"id": "PRT-0310",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Washer Nozzle": {
+"id": "PRT-0311",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Washer Pump": {
+"id": "PRT-0312",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "841370"
+},
+"PART|Washer Reservoir": {
+"id": "PRT-0313",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "851240"
+},
+"PART|Exterior Mirror Assembly": {
+"id": "PRT-0314",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "700910"
+},
+"PART|Mirror Glass": {
+"id": "PRT-0315",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "CANDIDATE",
+"codes": "700910"
+},
+"PART|Interior Mirror": {
+"id": "PRT-0316",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "CANDIDATE",
+"codes": "700910"
+},
+"PART|Mirror Cover": {
+"id": "PRT-0317",
+"class": "PART",
+"cat": "Lighting & Visibility",
+"sub": "Wipers, Washers & Mirrors",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|AC Compressor": {
+"id": "PRT-0318",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "CANDIDATE",
+"codes": "841430"
+},
+"PART|AC Compressor Clutch": {
+"id": "PRT-0319",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "841490"
+},
+"PART|AC Condenser": {
+"id": "PRT-0320",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "841590"
+},
+"PART|AC Evaporator": {
+"id": "PRT-0321",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "841590"
+},
+"PART|AC Expansion Valve": {
+"id": "PRT-0322",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "848180"
+},
+"PART|AC Receiver Drier": {
+"id": "PRT-0323",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "841590"
+},
+"PART|AC Hose": {
+"id": "PRT-0324",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "400912"
+},
+"PART|AC Pressure Switch": {
+"id": "PRT-0325",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "903289"
+},
+"PART|AC Control Panel": {
+"id": "PRT-0326",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|AC O-Ring Kit": {
+"id": "PRT-0327",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "NEEDS_REVIEW",
+"codes": "401693"
+},
+"PART|Automotive AC Unit": {
+"id": "PRT-0328",
+"class": "PART",
+"cat": "Air Conditioning",
+"sub": "A/C Components",
+"status": "CANDIDATE",
+"codes": "841520"
+},
+"PART|Refrigerant R134a": {
+"id": "PRT-0329",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "A/C Refrigerants & Oils",
+"status": "NEEDS_REVIEW",
+"codes": "290339"
+},
+"PART|Refrigerant R1234yf": {
+"id": "PRT-0330",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "A/C Refrigerants & Oils",
+"status": "NEEDS_REVIEW",
+"codes": "290339"
+},
+"PART|AC Compressor Oil": {
+"id": "PRT-0331",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "A/C Refrigerants & Oils",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|AC Leak Detection Dye": {
+"id": "PRT-0332",
+"class": "FLUID_LUBRICANT",
+"cat": "Lubricants & Fluids",
+"sub": "A/C Refrigerants & Oils",
+"status": "NEEDS_REVIEW",
+"codes": "3204"
+},
+"PART|Car Tyre": {
+"id": "PRT-0333",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401110"
+},
+"PART|Truck and Bus Tyre": {
+"id": "PRT-0334",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401120"
+},
+"PART|Motorcycle Tyre": {
+"id": "PRT-0335",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401140"
+},
+"PART|Agricultural Tyre": {
+"id": "PRT-0336",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401170"
+},
+"PART|Retreaded Tyre": {
+"id": "PRT-0337",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401211"
+},
+"PART|Inner Tube - Car": {
+"id": "PRT-0338",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "CANDIDATE",
+"codes": "401310"
+},
+"PART|Inner Tube - Motorcycle": {
+"id": "PRT-0339",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "NEEDS_REVIEW",
+"codes": "401390"
+},
+"PART|Tyre Flap": {
+"id": "PRT-0340",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "NEEDS_REVIEW",
+"codes": "401290"
+},
+"PART|Tyre Valve": {
+"id": "PRT-0341",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Tyres & Tubes",
+"status": "NEEDS_REVIEW",
+"codes": "848180"
+},
+"PART|Alloy Wheel": {
+"id": "PRT-0342",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "CANDIDATE",
+"codes": "870870"
+},
+"PART|Steel Wheel": {
+"id": "PRT-0343",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "CANDIDATE",
+"codes": "870870"
+},
+"PART|Wheel Cap": {
+"id": "PRT-0344",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "NEEDS_REVIEW",
+"codes": "870870"
+},
+"PART|Wheel Cover": {
+"id": "PRT-0345",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "NEEDS_REVIEW",
+"codes": "870870"
+},
+"PART|Wheel Balancing Weight - Clip-On": {
+"id": "PRT-0346",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Wheel Balancing Weight - Adhesive": {
+"id": "PRT-0347",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Tyre Sealant": {
+"id": "PRT-0348",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "NEEDS_REVIEW",
+"codes": "3506"
+},
+"PART|Tyre Repair Plug": {
+"id": "PRT-0349",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "NEEDS_REVIEW",
+"codes": "4006"
+},
+"PART|Tyre Bead Lubricant": {
+"id": "PRT-0350",
+"class": "PART",
+"cat": "Tyres & Wheels",
+"sub": "Wheels & Balancing",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Front Bumper": {
+"id": "PRT-0351",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "CANDIDATE",
+"codes": "870810"
+},
+"PART|Rear Bumper": {
+"id": "PRT-0352",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "CANDIDATE",
+"codes": "870810"
+},
+"PART|Bumper Reinforcement": {
+"id": "PRT-0353",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870810"
+},
+"PART|Bumper Grille": {
+"id": "PRT-0354",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Radiator Grille": {
+"id": "PRT-0355",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Front Fender": {
+"id": "PRT-0356",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Bonnet": {
+"id": "PRT-0357",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Boot Lid": {
+"id": "PRT-0358",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Door Shell": {
+"id": "PRT-0359",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Windscreen": {
+"id": "PRT-0360",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "CANDIDATE",
+"codes": "870822"
+},
+"PART|Rear Windscreen": {
+"id": "PRT-0361",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "CANDIDATE",
+"codes": "870822"
+},
+"PART|Door Glass": {
+"id": "PRT-0362",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870822"
+},
+"PART|Bonnet Gas Strut": {
+"id": "PRT-0363",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Mud Flap": {
+"id": "PRT-0364",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Wheel Arch Liner": {
+"id": "PRT-0365",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Underbody Shield": {
+"id": "PRT-0366",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Spoiler": {
+"id": "PRT-0367",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Vehicle Emblem": {
+"id": "PRT-0368",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Panels & Glass",
+"status": "NEEDS_REVIEW",
+"codes": "870829"
+},
+"PART|Door Handle - Exterior": {
+"id": "PRT-0369",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830230"
+},
+"PART|Door Handle - Interior": {
+"id": "PRT-0370",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830230"
+},
+"PART|Door Hinge": {
+"id": "PRT-0371",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830230"
+},
+"PART|Door Lock Assembly": {
+"id": "PRT-0372",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830120"
+},
+"PART|Door Lock Cylinder": {
+"id": "PRT-0373",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830120"
+},
+"PART|Door Check Strap": {
+"id": "PRT-0374",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830230"
+},
+"PART|Bonnet Latch": {
+"id": "PRT-0375",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "CANDIDATE",
+"codes": "830230"
+},
+"PART|Door Weatherstrip": {
+"id": "PRT-0376",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "NEEDS_REVIEW",
+"codes": "401699"
+},
+"PART|Window Channel Seal": {
+"id": "PRT-0377",
+"class": "PART",
+"cat": "Body & Exterior",
+"sub": "Door Hardware & Seals",
+"status": "NEEDS_REVIEW",
+"codes": "401699"
+},
+"PART|Seat Belt": {
+"id": "PRT-0378",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "CANDIDATE",
+"codes": "870821"
+},
+"PART|Seat Belt Buckle": {
+"id": "PRT-0379",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "CANDIDATE",
+"codes": "870821"
+},
+"PART|Seat Assembly": {
+"id": "PRT-0380",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "CANDIDATE",
+"codes": "940120"
+},
+"PART|Seat Cover Set": {
+"id": "PRT-0381",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "NEEDS_REVIEW",
+"codes": "630492"
+},
+"PART|Floor Mat Set - Rubber": {
+"id": "PRT-0382",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "CANDIDATE",
+"codes": "401691"
+},
+"PART|Floor Mat Set - Carpet": {
+"id": "PRT-0383",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "NEEDS_REVIEW",
+"codes": "570390"
+},
+"PART|Airbag Module": {
+"id": "PRT-0384",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "CANDIDATE",
+"codes": "870895"
+},
+"PART|Sun Visor": {
+"id": "PRT-0385",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Dashboard Panel": {
+"id": "PRT-0386",
+"class": "PART",
+"cat": "Interior & Safety",
+"sub": "Seats & Restraints",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Exhaust Manifold": {
+"id": "PRT-0387",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "840991"
+},
+"PART|Exhaust Pipe": {
+"id": "PRT-0388",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "CANDIDATE",
+"codes": "870892"
+},
+"PART|Muffler": {
+"id": "PRT-0389",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "CANDIDATE",
+"codes": "870892"
+},
+"PART|Resonator": {
+"id": "PRT-0390",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "870892"
+},
+"PART|Exhaust Flex Pipe": {
+"id": "PRT-0391",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "870892"
+},
+"PART|Exhaust Gasket": {
+"id": "PRT-0392",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "848410"
+},
+"PART|Exhaust Hanger": {
+"id": "PRT-0393",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "401699"
+},
+"PART|Catalytic Converter": {
+"id": "PRT-0394",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "CANDIDATE",
+"codes": "842132"
+},
+"PART|SCR Dosing Pump": {
+"id": "PRT-0395",
+"class": "PART",
+"cat": "Exhaust & Emission",
+"sub": "Exhaust System",
+"status": "NEEDS_REVIEW",
+"codes": "841370"
+},
+"PART|Serpentine Belt": {
+"id": "PRT-0396",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Belts",
+"status": "NEEDS_REVIEW",
+"codes": "401031"
+},
+"PART|V-Belt": {
+"id": "PRT-0397",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Belts",
+"status": "NEEDS_REVIEW",
+"codes": "401032"
+},
+"PART|Power Steering Belt": {
+"id": "PRT-0398",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Belts",
+"status": "NEEDS_REVIEW",
+"codes": "401031"
+},
+"PART|AC Belt": {
+"id": "PRT-0399",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Belts",
+"status": "NEEDS_REVIEW",
+"codes": "401031"
+},
+"PART|O-Ring Assortment": {
+"id": "PRT-0400",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "CANDIDATE",
+"codes": "401693"
+},
+"PART|Oil Seal Assortment": {
+"id": "PRT-0401",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "848420"
+},
+"PART|Gearbox Output Seal": {
+"id": "PRT-0402",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "848420"
+},
+"PART|Axle Seal": {
+"id": "PRT-0403",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "848420"
+},
+"PART|RTV Gasket Maker": {
+"id": "PRT-0404",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "CANDIDATE",
+"codes": "321410"
+},
+"PART|Thread Locker": {
+"id": "PRT-0405",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "350691"
+},
+"PART|Copper Sealing Washer": {
+"id": "PRT-0406",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "731822"
+},
+"PART|Banjo Bolt": {
+"id": "PRT-0407",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "731815"
+},
+"PART|Hose Clamp": {
+"id": "PRT-0408",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Cotter Pin": {
+"id": "PRT-0409",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "CANDIDATE",
+"codes": "731824"
+},
+"PART|Circlip Assortment": {
+"id": "PRT-0410",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "731829"
+},
+"PART|Rivet": {
+"id": "PRT-0411",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "CANDIDATE",
+"codes": "731823"
+},
+"PART|Self-Tapping Screw": {
+"id": "PRT-0412",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "CANDIDATE",
+"codes": "731814"
+},
+"PART|Nut and Bolt Assortment": {
+"id": "PRT-0413",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "731815"
+},
+"PART|Washer Assortment": {
+"id": "PRT-0414",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "NEEDS_REVIEW",
+"codes": "731822"
+},
+"PART|Trim Clip Assortment": {
+"id": "PRT-0415",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Cable Tie": {
+"id": "PRT-0416",
+"class": "PART",
+"cat": "Belts, Bearings & Seals",
+"sub": "Gaskets, Seals & Hardware",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Car Shampoo": {
+"id": "PRT-0417",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340250"
+},
+"PART|Car Polish": {
+"id": "PRT-0418",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "CANDIDATE",
+"codes": "340530"
+},
+"PART|Rubbing Compound": {
+"id": "PRT-0419",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340530"
+},
+"PART|Glass Cleaner": {
+"id": "PRT-0420",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340290"
+},
+"PART|Tyre Dressing": {
+"id": "PRT-0421",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340590"
+},
+"PART|Dashboard Polish": {
+"id": "PRT-0422",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340590"
+},
+"PART|Upholstery Cleaner": {
+"id": "PRT-0423",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340290"
+},
+"PART|Leather Conditioner": {
+"id": "PRT-0424",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340510"
+},
+"PART|Engine Degreaser": {
+"id": "PRT-0425",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340290"
+},
+"PART|Brake Cleaner": {
+"id": "PRT-0426",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "381400"
+},
+"PART|Throttle Body Cleaner": {
+"id": "PRT-0427",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "381400"
+},
+"PART|Contact Cleaner": {
+"id": "PRT-0428",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "381400"
+},
+"PART|Anti-Rust Coating": {
+"id": "PRT-0429",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "340319"
+},
+"PART|Underbody Coating": {
+"id": "PRT-0430",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "NEEDS_REVIEW",
+"codes": "320810"
+},
+"PART|Microfibre Cloth": {
+"id": "PRT-0431",
+"class": "DETAILING_PRODUCT",
+"cat": "Detailing & Cleaning",
+"sub": "Detailing Products",
+"status": "CANDIDATE",
+"codes": "630710"
+},
+"PART|Shop Towel": {
+"id": "PRT-0432",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Masking Tape": {
+"id": "PRT-0433",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Sandpaper": {
+"id": "PRT-0434",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Polishing Pad": {
+"id": "PRT-0435",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Paint Brush": {
+"id": "PRT-0436",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "NEEDS_REVIEW",
+"codes": "960340"
+},
+"PART|Nitrile Gloves": {
+"id": "PRT-0437",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"PART|Body Filler": {
+"id": "PRT-0438",
+"class": "WORKSHOP_CONSUMABLE",
+"cat": "Detailing & Cleaning",
+"sub": "Workshop Consumables",
+"status": "NEEDS_REVIEW",
+"codes": "321410"
+},
+"PART|Automotive Primer": {
+"id": "PRT-0439",
+"class": "PART",
+"cat": "Paint & Body Materials",
+"sub": "Paints",
+"status": "NEEDS_REVIEW",
+"codes": "320810"
+},
+"PART|Base Coat": {
+"id": "PRT-0440",
+"class": "PART",
+"cat": "Paint & Body Materials",
+"sub": "Paints",
+"status": "NEEDS_REVIEW",
+"codes": "320810"
+},
+"PART|Clear Coat": {
+"id": "PRT-0441",
+"class": "PART",
+"cat": "Paint & Body Materials",
+"sub": "Paints",
+"status": "NEEDS_REVIEW",
+"codes": "320810"
+},
+"PART|Paint Thinner": {
+"id": "PRT-0442",
+"class": "PART",
+"cat": "Paint & Body Materials",
+"sub": "Paints",
+"status": "NEEDS_REVIEW",
+"codes": "381400"
+},
+"PART|Hardener": {
+"id": "PRT-0443",
+"class": "PART",
+"cat": "Paint & Body Materials",
+"sub": "Paints",
+"status": "NEEDS_REVIEW",
+"codes": "320810"
+},
+"PART|Traction Battery Pack": {
+"id": "PRT-0444",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850760"
+},
+"PART|Battery Module": {
+"id": "PRT-0445",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850760"
+},
+"PART|Battery Management System": {
+"id": "PRT-0446",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Traction Motor": {
+"id": "PRT-0447",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850131"
+},
+"PART|Motor Controller": {
+"id": "PRT-0448",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850440"
+},
+"PART|DC-DC Converter": {
+"id": "PRT-0449",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850440"
+},
+"PART|On-Board Charger": {
+"id": "PRT-0450",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850440"
+},
+"PART|Charging Inlet": {
+"id": "PRT-0451",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "853669"
+},
+"PART|Charging Cable": {
+"id": "PRT-0452",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "854442"
+},
+"PART|High Voltage Cable": {
+"id": "PRT-0453",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "854442"
+},
+"PART|High Voltage Contactor": {
+"id": "PRT-0454",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "853649"
+},
+"PART|Battery Coolant Pump": {
+"id": "PRT-0455",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "841370"
+},
+"PART|EV Coolant": {
+"id": "PRT-0456",
+"class": "FLUID_LUBRICANT",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "382000"
+},
+"PART|EV Reduction Gear Oil": {
+"id": "PRT-0457",
+"class": "FLUID_LUBRICANT",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "271019"
+},
+"PART|12V Auxiliary Battery": {
+"id": "PRT-0458",
+"class": "EV_SPECIALIST",
+"cat": "Electric Vehicle Components",
+"sub": "Traction System",
+"status": "NEEDS_REVIEW",
+"codes": "850710"
+},
+"PART|Drive Chain": {
+"id": "PRT-0459",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "731511"
+},
+"PART|Sprocket Set": {
+"id": "PRT-0460",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "848390"
+},
+"PART|Motorcycle Clutch Plate Set": {
+"id": "PRT-0461",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871410"
+},
+"PART|Motorcycle Brake Shoe": {
+"id": "PRT-0462",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "CANDIDATE",
+"codes": "871494"
+},
+"PART|Motorcycle Brake Pad Set": {
+"id": "PRT-0463",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871494"
+},
+"PART|Throttle Cable": {
+"id": "PRT-0464",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871410"
+},
+"PART|Front Fork Assembly": {
+"id": "PRT-0465",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "CANDIDATE",
+"codes": "871491"
+},
+"PART|Fork Oil Seal": {
+"id": "PRT-0466",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "848420"
+},
+"PART|Rear Shock Absorber - Motorcycle": {
+"id": "PRT-0467",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871410"
+},
+"PART|Motorcycle Wheel Rim": {
+"id": "PRT-0468",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "CANDIDATE",
+"codes": "871492"
+},
+"PART|Motorcycle Spoke Set": {
+"id": "PRT-0469",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "CANDIDATE",
+"codes": "871492"
+},
+"PART|Motorcycle Seat": {
+"id": "PRT-0470",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871410"
+},
+"PART|Motorcycle Handlebar": {
+"id": "PRT-0471",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "871410"
+},
+"PART|Motorcycle Rectifier": {
+"id": "PRT-0472",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "850440"
+},
+"PART|CDI Unit": {
+"id": "PRT-0473",
+"class": "PART",
+"cat": "Two-Wheeler Parts",
+"sub": "Motorcycle Components",
+"status": "NEEDS_REVIEW",
+"codes": "853710"
+},
+"PART|Air Brake Chamber": {
+"id": "PRT-0474",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "870830"
+},
+"PART|Air Dryer": {
+"id": "PRT-0475",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "841410"
+},
+"PART|Air Brake Compressor": {
+"id": "PRT-0476",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "841480"
+},
+"PART|Brake Lining": {
+"id": "PRT-0477",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "681381"
+},
+"PART|Spring Bush": {
+"id": "PRT-0478",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "870880"
+},
+"PART|Tow Hook": {
+"id": "PRT-0479",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Tow Bar": {
+"id": "PRT-0480",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "870899"
+},
+"PART|Axle Shaft": {
+"id": "PRT-0481",
+"class": "PART",
+"cat": "Commercial Vehicle Parts",
+"sub": "Heavy Vehicle Components",
+"status": "NEEDS_REVIEW",
+"codes": "870850"
+},
+"SERVICE|General Periodic Service": {
+"id": "SVC-0001",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Engine Oil Replacement": {
+"id": "SVC-0002",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Oil Filter Replacement": {
+"id": "SVC-0003",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Air Filter Replacement": {
+"id": "SVC-0004",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Cabin Filter Replacement": {
+"id": "SVC-0005",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuel Filter Replacement": {
+"id": "SVC-0006",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Spark Plug Replacement": {
+"id": "SVC-0007",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Manual Transmission Oil Replacement": {
+"id": "SVC-0008",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Automatic Transmission Fluid Replacement": {
+"id": "SVC-0009",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Automatic Transmission Fluid Flush": {
+"id": "SVC-0010",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|CVT Fluid Replacement": {
+"id": "SVC-0011",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Differential Oil Replacement": {
+"id": "SVC-0012",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Transfer Case Oil Replacement": {
+"id": "SVC-0013",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Power Steering Fluid Replacement": {
+"id": "SVC-0014",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Coolant Replacement": {
+"id": "SVC-0015",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Fluid Replacement": {
+"id": "SVC-0016",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Clutch Fluid Bleeding": {
+"id": "SVC-0017",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Battery Terminal Cleaning": {
+"id": "SVC-0018",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wiper Blade Replacement": {
+"id": "SVC-0019",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tyre Rotation": {
+"id": "SVC-0020",
+"class": "LABOUR_OPERATION",
+"cat": "Periodic Maintenance",
+"sub": "Fluids & Filters",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Drive Belt Replacement": {
+"id": "SVC-0021",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Timing Belt Replacement": {
+"id": "SVC-0022",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Timing Chain Replacement": {
+"id": "SVC-0023",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Valve Clearance Adjustment": {
+"id": "SVC-0024",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Cylinder Head Gasket Replacement": {
+"id": "SVC-0025",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Cylinder Head Overhaul": {
+"id": "SVC-0026",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Top Overhaul": {
+"id": "SVC-0027",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Major Overhaul": {
+"id": "SVC-0028",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Assembly Replacement": {
+"id": "SVC-0029",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Piston Ring Replacement": {
+"id": "SVC-0030",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Crankshaft Oil Seal Replacement": {
+"id": "SVC-0031",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Oil Pan Gasket Replacement": {
+"id": "SVC-0032",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Oil Leak Diagnosis and Repair": {
+"id": "SVC-0033",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Mount Replacement": {
+"id": "SVC-0034",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Turbocharger Replacement": {
+"id": "SVC-0035",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Throttle Body Cleaning": {
+"id": "SVC-0036",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuel Injector Cleaning": {
+"id": "SVC-0037",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuel Injector Replacement": {
+"id": "SVC-0038",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuel Pump Replacement": {
+"id": "SVC-0039",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuel Tank Cleaning": {
+"id": "SVC-0040",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Carburettor Cleaning and Tuning": {
+"id": "SVC-0041",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Tune-Up": {
+"id": "SVC-0042",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Engine Decarbonisation": {
+"id": "SVC-0043",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|EGR Valve Cleaning": {
+"id": "SVC-0044",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Exhaust Muffler Repair": {
+"id": "SVC-0045",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Exhaust Muffler Replacement": {
+"id": "SVC-0046",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Catalytic Converter Replacement": {
+"id": "SVC-0047",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Diesel Particulate Filter Cleaning": {
+"id": "SVC-0048",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Engine Repair",
+"sub": "Engine Mechanical",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Water Pump Replacement": {
+"id": "SVC-0049",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Thermostat Replacement": {
+"id": "SVC-0050",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Radiator Replacement": {
+"id": "SVC-0051",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Radiator Hose Replacement": {
+"id": "SVC-0052",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Radiator Flushing": {
+"id": "SVC-0053",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Cooling System Pressure Test": {
+"id": "SVC-0054",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Cooling Fan Replacement": {
+"id": "SVC-0055",
+"class": "LABOUR_OPERATION",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Radiator Repair": {
+"id": "SVC-0056",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Engine Repair",
+"sub": "Cooling System",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Brake Inspection": {
+"id": "SVC-0057",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Pad Replacement": {
+"id": "SVC-0058",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Disc Replacement": {
+"id": "SVC-0059",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Disc Resurfacing": {
+"id": "SVC-0060",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Shoe Replacement": {
+"id": "SVC-0061",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Drum Turning": {
+"id": "SVC-0062",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Caliper Overhaul": {
+"id": "SVC-0063",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Caliper Replacement": {
+"id": "SVC-0064",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Master Cylinder Replacement": {
+"id": "SVC-0065",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Cylinder Replacement": {
+"id": "SVC-0066",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Hose Replacement": {
+"id": "SVC-0067",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Line Repair": {
+"id": "SVC-0068",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Handbrake Adjustment": {
+"id": "SVC-0069",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Handbrake Cable Replacement": {
+"id": "SVC-0070",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Brake Booster Replacement": {
+"id": "SVC-0071",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|ABS Sensor Replacement": {
+"id": "SVC-0072",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|ABS Diagnosis": {
+"id": "SVC-0073",
+"class": "LABOUR_OPERATION",
+"cat": "Brakes",
+"sub": "Brake Service & Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Clutch Inspection": {
+"id": "SVC-0074",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Clutch Replacement": {
+"id": "SVC-0075",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Clutch Master Cylinder Replacement": {
+"id": "SVC-0076",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Clutch Slave Cylinder Replacement": {
+"id": "SVC-0077",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Flywheel Resurfacing": {
+"id": "SVC-0078",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Manual Gearbox Overhaul": {
+"id": "SVC-0079",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Automatic Transmission Overhaul": {
+"id": "SVC-0080",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Gearbox Mount Replacement": {
+"id": "SVC-0081",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Differential Overhaul": {
+"id": "SVC-0082",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Drive Shaft Replacement": {
+"id": "SVC-0083",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|CV Joint Replacement": {
+"id": "SVC-0084",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|CV Boot Replacement": {
+"id": "SVC-0085",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Universal Joint Replacement": {
+"id": "SVC-0086",
+"class": "LABOUR_OPERATION",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Propeller Shaft Balancing": {
+"id": "SVC-0087",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Clutch & Transmission",
+"sub": "Clutch, Gearbox & Drivetrain",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Suspension Inspection": {
+"id": "SVC-0088",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Shock Absorber Replacement": {
+"id": "SVC-0089",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Strut Mount Replacement": {
+"id": "SVC-0090",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Control Arm Bush Replacement": {
+"id": "SVC-0091",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Ball Joint Replacement": {
+"id": "SVC-0092",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tie Rod End Replacement": {
+"id": "SVC-0093",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Stabiliser Link Replacement": {
+"id": "SVC-0094",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Coil Spring Replacement": {
+"id": "SVC-0095",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Bearing Replacement": {
+"id": "SVC-0096",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Steering Rack Replacement": {
+"id": "SVC-0097",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Steering Rack Overhaul": {
+"id": "SVC-0098",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Power Steering Pump Replacement": {
+"id": "SVC-0099",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Steering Wheel Alignment": {
+"id": "SVC-0100",
+"class": "LABOUR_OPERATION",
+"cat": "Suspension & Steering",
+"sub": "Suspension & Steering Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Alignment": {
+"id": "SVC-0101",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Balancing": {
+"id": "SVC-0102",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tyre Fitting": {
+"id": "SVC-0103",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tubeless Puncture Repair": {
+"id": "SVC-0104",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tube-Type Puncture Repair": {
+"id": "SVC-0105",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Alloy Repair": {
+"id": "SVC-0106",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|TPMS Service": {
+"id": "SVC-0107",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Nitrogen Tyre Filling": {
+"id": "SVC-0108",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Spare Wheel Change": {
+"id": "SVC-0109",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Wheel Nut Torque Check": {
+"id": "SVC-0110",
+"class": "LABOUR_OPERATION",
+"cat": "Tyres & Wheels",
+"sub": "Tyre & Wheel Services",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Electrical Diagnostics": {
+"id": "SVC-0111",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Battery Testing": {
+"id": "SVC-0112",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Battery Replacement": {
+"id": "SVC-0113",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Battery Charging": {
+"id": "SVC-0114",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Alternator Replacement": {
+"id": "SVC-0115",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Alternator Overhaul": {
+"id": "SVC-0116",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Starter Motor Replacement": {
+"id": "SVC-0117",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Starter Motor Overhaul": {
+"id": "SVC-0118",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Wiring Repair": {
+"id": "SVC-0119",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Fuse and Relay Replacement": {
+"id": "SVC-0120",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Headlamp Bulb Replacement": {
+"id": "SVC-0121",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Tail Lamp Bulb Replacement": {
+"id": "SVC-0122",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Headlamp Alignment": {
+"id": "SVC-0123",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Headlamp Restoration": {
+"id": "SVC-0124",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Horn Replacement": {
+"id": "SVC-0125",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Power Window Repair": {
+"id": "SVC-0126",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Central Locking Repair": {
+"id": "SVC-0127",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Instrument Cluster Repair": {
+"id": "SVC-0128",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Sensor Replacement": {
+"id": "SVC-0129",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Key Programming": {
+"id": "SVC-0130",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|ECU Reprogramming": {
+"id": "SVC-0131",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|ECU Replacement and Coding": {
+"id": "SVC-0132",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Airbag System Diagnosis": {
+"id": "SVC-0133",
+"class": "LABOUR_OPERATION",
+"cat": "Electrical & Electronics",
+"sub": "Electrical Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Engine Diagnostics": {
+"id": "SVC-0134",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Computerised Scan": {
+"id": "SVC-0135",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Live Data Analysis": {
+"id": "SVC-0136",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Compression Test": {
+"id": "SVC-0137",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Leak Down Test": {
+"id": "SVC-0138",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Fuel Pressure Test": {
+"id": "SVC-0139",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Smoke Test": {
+"id": "SVC-0140",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Battery Load Test": {
+"id": "SVC-0141",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Charging System Test": {
+"id": "SVC-0142",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Emission Test": {
+"id": "SVC-0143",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Multi-Point Inspection": {
+"id": "SVC-0144",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Road Test": {
+"id": "SVC-0145",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Pre-Purchase Inspection": {
+"id": "SVC-0146",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998346"
+},
+"SERVICE|Underbody Inspection": {
+"id": "SVC-0147",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Accident Damage Assessment": {
+"id": "SVC-0148",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998346"
+},
+"SERVICE|Pre-Trip Safety Check": {
+"id": "SVC-0149",
+"class": "LABOUR_OPERATION",
+"cat": "Diagnostics & Inspection",
+"sub": "Diagnostics",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|AC Inspection": {
+"id": "SVC-0150",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Servicing": {
+"id": "SVC-0151",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Gas Refilling": {
+"id": "SVC-0152",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Leak Test": {
+"id": "SVC-0153",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Compressor Replacement": {
+"id": "SVC-0154",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Condenser Replacement": {
+"id": "SVC-0155",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Evaporator Replacement": {
+"id": "SVC-0156",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|Blower Motor Replacement": {
+"id": "SVC-0157",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "CANDIDATE",
+"codes": "998714"
+},
+"SERVICE|AC Duct Cleaning": {
+"id": "SVC-0158",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|AC Sanitisation": {
+"id": "SVC-0159",
+"class": "LABOUR_OPERATION",
+"cat": "Air Conditioning",
+"sub": "A/C Service & Repair",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Dent Removal": {
+"id": "SVC-0160",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Panel Beating": {
+"id": "SVC-0161",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Bumper Repair": {
+"id": "SVC-0162",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Bumper Replacement": {
+"id": "SVC-0163",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Scratch Repair": {
+"id": "SVC-0164",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Panel Painting": {
+"id": "SVC-0165",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Full Body Painting": {
+"id": "SVC-0166",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Touch-Up Painting": {
+"id": "SVC-0167",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Windscreen Replacement": {
+"id": "SVC-0168",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Door Glass Replacement": {
+"id": "SVC-0169",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Rust Treatment": {
+"id": "SVC-0170",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Underbody Coating Application": {
+"id": "SVC-0171",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Chassis Straightening": {
+"id": "SVC-0172",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Fibre Panel Repair": {
+"id": "SVC-0173",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Seat Upholstery Repair": {
+"id": "SVC-0174",
+"class": "LABOUR_OPERATION",
+"cat": "Body Repair & Paint",
+"sub": "Body & Paint",
+"status": "NEEDS_REVIEW",
+"codes": "998729"
+},
+"SERVICE|Exterior Wash": {
+"id": "SVC-0175",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Interior Vacuum Cleaning": {
+"id": "SVC-0176",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Full Wash": {
+"id": "SVC-0177",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Foam Wash": {
+"id": "SVC-0178",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Engine Bay Cleaning": {
+"id": "SVC-0179",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Underbody Wash": {
+"id": "SVC-0180",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "CANDIDATE",
+"codes": "998538"
+},
+"SERVICE|Polishing": {
+"id": "SVC-0181",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Waxing": {
+"id": "SVC-0182",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Ceramic Coating Application": {
+"id": "SVC-0183",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Paint Protection Film Installation": {
+"id": "SVC-0184",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Interior Deep Cleaning": {
+"id": "SVC-0185",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Leather Treatment": {
+"id": "SVC-0186",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Odour Removal": {
+"id": "SVC-0187",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Windscreen Water-Repellent Treatment": {
+"id": "SVC-0188",
+"class": "LABOUR_OPERATION",
+"cat": "Cleaning & Detailing",
+"sub": "Washing & Detailing",
+"status": "NEEDS_REVIEW",
+"codes": "998538"
+},
+"SERVICE|Reverse Camera Installation": {
+"id": "SVC-0189",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Parking Sensor Installation": {
+"id": "SVC-0190",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Music System Installation": {
+"id": "SVC-0191",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Dashcam Installation": {
+"id": "SVC-0192",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Fog Lamp Installation": {
+"id": "SVC-0193",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|LED Lighting Installation": {
+"id": "SVC-0194",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Seat Cover Fitting": {
+"id": "SVC-0195",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Floor Mat Fitting": {
+"id": "SVC-0196",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Alloy Wheel Fitting": {
+"id": "SVC-0197",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Window Film Installation": {
+"id": "SVC-0198",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Central Locking Installation": {
+"id": "SVC-0199",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Alarm and Immobiliser Installation": {
+"id": "SVC-0200",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|GPS Tracker Installation": {
+"id": "SVC-0201",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Tow Bar Installation": {
+"id": "SVC-0202",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Roof Rail Installation": {
+"id": "SVC-0203",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|Horn Upgrade Installation": {
+"id": "SVC-0204",
+"class": "LABOUR_OPERATION",
+"cat": "Accessories",
+"sub": "Accessory Installation",
+"status": "NEEDS_REVIEW",
+"codes": "998736"
+},
+"SERVICE|EV Periodic Inspection": {
+"id": "SVC-0205",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|High Voltage Battery Health Check": {
+"id": "SVC-0206",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|EV Charging Port Inspection": {
+"id": "SVC-0207",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|EV Coolant Service": {
+"id": "SVC-0208",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|EV Reduction Gear Oil Service": {
+"id": "SVC-0209",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|EV Brake Service": {
+"id": "SVC-0210",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|EV Software Update and Diagnostics": {
+"id": "SVC-0211",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|HV System Isolation Test": {
+"id": "SVC-0212",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998346"
+},
+"SERVICE|12V Auxiliary Battery Replacement": {
+"id": "SVC-0213",
+"class": "LABOUR_OPERATION",
+"cat": "Electric Vehicle Services",
+"sub": "EV Maintenance",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Vehicle Towing": {
+"id": "SVC-0214",
+"class": "LABOUR_OPERATION",
+"cat": "Roadside & Transport",
+"sub": "Towing & Assistance",
+"status": "CANDIDATE",
+"codes": "996744"
+},
+"SERVICE|Flatbed Transport": {
+"id": "SVC-0215",
+"class": "LABOUR_OPERATION",
+"cat": "Roadside & Transport",
+"sub": "Towing & Assistance",
+"status": "NEEDS_REVIEW",
+"codes": "996744"
+},
+"SERVICE|Jump Start": {
+"id": "SVC-0216",
+"class": "LABOUR_OPERATION",
+"cat": "Roadside & Transport",
+"sub": "Towing & Assistance",
+"status": "NEEDS_REVIEW",
+"codes": "996744"
+},
+"SERVICE|Roadside Assistance": {
+"id": "SVC-0217",
+"class": "LABOUR_OPERATION",
+"cat": "Roadside & Transport",
+"sub": "Towing & Assistance",
+"status": "NEEDS_REVIEW",
+"codes": "996744"
+},
+"SERVICE|Vehicle Pick-Up and Drop": {
+"id": "SVC-0218",
+"class": "LABOUR_OPERATION",
+"cat": "Roadside & Transport",
+"sub": "Towing & Assistance",
+"status": "NEEDS_REVIEW",
+"codes": "996749"
+},
+"SERVICE|Cylinder Boring": {
+"id": "SVC-0219",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Outsourced Machine Shop",
+"sub": "Machining Services",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Crankshaft Grinding": {
+"id": "SVC-0220",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Outsourced Machine Shop",
+"sub": "Machining Services",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Cylinder Head Skimming": {
+"id": "SVC-0221",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Outsourced Machine Shop",
+"sub": "Machining Services",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Valve Seat Cutting": {
+"id": "SVC-0222",
+"class": "OUTSOURCED_SERVICE",
+"cat": "Outsourced Machine Shop",
+"sub": "Machining Services",
+"status": "NEEDS_REVIEW",
+"codes": "998714"
+},
+"SERVICE|Basic Periodic Service Package": {
+"id": "SVC-0223",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Standard Periodic Service Package": {
+"id": "SVC-0224",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Major Periodic Service Package": {
+"id": "SVC-0225",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Brake Service Package": {
+"id": "SVC-0226",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|AC Service Package": {
+"id": "SVC-0227",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Wheel Care Package": {
+"id": "SVC-0228",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Pre-Trip Safety Package": {
+"id": "SVC-0229",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Monsoon Care Package": {
+"id": "SVC-0230",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|EV Periodic Service Package": {
+"id": "SVC-0231",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Two-Wheeler Periodic Service Package": {
+"id": "SVC-0232",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+},
+"SERVICE|Commercial Vehicle Periodic Service Package": {
+"id": "SVC-0233",
+"class": "SERVICE_PACKAGE",
+"cat": "Service Packages",
+"sub": "Periodic Packages",
+"status": "UNCLASSIFIED",
+"codes": ""
+}
+}

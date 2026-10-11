@@ -6,6 +6,7 @@ import com.garageos.core.enums.JobCardStatus;
 import com.garageos.core.enums.booking.BookingStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
+import com.garageos.core.security.GarageScope;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.core.util.JobCardNumberGenerator;
 import com.garageos.modules.booking.entity.Booking;
@@ -64,6 +65,17 @@ public class JobCardServiceImpl implements JobCardService {
 
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
+
+    /**
+     * Closure prerequisites (defence in depth behind the status machine). Field-injected and optional, like the
+     * other collaborators here, so constructor-built unit tests are unaffected; in the running application both are
+     * always present.
+     */
+    @Autowired(required = false)
+    private com.garageos.modules.delivery.repository.DeliveryRepository deliveryRepository;
+
+    @Autowired(required = false)
+    private com.garageos.modules.invoice.repository.InvoiceRepository invoiceRepository;
 
     private final JobCardRepository jobCardRepository;
     private final VehicleRepository vehicleRepository;
@@ -233,6 +245,8 @@ public class JobCardServiceImpl implements JobCardService {
 
         JobCard jobCard = getJobCardByIdOrThrow(id);
 
+        authorizeJobCardRead(jobCard);
+
         return jobCardMapper.toResponse(jobCard);
     }
 
@@ -242,6 +256,8 @@ public class JobCardServiceImpl implements JobCardService {
             CreateJobCardRequest request) {
 
         JobCard jobCard = getJobCardByIdOrThrow(id);
+
+        authorizeJobCardGarage(jobCard);
 
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() ->
@@ -263,6 +279,8 @@ public class JobCardServiceImpl implements JobCardService {
     public void deleteJobCard(Long id) {
 
         JobCard jobCard = getJobCardByIdOrThrow(id);
+
+        authorizeJobCardGarage(jobCard);
 
         jobCardRepository.delete(jobCard);
     }
@@ -646,10 +664,18 @@ public class JobCardServiceImpl implements JobCardService {
         // every by-number operation, not just this one.
         JobCard jobCard = getJobCardByNumberOrThrow(jobCardNumber);
 
+        // Idempotent: a repeated request (double tap, retry after a dropped response) returns the closed job card and
+        // publishes nothing a second time - no duplicate notification, no second final report.
+        if (jobCard.getStatus() == JobCardStatus.CLOSED) {
+            return jobCardMapper.toResponse(jobCard);
+        }
+
         statusValidator.validate(
                 jobCard.getStatus(),
                 JobCardStatus.CLOSED
         );
+
+        requireClosurePrerequisites(jobCard);
 
         jobCard.setStatus(JobCardStatus.CLOSED);
 
@@ -665,6 +691,35 @@ public class JobCardServiceImpl implements JobCardService {
         }
 
         return jobCardMapper.toResponse(jobCard);
+    }
+
+    /**
+     * A job card is closed only after the vehicle has actually been handed over (a Delivery record: created either
+     * by the delivery trip with OTP and evidence, or by the garage when the customer collects the vehicle in person)
+     * and its invoice is generated and paid. Repair-task state, trip state and job-card state are separate: nothing
+     * here looks at a single repair task. A customer self-pickup needs no driver and no trip.
+     */
+    private void requireClosurePrerequisites(JobCard jobCard) {
+
+        if (deliveryRepository != null && !deliveryRepository.existsByJobCardId(jobCard.getId())) {
+            throw new BusinessException(
+                    "The vehicle has not been handed over yet. Record the delivery (or complete the delivery trip) "
+                            + "before closing the job card.");
+        }
+
+        if (invoiceRepository != null) {
+
+            com.garageos.modules.invoice.entity.Invoice invoice = invoiceRepository
+                    .findByEstimateJobCardId(jobCard.getId())
+                    .orElseThrow(() -> new BusinessException(
+                            "The job card has no invoice, so it cannot be closed."));
+
+            if (invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.GENERATED
+                    || invoice.getPaymentStatus() != com.garageos.core.enums.PaymentStatus.PAID) {
+                throw new BusinessException(
+                        "The invoice must be generated and fully paid before the job card can be closed.");
+            }
+        }
     }
 
     /**
@@ -687,11 +742,35 @@ public class JobCardServiceImpl implements JobCardService {
                         .getPrincipal();
 
         if (jobCard.getGarage() == null
-                || principal.getGarageId() == null
-                || !principal.getGarageId().equals(jobCard.getGarage().getId())) {
+                || !GarageScope.isMemberOfGarage(
+                        new GarageScope(garageMembershipRepository), principal, jobCard.getGarage().getId())) {
 
             throw new BusinessException(
                     "E1: This Job Card does not belong to your garage.");
+        }
+    }
+
+    /**
+     * Read of ONE job card by numeric id: staff of the job card's own garage (same rule as the by-number
+     * operations) or the customer it belongs to. Anyone else gets a not-found, so a guessed id exposes nothing.
+     */
+    private void authorizeJobCardRead(JobCard jobCard) {
+
+        GarageUserPrincipal principal =
+                (GarageUserPrincipal) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getPrincipal();
+
+        boolean ownGarage = jobCard.getGarage() != null
+                && GarageScope.isMemberOfGarage(
+                        new GarageScope(garageMembershipRepository), principal, jobCard.getGarage().getId());
+
+        boolean ownCustomer = jobCard.getCustomer() != null
+                && GarageScope.isOwnCustomer(principal, jobCard.getCustomer().getMobileNumber());
+
+        if (!ownGarage && !ownCustomer) {
+            throw new ResourceNotFoundException("Job Card not found with id : " + jobCard.getId());
         }
     }
 

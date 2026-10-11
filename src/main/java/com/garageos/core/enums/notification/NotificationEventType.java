@@ -50,7 +50,10 @@ public enum NotificationEventType {
 
     VEHICLE_READY_FOR_DELIVERY(DELIVERY, HIGH, "JOB_CARD"),
     VEHICLE_DELIVERED(DELIVERY, NORMAL, "JOB_CARD"),
-    JOB_CLOSED(JOB_CARD, LOW, "JOB_CARD");
+    JOB_CLOSED(JOB_CARD, LOW, "JOB_CARD"),
+
+    /** A chat message was posted in a booking / job-card conversation; the recipients are the other participants. */
+    CHAT_MESSAGE_RECEIVED(CHAT, NORMAL, "CHAT");
 
     private final NotificationCategory category;
     private final NotificationPriority priority;

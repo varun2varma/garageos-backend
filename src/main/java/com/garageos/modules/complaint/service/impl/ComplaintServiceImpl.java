@@ -20,6 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ComplaintServiceImpl implements ComplaintService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final ComplaintRepository repository;
     private final JobCardRepository jobCardRepository;
     private final ComplaintMapper mapper;
@@ -33,6 +37,8 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found with id : " + jobCardId));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jobCard, "Job Card not found with id : " + jobCardId);
 
         Complaint complaint = mapper.toEntity(request);
 
@@ -53,6 +59,8 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found with id : " + jobCardId));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jobCard, "Job Card not found with id : " + jobCardId);
 
         List<Complaint> complaints = mapper.toEntity(request);
 
@@ -95,11 +103,16 @@ public class ComplaintServiceImpl implements ComplaintService {
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, complaint.getJobCard(), "Complaint not found with id : " + id);
+
         return mapper.toResponse(complaint);
     }
 
     @Override
     public List<ComplaintResponse> getComplaints(Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, jc, "Job Card not found with id : " + jobCardId));
 
         return repository.findByJobCardId(jobCardId)
                 .stream()
@@ -117,6 +130,8 @@ public class ComplaintServiceImpl implements ComplaintService {
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, complaint.getJobCard(), "Complaint not found with id : " + id);
+
         mapper.updateEntity(request, complaint);
 
         complaint = repository.save(complaint);
@@ -131,6 +146,8 @@ public class ComplaintServiceImpl implements ComplaintService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Complaint not found with id : " + id));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, complaint.getJobCard(), "Complaint not found with id : " + id);
 
         repository.delete(complaint);
     }

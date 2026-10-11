@@ -45,6 +45,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Transactional
 public class JobAssignmentServiceImpl implements JobAssignmentService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
@@ -81,6 +85,9 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         )
                 );
 
+        com.garageos.core.security.GarageScope.requireJobCardStaff(
+                garageScope, jobCard, "Job Card not found : " + request.getJobCardId());
+
         EstimateItem estimateItem = null;
 
         RepairTask repairTask = null;
@@ -102,6 +109,12 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                                     "Repair Task not found : "
                                             + request.getRepairTaskId()
                             ));
+
+            if (repairTask.getJobCard() == null
+                    || !repairTask.getJobCard().getId().equals(jobCard.getId())) {
+                throw new ResourceNotFoundException(
+                        "Repair Task not found : " + request.getRepairTaskId());
+            }
         }
 
         User user =
@@ -113,6 +126,14 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                                         + request.getEmployeeId()
                         )
                 );
+
+        // The assignee must work in the job card's own garage: never an employee of another tenant.
+        if (user.getGarageId() == null
+                || jobCard.getGarage() == null
+                || !user.getGarageId().equals(jobCard.getGarage().getId())) {
+            throw new ResourceNotFoundException(
+                    "User not found : " + request.getEmployeeId());
+        }
 
         Garage garage =
                 garageRepository.findById(
@@ -513,6 +534,22 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
         );
     }
 
+    /** The person the assignment belongs to, or staff of the job card's garage; anyone else gets not-found. */
+    private void requireAssigneeOrGarageStaff(JobAssignment assignment) {
+
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        boolean self = principal != null
+                && assignment.getUser() != null
+                && assignment.getUser().getId().equals(principal.getId());
+
+        if (!self) {
+            com.garageos.core.security.GarageScope.requireJobCardStaff(
+                    garageScope, assignment.getJobCard(),
+                    "Assignment not found : " + assignment.getId());
+        }
+    }
+
     private JobAssignment getAssignmentOrThrow(
             Long assignmentId) {
 
@@ -544,6 +581,9 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         assignmentId
                 );
 
+        com.garageos.core.security.GarageScope.requireJobCardStaff(
+                garageScope, oldAssignment.getJobCard(), "Assignment not found : " + assignmentId);
+
         User user =
                 userRepository.findById(
                         request.getEmployeeId()
@@ -552,6 +592,13 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                                 "User not found : "
                                         + request.getEmployeeId()
                         ));
+
+        if (user.getGarageId() == null
+                || oldAssignment.getGarage() == null
+                || !user.getGarageId().equals(oldAssignment.getGarage().getId())) {
+            throw new ResourceNotFoundException(
+                    "User not found : " + request.getEmployeeId());
+        }
 
         /*
          * Preserve the RepairTask linked to the old assignment.
@@ -650,6 +697,8 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
                         assignmentId
                 );
 
+        requireAssigneeOrGarageStaff(assignment);
+
         return jobAssignmentMapper.toResponse(
                 assignment
         );
@@ -659,6 +708,10 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
     @Transactional(readOnly = true)
     public List<JobAssignmentResponse> getAssignmentsByJobCard(
             Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardStaff(
+                        garageScope, jc, "Job Card not found : " + jobCardId));
 
         List<JobAssignment> assignments =
                 jobAssignmentRepository.findByJobCardId(

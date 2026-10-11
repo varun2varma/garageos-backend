@@ -1,0 +1,204 @@
+type,name,category,default_unit,description
+SERVICE,Automatic Transmission Fluid Flush,Periodic Maintenance,JOB,Machine flush of ATF. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,CVT Fluid Replacement,Periodic Maintenance,JOB,Replace CVT fluid. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Differential Oil Replacement,Periodic Maintenance,JOB,Replace differential oil. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Transfer Case Oil Replacement,Periodic Maintenance,JOB,Replace transfer case oil. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Power Steering Fluid Replacement,Periodic Maintenance,JOB,Replace power steering fluid. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Clutch Fluid Bleeding,Periodic Maintenance,JOB,Bleed the hydraulic clutch. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Battery Terminal Cleaning,Periodic Maintenance,JOB,Clean and protect battery terminals. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Wiper Blade Replacement,Periodic Maintenance,JOB,Replace wiper blades. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Drive Belt Replacement,Engine Repair,JOB,Replace the accessory drive belt. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Timing Belt Replacement,Engine Repair,JOB,Replace the timing belt and tensioners. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Timing Chain Replacement,Engine Repair,JOB,Replace the timing chain set. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Valve Clearance Adjustment,Engine Repair,JOB,Adjust valve clearances. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Cylinder Head Gasket Replacement,Engine Repair,JOB,Replace the head gasket. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Cylinder Head Overhaul,Engine Repair,JOB,Remove and overhaul the head. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Top Overhaul,Engine Repair,JOB,Top-end overhaul. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Major Overhaul,Engine Repair,JOB,Full engine overhaul. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Assembly Replacement,Engine Repair,JOB,Remove and fit an engine assembly. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Piston Ring Replacement,Engine Repair,JOB,Replace piston rings. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Crankshaft Oil Seal Replacement,Engine Repair,JOB,Replace crankshaft seals. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Oil Pan Gasket Replacement,Engine Repair,JOB,Replace sump gasket. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Oil Leak Diagnosis and Repair,Engine Repair,JOB,Trace and repair oil leaks. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Mount Replacement,Engine Repair,JOB,Replace engine mounts. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Turbocharger Replacement,Engine Repair,JOB,Remove and fit a turbocharger. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Throttle Body Cleaning,Engine Repair,JOB,Clean the throttle body. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Injector Cleaning,Engine Repair,JOB,Clean injectors. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Injector Replacement,Engine Repair,JOB,Replace injectors. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Pump Replacement,Engine Repair,JOB,Replace the fuel pump. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Tank Cleaning,Engine Repair,JOB,Clean the fuel tank. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Carburettor Cleaning and Tuning,Engine Repair,JOB,Clean and tune a carburettor. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Tune-Up,Engine Repair,JOB,Engine tune-up. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Decarbonisation,Engine Repair,JOB,Remove carbon deposits. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,EGR Valve Cleaning,Engine Repair,JOB,Clean the EGR valve. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Exhaust Muffler Repair,Engine Repair,JOB,Repair or weld the muffler. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Exhaust Muffler Replacement,Engine Repair,JOB,Replace the muffler. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Catalytic Converter Replacement,Engine Repair,JOB,Replace the catalytic converter. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Diesel Particulate Filter Cleaning,Engine Repair,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Clean the DPF. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Water Pump Replacement,Engine Repair,JOB,Replace the water pump. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Thermostat Replacement,Engine Repair,JOB,Replace the thermostat. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Replacement,Engine Repair,JOB,Replace the radiator. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Hose Replacement,Engine Repair,JOB,Replace radiator hoses. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Flushing,Engine Repair,JOB,Flush the cooling system. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Cooling System Pressure Test,Engine Repair,JOB,Pressure test the cooling system. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Cooling Fan Replacement,Engine Repair,JOB,Replace the cooling fan. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Repair,Engine Repair,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Repair a radiator. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Brake Disc Replacement,Brakes,JOB,Replace brake discs. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Disc Resurfacing,Brakes,JOB,Machine brake discs. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Shoe Replacement,Brakes,JOB,Replace brake shoes. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Drum Turning,Brakes,JOB,Machine brake drums. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Caliper Overhaul,Brakes,JOB,Overhaul a caliper. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Caliper Replacement,Brakes,JOB,Replace a caliper. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Master Cylinder Replacement,Brakes,JOB,Replace the master cylinder. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Wheel Cylinder Replacement,Brakes,JOB,Replace wheel cylinders. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Hose Replacement,Brakes,JOB,Replace brake hoses. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Line Repair,Brakes,JOB,Repair brake lines. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Handbrake Adjustment,Brakes,JOB,Adjust the parking brake. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Handbrake Cable Replacement,Brakes,JOB,Replace the parking brake cable. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Booster Replacement,Brakes,JOB,Replace the brake booster. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,ABS Sensor Replacement,Brakes,JOB,Replace an ABS sensor. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,ABS Diagnosis,Brakes,JOB,Diagnose ABS faults. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Clutch Replacement,Clutch & Transmission,JOB,"Replace the clutch kit. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Clutch Master Cylinder Replacement,Clutch & Transmission,JOB,"Replace the clutch master cylinder. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Clutch Slave Cylinder Replacement,Clutch & Transmission,JOB,"Replace the slave cylinder. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Flywheel Resurfacing,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Machine the flywheel. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Manual Gearbox Overhaul,Clutch & Transmission,JOB,"Overhaul a manual gearbox. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Automatic Transmission Overhaul,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Overhaul an automatic transmission. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Gearbox Mount Replacement,Clutch & Transmission,JOB,"Replace gearbox mounts. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Differential Overhaul,Clutch & Transmission,JOB,"Overhaul a differential. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Drive Shaft Replacement,Clutch & Transmission,JOB,"Replace a driveshaft. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,CV Joint Replacement,Clutch & Transmission,JOB,"Replace a CV joint. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,CV Boot Replacement,Clutch & Transmission,JOB,"Replace a CV boot. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Universal Joint Replacement,Clutch & Transmission,JOB,"Replace a U-joint. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Propeller Shaft Balancing,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Balance a propeller shaft. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Shock Absorber Replacement,Suspension & Steering,JOB,Replace shock absorbers. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Strut Mount Replacement,Suspension & Steering,JOB,Replace strut mounts. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Control Arm Bush Replacement,Suspension & Steering,JOB,Replace control arm bushes. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Ball Joint Replacement,Suspension & Steering,JOB,Replace ball joints. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Tie Rod End Replacement,Suspension & Steering,JOB,Replace tie rod ends. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Stabiliser Link Replacement,Suspension & Steering,JOB,Replace stabiliser links. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Coil Spring Replacement,Suspension & Steering,JOB,Replace springs. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Wheel Bearing Replacement,Suspension & Steering,JOB,Replace wheel bearings. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Rack Replacement,Suspension & Steering,JOB,Replace the steering rack. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Rack Overhaul,Suspension & Steering,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the steering rack. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Power Steering Pump Replacement,Suspension & Steering,JOB,Replace the power steering pump. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Wheel Alignment,Suspension & Steering,JOB,Centre the steering wheel. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Tyre Fitting,Tyres & Wheels,JOB,Remove and fit a tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Tubeless Puncture Repair,Tyres & Wheels,JOB,Repair a tubeless tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Tube-Type Puncture Repair,Tyres & Wheels,JOB,Repair a tube-type tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Alloy Repair,Tyres & Wheels,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Straighten or repair an alloy wheel. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,TPMS Service,Tyres & Wheels,JOB,Service TPMS sensors. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Nitrogen Tyre Filling,Tyres & Wheels,JOB,Fill tyres with nitrogen. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Spare Wheel Change,Tyres & Wheels,JOB,Change to the spare wheel. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Nut Torque Check,Tyres & Wheels,JOB,Torque wheel nuts. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Battery Charging,Electrical & Electronics,JOB,Charge a battery. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Alternator Replacement,Electrical & Electronics,JOB,Replace the alternator. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Alternator Overhaul,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the alternator. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Starter Motor Replacement,Electrical & Electronics,JOB,Replace the starter. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Starter Motor Overhaul,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the starter. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Wiring Repair,Electrical & Electronics,JOB,Repair wiring. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Fuse and Relay Replacement,Electrical & Electronics,JOB,Replace fuses and relays. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Bulb Replacement,Electrical & Electronics,JOB,Replace headlamp bulbs. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Tail Lamp Bulb Replacement,Electrical & Electronics,JOB,Replace tail lamp bulbs. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Alignment,Electrical & Electronics,JOB,Aim headlamps. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Restoration,Electrical & Electronics,JOB,Restore headlamp lenses. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Horn Replacement,Electrical & Electronics,JOB,Replace the horn. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Power Window Repair,Electrical & Electronics,JOB,Repair a power window. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Central Locking Repair,Electrical & Electronics,JOB,Repair central locking. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Instrument Cluster Repair,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Repair the cluster. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Sensor Replacement,Electrical & Electronics,JOB,Replace a sensor. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Key Programming,Electrical & Electronics,JOB,Program keys. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,ECU Reprogramming,Electrical & Electronics,JOB,Reprogram the ECU. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,ECU Replacement and Coding,Electrical & Electronics,JOB,Replace and code an ECU. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Airbag System Diagnosis,Electrical & Electronics,JOB,Diagnose the SRS. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Computerised Scan,Diagnostics & Inspection,JOB,Read and clear fault codes across modules. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Live Data Analysis,Diagnostics & Inspection,JOB,Analyse live data. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Compression Test,Diagnostics & Inspection,JOB,Test compression. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Leak Down Test,Diagnostics & Inspection,JOB,Test cylinder sealing. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Fuel Pressure Test,Diagnostics & Inspection,JOB,Test fuel pressure. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Smoke Test,Diagnostics & Inspection,JOB,Smoke test for leaks. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Battery Load Test,Diagnostics & Inspection,JOB,Load test a battery. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Charging System Test,Diagnostics & Inspection,JOB,Test charging. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Emission Test,Diagnostics & Inspection,JOB,Emission test. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Multi-Point Inspection,Diagnostics & Inspection,JOB,Structured inspection. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Road Test,Diagnostics & Inspection,JOB,Road test. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Pre-Purchase Inspection,Diagnostics & Inspection,JOB,Inspection before purchase. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Underbody Inspection,Diagnostics & Inspection,JOB,Underbody inspection. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Accident Damage Assessment,Diagnostics & Inspection,JOB,Assess accident damage. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Pre-Trip Safety Check,Diagnostics & Inspection,JOB,Pre-trip check. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,AC Gas Refilling,Air Conditioning,JOB,Evacuate and recharge refrigerant. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Leak Test,Air Conditioning,JOB,Find A/C leaks. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Compressor Replacement,Air Conditioning,JOB,Replace the compressor. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Condenser Replacement,Air Conditioning,JOB,Replace the condenser. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Evaporator Replacement,Air Conditioning,JOB,Replace the evaporator. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,Blower Motor Replacement,Air Conditioning,JOB,Replace the blower. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Duct Cleaning,Air Conditioning,JOB,Clean ducts. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Sanitisation,Air Conditioning,JOB,Sanitise the A/C. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,Dent Removal,Body Repair & Paint,JOB,Remove dents. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Panel Beating,Body Repair & Paint,JOB,Straighten panels. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Bumper Repair,Body Repair & Paint,JOB,Repair a bumper. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Bumper Replacement,Body Repair & Paint,JOB,Replace a bumper. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Scratch Repair,Body Repair & Paint,JOB,Repair scratches. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Panel Painting,Body Repair & Paint,JOB,Paint a panel. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Full Body Painting,Body Repair & Paint,JOB,Paint the vehicle. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Touch-Up Painting,Body Repair & Paint,JOB,Touch-up. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Windscreen Replacement,Body Repair & Paint,JOB,Replace the windscreen. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Door Glass Replacement,Body Repair & Paint,JOB,Replace door glass. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Rust Treatment,Body Repair & Paint,JOB,Treat rust. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Underbody Coating Application,Body Repair & Paint,JOB,Apply underbody coating. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Chassis Straightening,Body Repair & Paint,JOB,Straighten the chassis. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Fibre Panel Repair,Body Repair & Paint,JOB,Repair fibre panels. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Seat Upholstery Repair,Body Repair & Paint,JOB,Repair upholstery. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Exterior Wash,Cleaning & Detailing,JOB,Exterior wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Interior Vacuum Cleaning,Cleaning & Detailing,JOB,Vacuum interior. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Full Wash,Cleaning & Detailing,JOB,Exterior and interior wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Foam Wash,Cleaning & Detailing,JOB,Foam wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Engine Bay Cleaning,Cleaning & Detailing,JOB,Engine bay clean. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Underbody Wash,Cleaning & Detailing,JOB,Underbody wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Polishing,Cleaning & Detailing,JOB,Machine polishing. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Waxing,Cleaning & Detailing,JOB,Apply wax. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Ceramic Coating Application,Cleaning & Detailing,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Apply ceramic coating. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Paint Protection Film Installation,Cleaning & Detailing,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Install PPF. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Interior Deep Cleaning,Cleaning & Detailing,JOB,Deep interior clean. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Leather Treatment,Cleaning & Detailing,JOB,Leather treatment. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Odour Removal,Cleaning & Detailing,JOB,Odour removal. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Windscreen Water-Repellent Treatment,Cleaning & Detailing,JOB,Glass treatment. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Reverse Camera Installation,Accessories,JOB,Install a camera. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Parking Sensor Installation,Accessories,JOB,Install parking sensors. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Music System Installation,Accessories,JOB,Install a stereo. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Dashcam Installation,Accessories,JOB,Install a dashcam. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Fog Lamp Installation,Accessories,JOB,Install fog lamps. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,LED Lighting Installation,Accessories,JOB,Install LED lighting. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Seat Cover Fitting,Accessories,JOB,Fit seat covers. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Floor Mat Fitting,Accessories,JOB,Fit floor mats. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Alloy Wheel Fitting,Accessories,JOB,Fit alloy wheels. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Window Film Installation,Accessories,JOB,Fit window film. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Central Locking Installation,Accessories,JOB,Install central locking. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Alarm and Immobiliser Installation,Accessories,JOB,Install a security system. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,GPS Tracker Installation,Accessories,JOB,Install a tracker. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Tow Bar Installation,Accessories,JOB,Install a tow bar. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Roof Rail Installation,Accessories,JOB,Install roof rails. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Horn Upgrade Installation,Accessories,JOB,Install a horn. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,EV Periodic Inspection,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV inspection. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,High Voltage Battery Health Check,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. HV battery test. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Charging Port Inspection,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. Charging port check. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Coolant Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV coolant service. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Reduction Gear Oil Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV gear oil change. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Brake Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV brake service. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Software Update and Diagnostics,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV diagnostics. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,HV System Isolation Test,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. HV isolation test. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,12V Auxiliary Battery Replacement,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. Replace the 12 V battery. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,Vehicle Towing,Roadside & Transport,JOB,Tow a vehicle. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Flatbed Transport,Roadside & Transport,JOB,Flatbed transport. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Jump Start,Roadside & Transport,JOB,Jump start. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Roadside Assistance,Roadside & Transport,JOB,Roadside assistance. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Vehicle Pick-Up and Drop,Roadside & Transport,JOB,Pick-up and drop. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Cylinder Boring,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Bore cylinders. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Crankshaft Grinding,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Grind a crankshaft. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Cylinder Head Skimming,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Resurface a head. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Valve Seat Cutting,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Cut valve seats. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Fire Extinguisher Fitting,Accessories,JOB,Mount vehicle fire extinguisher. Labour operation in Accessories / Audio & Safety Installation; priced per job.
+SERVICE,TPMS Sensor Replacement,Tyres & Wheels,JOB,Replace tyre pressure monitoring sensor. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Weight Replacement,Tyres & Wheels,JOB,Replace wheel balancing weights. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Flat Tyre Roadside Assistance,Roadside & Transport,JOB,Roadside tyre change or puncture repair. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Fuel Delivery Assistance,Roadside & Transport,JOB,Deliver fuel to a stranded vehicle. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.

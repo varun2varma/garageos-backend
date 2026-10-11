@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NavigationTripMediaRepository
@@ -21,4 +22,6 @@ public interface NavigationTripMediaRepository
             Long tripId,
             TripMediaStage mediaStage
     );
+
+    Optional<NavigationTripMedia> findByTripIdAndClientUploadId(Long tripId, String clientUploadId);
 }

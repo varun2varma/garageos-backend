@@ -14,4 +14,7 @@ public final class NotificationFacts {
     public static final String TECHNICIAN_USER_IDS = "technicianUserIds";
     public static final String BOOKING_ID = "bookingId";
     public static final String TRIP_ID = "tripId";
+
+    /** Chat: the participants the chat service already authorised (sender excluded). Ids only, never the message text. */
+    public static final String CHAT_RECIPIENT_USER_IDS = "chatRecipientUserIds";
 }

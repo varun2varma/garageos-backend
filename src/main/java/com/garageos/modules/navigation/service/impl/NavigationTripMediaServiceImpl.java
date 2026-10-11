@@ -9,6 +9,7 @@ import com.garageos.core.enums.navigation.TripType;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.garageos.modules.audit.service.AuditService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
+import com.garageos.modules.media.util.ImageOrientation;
 import com.garageos.modules.navigation.dto.response.NavigationTripMediaResponse;
 import com.garageos.modules.navigation.entity.NavigationRequest;
 import com.garageos.modules.navigation.entity.NavigationTrip;
@@ -64,6 +65,21 @@ public class NavigationTripMediaServiceImpl
             Double latitude,
             Double longitude) {
 
+        return upload(tripId, driverId, stage, shotType, file, latitude, longitude, null);
+    }
+
+    @Override
+    @Transactional
+    public NavigationTripMediaResponse upload(
+            Long tripId,
+            Long driverId,
+            TripMediaStage stage,
+            TripMediaShotType shotType,
+            MultipartFile file,
+            Double latitude,
+            Double longitude,
+            String clientUploadId) {
+
         // Root-cause fix: this previously trusted the client-supplied
         // driverId outright - any authenticated user of any role could
         // upload pickup/delivery evidence attributed to a different
@@ -88,6 +104,21 @@ public class NavigationTripMediaServiceImpl
                         );
 
 
+        String uploadId = clientUploadId == null || clientUploadId.isBlank() ? null : clientUploadId.trim();
+
+        if (uploadId != null && uploadId.length() > 80) {
+            throw new IllegalArgumentException("clientUploadId is at most 80 characters");
+        }
+
+        if (uploadId != null) {
+            // Retry of a file that was already stored: return it, create nothing.
+            java.util.Optional<NavigationTripMedia> existing =
+                    mediaRepository.findByTripIdAndClientUploadId(tripId, uploadId);
+            if (existing.isPresent()) {
+                return toResponse(existing.get());
+            }
+        }
+
         validateMediaUpload(
                 trip,
                 stage,
@@ -102,12 +133,32 @@ public class NavigationTripMediaServiceImpl
                         + stage.name().toLowerCase();
 
 
-        String storageKey =
-                mediaStorageService.upload(
-                        file,
-                        folder
-                );
+        // Photos: bake the EXIF orientation into the pixels once (the stored bytes then carry no orientation tag, so
+        // no consumer can apply it a second time). Untagged/normal images and videos are stored byte-for-byte.
+        byte[] stored = null;
+        String storedContentType = file.getContentType();
+        long storedSize = file.getSize();
 
+        if ("image/jpeg".equalsIgnoreCase(file.getContentType()) || "image/jpg".equalsIgnoreCase(file.getContentType())) {
+            try {
+                byte[] original = file.getBytes();
+                if (ImageOrientation.readJpegOrientation(original) != ImageOrientation.NORMAL) {
+                    java.awt.image.BufferedImage upright = ImageOrientation.decodeUpright(original);
+                    if (upright != null) {
+                        stored = ImageOrientation.encodeJpeg(upright, 0.92f);
+                        storedContentType = "image/jpeg";
+                        storedSize = stored.length;
+                    }
+                }
+            } catch (java.io.IOException | RuntimeException ex) {
+                // Undecodable: keep the original bytes rather than lose the evidence.
+                stored = null;
+            }
+        }
+
+        String storageKey = stored != null
+                ? mediaStorageService.storeEvidence(stored, storedContentType, folder, ".jpg")
+                : mediaStorageService.upload(file, folder);
 
         NavigationTripMedia media =
                 NavigationTripMedia.builder()
@@ -124,12 +175,14 @@ public class NavigationTripMediaServiceImpl
                                 file.getOriginalFilename()
                         )
 
+                        .clientUploadId(uploadId)
+
                         .contentType(
-                                file.getContentType()
+                                storedContentType
                         )
 
                         .fileSize(
-                                file.getSize()
+                                storedSize
                         )
 
                         .capturedBy(
@@ -218,6 +271,41 @@ public class NavigationTripMediaServiceImpl
 
     @Override
     @Transactional(readOnly = true)
+    public List<NavigationTripMediaResponse> getJobCardEvidence(Long jobCardId) {
+
+        GarageUserPrincipal principal = currentPrincipal();
+
+        List<NavigationRequest> requests = navigationRequestRepository.findByJobCardId(jobCardId);
+
+        if (requests.isEmpty()) {
+            return List.of();
+        }
+
+        java.util.Map<Long, NavigationRequest> byId = new java.util.HashMap<>();
+        requests.forEach(r -> byId.put(r.getId(), r));
+
+        List<NavigationTrip> trips = navigationTripRepository.findByNavigationRequestIdIn(byId.keySet());
+
+        List<NavigationTripMediaResponse> out = new java.util.ArrayList<>();
+
+        for (NavigationTrip trip : trips) {
+            try {
+                accessGuard.authorizeViewer(principal, trip, byId.get(trip.getNavigationRequestId()));
+            } catch (ResourceNotFoundException ex) {
+                continue; // not this caller's trip: contributes nothing
+            }
+            mediaRepository.findByTripIdOrderByCapturedAtAsc(trip.getId())
+                    .forEach(m -> out.add(toResponse(m)));
+        }
+
+        out.sort(java.util.Comparator.comparing(NavigationTripMediaResponse::getCapturedAt,
+                java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())));
+
+        return out;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public TripMediaContent getMediaContent(Long tripId, Long mediaId) {
 
         accessGuard.authorizeViewer(currentPrincipal(), tripId);
@@ -250,10 +338,10 @@ public class NavigationTripMediaServiceImpl
         }
 
 
-        if (!isImage(file)) {
+        if (!isImageOrVideo(file)) {
 
             throw new IllegalArgumentException(
-                    "Only image files are allowed"
+                    "Only image or video files are allowed"
             );
         }
 
@@ -349,16 +437,15 @@ public class NavigationTripMediaServiceImpl
     }
 
 
-    private boolean isImage(
+    private boolean isImageOrVideo(
             MultipartFile file) {
 
         String contentType =
                 file.getContentType();
 
         return contentType != null
-                && contentType.startsWith(
-                "image/"
-        );
+                && (contentType.startsWith("image/")
+                || contentType.startsWith("video/"));
     }
 
 

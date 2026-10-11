@@ -45,7 +45,10 @@ public class NavigationTripMediaController {
             Double latitude,
 
             @RequestParam(required = false)
-            Double longitude) {
+            Double longitude,
+
+            @RequestParam(required = false)
+            String clientUploadId) {
 
         return mediaService.upload(
                 tripId,
@@ -54,7 +57,8 @@ public class NavigationTripMediaController {
                 shotType,
                 file,
                 latitude,
-                longitude
+                longitude,
+                clientUploadId
         );
     }
 

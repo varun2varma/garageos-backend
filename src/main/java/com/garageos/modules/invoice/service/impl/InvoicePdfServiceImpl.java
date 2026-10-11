@@ -12,6 +12,7 @@ import com.garageos.modules.garage.service.GarageBrandingService;
 import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import com.garageos.modules.invoice.entity.Invoice;
 import com.garageos.modules.invoice.pdf.InvoiceDocumentData;
+import com.garageos.modules.invoice.pdf.InvoiceSnapshotView;
 import com.garageos.modules.invoice.pdf.InvoicePdfRenderer;
 import com.garageos.modules.invoice.repository.InvoiceRepository;
 import com.garageos.modules.invoice.service.InvoicePdfService;
@@ -30,6 +31,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class InvoicePdfServiceImpl implements InvoicePdfService {
+
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
@@ -57,8 +62,19 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
 
         GarageBrandingService.LogoContent logo = garageBrandingService.loadLogoOrNull(garageId);
 
-        InvoiceTaxCalculator.Breakdown breakdown =
-                InvoiceTaxCalculator.calculate(finalBillableLines(invoice, estimate), invoice.getDiscount());
+        // New invoices print exactly what was persisted at issuance; legacy invoices keep the
+        // original recomputation so their historical figures are unchanged.
+        InvoiceSnapshotView snapshot = null;
+        InvoiceTaxCalculator.Breakdown breakdown;
+
+        if (invoice.isTaxSnapshot()) {
+            List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(invoice.getId());
+            snapshot = InvoiceSnapshotView.of(invoice, items);
+            breakdown = InvoiceSnapshotView.breakdownOf(invoice, items);
+        } else {
+            breakdown = InvoiceTaxCalculator.calculate(
+                    finalBillableLines(invoice, estimate), invoice.getDiscount());
+        }
 
         Customer customer = jobCard.getCustomer();
         Vehicle vehicle = jobCard.getVehicle();
@@ -80,7 +96,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
                 vehicleDetails(vehicle, jobCard),
                 invoice.getRemarks(),
                 invoice.getPaymentStatus() == null ? null : invoice.getPaymentStatus().name(),
-                breakdown);
+                breakdown,
+                snapshot);
 
         return new InvoicePdf(
                 renderer.render(data),
@@ -90,6 +107,10 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
     @Override
     @Transactional(readOnly = true)
     public InvoiceTaxCalculator.Breakdown breakdownFor(Invoice invoice) {
+        if (invoice.isTaxSnapshot()) {
+            return InvoiceSnapshotView.breakdownOf(
+                    invoice, invoiceItemRepository.findByInvoiceId(invoice.getId()));
+        }
         return InvoiceTaxCalculator.calculate(
                 finalBillableLines(invoice, invoice.getEstimate()), invoice.getDiscount());
     }
@@ -132,9 +153,8 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
 
     private void authorize(GarageUserPrincipal principal, JobCard jobCard) {
 
-        if (principal.getGarageId() != null
-                && jobCard.getGarage() != null
-                && principal.getGarageId().equals(jobCard.getGarage().getId())) {
+        if (jobCard.getGarage() != null
+                && com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
             return;
         }
 

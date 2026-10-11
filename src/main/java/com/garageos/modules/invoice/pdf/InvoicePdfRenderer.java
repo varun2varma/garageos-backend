@@ -1,5 +1,6 @@
 package com.garageos.modules.invoice.pdf;
 
+import com.garageos.core.enums.catalog.SupplyType;
 import com.garageos.core.pdf.GarageStPageFooter;
 import com.garageos.core.util.AmountInWords;
 import com.garageos.core.util.InvoiceTaxCalculator.Breakdown;
@@ -46,9 +47,8 @@ import static com.garageos.core.pdf.GarageStPdf.*;
 @Component
 public class InvoicePdfRenderer {
 
-    /** Default HSN for motor-vehicle parts and SAC for motor-vehicle repair services (not garage-specific). */
-    static final String DEFAULT_PART_HSN = "8708";
-    static final String DEFAULT_LABOUR_SAC = "9987";
+    /** Shown where a line has no saved classification; a code is never invented. */
+    static final String NO_CODE = "-";
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -75,16 +75,23 @@ public class InvoicePdfRenderer {
 
             Breakdown b = data.breakdown();
 
-            document.add(lineSection(
-                    "PARTS (prices are GST-inclusive)",
-                    "Part", "HSN", DEFAULT_PART_HSN, b.parts()));
+            InvoiceSnapshotView snap = data.snapshot();
 
-            document.add(lineSection(
-                    "LABOUR / SERVICES (GST added on price)",
-                    "Service", "SAC", DEFAULT_LABOUR_SAC, b.labour()));
+            if (snap != null) {
+                document.add(supplyBlock(snap));
+                document.add(snapshotLines(snap));
+            } else {
+                document.add(lineSection(
+                        "PARTS (prices are GST-inclusive)",
+                        "Part", "HSN", NO_CODE, b.parts()));
 
-            if (!b.others().isEmpty()) {
-                document.add(othersSection(b.others()));
+                document.add(lineSection(
+                        "LABOUR / SERVICES (GST added on price)",
+                        "Service", "SAC", NO_CODE, b.labour()));
+
+                if (!b.others().isEmpty()) {
+                    document.add(othersSection(b.others()));
+                }
             }
 
             // Totals and signatures stay together: when a long invoice overflows, they move
@@ -93,7 +100,7 @@ public class InvoicePdfRenderer {
             closing.setWidthPercentage(100);
             closing.setKeepTogether(true);
             PdfPCell closingCell = noBorder();
-            closingCell.addElement(summaryBlock(b, data));
+            closingCell.addElement(snap != null ? snapshotSummary(snap, data) : summaryBlock(b, data));
             closingCell.addElement(signatureBlock(data));
             closing.addCell(closingCell);
             document.add(closing);
@@ -250,7 +257,7 @@ public class InvoicePdfRenderer {
         // page is not spent on an empty column beside the summary.
         PdfPCell left = noBorder();
         left.setPaddingRight(8);
-        left.addElement(wordsBox(b));
+        left.addElement(wordsBox(b.grandTotal()));
         if (!isBlank(data.paymentStatus())) {
             left.addElement(paymentBox(data.paymentStatus()));
         }
@@ -318,7 +325,139 @@ public class InvoicePdfRenderer {
         return outer;
     }
 
-    private PdfPTable wordsBox(Breakdown b) {
+    // ------------------------------------------- invoices with a persisted tax snapshot
+
+    private PdfPTable supplyBlock(InvoiceSnapshotView snap) {
+
+        PdfPTable table = new PdfPTable(1);
+        table.setWidthPercentage(100);
+        table.setSpacingAfter(6);
+
+        String place = isBlank(snap.placeOfSupplyState()) ? "not recorded" : snap.placeOfSupplyState();
+        String supply = snap.supplyType() == SupplyType.INTER_STATE
+                ? "inter-state supply (IGST)"
+                : "intra-state supply (CGST + SGST)";
+
+        PdfPCell cell = noBorder();
+        cell.addElement(new Paragraph("Place of supply: " + place + " - " + supply, SMALL));
+        table.addCell(cell);
+
+        return table;
+    }
+
+    private PdfPTable snapshotLines(InvoiceSnapshotView snap) throws DocumentException {
+
+        PdfPTable table = new PdfPTable(new float[]{2.9f, 1.6f, 1.3f, 1.3f, 0.9f, 1.5f, 1.3f, 1.5f});
+        table.setWidthPercentage(100);
+        table.setSpacingAfter(8);
+
+        PdfPCell banner = new PdfPCell(new Phrase("ITEMS (parts: price includes GST; services: GST added on price)", SECTION));
+        banner.setColspan(8);
+        banner.setBackgroundColor(GREEN);
+        banner.setPadding(4);
+        banner.setBorder(Rectangle.NO_BORDER);
+        table.addCell(banner);
+
+        String[] headers = {"Description", "HSN/SAC", "Qty", "Unit Price", "GST %", "Taxable Value", "GST", "Total"};
+        for (int i = 0; i < headers.length; i++) {
+            table.addCell(headCell(headers[i], i < 2 ? Element.ALIGN_LEFT : Element.ALIGN_RIGHT));
+        }
+
+        if (snap.lines().isEmpty()) {
+            PdfPCell none = new PdfPCell(new Phrase("No items", SMALL));
+            none.setColspan(8);
+            none.setBorderColor(BORDER);
+            none.setPadding(4);
+            table.addCell(none);
+        }
+
+        for (InvoiceSnapshotView.Line line : snap.lines()) {
+            String qty = quantity(line.quantity()) + (isBlank(line.unit()) ? "" : " " + line.unit());
+            table.addCell(bodyCell(line.description(), Element.ALIGN_LEFT));
+            table.addCell(bodyCell(isBlank(line.hsnSacCode()) ? NO_CODE : line.hsnSacCode(), Element.ALIGN_LEFT));
+            table.addCell(bodyCell(qty, Element.ALIGN_RIGHT));
+            table.addCell(bodyCell(money(line.unitPrice()), Element.ALIGN_RIGHT));
+            table.addCell(bodyCell(line.ratePercent() == null ? "-" : pct(line.ratePercent()) + "%", Element.ALIGN_RIGHT));
+            table.addCell(bodyCell(money(line.taxableValue()), Element.ALIGN_RIGHT));
+            table.addCell(bodyCell(money(line.taxAmount()), Element.ALIGN_RIGHT));
+            table.addCell(bodyCell(money(line.lineTotal()), Element.ALIGN_RIGHT));
+        }
+
+        return table;
+    }
+
+    private PdfPTable snapshotSummary(InvoiceSnapshotView snap, InvoiceDocumentData data) throws DocumentException {
+
+        PdfPTable outer = new PdfPTable(new float[]{1f, 1f});
+        outer.setWidthPercentage(100);
+        outer.setSpacingAfter(6);
+
+        PdfPCell left = noBorder();
+        left.setPaddingRight(8);
+        left.addElement(wordsBox(snap.grandTotal()));
+        if (!isBlank(data.paymentStatus())) {
+            left.addElement(paymentBox(data.paymentStatus()));
+        }
+        if (!isBlank(data.remarks())) {
+            Paragraph remarks = new Paragraph("Remarks: " + data.remarks(), SMALL);
+            remarks.setSpacingBefore(6);
+            left.addElement(remarks);
+        }
+        outer.addCell(left);
+
+        PdfPTable summary = new PdfPTable(new float[]{3f, 1.6f});
+        summary.setWidthPercentage(100);
+
+        PdfPCell heading = new PdfPCell(new Phrase("SUMMARY", SECTION));
+        heading.setColspan(2);
+        heading.setBackgroundColor(NAVY);
+        heading.setPadding(4);
+        heading.setBorder(Rectangle.NO_BORDER);
+        summary.addCell(heading);
+
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[]{"Items Total (as entered)", money(snap.subtotal())});
+        if (snap.discount().signum() != 0) {
+            rows.add(new String[]{"Discount", "- " + money(snap.discount())});
+        }
+        rows.add(new String[]{"Taxable Value", money(snap.taxableTotal())});
+        if (snap.supplyType() == SupplyType.INTER_STATE) {
+            rows.add(new String[]{"IGST", money(snap.igstTotal())});
+        } else {
+            rows.add(new String[]{"CGST", money(snap.cgstTotal())});
+            rows.add(new String[]{"SGST", money(snap.sgstTotal())});
+        }
+        rows.add(new String[]{"Total GST", money(snap.taxTotal())});
+
+        for (String[] row : rows) {
+            summary.addCell(bodyCell(row[0], Element.ALIGN_LEFT));
+            summary.addCell(bodyCell(row[1], Element.ALIGN_RIGHT));
+        }
+
+        summary.addCell(bodyCell("Round Off", Element.ALIGN_LEFT));
+        summary.addCell(bodyCell(signedMoney(snap.roundOff()), Element.ALIGN_RIGHT));
+
+        PdfPCell grandLabel = new PdfPCell(new Phrase("GRAND TOTAL", GRAND));
+        grandLabel.setBackgroundColor(HEADER_BG);
+        grandLabel.setBorderColor(BORDER);
+        grandLabel.setPadding(5);
+        summary.addCell(grandLabel);
+
+        PdfPCell grandValue = new PdfPCell(new Phrase(money(snap.grandTotal()), GRAND));
+        grandValue.setBackgroundColor(HEADER_BG);
+        grandValue.setBorderColor(BORDER);
+        grandValue.setPadding(5);
+        grandValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        summary.addCell(grandValue);
+
+        PdfPCell holder = noBorder();
+        holder.addElement(summary);
+        outer.addCell(holder);
+
+        return outer;
+    }
+
+    private PdfPTable wordsBox(BigDecimal grandTotal) {
 
         PdfPTable table = new PdfPTable(1);
         table.setWidthPercentage(100);
@@ -327,7 +466,7 @@ public class InvoicePdfRenderer {
         cell.setBorderColor(BORDER);
         cell.setPadding(6);
         cell.addElement(new Paragraph("Amount in words", SMALL));
-        cell.addElement(new Paragraph(AmountInWords.rupees(b.grandTotal()), BOLD));
+        cell.addElement(new Paragraph(AmountInWords.rupees(grandTotal), BOLD));
 
         table.addCell(cell);
 

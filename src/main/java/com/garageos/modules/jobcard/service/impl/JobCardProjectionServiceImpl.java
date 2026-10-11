@@ -67,6 +67,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobCardProjectionServiceImpl implements JobCardProjectionService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final JobCardRepository jobCardRepository;
     private final JobCardMapper jobCardMapper;
     private final CustomerRepository customerRepository;
@@ -266,8 +270,7 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
         }
 
         if (jobCard.getGarage() == null
-                || principal.getGarageId() == null
-                || !jobCard.getGarage().getId().equals(principal.getGarageId())) {
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
 
             throw new ResourceNotFoundException(
                     "Job Card not found with id : " + jobCard.getId());

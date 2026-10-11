@@ -1,0 +1,704 @@
+type,name,category,default_unit,description
+PART,Cylinder Head,Engine,NOS,"Cast cylinder head carrying valves, ports and combustion chambers. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Engine type: petrol/diesel; Cylinders; Valves per cylinder; Material: aluminium/cast iron."
+PART,Cylinder Head Gasket,Engine,NOS,Seal between block and head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: MLS/composite; Bore size; Thickness.
+PART,Cylinder Head Bolt Set,Engine,NOS,Torque-to-yield or stud set for the cylinder head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Thread size; Quantity; Type: bolt/stud.
+PART,Valve Cover,Engine,NOS,Cover over the valve train. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: aluminium/plastic/steel.
+PART,Valve Cover Gasket,Engine,NOS,Seal for the valve cover. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: rubber/cork/silicone.
+PART,Intake Valve,Engine,NOS,Engine inlet valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Stem diameter; Material.
+PART,Exhaust Valve,Engine,NOS,Engine exhaust valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Stem diameter; Material.
+PART,Valve Spring,Engine,NOS,Spring that closes the valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Free length; Wire diameter.
+PART,Valve Guide,Engine,NOS,Guide bushing for the valve stem. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Inner diameter; Length.
+PART,Valve Stem Seal,Engine,NOS,Oil seal on the valve stem. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Stem diameter; Material.
+PART,Valve Seat Insert,Engine,NOS,Hardened seat insert in the head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Material.
+PART,Tappet,Engine,NOS,Hydraulic or mechanical valve lifter. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Type: hydraulic/mechanical; Diameter.
+PART,Rocker Arm,Engine,NOS,Lever transferring cam motion to the valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Ratio; Type: roller/slipper.
+PART,Camshaft,Engine,NOS,Shaft with cam lobes operating the valves. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Engine type; Journals; Material.
+PART,Camshaft Oil Seal,Engine,NOS,Rotary seal on the camshaft. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Inner diameter; Material.
+PART,Camshaft Phaser,Engine,NOS,Variable valve timing actuator. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Type: intake/exhaust.
+PART,Cylinder Block,Engine,NOS,Block casting housing cylinders and crankcase. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type; Cylinders; Material.
+PART,Cylinder Liner,Engine,NOS,Replaceable cylinder sleeve. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Type: wet/dry.
+PART,Piston,Engine,NOS,Piston for one cylinder. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Oversize; Material.
+PART,Piston Ring Set,Engine,SET,Compression and oil control rings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Oversize; Rings per piston.
+PART,Piston Pin,Engine,NOS,Pin joining piston and rod. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Diameter; Length.
+PART,Connecting Rod,Engine,NOS,Rod linking piston to crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Length; Material.
+PART,Connecting Rod Bearing Set,Engine,SET,Big-end shell bearings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Size: STD/undersize; Quantity.
+PART,Crankshaft,Engine,NOS,Engine crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinders; Journal size.
+PART,Main Bearing Set,Engine,SET,Main journal shell bearings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Size: STD/undersize.
+PART,Crankshaft Pulley,Engine,NOS,Pulley or damper on the crank nose. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Groove type; Diameter.
+PART,Crankshaft Oil Seal,Engine,NOS,Rotary seal on the crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Position: front/rear; Inner diameter.
+PART,Flywheel,Engine,NOS,Mass wheel carrying the starter ring gear. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type: single mass; Teeth; Diameter.
+PART,Dual Mass Flywheel,Engine,NOS,Two-mass flywheel damping vibration. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Teeth; Diameter.
+PART,Flywheel Ring Gear,Engine,NOS,Toothed ring pressed on the flywheel. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Teeth; Diameter.
+PART,Engine Mounting,Engine,NOS,Rubber or hydraulic engine support. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Position: front/rear/left/right; Type: rubber/hydraulic.
+PART,Engine Assembly - Petrol,Engine,NOS,Complete petrol engine. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinder capacity band; Cylinders.
+PART,Engine Assembly - Diesel,Engine,NOS,Complete diesel engine for road vehicles. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinders; Capacity.
+PART,Engine Gasket Set - Full,Engine,SET,Complete engine gasket kit. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Engine Gasket Set - Top End,Engine,SET,Gaskets for cylinder head work. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Oil Pump,Engine,NOS,Pump circulating engine oil. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type: gear/rotor.
+PART,Oil Pan,Engine,NOS,Engine oil sump. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Material: steel/aluminium.
+PART,Oil Pan Gasket,Engine,NOS,Seal for the oil pan. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Oil Drain Plug,Engine,NOS,Drain bolt for the sump. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread size; Magnetic: yes/no.
+PART,Oil Drain Plug Washer,Engine,NOS,Sealing washer for the drain plug. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread size; Material: copper/aluminium.
+PART,Oil Filler Cap,Engine,NOS,Cap on the oil filler neck. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread: screw/bayonet.
+PART,Oil Dipstick,Engine,NOS,Dipstick for oil level. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Length.
+PART,Crankcase Breather Valve,Engine,NOS,Positive crankcase ventilation valve. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Timing Belt,Engine,NOS,Synchronous rubber belt driving the camshaft. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Teeth; Width; Length.
+PART,Timing Belt Kit,Engine,KIT,Belt with tensioner and idlers. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Includes: belt/tensioner/idler/water pump.
+PART,Timing Chain,Engine,NOS,Roller chain driving the camshafts. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Pitch; Links.
+PART,Timing Chain Kit,Engine,KIT,"Chain with sprockets, guides and tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Includes: chain/sprockets/guides/tensioner."
+PART,Timing Chain Tensioner,Engine,NOS,Hydraulic or mechanical chain tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Timing Chain Guide,Engine,NOS,Plastic guide rail for the chain. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Position.
+PART,Timing Sprocket,Engine,NOS,Toothed wheel on cam or crank. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Teeth; Position.
+PART,Timing Belt Tensioner,Engine,NOS,Spring or hydraulic belt tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Idler Pulley,Engine,NOS,Fixed pulley guiding a belt. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Diameter; Type: smooth/grooved.
+PART,Timing Cover Gasket,Engine,NOS,Seal for the timing cover. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Turbocharger,Engine,NOS,Exhaust-driven compressor. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Engine type; Wastegate: yes/no.
+PART,Turbocharger Gasket Set,Engine,KIT,Gaskets and hardware for turbo fitting. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Intercooler,Engine,NOS,Air-to-air or air-to-liquid charge cooler. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,EGR Valve,Engine,NOS,Valve routing exhaust gas to the intake. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type: vacuum/electric.
+PART,Throttle Body,Engine,NOS,Air throttle assembly. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type: cable/electronic.
+PART,Intake Manifold,Engine,NOS,Air distribution manifold. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material: plastic/aluminium.
+PART,Intake Manifold Gasket,Engine,NOS,Seal for the intake manifold. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Engine Oil - Mineral,Lubricants & Fluids,LTR,Petroleum-based engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; API/ACEA specification; Pack size.
+PART,Engine Oil - Semi-Synthetic,Lubricants & Fluids,LTR,Blended petroleum and synthetic engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; Specification; Pack size.
+PART,Engine Oil - Fully Synthetic,Lubricants & Fluids,LTR,Fully synthetic engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; Specification; Pack size.
+PART,Engine Oil - Diesel Heavy Duty,Lubricants & Fluids,LTR,Heavy-duty diesel engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; API CK-4/CI-4; Pack size.
+PART,Engine Oil - Motorcycle 4T,Lubricants & Fluids,LTR,Four-stroke motorcycle engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; JASO grade; Pack size.
+PART,Two-Stroke Oil,Lubricants & Fluids,LTR,Two-stroke engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Type; Pack size.
+PART,Manual Transmission Oil,Lubricants & Fluids,LTR,Gear oil for manual gearboxes. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity grade; API GL rating; Pack size.
+PART,Automatic Transmission Fluid,Lubricants & Fluids,LTR,Fluid for automatic transmissions. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,CVT Fluid,Lubricants & Fluids,LTR,Fluid for continuously variable transmissions. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Dual Clutch Transmission Fluid,Lubricants & Fluids,LTR,Fluid for dual-clutch gearboxes. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Differential Oil,Lubricants & Fluids,LTR,Oil for differentials and axles. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity grade; API GL-5; Pack size.
+PART,Transfer Case Fluid,Lubricants & Fluids,LTR,Oil for transfer cases. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Power Steering Fluid,Lubricants & Fluids,LTR,Hydraulic fluid for power steering. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Type; Pack size.
+PART,Motorcycle Fork Oil,Lubricants & Fluids,LTR,Oil for telescopic forks. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity; Pack size.
+PART,Brake Fluid DOT 4,Lubricants & Fluids,LTR,Glycol-based brake and clutch fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 4; Pack size.
+PART,Brake Fluid DOT 5.1,Lubricants & Fluids,LTR,Glycol-based high-performance brake fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 5.1; Pack size.
+PART,Brake Fluid DOT 3,Lubricants & Fluids,LTR,Glycol-based brake fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 3; Pack size.
+PART,Coolant Concentrate,Lubricants & Fluids,LTR,Concentrated engine coolant to be diluted. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Chemistry: IAT/OAT/HOAT; Colour; Pack size.
+PART,Coolant Ready-Mix,Lubricants & Fluids,LTR,Ready-to-use 50:50 coolant. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Chemistry; Colour; Pack size.
+PART,Radiator Flush,Lubricants & Fluids,LTR,Chemical cleaner for the cooling circuit. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Pack size.
+PART,Radiator Stop Leak,Lubricants & Fluids,LTR,Sealant for small cooling leaks. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Pack size.
+PART,Windscreen Washer Fluid,Lubricants & Fluids,LTR,Screen-wash concentrate or ready fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Type: concentrate/ready; Pack size.
+PART,Diesel Exhaust Fluid,Lubricants & Fluids,LTR,Aqueous urea solution for SCR systems. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Concentration: 32.5%; Pack size.
+PART,Multipurpose Grease,Lubricants & Fluids,KG,General-purpose chassis and bearing grease. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: NLGI grade; Thickener; Pack size.
+PART,Wheel Bearing Grease,Lubricants & Fluids,KG,High-temperature wheel bearing grease. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: NLGI grade; Pack size.
+PART,CV Joint Grease,Lubricants & Fluids,KG,Molybdenum grease for CV joints. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Copper Anti-Seize Paste,Lubricants & Fluids,GM,Anti-seize for exhaust and brake hardware. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Silicone Grease,Lubricants & Fluids,GM,Silicone grease for rubber and plastic parts. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Brake Caliper Grease,Lubricants & Fluids,GM,High-temperature grease for caliper slides. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Chain Lubricant,Lubricants & Fluids,ML,Spray lubricant for drive chains. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Type: standard/O-ring; Pack size.
+PART,Penetrating Oil,Lubricants & Fluids,ML,Rust-penetrating lubricant spray. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Petrol System Cleaner,Lubricants & Fluids,ML,Additive cleaning petrol injectors and valves. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Diesel System Cleaner,Lubricants & Fluids,ML,Additive cleaning diesel injectors. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Diesel Anti-Gel Additive,Lubricants & Fluids,ML,Additive improving cold flow. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Octane Booster,Lubricants & Fluids,ML,Additive raising octane rating. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Engine Oil Additive,Lubricants & Fluids,ML,Additive for engine oil. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Engine Flush,Lubricants & Fluids,ML,Cleaner run before an oil change. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Oil Filter - Spin-On,Filters,NOS,Spin-on engine oil filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Thread; Height; Diameter; Bypass valve.
+PART,Oil Filter - Cartridge,Filters,NOS,Replaceable oil filter element. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Housing fit; Diameter; Height.
+PART,Fuel Filter - Petrol,Filters,NOS,Inline or in-tank petrol filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection; Type: inline/in-tank.
+PART,Fuel Filter - Diesel,Filters,NOS,Diesel fuel filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection; Water separation: yes/no.
+PART,Fuel Water Separator,Filters,NOS,Separates water from diesel. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type; Connection.
+PART,Air Filter - Engine Intake,Filters,NOS,Engine intake air filter element. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Shape: panel/round; Dimensions.
+PART,Air Filter - Heavy Duty,Filters,NOS,Large intake filter for commercial vehicles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions.
+PART,Breather Filter,Filters,NOS,Filter on the crankcase breather. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type.
+PART,Cabin Air Filter - Particulate,Filters,NOS,Passenger compartment air filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions; Type: particulate.
+PART,Cabin Air Filter - Activated Carbon,Filters,NOS,Cabin filter with activated carbon layer. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions.
+PART,Transmission Oil Filter,Filters,NOS,Filter for automatic transmission fluid. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Vehicle fit.
+PART,Hydraulic Oil Filter,Filters,NOS,Filter for hydraulic circuits. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection.
+PART,Fuel Pump Strainer,Filters,NOS,Strainer on the fuel pump inlet. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type.
+PART,Diesel Particulate Filter,Filters,NOS,Particulate filter in the exhaust. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Engine type.
+PART,Motorcycle Air Filter,Filters,NOS,Air filter for motorcycles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type: foam/paper; Dimensions.
+PART,Motorcycle Oil Filter,Filters,NOS,Oil filter for motorcycles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type: spin-on/cartridge.
+PART,Brake Pad Set - Front,Brakes,SET,Friction pads for front disc brakes. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle: front; Material: ceramic/semi-metallic/organic; Wear sensor: yes/no.
+PART,Brake Pad Set - Rear,Brakes,SET,Friction pads for rear disc brakes. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle: rear; Material; Wear sensor.
+PART,Brake Disc - Front,Brakes,PAIR,Front brake disc. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Type: vented/solid; Pcd.
+PART,Brake Disc - Rear,Brakes,PAIR,Rear brake disc. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Type: vented/solid.
+PART,Brake Caliper,Brakes,NOS,"Hydraulic disc brake caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Position: front/rear, left/right; Piston count."
+PART,Brake Caliper Repair Kit,Brakes,KIT,Seals and boots for a caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Piston diameter.
+PART,Brake Caliper Guide Pin Kit,Brakes,KIT,Slide pins and boots for a caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Brake Pad Hardware Kit,Brakes,KIT,Clips and shims for pads. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle.
+PART,Brake Pad Wear Sensor,Brakes,NOS,Electrical wear sensor for pads. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle.
+PART,Brake Shoe Set,Brakes,SET,Shoes for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Width; Lined/relined.
+PART,Brake Drum,Brakes,NOS,Drum for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Width.
+PART,Wheel Cylinder,Brakes,NOS,Hydraulic cylinder in drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Bore.
+PART,Wheel Cylinder Repair Kit,Brakes,KIT,Seals for a wheel cylinder. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Bore.
+PART,Drum Brake Spring Kit,Brakes,KIT,Springs and retainers for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Brake Adjuster,Brakes,NOS,Adjuster for brake clearance. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type: manual/automatic.
+PART,Brake Master Cylinder,Brakes,NOS,Master cylinder of the hydraulic circuit. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Bore; Circuits.
+PART,Brake Booster,Brakes,NOS,Vacuum brake servo. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Diameter.
+PART,Brake Hose - Flexible,Brakes,NOS,Flexible hose between body and caliper. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; End fittings.
+PART,Brake Pipe,Brakes,NOS,Rigid steel brake line. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; Diameter.
+PART,Handbrake Cable,Brakes,NOS,Cable for the parking brake. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; Position.
+PART,Brake Light Switch,Brakes,NOS,Switch signalling brake application. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Proportioning Valve,Brakes,NOS,Valve proportioning rear brake pressure. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Wheel Speed Sensor,Brakes,NOS,ABS wheel speed sensor. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Position.
+PART,ABS Hydraulic Modulator,Brakes,NOS,Hydraulic unit of the ABS. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Vehicle fit.
+PART,ABS Control Module,Brakes,NOS,Electronic module controlling ABS. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Vehicle fit.
+PART,Clutch Kit,Clutch & Transmission,KIT,"Clutch disc, pressure plate and release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter; Splines; Includes."
+PART,Clutch Disc,Clutch & Transmission,NOS,Driven clutch disc. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter; Splines.
+PART,Clutch Pressure Plate,Clutch & Transmission,NOS,Pressure plate assembly. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter.
+PART,Clutch Release Bearing,Clutch & Transmission,NOS,Release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type: mechanical/hydraulic.
+PART,Clutch Master Cylinder,Clutch & Transmission,NOS,Hydraulic clutch master cylinder. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Bore.
+PART,Clutch Slave Cylinder,Clutch & Transmission,NOS,Hydraulic clutch slave cylinder. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Bore.
+PART,Clutch Cable,Clutch & Transmission,NOS,Clutch actuation cable. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length.
+PART,Clutch Fork,Clutch & Transmission,NOS,Fork operating the release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Vehicle fit.
+PART,Gearbox - Manual,Clutch & Transmission,NOS,Complete manual gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Speeds; Drive.
+PART,Gearbox - Automatic,Clutch & Transmission,NOS,Complete automatic gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type: torque converter/CVT/DCT.
+PART,Gearbox Mounting,Clutch & Transmission,NOS,Support for the gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position.
+PART,Gear Shift Cable,Clutch & Transmission,NOS,Shift cable. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length.
+PART,Gear Set,Clutch & Transmission,NOS,Gear and synchroniser parts. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Gear position.
+PART,Torque Converter,Clutch & Transmission,NOS,Fluid coupling for automatic gearboxes. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Vehicle fit.
+PART,Differential Assembly,Clutch & Transmission,NOS,Differential unit. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Ratio.
+PART,Crown Wheel and Pinion,Clutch & Transmission,SET,Final drive gear set. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Ratio.
+PART,Differential Bearing,Clutch & Transmission,NOS,Bearing in the differential. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type.
+PART,Drive Shaft Assembly,Clutch & Transmission,NOS,"Driveshaft with joints. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: front/rear, left/right."
+PART,Propeller Shaft,Clutch & Transmission,NOS,Rear-drive propeller shaft. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length; Joints.
+PART,CV Joint,Clutch & Transmission,NOS,Outer or inner CV joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: inner/outer.
+PART,CV Boot Kit,Clutch & Transmission,KIT,"Boot, clamps and grease for CV joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: inner/outer."
+PART,Universal Joint,Clutch & Transmission,NOS,Cardan cross joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Size.
+PART,Centre Support Bearing,Clutch & Transmission,NOS,Centre bearing of the propeller shaft. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Size.
+PART,Shock Absorber - Front,Suspension & Steering,NOS,Front hydraulic or gas damper. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Type: oil/gas; Position.
+PART,Shock Absorber - Rear,Suspension & Steering,NOS,Rear hydraulic or gas damper. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Type: oil/gas.
+PART,Strut Assembly,Suspension & Steering,NOS,Strut with spring and mount. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Strut Mount,Suspension & Steering,NOS,Upper strut mounting. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Strut Bearing,Suspension & Steering,NOS,Bearing in the strut mount. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Size.
+PART,Coil Spring,Suspension & Steering,NOS,Coil suspension spring. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position; Rate; Free length.
+PART,Leaf Spring,Suspension & Steering,NOS,Leaf spring or leaf. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Leaves; Length.
+PART,Spring Bump Stop,Suspension & Steering,KIT,Bump stop and dust boot. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Control Arm,Suspension & Steering,NOS,"Suspension control arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position: lower/upper, left/right."
+PART,Ball Joint,Suspension & Steering,NOS,Ball joint of the control arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Suspension Bush,Suspension & Steering,NOS,Rubber or polyurethane bush. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position; Size.
+PART,Stabiliser Bar,Suspension & Steering,NOS,Anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Stabiliser Link,Suspension & Steering,NOS,Link for the anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Stabiliser Bush,Suspension & Steering,NOS,Bush for the anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Size.
+PART,Trailing Arm,Suspension & Steering,NOS,Rear suspension arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Air Spring,Suspension & Steering,NOS,Air suspension spring. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Steering Rack,Suspension & Steering,NOS,Steering rack assembly. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type: manual/hydraulic/electric.
+PART,Steering Rack Boot,Suspension & Steering,NOS,Boot for the steering rack. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Steering Wheel,Suspension & Steering,NOS,Steering wheel. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Diameter; Airbag: yes/no.
+PART,Steering Column,Suspension & Steering,NOS,Steering column. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Steering Gear Box,Suspension & Steering,NOS,Recirculating-ball steering box. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type.
+PART,Tie Rod End,Suspension & Steering,NOS,Outer steering joint. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Inner Tie Rod,Suspension & Steering,NOS,Inner steering joint. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Power Steering Pump,Suspension & Steering,NOS,Hydraulic power steering pump. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type.
+PART,Power Steering Hose,Suspension & Steering,NOS,Power steering hose. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type: pressure/return.
+PART,Steering Idler Arm,Suspension & Steering,NOS,Steering linkage arm. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Drag Link,Suspension & Steering,NOS,Steering linkage rod. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Length.
+PART,King Pin Kit,Suspension & Steering,KIT,Kingpin and bush set. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Wheel Bearing - Front,Suspension & Steering,NOS,Front wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Type: ball/tapered; Size.
+PART,Wheel Bearing - Rear,Suspension & Steering,NOS,Rear wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Type; Size.
+PART,Wheel Hub Assembly,Suspension & Steering,NOS,Hub with integrated bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Position; ABS ring.
+PART,Wheel Stud,Suspension & Steering,NOS,Stud or bolt holding the wheel. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Thread; Length.
+PART,Wheel Nut,Suspension & Steering,NOS,Nut holding the wheel. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Thread; Seat type.
+PART,Wheel Bearing Seal,Suspension & Steering,NOS,Seal for the wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Size.
+PART,Radiator,Cooling System,NOS,Engine coolant radiator. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Core size; Material: aluminium/copper; Transmission cooler: yes/no.
+PART,Radiator Cap,Cooling System,NOS,Pressure cap of the cooling system. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Pressure rating.
+PART,Radiator Hose - Upper,Cooling System,NOS,Upper radiator hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Radiator Hose - Lower,Cooling System,NOS,Lower radiator hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Heater Hose,Cooling System,NOS,Heater circuit hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Coolant Expansion Tank,Cooling System,NOS,Coolant reservoir. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Cap: yes/no.
+PART,Water Pump,Cooling System,NOS,Coolant circulation pump. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Drive: belt/chain/electric.
+PART,Thermostat,Cooling System,NOS,Thermostat regulating coolant temperature. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Opening temperature.
+PART,Thermostat Housing,Cooling System,NOS,Housing of the thermostat. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Material.
+PART,Radiator Fan,Cooling System,NOS,Radiator cooling fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Diameter; Type: electric/belt.
+PART,Radiator Fan Motor,Cooling System,NOS,Motor of the radiator fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Voltage.
+PART,Fan Clutch,Cooling System,NOS,Clutch of a belt-driven fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Radiator Fan Shroud,Cooling System,NOS,Shroud around the fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Vehicle fit.
+PART,Engine Oil Cooler,Cooling System,NOS,Oil-to-coolant cooler. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Heater Core,Cooling System,NOS,Cabin heater core. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Size.
+PART,Coolant Temperature Sensor,Cooling System,NOS,Sensor for coolant temperature. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Fuel Pump - Electric,Fuel System,NOS,Electric fuel pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type; Pressure.
+PART,Fuel Pump Module,Fuel System,NOS,Pump with sender and housing. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Vehicle fit.
+PART,Fuel Pump - Mechanical,Fuel System,NOS,Camshaft-driven fuel pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Diesel Injection Pump,Fuel System,NOS,Diesel injection pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: inline/rotary.
+PART,High Pressure Fuel Pump,Fuel System,NOS,High-pressure pump for direct injection. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Fuel Injector - Petrol,Fuel System,NOS,Petrol fuel injector. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: port/direct.
+PART,Fuel Injector - Diesel,Fuel System,NOS,Diesel fuel injector. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Injector Seal Kit,Fuel System,KIT,Seals for injectors. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Engine type.
+PART,Fuel Rail,Fuel System,NOS,Fuel distribution rail. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Engine type.
+PART,Fuel Pressure Regulator,Fuel System,NOS,Regulates fuel pressure. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Fuel Tank,Fuel System,NOS,Fuel tank. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Capacity; Material: steel/plastic.
+PART,Fuel Tank Cap,Fuel System,NOS,Fuel filler cap. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: locking/non-locking.
+PART,Fuel Hose,Fuel System,NOS,Fuel hose. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Length; Diameter.
+PART,Carburettor,Fuel System,NOS,Carburettor. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Throat size; Vehicle fit.
+PART,Carburettor Repair Kit,Fuel System,KIT,"Jets, gaskets and needles. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Vehicle fit."
+PART,Fuel Level Sender,Fuel System,NOS,Fuel level sensor. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Car Battery - Lead Acid,Electrical,NOS,12 V lead-acid battery for cars. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; CCA; Terminal layout; Type: flooded/SMF.
+PART,Heavy Duty Battery,Electrical,NOS,Lead-acid battery for commercial vehicles. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Voltage.
+PART,Motorcycle Battery,Electrical,NOS,Battery for motorcycles. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Type: dry/gel/lithium.
+PART,AGM Start-Stop Battery,Electrical,NOS,Battery for start-stop systems. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Technology: AGM/EFB.
+PART,Battery Terminal,Electrical,NOS,Terminal clamp. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Polarity.
+PART,Battery Cable,Electrical,NOS,Battery cable. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Length; Gauge.
+PART,Alternator,Electrical,NOS,Charging alternator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Output A; Pulley type.
+PART,Alternator Regulator,Electrical,NOS,Alternator voltage regulator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Alternator Rectifier,Electrical,NOS,Diode bridge of the alternator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Alternator Pulley,Electrical,NOS,Alternator drive pulley. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Type.
+PART,Starter Motor,Electrical,NOS,Engine starter motor. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Power.
+PART,Starter Solenoid,Electrical,NOS,Solenoid of the starter. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Starter Drive,Electrical,NOS,Pinion drive of the starter. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Teeth.
+PART,Ignition Coil,Electrical,NOS,Ignition coil. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Type: single/pack.
+PART,Spark Plug - Iridium,Electrical,NOS,Iridium electrode spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Spark Plug - Platinum,Electrical,NOS,Platinum electrode spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Spark Plug - Standard,Electrical,NOS,Standard spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Glow Plug,Electrical,NOS,Diesel pre-heating plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Length.
+PART,HT Lead Set,Electrical,SET,High-tension lead set. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Cylinders.
+PART,Distributor Cap,Electrical,NOS,Distributor cap. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Cylinders.
+PART,Ignition Switch,Electrical,NOS,Ignition switch. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Type.
+PART,Magneto Coil,Electrical,NOS,Magneto or stator coil. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Vehicle fit.
+PART,Fuse - Blade,Electrical,PKT,"Blade-type fuse. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Rating A; Type."
+PART,Fuse - Cartridge,Electrical,PKT,"Cartridge fuse. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Rating A."
+PART,Relay - Automotive,Electrical,NOS,"Automotive relay. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Contacts."
+PART,Flasher Relay,Electrical,NOS,"Indicator flasher. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Voltage."
+PART,Wiring Harness,Electrical,NOS,"Vehicle wiring harness. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Section."
+PART,Fuse Box,Electrical,NOS,"Fuse and relay box. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Vehicle fit."
+PART,Combination Switch,Electrical,NOS,"Steering column switch. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Functions."
+PART,Headlamp Switch,Electrical,NOS,"Headlamp switch. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Type."
+PART,Hazard Switch,Electrical,NOS,"Hazard switch. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Type."
+PART,Power Window Switch,Electrical,NOS,"Window switch. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Position."
+PART,Reverse Lamp Switch,Electrical,NOS,"Reverse light switch. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Type."
+PART,Horn,Electrical,NOS,"Electric horn. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Tone."
+PART,Horn Relay,Electrical,NOS,"Relay for the horn. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Voltage."
+PART,Power Window Motor,Electrical,NOS,"Window motor. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Position."
+PART,Window Regulator,Electrical,NOS,"Window regulator. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Position; Type."
+PART,Central Locking Actuator,Electrical,NOS,"Central locking actuator. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Position."
+PART,Wiper Motor,Electrical,NOS,"Windscreen wiper motor. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Position: front/rear."
+PART,Blower Motor,Electrical,NOS,"Cabin blower motor. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Voltage."
+PART,Blower Resistor,Electrical,NOS,"Blower speed control resistor. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Vehicle fit."
+PART,Crankshaft Position Sensor,Sensors & Control Modules,NOS,Crankshaft position sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type: Hall/inductive.
+PART,Camshaft Position Sensor,Sensors & Control Modules,NOS,Camshaft position sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Oxygen Sensor,Sensors & Control Modules,NOS,Exhaust oxygen sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Wires; Position: pre/post cat.
+PART,NOx Sensor,Sensors & Control Modules,NOS,Exhaust NOx sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Position.
+PART,MAP Sensor,Sensors & Control Modules,NOS,Manifold pressure sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,MAF Sensor,Sensors & Control Modules,NOS,Mass air flow sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Throttle Position Sensor,Sensors & Control Modules,NOS,Throttle position sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Knock Sensor,Sensors & Control Modules,NOS,Knock sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Thread.
+PART,Intake Air Temperature Sensor,Sensors & Control Modules,NOS,Intake air temperature sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Oil Pressure Switch,Sensors & Control Modules,NOS,Oil pressure sensor or switch. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Thread.
+PART,Fuel Rail Pressure Sensor,Sensors & Control Modules,NOS,Fuel rail pressure sensor. Engine Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Parking Sensor,Sensors & Control Modules,NOS,Ultrasonic parking sensor. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Colour; Position.
+PART,Tyre Pressure Monitoring Sensor,Sensors & Control Modules,NOS,Tyre pressure sensor. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Frequency.
+PART,Steering Angle Sensor,Sensors & Control Modules,NOS,Steering angle sensor. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Rain Sensor,Sensors & Control Modules,NOS,Rain sensor. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Airbag Control Module,Sensors & Control Modules,NOS,Airbag control unit. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Airbag Clock Spring,Sensors & Control Modules,NOS,Steering airbag contact. Chassis & Body Sensors item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Engine Control Module,Sensors & Control Modules,NOS,Engine control unit. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit; Programmed: yes/no.
+PART,Body Control Module,Sensors & Control Modules,NOS,Body control unit. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Transmission Control Module,Sensors & Control Modules,NOS,Transmission control unit. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Immobiliser Module,Sensors & Control Modules,NOS,Immobiliser unit. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Instrument Cluster,Sensors & Control Modules,NOS,Instrument cluster. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Vehicle fit.
+PART,Speedometer,Sensors & Control Modules,NOS,Speed indicator. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type: cable/electronic.
+PART,Tachometer,Sensors & Control Modules,NOS,Engine speed indicator. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Type.
+PART,Speedometer Cable,Sensors & Control Modules,NOS,Speedometer drive cable. Control Modules item in the Sensors & Control Modules category (Electronics system). Variants are distinguished by: Length.
+PART,Headlamp Assembly,Lighting & Visibility,NOS,Complete headlamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position: left/right; Technology: halogen/LED.
+PART,Tail Lamp Assembly,Lighting & Visibility,NOS,Complete tail lamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position; Technology.
+PART,Fog Lamp Assembly,Lighting & Visibility,NOS,Fog lamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position.
+PART,Indicator Lamp Assembly,Lighting & Visibility,NOS,Indicator lamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position.
+PART,Side Marker Lamp,Lighting & Visibility,NOS,Side marker. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position.
+PART,Number Plate Lamp,Lighting & Visibility,NOS,Number plate lamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type.
+PART,Interior Lamp,Lighting & Visibility,NOS,Interior lamp. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type.
+PART,Halogen Bulb,Lighting & Visibility,NOS,Halogen headlamp bulb. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type: H1/H4/H7/H11; Wattage.
+PART,LED Bulb,Lighting & Visibility,NOS,LED lamp for vehicles. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type; Wattage.
+PART,HID Xenon Bulb,Lighting & Visibility,NOS,Discharge headlamp bulb. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type: D1S/D2S/D3S.
+PART,Signal Bulb,Lighting & Visibility,NOS,Small signal bulb. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Type: P21W/PY21W/W5W; Wattage.
+PART,Headlamp Ballast,Lighting & Visibility,NOS,Ballast of the HID system. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Voltage.
+PART,Headlamp Levelling Motor,Lighting & Visibility,NOS,Headlamp levelling actuator. Lamps item in the Lighting & Visibility category (Lighting system). Variants are distinguished by: Position.
+PART,Wiper Blade - Front,Lighting & Visibility,PAIR,"Front wiper blade. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Length; Type: conventional/flat."
+PART,Wiper Blade - Rear,Lighting & Visibility,NOS,"Rear wiper blade. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Length."
+PART,Wiper Arm,Lighting & Visibility,NOS,"Wiper arm. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Position."
+PART,Wiper Linkage,Lighting & Visibility,NOS,"Wiper linkage. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Vehicle fit."
+PART,Washer Pump,Lighting & Visibility,NOS,"Washer pump. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Voltage."
+PART,Washer Reservoir,Lighting & Visibility,NOS,"Washer fluid tank. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Capacity."
+PART,Washer Nozzle,Lighting & Visibility,NOS,"Windscreen washer spray nozzle. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Type: fixed/heated."
+PART,Exterior Mirror Assembly,Lighting & Visibility,NOS,"Complete exterior mirror. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Position; Electric: yes/no."
+PART,Mirror Glass,Lighting & Visibility,NOS,"Mirror glass only. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Position."
+PART,Interior Mirror,Lighting & Visibility,NOS,"Interior mirror. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Type."
+PART,Mirror Cover,Lighting & Visibility,NOS,"Mirror cover. Wipers, Washers & Mirrors item in the Lighting & Visibility category (Visibility system). Variants are distinguished by: Position."
+PART,AC Compressor,Air Conditioning,NOS,Refrigerant compressor. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type: fixed/variable; Clutch; Vehicle fit.
+PART,AC Compressor Clutch,Air Conditioning,NOS,Electromagnetic clutch. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Vehicle fit.
+PART,AC Condenser,Air Conditioning,NOS,A/C condenser. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Core size.
+PART,AC Evaporator,Air Conditioning,NOS,A/C evaporator. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Vehicle fit.
+PART,AC Expansion Valve,Air Conditioning,NOS,Thermal expansion valve. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type.
+PART,AC Receiver Drier,Air Conditioning,NOS,Drier or accumulator. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type.
+PART,AC Hose,Air Conditioning,NOS,Refrigerant hose. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Position.
+PART,AC Pressure Switch,Air Conditioning,NOS,A/C pressure switch. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type.
+PART,AC Control Panel,Air Conditioning,NOS,A/C control. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Vehicle fit.
+PART,AC O-Ring Kit,Air Conditioning,KIT,Seals for A/C joints. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type.
+PART,Automotive AC Unit,Air Conditioning,NOS,Complete A/C system for a vehicle. A/C Components item in the Air Conditioning category (Cabin Climate system). Variants are distinguished by: Type.
+PART,Refrigerant R134a,Lubricants & Fluids,KG,Refrigerant R134a. A/C Refrigerants & Oils item in the Lubricants & Fluids category (Cabin Climate system). Variants are distinguished by: Pack size.
+PART,Refrigerant R1234yf,Lubricants & Fluids,KG,Refrigerant R1234yf. A/C Refrigerants & Oils item in the Lubricants & Fluids category (Cabin Climate system). Variants are distinguished by: Pack size.
+PART,AC Compressor Oil,Lubricants & Fluids,ML,A/C compressor lubricant. A/C Refrigerants & Oils item in the Lubricants & Fluids category (Cabin Climate system). Variants are distinguished by: Type: PAG/POE; Pack size.
+PART,AC Leak Detection Dye,Lubricants & Fluids,ML,UV dye for leak detection. A/C Refrigerants & Oils item in the Lubricants & Fluids category (Cabin Climate system). Variants are distinguished by: Pack size.
+PART,Car Tyre,Tyres & Wheels,NOS,New pneumatic tyre for motor cars. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size; Load index; Speed rating; Tubeless.
+PART,Truck and Bus Tyre,Tyres & Wheels,NOS,New pneumatic tyre for buses or lorries. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size; Ply rating.
+PART,Motorcycle Tyre,Tyres & Wheels,NOS,New pneumatic tyre for motorcycles. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size; Position.
+PART,Agricultural Tyre,Tyres & Wheels,NOS,Tyre for agricultural vehicles. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size.
+PART,Retreaded Tyre,Tyres & Wheels,NOS,Retreaded pneumatic tyre. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size.
+PART,Inner Tube - Car,Tyres & Wheels,NOS,Inner tube for cars. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size; Valve.
+PART,Inner Tube - Motorcycle,Tyres & Wheels,NOS,Inner tube for motorcycles. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size.
+PART,Tyre Flap,Tyres & Wheels,NOS,Flap for tube-type tyres. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Size.
+PART,Tyre Valve,Tyres & Wheels,NOS,Tyre valve. Tyres & Tubes item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Type: snap-in/clamp-in.
+PART,Alloy Wheel,Tyres & Wheels,NOS,Alloy road wheel. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Diameter; Width; PCD; Offset.
+PART,Steel Wheel,Tyres & Wheels,NOS,Steel road wheel. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Diameter; Width; PCD.
+PART,Wheel Cap,Tyres & Wheels,NOS,Wheel centre cap. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Diameter.
+PART,Wheel Cover,Tyres & Wheels,NOS,Wheel cover. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Diameter.
+PART,Wheel Balancing Weight - Clip-On,Tyres & Wheels,PKT,Clip-on balancing weight. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Mass g.
+PART,Wheel Balancing Weight - Adhesive,Tyres & Wheels,ROLL,Adhesive balancing weight. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Mass g.
+PART,Tyre Sealant,Tyres & Wheels,ML,Puncture sealing liquid. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Pack size.
+PART,Tyre Repair Plug,Tyres & Wheels,PKT,Rubber repair plug. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Type.
+PART,Tyre Bead Lubricant,Tyres & Wheels,KG,Fitting paste. Wheels & Balancing item in the Tyres & Wheels category (Wheels system). Variants are distinguished by: Pack size.
+PART,Front Bumper,Body & Exterior,NOS,Front bumper. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position; Painted: yes/no.
+PART,Rear Bumper,Body & Exterior,NOS,Rear bumper. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Painted.
+PART,Bumper Reinforcement,Body & Exterior,NOS,Bumper beam. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Bumper Grille,Body & Exterior,NOS,Bumper grille. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Radiator Grille,Body & Exterior,NOS,Front grille. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Vehicle fit.
+PART,Front Fender,Body & Exterior,NOS,Front fender. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Bonnet,Body & Exterior,NOS,Bonnet. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Vehicle fit.
+PART,Boot Lid,Body & Exterior,NOS,Boot lid. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Vehicle fit.
+PART,Door Shell,Body & Exterior,NOS,Door shell. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Windscreen,Body & Exterior,NOS,Laminated windscreen. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Features: tint/rain sensor.
+PART,Rear Windscreen,Body & Exterior,NOS,Rear window glass. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Heated: yes/no.
+PART,Door Glass,Body & Exterior,NOS,Door window glass. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Bonnet Gas Strut,Body & Exterior,NOS,Gas strut. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Vehicle fit.
+PART,Mud Flap,Body & Exterior,NOS,Mud flap. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Wheel Arch Liner,Body & Exterior,NOS,Wheel arch liner. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Underbody Shield,Body & Exterior,NOS,Underbody shield. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Vehicle fit.
+PART,Spoiler,Body & Exterior,NOS,Spoiler. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Type.
+PART,Vehicle Emblem,Body & Exterior,NOS,Emblem. Panels & Glass item in the Body & Exterior category (Body system). Variants are distinguished by: Type.
+PART,Door Handle - Exterior,Body & Exterior,NOS,Exterior handle. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Door Handle - Interior,Body & Exterior,NOS,Interior handle. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Door Hinge,Body & Exterior,NOS,Hinge. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Door Lock Assembly,Body & Exterior,NOS,Door lock. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Door Lock Cylinder,Body & Exterior,NOS,Lock cylinder. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Door Check Strap,Body & Exterior,NOS,Door stay. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Bonnet Latch,Body & Exterior,NOS,Bonnet latch. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Type.
+PART,Door Weatherstrip,Body & Exterior,NOS,Door sealing rubber. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Window Channel Seal,Body & Exterior,NOS,Window channel rubber. Door Hardware & Seals item in the Body & Exterior category (Body system). Variants are distinguished by: Position.
+PART,Seat Belt,Interior & Safety,NOS,Seat belt. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Position.
+PART,Seat Belt Buckle,Interior & Safety,NOS,Seat belt buckle. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Position.
+PART,Seat Assembly,Interior & Safety,NOS,Vehicle seat. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Position.
+PART,Seat Cover Set,Interior & Safety,SET,Seat covers. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Material.
+PART,Floor Mat Set - Rubber,Interior & Safety,SET,Rubber floor mats. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Vehicle fit.
+PART,Floor Mat Set - Carpet,Interior & Safety,SET,Carpet floor mats. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Vehicle fit.
+PART,Airbag Module,Interior & Safety,NOS,Airbag with inflator. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Position.
+PART,Sun Visor,Interior & Safety,NOS,Sun visor. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Position.
+PART,Dashboard Panel,Interior & Safety,NOS,Dashboard. Seats & Restraints item in the Interior & Safety category (Interior system). Variants are distinguished by: Vehicle fit.
+PART,Exhaust Manifold,Exhaust & Emission,NOS,Exhaust manifold. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Engine type.
+PART,Exhaust Pipe,Exhaust & Emission,NOS,Exhaust pipe. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Section.
+PART,Muffler,Exhaust & Emission,NOS,Silencer. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Type.
+PART,Resonator,Exhaust & Emission,NOS,Resonator. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Type.
+PART,Exhaust Flex Pipe,Exhaust & Emission,NOS,Flex joint. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Length.
+PART,Exhaust Gasket,Exhaust & Emission,NOS,Exhaust gasket. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Type.
+PART,Exhaust Hanger,Exhaust & Emission,NOS,Hanger. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Type.
+PART,Catalytic Converter,Exhaust & Emission,NOS,Catalytic converter. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Type.
+PART,SCR Dosing Pump,Exhaust & Emission,NOS,Dosing pump for SCR. Exhaust System item in the Exhaust & Emission category (Exhaust system). Variants are distinguished by: Vehicle fit.
+PART,Serpentine Belt,"Belts, Bearings & Seals",NOS,"V-ribbed accessory belt. Belts item in the Belts, Bearings & Seals category (Drive system). Variants are distinguished by: Ribs; Length."
+PART,V-Belt,"Belts, Bearings & Seals",NOS,"V belt. Belts item in the Belts, Bearings & Seals category (Drive system). Variants are distinguished by: Width; Length."
+PART,Power Steering Belt,"Belts, Bearings & Seals",NOS,"Belt for power steering. Belts item in the Belts, Bearings & Seals category (Drive system). Variants are distinguished by: Length."
+PART,AC Belt,"Belts, Bearings & Seals",NOS,"Belt for A/C compressor. Belts item in the Belts, Bearings & Seals category (Drive system). Variants are distinguished by: Length."
+PART,O-Ring Assortment,"Belts, Bearings & Seals",KIT,"O-ring assortment. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Oil Seal Assortment,"Belts, Bearings & Seals",KIT,"Oil seal assortment. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Gearbox Output Seal,"Belts, Bearings & Seals",NOS,"Gearbox seal. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Axle Seal,"Belts, Bearings & Seals",NOS,"Axle seal. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,RTV Gasket Maker,"Belts, Bearings & Seals",ML,"RTV sealant. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Pack size."
+PART,Thread Locker,"Belts, Bearings & Seals",ML,"Thread locking adhesive. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Strength."
+PART,Copper Sealing Washer,"Belts, Bearings & Seals",PKT,"Sealing washer. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Banjo Bolt,"Belts, Bearings & Seals",NOS,"Banjo bolt. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Thread."
+PART,Hose Clamp,"Belts, Bearings & Seals",PKT,"Hose clamp. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Cotter Pin,"Belts, Bearings & Seals",PKT,"Cotter pin. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Circlip Assortment,"Belts, Bearings & Seals",KIT,"Circlip assortment. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Rivet,"Belts, Bearings & Seals",PKT,"Rivet. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Self-Tapping Screw,"Belts, Bearings & Seals",PKT,"Screw. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size."
+PART,Nut and Bolt Assortment,"Belts, Bearings & Seals",KIT,"Fastener assortment. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Washer Assortment,"Belts, Bearings & Seals",KIT,"Washer assortment. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Trim Clip Assortment,"Belts, Bearings & Seals",KIT,"Plastic clips. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Size range."
+PART,Cable Tie,"Belts, Bearings & Seals",PKT,"Cable tie. Gaskets, Seals & Hardware item in the Belts, Bearings & Seals category (Sealing system). Variants are distinguished by: Length."
+PART,Car Shampoo,Detailing & Cleaning,ML,Car wash shampoo. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Car Polish,Detailing & Cleaning,ML,Polish for coachwork. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Type: polish/wax.
+PART,Rubbing Compound,Detailing & Cleaning,ML,Abrasive paint compound. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Grade.
+PART,Glass Cleaner,Detailing & Cleaning,ML,Glass cleaner. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Tyre Dressing,Detailing & Cleaning,ML,Tyre dressing. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Dashboard Polish,Detailing & Cleaning,ML,Interior dressing. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Upholstery Cleaner,Detailing & Cleaning,ML,Upholstery cleaner. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Leather Conditioner,Detailing & Cleaning,ML,Leather conditioner. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Engine Degreaser,Detailing & Cleaning,ML,Degreaser. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Brake Cleaner,Detailing & Cleaning,ML,Solvent for brake parts. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Throttle Body Cleaner,Detailing & Cleaning,ML,Throttle cleaner. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Contact Cleaner,Detailing & Cleaning,ML,Electrical contact cleaner. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Anti-Rust Coating,Detailing & Cleaning,ML,Rust proofing. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Underbody Coating,Detailing & Cleaning,ML,Underbody coating. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Pack size.
+PART,Microfibre Cloth,Detailing & Cleaning,NOS,Cleaning cloth. Detailing Products item in the Detailing & Cleaning category (Cleaning system). Variants are distinguished by: Size.
+PART,Shop Towel,Detailing & Cleaning,PKT,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Wiping cloth. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Pack."
+PART,Masking Tape,Detailing & Cleaning,ROLL,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Masking tape. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Width."
+PART,Sandpaper,Detailing & Cleaning,PKT,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Abrasive paper. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Grit."
+PART,Polishing Pad,Detailing & Cleaning,NOS,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Buffing pad. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Diameter."
+PART,Paint Brush,Detailing & Cleaning,NOS,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Brush. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Type."
+PART,Nitrile Gloves,Detailing & Cleaning,BOX,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Gloves. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Size."
+PART,Body Filler,Detailing & Cleaning,KG,"Workshop consumable (inventory-tracked, billing treatment chosen by the garage). Body filler. Workshop Consumables item in the Detailing & Cleaning category (Workshop system). Variants are distinguished by: Pack size."
+PART,Automotive Primer,Paint & Body Materials,LTR,Primer. Paints item in the Paint & Body Materials category (Body Shop system). Variants are distinguished by: Type: 1K/2K; Pack size.
+PART,Base Coat,Paint & Body Materials,LTR,Base coat. Paints item in the Paint & Body Materials category (Body Shop system). Variants are distinguished by: Colour; Pack size.
+PART,Clear Coat,Paint & Body Materials,LTR,Clear coat. Paints item in the Paint & Body Materials category (Body Shop system). Variants are distinguished by: Type: 1K/2K; Pack size.
+PART,Paint Thinner,Paint & Body Materials,LTR,Thinner. Paints item in the Paint & Body Materials category (Body Shop system). Variants are distinguished by: Type.
+PART,Hardener,Paint & Body Materials,LTR,Paint hardener. Paints item in the Paint & Body Materials category (Body Shop system). Variants are distinguished by: Pack size.
+PART,Traction Battery Pack,Electric Vehicle Components,NOS,Specialist high-voltage component. High-voltage traction battery. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Chemistry; Capacity kWh; Voltage.
+PART,Battery Module,Electric Vehicle Components,NOS,Specialist high-voltage component. Battery module. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Chemistry; Voltage.
+PART,Battery Management System,Electric Vehicle Components,NOS,Specialist high-voltage component. Battery management unit. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Vehicle fit.
+PART,Traction Motor,Electric Vehicle Components,NOS,Specialist high-voltage component. EV drive motor. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Power kW; Type.
+PART,Motor Controller,Electric Vehicle Components,NOS,Specialist high-voltage component. Motor controller. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Voltage; Power.
+PART,DC-DC Converter,Electric Vehicle Components,NOS,Specialist high-voltage component. DC-DC converter. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Voltage.
+PART,On-Board Charger,Electric Vehicle Components,NOS,Specialist high-voltage component. On-board charger. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Power kW.
+PART,Charging Inlet,Electric Vehicle Components,NOS,Specialist high-voltage component. Charging port. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Type: AC/DC.
+PART,Charging Cable,Electric Vehicle Components,NOS,Specialist high-voltage component. Charging cable. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Type; Length.
+PART,High Voltage Cable,Electric Vehicle Components,NOS,Specialist high-voltage component. HV cable. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Length.
+PART,High Voltage Contactor,Electric Vehicle Components,NOS,Specialist high-voltage component. HV contactor. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Rating.
+PART,Battery Coolant Pump,Electric Vehicle Components,NOS,Specialist high-voltage component. Pump for battery cooling. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Voltage.
+PART,EV Coolant,Electric Vehicle Components,LTR,EV coolant. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Pack size.
+PART,EV Reduction Gear Oil,Electric Vehicle Components,LTR,Reduction gear oil. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Specification.
+PART,12V Auxiliary Battery,Electric Vehicle Components,NOS,Specialist high-voltage component. 12V battery. Traction System item in the Electric Vehicle Components category (EV system). Variants are distinguished by: Type.
+PART,Drive Chain,Two-Wheeler Parts,NOS,Motorcycle drive chain. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Pitch; Links; Type: O-ring.
+PART,Sprocket Set,Two-Wheeler Parts,SET,Front and rear sprockets. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Teeth.
+PART,Motorcycle Clutch Plate Set,Two-Wheeler Parts,SET,Clutch plates. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Plates.
+PART,Motorcycle Brake Shoe,Two-Wheeler Parts,SET,Motorcycle brake shoes. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Position.
+PART,Motorcycle Brake Pad Set,Two-Wheeler Parts,SET,Motorcycle disc pads. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Position.
+PART,Throttle Cable,Two-Wheeler Parts,NOS,Throttle cable. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Length.
+PART,Front Fork Assembly,Two-Wheeler Parts,NOS,Front fork. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Vehicle fit.
+PART,Fork Oil Seal,Two-Wheeler Parts,PAIR,Fork seal. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Size.
+PART,Rear Shock Absorber - Motorcycle,Two-Wheeler Parts,PAIR,Rear shock absorber. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Type.
+PART,Motorcycle Wheel Rim,Two-Wheeler Parts,NOS,Wheel rim. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Size.
+PART,Motorcycle Spoke Set,Two-Wheeler Parts,SET,Spokes. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Size.
+PART,Motorcycle Seat,Two-Wheeler Parts,NOS,Seat. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Vehicle fit.
+PART,Motorcycle Handlebar,Two-Wheeler Parts,NOS,Handlebar. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Vehicle fit.
+PART,Motorcycle Rectifier,Two-Wheeler Parts,NOS,Regulator rectifier. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Voltage.
+PART,CDI Unit,Two-Wheeler Parts,NOS,CDI unit. Motorcycle Components item in the Two-Wheeler Parts category (Two-Wheeler system). Variants are distinguished by: Vehicle fit.
+PART,Air Brake Chamber,Commercial Vehicle Parts,NOS,Air brake chamber. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Type.
+PART,Air Dryer,Commercial Vehicle Parts,NOS,Air dryer. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Vehicle fit.
+PART,Air Brake Compressor,Commercial Vehicle Parts,NOS,Air compressor. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Vehicle fit.
+PART,Brake Lining,Commercial Vehicle Parts,SET,Brake lining. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Width.
+PART,Spring Bush,Commercial Vehicle Parts,NOS,Spring bush. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Size.
+PART,Tow Hook,Commercial Vehicle Parts,NOS,Tow hook. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Vehicle fit.
+PART,Tow Bar,Commercial Vehicle Parts,NOS,Tow bar. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Vehicle fit.
+PART,Axle Shaft,Commercial Vehicle Parts,NOS,Axle shaft. Heavy Vehicle Components item in the Commercial Vehicle Parts category (Commercial system). Variants are distinguished by: Length.
+PART,Car Audio Head Unit,Accessories & Audio,NOS,"Vehicle audio or infotainment head unit. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Size: single/double DIN; Features."
+PART,Car Speaker,Accessories & Audio,NOS,"Vehicle loudspeaker. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Size; Power; Type: coaxial/component."
+PART,Car Antenna,Accessories & Audio,NOS,"Radio or signal antenna. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Type: mast/shark fin."
+PART,Dash Camera,Accessories & Audio,NOS,"Vehicle video recorder. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Channels: single/dual."
+PART,Fire Extinguisher - Vehicle,Accessories & Audio,NOS,"Portable fire extinguisher for vehicles. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Capacity; Type."
+PART,Hydraulic Jack,Accessories & Audio,NOS,"Hydraulic jack for lifting vehicles. Audio, Camera & Safety Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Capacity."
+PART,Roof Rack,Accessories & Audio,NOS,Roof-mounted carrier. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Material; Load rating.
+PART,Steering Wheel Cover,Accessories & Audio,NOS,Cover for steering wheel rim. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Size; Material.
+PART,Gear Knob,Accessories & Audio,NOS,Gear lever knob. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Thread; Material.
+PART,Pedal Assembly,Accessories & Audio,NOS,Control pedal. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Type: accelerator/brake/clutch.
+PART,Exhaust Heat Shield,Accessories & Audio,NOS,Heat shield for exhaust components. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Material.
+PART,Reflector,Accessories & Audio,NOS,Reflector fitted to the vehicle. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Type; Colour.
+PART,Vehicle Cover,Accessories & Audio,NOS,Protective cover for the vehicle. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Size; Material.
+PART,Sunshade,Accessories & Audio,NOS,Windscreen sunshade. Body & Utility Accessories item in the Accessories & Audio category (Accessories system). Variants are distinguished by: Size.
+SERVICE,Cabin Filter Replacement,Periodic Maintenance,JOB,Replace the cabin air filter. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Fuel Filter Replacement,Periodic Maintenance,JOB,Replace the fuel filter. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Spark Plug Replacement,Periodic Maintenance,JOB,Replace spark plugs. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Manual Transmission Oil Replacement,Periodic Maintenance,JOB,Drain and refill gearbox oil. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Automatic Transmission Fluid Replacement,Periodic Maintenance,JOB,Drain and refill ATF. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Automatic Transmission Fluid Flush,Periodic Maintenance,JOB,Machine flush of ATF. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,CVT Fluid Replacement,Periodic Maintenance,JOB,Replace CVT fluid. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Differential Oil Replacement,Periodic Maintenance,JOB,Replace differential oil. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Transfer Case Oil Replacement,Periodic Maintenance,JOB,Replace transfer case oil. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Power Steering Fluid Replacement,Periodic Maintenance,JOB,Replace power steering fluid. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Clutch Fluid Bleeding,Periodic Maintenance,JOB,Bleed the hydraulic clutch. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Battery Terminal Cleaning,Periodic Maintenance,JOB,Clean and protect battery terminals. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Wiper Blade Replacement,Periodic Maintenance,JOB,Replace wiper blades. Labour operation in Periodic Maintenance / Fluids & Filters; priced per job.
+SERVICE,Drive Belt Replacement,Engine Repair,JOB,Replace the accessory drive belt. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Timing Belt Replacement,Engine Repair,JOB,Replace the timing belt and tensioners. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Timing Chain Replacement,Engine Repair,JOB,Replace the timing chain set. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Valve Clearance Adjustment,Engine Repair,JOB,Adjust valve clearances. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Cylinder Head Gasket Replacement,Engine Repair,JOB,Replace the head gasket. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Cylinder Head Overhaul,Engine Repair,JOB,Remove and overhaul the head. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Top Overhaul,Engine Repair,JOB,Top-end overhaul. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Major Overhaul,Engine Repair,JOB,Full engine overhaul. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Assembly Replacement,Engine Repair,JOB,Remove and fit an engine assembly. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Piston Ring Replacement,Engine Repair,JOB,Replace piston rings. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Crankshaft Oil Seal Replacement,Engine Repair,JOB,Replace crankshaft seals. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Oil Pan Gasket Replacement,Engine Repair,JOB,Replace sump gasket. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Oil Leak Diagnosis and Repair,Engine Repair,JOB,Trace and repair oil leaks. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Mount Replacement,Engine Repair,JOB,Replace engine mounts. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Turbocharger Replacement,Engine Repair,JOB,Remove and fit a turbocharger. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Throttle Body Cleaning,Engine Repair,JOB,Clean the throttle body. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Injector Cleaning,Engine Repair,JOB,Clean injectors. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Injector Replacement,Engine Repair,JOB,Replace injectors. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Pump Replacement,Engine Repair,JOB,Replace the fuel pump. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Fuel Tank Cleaning,Engine Repair,JOB,Clean the fuel tank. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Carburettor Cleaning and Tuning,Engine Repair,JOB,Clean and tune a carburettor. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Tune-Up,Engine Repair,JOB,Engine tune-up. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Engine Decarbonisation,Engine Repair,JOB,Remove carbon deposits. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,EGR Valve Cleaning,Engine Repair,JOB,Clean the EGR valve. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Exhaust Muffler Repair,Engine Repair,JOB,Repair or weld the muffler. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Exhaust Muffler Replacement,Engine Repair,JOB,Replace the muffler. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Catalytic Converter Replacement,Engine Repair,JOB,Replace the catalytic converter. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Diesel Particulate Filter Cleaning,Engine Repair,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Clean the DPF. Labour operation in Engine Repair / Engine Mechanical; priced per job.
+SERVICE,Water Pump Replacement,Engine Repair,JOB,Replace the water pump. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Thermostat Replacement,Engine Repair,JOB,Replace the thermostat. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Replacement,Engine Repair,JOB,Replace the radiator. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Hose Replacement,Engine Repair,JOB,Replace radiator hoses. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Flushing,Engine Repair,JOB,Flush the cooling system. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Cooling System Pressure Test,Engine Repair,JOB,Pressure test the cooling system. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Cooling Fan Replacement,Engine Repair,JOB,Replace the cooling fan. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Radiator Repair,Engine Repair,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Repair a radiator. Labour operation in Engine Repair / Cooling System; priced per job.
+SERVICE,Brake Disc Replacement,Brakes,JOB,Replace brake discs. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Disc Resurfacing,Brakes,JOB,Machine brake discs. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Shoe Replacement,Brakes,JOB,Replace brake shoes. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Drum Turning,Brakes,JOB,Machine brake drums. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Caliper Overhaul,Brakes,JOB,Overhaul a caliper. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Caliper Replacement,Brakes,JOB,Replace a caliper. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Master Cylinder Replacement,Brakes,JOB,Replace the master cylinder. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Wheel Cylinder Replacement,Brakes,JOB,Replace wheel cylinders. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Hose Replacement,Brakes,JOB,Replace brake hoses. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Line Repair,Brakes,JOB,Repair brake lines. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Handbrake Adjustment,Brakes,JOB,Adjust the parking brake. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Handbrake Cable Replacement,Brakes,JOB,Replace the parking brake cable. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Brake Booster Replacement,Brakes,JOB,Replace the brake booster. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,ABS Sensor Replacement,Brakes,JOB,Replace an ABS sensor. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,ABS Diagnosis,Brakes,JOB,Diagnose ABS faults. Labour operation in Brakes / Brake Service & Repair; priced per job.
+SERVICE,Clutch Replacement,Clutch & Transmission,JOB,"Replace the clutch kit. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Clutch Master Cylinder Replacement,Clutch & Transmission,JOB,"Replace the clutch master cylinder. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Clutch Slave Cylinder Replacement,Clutch & Transmission,JOB,"Replace the slave cylinder. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Flywheel Resurfacing,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Machine the flywheel. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Manual Gearbox Overhaul,Clutch & Transmission,JOB,"Overhaul a manual gearbox. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Automatic Transmission Overhaul,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Overhaul an automatic transmission. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Gearbox Mount Replacement,Clutch & Transmission,JOB,"Replace gearbox mounts. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Differential Overhaul,Clutch & Transmission,JOB,"Overhaul a differential. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Drive Shaft Replacement,Clutch & Transmission,JOB,"Replace a driveshaft. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,CV Joint Replacement,Clutch & Transmission,JOB,"Replace a CV joint. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,CV Boot Replacement,Clutch & Transmission,JOB,"Replace a CV boot. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Universal Joint Replacement,Clutch & Transmission,JOB,"Replace a U-joint. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Propeller Shaft Balancing,Clutch & Transmission,JOB,"Commonly outsourced to an external workshop (marked as outsourced work). Balance a propeller shaft. Labour operation in Clutch & Transmission / Clutch, Gearbox & Drivetrain; priced per job."
+SERVICE,Shock Absorber Replacement,Suspension & Steering,JOB,Replace shock absorbers. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Strut Mount Replacement,Suspension & Steering,JOB,Replace strut mounts. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Control Arm Bush Replacement,Suspension & Steering,JOB,Replace control arm bushes. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Ball Joint Replacement,Suspension & Steering,JOB,Replace ball joints. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Tie Rod End Replacement,Suspension & Steering,JOB,Replace tie rod ends. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Stabiliser Link Replacement,Suspension & Steering,JOB,Replace stabiliser links. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Coil Spring Replacement,Suspension & Steering,JOB,Replace springs. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Wheel Bearing Replacement,Suspension & Steering,JOB,Replace wheel bearings. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Rack Replacement,Suspension & Steering,JOB,Replace the steering rack. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Rack Overhaul,Suspension & Steering,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the steering rack. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Power Steering Pump Replacement,Suspension & Steering,JOB,Replace the power steering pump. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Steering Wheel Alignment,Suspension & Steering,JOB,Centre the steering wheel. Labour operation in Suspension & Steering / Suspension & Steering Repair; priced per job.
+SERVICE,Tyre Fitting,Tyres & Wheels,JOB,Remove and fit a tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Tubeless Puncture Repair,Tyres & Wheels,JOB,Repair a tubeless tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Tube-Type Puncture Repair,Tyres & Wheels,JOB,Repair a tube-type tyre. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Alloy Repair,Tyres & Wheels,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Straighten or repair an alloy wheel. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,TPMS Service,Tyres & Wheels,JOB,Service TPMS sensors. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Nitrogen Tyre Filling,Tyres & Wheels,JOB,Fill tyres with nitrogen. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Spare Wheel Change,Tyres & Wheels,JOB,Change to the spare wheel. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Nut Torque Check,Tyres & Wheels,JOB,Torque wheel nuts. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Battery Charging,Electrical & Electronics,JOB,Charge a battery. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Alternator Replacement,Electrical & Electronics,JOB,Replace the alternator. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Alternator Overhaul,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the alternator. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Starter Motor Replacement,Electrical & Electronics,JOB,Replace the starter. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Starter Motor Overhaul,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Overhaul the starter. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Wiring Repair,Electrical & Electronics,JOB,Repair wiring. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Fuse and Relay Replacement,Electrical & Electronics,JOB,Replace fuses and relays. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Bulb Replacement,Electrical & Electronics,JOB,Replace headlamp bulbs. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Tail Lamp Bulb Replacement,Electrical & Electronics,JOB,Replace tail lamp bulbs. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Alignment,Electrical & Electronics,JOB,Aim headlamps. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Headlamp Restoration,Electrical & Electronics,JOB,Restore headlamp lenses. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Horn Replacement,Electrical & Electronics,JOB,Replace the horn. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Power Window Repair,Electrical & Electronics,JOB,Repair a power window. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Central Locking Repair,Electrical & Electronics,JOB,Repair central locking. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Instrument Cluster Repair,Electrical & Electronics,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Repair the cluster. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Sensor Replacement,Electrical & Electronics,JOB,Replace a sensor. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Key Programming,Electrical & Electronics,JOB,Program keys. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,ECU Reprogramming,Electrical & Electronics,JOB,Reprogram the ECU. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,ECU Replacement and Coding,Electrical & Electronics,JOB,Replace and code an ECU. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Airbag System Diagnosis,Electrical & Electronics,JOB,Diagnose the SRS. Labour operation in Electrical & Electronics / Electrical Repair; priced per job.
+SERVICE,Computerised Scan,Diagnostics & Inspection,JOB,Read and clear fault codes across modules. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Live Data Analysis,Diagnostics & Inspection,JOB,Analyse live data. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Compression Test,Diagnostics & Inspection,JOB,Test compression. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Leak Down Test,Diagnostics & Inspection,JOB,Test cylinder sealing. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Fuel Pressure Test,Diagnostics & Inspection,JOB,Test fuel pressure. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Smoke Test,Diagnostics & Inspection,JOB,Smoke test for leaks. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Battery Load Test,Diagnostics & Inspection,JOB,Load test a battery. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Charging System Test,Diagnostics & Inspection,JOB,Test charging. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Emission Test,Diagnostics & Inspection,JOB,Emission test. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Multi-Point Inspection,Diagnostics & Inspection,JOB,Structured inspection. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Road Test,Diagnostics & Inspection,JOB,Road test. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Pre-Purchase Inspection,Diagnostics & Inspection,JOB,Inspection before purchase. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Underbody Inspection,Diagnostics & Inspection,JOB,Underbody inspection. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Accident Damage Assessment,Diagnostics & Inspection,JOB,Assess accident damage. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,Pre-Trip Safety Check,Diagnostics & Inspection,JOB,Pre-trip check. Labour operation in Diagnostics & Inspection / Diagnostics; priced per job.
+SERVICE,AC Gas Refilling,Air Conditioning,JOB,Evacuate and recharge refrigerant. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Leak Test,Air Conditioning,JOB,Find A/C leaks. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Compressor Replacement,Air Conditioning,JOB,Replace the compressor. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Condenser Replacement,Air Conditioning,JOB,Replace the condenser. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Evaporator Replacement,Air Conditioning,JOB,Replace the evaporator. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,Blower Motor Replacement,Air Conditioning,JOB,Replace the blower. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Duct Cleaning,Air Conditioning,JOB,Clean ducts. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,AC Sanitisation,Air Conditioning,JOB,Sanitise the A/C. Labour operation in Air Conditioning / A/C Service & Repair; priced per job.
+SERVICE,Dent Removal,Body Repair & Paint,JOB,Remove dents. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Panel Beating,Body Repair & Paint,JOB,Straighten panels. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Bumper Repair,Body Repair & Paint,JOB,Repair a bumper. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Bumper Replacement,Body Repair & Paint,JOB,Replace a bumper. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Scratch Repair,Body Repair & Paint,JOB,Repair scratches. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Panel Painting,Body Repair & Paint,JOB,Paint a panel. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Full Body Painting,Body Repair & Paint,JOB,Paint the vehicle. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Touch-Up Painting,Body Repair & Paint,JOB,Touch-up. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Windscreen Replacement,Body Repair & Paint,JOB,Replace the windscreen. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Door Glass Replacement,Body Repair & Paint,JOB,Replace door glass. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Rust Treatment,Body Repair & Paint,JOB,Treat rust. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Underbody Coating Application,Body Repair & Paint,JOB,Apply underbody coating. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Chassis Straightening,Body Repair & Paint,JOB,Straighten the chassis. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Fibre Panel Repair,Body Repair & Paint,JOB,Repair fibre panels. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Seat Upholstery Repair,Body Repair & Paint,JOB,Repair upholstery. Labour operation in Body Repair & Paint / Body & Paint; priced per job.
+SERVICE,Exterior Wash,Cleaning & Detailing,JOB,Exterior wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Interior Vacuum Cleaning,Cleaning & Detailing,JOB,Vacuum interior. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Full Wash,Cleaning & Detailing,JOB,Exterior and interior wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Foam Wash,Cleaning & Detailing,JOB,Foam wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Engine Bay Cleaning,Cleaning & Detailing,JOB,Engine bay clean. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Underbody Wash,Cleaning & Detailing,JOB,Underbody wash. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Polishing,Cleaning & Detailing,JOB,Machine polishing. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Waxing,Cleaning & Detailing,JOB,Apply wax. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Ceramic Coating Application,Cleaning & Detailing,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Apply ceramic coating. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Paint Protection Film Installation,Cleaning & Detailing,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Install PPF. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Interior Deep Cleaning,Cleaning & Detailing,JOB,Deep interior clean. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Leather Treatment,Cleaning & Detailing,JOB,Leather treatment. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Odour Removal,Cleaning & Detailing,JOB,Odour removal. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Windscreen Water-Repellent Treatment,Cleaning & Detailing,JOB,Glass treatment. Labour operation in Cleaning & Detailing / Washing & Detailing; priced per job.
+SERVICE,Reverse Camera Installation,Accessories,JOB,Install a camera. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Parking Sensor Installation,Accessories,JOB,Install parking sensors. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Music System Installation,Accessories,JOB,Install a stereo. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Dashcam Installation,Accessories,JOB,Install a dashcam. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Fog Lamp Installation,Accessories,JOB,Install fog lamps. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,LED Lighting Installation,Accessories,JOB,Install LED lighting. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Seat Cover Fitting,Accessories,JOB,Fit seat covers. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Floor Mat Fitting,Accessories,JOB,Fit floor mats. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Alloy Wheel Fitting,Accessories,JOB,Fit alloy wheels. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Window Film Installation,Accessories,JOB,Fit window film. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Central Locking Installation,Accessories,JOB,Install central locking. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Alarm and Immobiliser Installation,Accessories,JOB,Install a security system. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,GPS Tracker Installation,Accessories,JOB,Install a tracker. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Tow Bar Installation,Accessories,JOB,Install a tow bar. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Roof Rail Installation,Accessories,JOB,Install roof rails. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,Horn Upgrade Installation,Accessories,JOB,Install a horn. Labour operation in Accessories / Accessory Installation; priced per job.
+SERVICE,EV Periodic Inspection,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV inspection. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,High Voltage Battery Health Check,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. HV battery test. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Charging Port Inspection,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. Charging port check. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Coolant Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV coolant service. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Reduction Gear Oil Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV gear oil change. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Brake Service,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV brake service. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,EV Software Update and Diagnostics,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. EV diagnostics. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,HV System Isolation Test,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. HV isolation test. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,12V Auxiliary Battery Replacement,Electric Vehicle Services,JOB,Specialist EV work requiring trained personnel and equipment. Replace the 12 V battery. Labour operation in Electric Vehicle Services / EV Maintenance; priced per job.
+SERVICE,Vehicle Towing,Roadside & Transport,JOB,Tow a vehicle. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Flatbed Transport,Roadside & Transport,JOB,Flatbed transport. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Jump Start,Roadside & Transport,JOB,Jump start. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Roadside Assistance,Roadside & Transport,JOB,Roadside assistance. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Vehicle Pick-Up and Drop,Roadside & Transport,JOB,Pick-up and drop. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Cylinder Boring,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Bore cylinders. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Crankshaft Grinding,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Grind a crankshaft. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Cylinder Head Skimming,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Resurface a head. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Valve Seat Cutting,Outsourced Machine Shop,JOB,Commonly outsourced to an external workshop (marked as outsourced work). Cut valve seats. Labour operation in Outsourced Machine Shop / Machining Services; priced per job.
+SERVICE,Fire Extinguisher Fitting,Accessories,JOB,Mount vehicle fire extinguisher. Labour operation in Accessories / Audio & Safety Installation; priced per job.
+SERVICE,TPMS Sensor Replacement,Tyres & Wheels,JOB,Replace tyre pressure monitoring sensor. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Wheel Weight Replacement,Tyres & Wheels,JOB,Replace wheel balancing weights. Labour operation in Tyres & Wheels / Tyre & Wheel Services; priced per job.
+SERVICE,Flat Tyre Roadside Assistance,Roadside & Transport,JOB,Roadside tyre change or puncture repair. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.
+SERVICE,Fuel Delivery Assistance,Roadside & Transport,JOB,Deliver fuel to a stranded vehicle. Labour operation in Roadside & Transport / Towing & Assistance; priced per job.

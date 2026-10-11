@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +22,7 @@ public class InspectionMasterController {
     private final InspectionMasterService service;
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<InspectionMasterResponse>> createInspectionMaster(
             @Valid @RequestBody CreateInspectionMasterRequest request) {
 
@@ -56,6 +58,7 @@ public class InspectionMasterController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<InspectionMasterResponse>> updateInspectionMaster(
             @PathVariable Long id,
             @Valid @RequestBody CreateInspectionMasterRequest request) {
@@ -66,6 +69,7 @@ public class InspectionMasterController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteInspectionMaster(
             @PathVariable Long id) {
 

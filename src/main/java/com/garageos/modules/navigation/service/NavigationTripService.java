@@ -79,4 +79,10 @@ public interface NavigationTripService {
      * garage's fleet.
      */
     List<FleetTripResponse> getGarageFleet(Long garageId);
+
+    /**
+     * Fleet map by DRIVER (not by trip): every ACTIVE driver of the garage, with availability, last known position and
+     * freshness, and the active trip if there is one. Operational staff of that garage only.
+     */
+    List<com.garageos.modules.navigation.dto.response.FleetDriverResponse> getGarageFleetDrivers(Long garageId);
 }

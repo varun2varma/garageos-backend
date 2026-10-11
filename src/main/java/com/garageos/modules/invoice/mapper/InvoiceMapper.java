@@ -27,6 +27,16 @@ public interface InvoiceMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "generatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "taxSnapshot", ignore = true)
+    @Mapping(target = "taxTotal", ignore = true)
+    @Mapping(target = "cgstTotal", ignore = true)
+    @Mapping(target = "sgstTotal", ignore = true)
+    @Mapping(target = "igstTotal", ignore = true)
+    @Mapping(target = "roundOff", ignore = true)
+    @Mapping(target = "supplyType", ignore = true)
+    @Mapping(target = "supplierGstin", ignore = true)
+    @Mapping(target = "supplierState", ignore = true)
+    @Mapping(target = "placeOfSupplyState", ignore = true)
     Invoice toEntity(CreateInvoiceRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
@@ -49,6 +59,16 @@ public interface InvoiceMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "generatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "taxSnapshot", ignore = true)
+    @Mapping(target = "taxTotal", ignore = true)
+    @Mapping(target = "cgstTotal", ignore = true)
+    @Mapping(target = "sgstTotal", ignore = true)
+    @Mapping(target = "igstTotal", ignore = true)
+    @Mapping(target = "roundOff", ignore = true)
+    @Mapping(target = "supplyType", ignore = true)
+    @Mapping(target = "supplierGstin", ignore = true)
+    @Mapping(target = "supplierState", ignore = true)
+    @Mapping(target = "placeOfSupplyState", ignore = true)
     void updateEntity(
             CreateInvoiceRequest request,
             @MappingTarget Invoice invoice);

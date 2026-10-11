@@ -2,6 +2,8 @@ package com.garageos.modules.estimateitem.entity;
 
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.EstimateItemType;
+import com.garageos.core.enums.catalog.EntrySource;
+import com.garageos.core.enums.catalog.ReviewStatus;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.estimate.entity.Estimate;
 import com.garageos.modules.inspectionfinding.entity.InspectionFinding;
@@ -62,4 +64,41 @@ public class EstimateItem extends BaseEntity {
      */
     @Column(nullable = false)
     Boolean selected = true;
+
+    /** Real FK to catalog_item for MASTER lines; null for MANUAL and LEGACY lines (V69). */
+    @Column(name = "catalog_item_id")
+    Long catalogItemId;
+
+    /** Provenance garage, always derived server-side from the job card. */
+    @Column(name = "garage_id")
+    Long garageId;
+
+    @Column(length = 20)
+    String unit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entry_source", nullable = false, length = 20)
+    EntrySource entrySource = EntrySource.LEGACY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_status", nullable = false, length = 20)
+    ReviewStatus reviewStatus = ReviewStatus.NOT_REQUIRED;
+
+    /** Authenticated creator, never taken from the request. */
+    @Column(name = "created_by_user_id")
+    Long createdByUserId;
+
+    @Column(name = "manual_note", length = 500)
+    String manualNote;
+
+    // Classification snapshot copied from the catalog at selection time; later
+    // catalog edits never rewrite these.
+    @Column(name = "hsn_sac_code", length = 10)
+    String hsnSacCode;
+
+    @Column(name = "tax_rule_code", length = 40)
+    String taxRuleCode;
+
+    @Column(name = "gst_rate_percent", precision = 5, scale = 2)
+    BigDecimal gstRatePercent;
 }

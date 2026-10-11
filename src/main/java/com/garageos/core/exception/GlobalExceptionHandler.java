@@ -55,6 +55,13 @@ public class GlobalExceptionHandler {
                 .body(buildError(ex.getMessage(), ex.getCode()));
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflictException(ConflictException ex) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildError(ex.getMessage(), ex.getCode()));
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
 

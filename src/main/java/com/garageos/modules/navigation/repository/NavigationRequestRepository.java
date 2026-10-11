@@ -59,4 +59,7 @@ public interface NavigationRequestRepository
             List<Long> vehicleIds,
             List<NavigationRequestStatus> statuses
     );
+
+    /** Every navigation request (pickup and delivery) linked to a job card. */
+    List<NavigationRequest> findByJobCardId(Long jobCardId);
 }

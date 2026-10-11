@@ -183,6 +183,17 @@ public class GarageMembershipServiceImpl
                                 new ResourceNotFoundException(
                                         "Membership not found."));
 
+        requireOwnerOfMembershipGarage(membership);
+
+        // A garage owner may only grant garage roles: never the platform-administrator role.
+        for (Long roleId : request.getRoleIds()) {
+            roleRepository.findById(roleId).ifPresent(r -> {
+                if (r.getCode() == RoleCode.SUPER_ADMIN) {
+                    throw new BusinessException("This role cannot be granted to an employee.");
+                }
+            });
+        }
+
         if (membership.getStatus() !=
                 GarageMembershipStatus.PENDING) {
 
@@ -248,6 +259,28 @@ public class GarageMembershipServiceImpl
     }
 
     /**
+     * Approving, rejecting or removing a membership is an owner action on THAT garage: the caller must hold the
+     * OWNER role and be an owner of the membership's garage (own garage or an ACTIVE owner membership). Anyone else
+     * gets the normal not-found, so a membership id of another garage is never confirmed or changed.
+     */
+    private void requireOwnerOfMembershipGarage(GarageMembership membership) {
+
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        boolean owner = principal != null
+                && principal.getRoles() != null
+                && principal.getRoles().contains(RoleCode.OWNER.name());
+
+        if (!owner
+                || membership.getGarage() == null
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(
+                        new com.garageos.core.security.GarageScope(membershipRepository),
+                        principal, membership.getGarage().getId())) {
+            throw new ResourceNotFoundException("Membership not found.");
+        }
+    }
+
+    /**
      * Concurrency-safe replacement for the previous MAX(existing code) + 1
      * scan, which raced when two employees were approved into the same
      * garage at the same time. Garage.nextEmployeeSequence is read and
@@ -284,6 +317,8 @@ public class GarageMembershipServiceImpl
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Membership not found."));
+
+        requireOwnerOfMembershipGarage(membership);
 
         if (membership.getStatus() !=
                 GarageMembershipStatus.PENDING) {
@@ -330,6 +365,8 @@ public class GarageMembershipServiceImpl
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Membership not found."));
+
+        requireOwnerOfMembershipGarage(membership);
 
         User user = membership.getUser();
 

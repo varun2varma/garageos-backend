@@ -41,6 +41,10 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FinalReportServiceImpl implements FinalReportService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final JobCardRepository jobCardRepository;
     private final JobCardFinalReportRepository reportRepository;
     private final DeliveryRepository deliveryRepository;
@@ -259,9 +263,8 @@ public class FinalReportServiceImpl implements FinalReportService {
      */
     Access access(GarageUserPrincipal principal, JobCard jobCard) {
 
-        if (principal.getGarageId() != null
-                && jobCard.getGarage() != null
-                && principal.getGarageId().equals(jobCard.getGarage().getId())) {
+        if (jobCard.getGarage() != null
+                && com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, jobCard.getGarage().getId())) {
 
             Set<String> roles = principal.getRoles() == null ? Set.of() : principal.getRoles();
             boolean ownerLevel = roles.contains(RoleCode.OWNER.name()) || roles.contains(RoleCode.MANAGER.name());

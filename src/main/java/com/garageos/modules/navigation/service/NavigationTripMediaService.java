@@ -19,6 +19,22 @@ public interface NavigationTripMediaService {
             Double longitude
     );
 
+    /**
+     * Same as the 7-argument upload, plus a client-generated id for the captured file. Sending the same id again
+     * (a retry after a dropped response, an app restart or a queue resume) returns the row already stored: no second
+     * metadata row and no second cloud object.
+     */
+    NavigationTripMediaResponse upload(
+            Long tripId,
+            Long driverId,
+            TripMediaStage stage,
+            TripMediaShotType shotType,
+            MultipartFile file,
+            Double latitude,
+            Double longitude,
+            String clientUploadId
+    );
+
     List<NavigationTripMediaResponse> getTripMedia(
             Long tripId
     );
@@ -34,4 +50,12 @@ public interface NavigationTripMediaService {
      * or garage-matched operational staff).
      */
     TripMediaContent getMediaContent(Long tripId, Long mediaId);
+
+    /**
+     * Driver pickup (BEFORE_PICKUP) and delivery (DELIVERY) evidence of every trip linked to the job card, oldest first.
+     * Only trips the caller may view (the same rule as a single trip) contribute; an unrelated caller gets an empty
+     * list, never another booking's or garage's evidence. The bytes are served by the existing per-trip content
+     * endpoint, so the same authorization applies there.
+     */
+    List<NavigationTripMediaResponse> getJobCardEvidence(Long jobCardId);
 }

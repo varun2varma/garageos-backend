@@ -54,7 +54,9 @@ public class MediaException extends RuntimeException {
         MEDIA_INVALID_REQUEST(HttpStatus.BAD_REQUEST),
 
         /** R2 upload/playback was requested but R2 environment variables are not set yet. */
-        MEDIA_STORAGE_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE);
+        MEDIA_STORAGE_NOT_CONFIGURED(HttpStatus.SERVICE_UNAVAILABLE),
+        /** Cloud object storage (R2) rejected or could not complete a driver-evidence upload; nothing was persisted, retry. */
+        MEDIA_CLOUD_UPLOAD_FAILED(HttpStatus.BAD_GATEWAY);
 
         private final HttpStatus status;
 

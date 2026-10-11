@@ -18,6 +18,16 @@ import java.util.Optional;
 public interface UserRepository
         extends JpaRepository<User, Long> {
 
+    /**
+     * Pessimistically locks the user row. Used to serialise work that must be one-at-a-time per account, such as
+     * registering a garage (so two identical simultaneous submissions cannot both pass the duplicate check).
+     * Only call within an existing transaction.
+     */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select u from User u where u.id = :id")
+    Optional<User> findByIdForUpdate(@Param("id") Long id);
+
+
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);

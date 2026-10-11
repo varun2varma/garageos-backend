@@ -87,6 +87,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ResourceNotFoundException("Invoice not found.");
         }
 
+        if (invoice.getInvoiceStatus() == InvoiceStatus.CANCELLED) {
+            throw new BusinessException("This invoice has been cancelled and cannot receive payments.");
+        }
+
         String key = blankToNull(request.getIdempotencyKey());
 
         if (key != null) {

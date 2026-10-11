@@ -50,6 +50,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor
 public class RepairTaskServiceImpl implements RepairTaskService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
@@ -272,9 +276,8 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                 || principal.getRoles().contains(RoleCode.SERVICE_ADVISOR.name())) {
 
             if (task.getJobCard().getGarage() == null
-                    || principal.getGarageId() == null
-                    || !principal.getGarageId()
-                            .equals(task.getJobCard().getGarage().getId())) {
+                    || !com.garageos.core.security.GarageScope.isMemberOfGarage(
+                            garageScope, principal, task.getJobCard().getGarage().getId())) {
 
                 throw new BusinessException(
                         "This Repair Task does not belong to your garage.");
@@ -480,6 +483,12 @@ public class RepairTaskServiceImpl implements RepairTaskService {
     @Override
     public List<RepairTaskResponse> getRepairTasks(Long jobCardId) {
 
+        List<RepairTask> found = repository.findByJobCardIdOrderById(jobCardId);
+
+        if (!found.isEmpty()) {
+            com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, found.get(0).getJobCard(), "Job Card not found with id : " + jobCardId);
+        }
+
         return mapper.toResponseList(
                 repository.findByJobCardIdOrderById(jobCardId));
     }
@@ -491,6 +500,8 @@ public class RepairTaskServiceImpl implements RepairTaskService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Repair Task not found with id : " + id));
+
+        com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, task.getJobCard(), "Repair Task not found with id : " + id);
 
         return mapper.toResponse(task);
     }

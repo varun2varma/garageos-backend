@@ -30,6 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.security.access.AccessDeniedException;
+import com.garageos.core.exception.ConflictException;
 
 @Service
 @RequiredArgsConstructor
@@ -51,9 +55,21 @@ public class GarageServiceImpl implements GarageService {
             Long userId,
             CreateGarageRequest request) {
 
-        User user = userRepository.findById(userId)
+        // Row lock on the caller: registrations by one account run one at a time, so the duplicate check below is
+        // race-free (the garage table has no unique key on name/address, and existing data may hold duplicates).
+        User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User not found."));
+
+        requireMayRegisterGarage(userId);
+
+        // Before the OTP check so a duplicate never burns a one-time code.
+        if (garageRepository.existsByOwnerUserIdAndGarageNameIgnoreCaseAndAddressIgnoreCaseAndCityIgnoreCase(
+                userId, request.getGarageName(), request.getAddress(), request.getCity())) {
+            throw new ConflictException(
+                    "You have already registered a garage with this name, address and city.",
+                    "GARAGE_ALREADY_REGISTERED");
+        }
 
         if (otpService.isEnabled()) {
             // Always the authenticated user's own registered number, never client input.
@@ -81,7 +97,12 @@ public class GarageServiceImpl implements GarageService {
 
         garage = garageRepository.save(garage);
 
-        user.setGarageId(garage.getId());
+        // The account's default garage is set only by the FIRST registration. An owner adding another garage keeps
+        // their existing default: the new garage is reached through its ACTIVE membership (GarageScope), and
+        // overwriting garageId would silently switch every request that does not name a garage to the new one.
+        if (user.getGarageId() == null) {
+            user.setGarageId(garage.getId());
+        }
         user.setFirstLogin(false);
 
         userRepository.save(user);
@@ -91,6 +112,28 @@ public class GarageServiceImpl implements GarageService {
         createOwnerMembership(garage, user);
 
         return garageMapper.toResponse(garage);
+    }
+
+    /**
+     * Registering a garage is open to an account with no staff role (the first registration, from a plain or
+     * customer account) and to an OWNER (additional garages). An employee of another garage, or a platform
+     * administrator, is refused: it would otherwise hand them an OWNER role and repoint their garage.
+     */
+    private void requireMayRegisterGarage(Long userId) {
+
+        Set<RoleCode> roles = userRoleRepository.findByUserId(userId).stream()
+                .map(r -> r.getRole().getCode())
+                .collect(Collectors.toSet());
+
+        if (roles.contains(RoleCode.OWNER)) {
+            return;
+        }
+
+        boolean blocked = roles.stream().anyMatch(code -> code != RoleCode.USER && code != RoleCode.CUSTOMER);
+
+        if (blocked) {
+            throw new AccessDeniedException("This account cannot register a garage.");
+        }
     }
 
     /**
@@ -214,12 +257,8 @@ public class GarageServiceImpl implements GarageService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Garage not found."));
 
-        if (principal.getGarageId() == null
-                || !principal.getGarageId().equals(garage.getId())) {
-
-            throw new BusinessException(
-                    "This garage does not belong to you.");
-        }
+        // Same ownership rule as updateGarage: the owner of THIS garage, including an owner's further garages.
+        requireOwnerOf(principal, garage);
 
         garage.setLatitude(request.getLatitude());
         garage.setLongitude(request.getLongitude());

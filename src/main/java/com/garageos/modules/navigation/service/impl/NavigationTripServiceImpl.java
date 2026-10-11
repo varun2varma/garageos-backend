@@ -829,6 +829,93 @@ public class NavigationTripServiceImpl
         return trips.stream().map(this::toFleetResponse).toList();
     }
 
+    /** Position older than this is shown as STALE (config {@code garagest.fleet.location-stale-seconds}). */
+    @org.springframework.beans.factory.annotation.Value("${garagest.fleet.location-stale-seconds:120}")
+    private long locationStaleSeconds = 120;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.garageos.modules.navigation.dto.response.FleetDriverResponse> getGarageFleetDrivers(Long garageId) {
+
+        requireOperationalStaffOfGarage(garageId);
+
+        // Same role gate as the rest of dispatch: drivers, technicians and customers do not see the whole fleet.
+        GarageUserPrincipal principal = currentPrincipal();
+        if (!(principal.getRoles().contains("OWNER") || principal.getRoles().contains("MANAGER")
+                || principal.getRoles().contains("SERVICE_ADVISOR"))) {
+            throw new ResourceNotFoundException("Navigation request not found.");
+        }
+
+        // The assignable-driver query: ACTIVE users holding the DRIVER role in this garage (never other garages).
+        List<com.garageos.modules.identity.entity.User> drivers = userRepository.findByGarageIdAndRoleAndStatus(
+                garageId,
+                com.garageos.core.enums.identity.RoleCode.DRIVER,
+                com.garageos.core.enums.identity.UserStatus.ACTIVE);
+
+        if (drivers.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> driverIds = drivers.stream().map(com.garageos.modules.identity.entity.User::getId).toList();
+
+        java.util.Map<Long, NavigationTrip> activeByDriver = new java.util.HashMap<>();
+        for (NavigationTrip trip : navigationTripRepository.findActiveByGarageId(
+                garageId, List.of(TripStatus.ASSIGNED, TripStatus.ACCEPTED, TripStatus.IN_PROGRESS))) {
+            if (trip.getDriverId() != null) {
+                activeByDriver.merge(trip.getDriverId(), trip,
+                        (a, b) -> a.getId() > b.getId() ? a : b);
+            }
+        }
+
+        java.util.Map<Long, DriverCurrentLocation> latestByDriver = new java.util.HashMap<>();
+        for (DriverCurrentLocation l : driverCurrentLocationRepository.findLatestForDrivers(driverIds)) {
+            latestByDriver.merge(l.getDriverId(), l, (a, b) -> a.getId() > b.getId() ? a : b);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<com.garageos.modules.navigation.dto.response.FleetDriverResponse> out = new java.util.ArrayList<>();
+
+        for (com.garageos.modules.identity.entity.User driver : drivers) {
+
+            NavigationTrip active = activeByDriver.get(driver.getId());
+            DriverCurrentLocation location = latestByDriver.get(driver.getId());
+
+            var state = location == null || location.getLastUpdated() == null
+                    ? com.garageos.modules.navigation.dto.response.FleetDriverResponse.LocationState.NONE
+                    : location.getLastUpdated().isBefore(now.minusSeconds(locationStaleSeconds))
+                    ? com.garageos.modules.navigation.dto.response.FleetDriverResponse.LocationState.STALE
+                    : com.garageos.modules.navigation.dto.response.FleetDriverResponse.LocationState.LIVE;
+
+            String name = ((driver.getFirstName() == null ? "" : driver.getFirstName())
+                    + (driver.getLastName() == null ? "" : " " + driver.getLastName())).trim();
+
+            boolean hasPosition = state != com.garageos.modules.navigation.dto.response.FleetDriverResponse.LocationState.NONE;
+
+            out.add(com.garageos.modules.navigation.dto.response.FleetDriverResponse.builder()
+                    .driverId(driver.getId())
+                    .driverName(name.isEmpty() ? null : name)
+                    .mobile(driver.getMobile())
+                    .availability(active == null
+                            ? com.garageos.modules.navigation.dto.response.FleetDriverResponse.Availability.AVAILABLE
+                            : com.garageos.modules.navigation.dto.response.FleetDriverResponse.Availability.ON_TRIP)
+                    .locationState(state)
+                    .latitude(hasPosition ? location.getLatitude() : null)
+                    .longitude(hasPosition ? location.getLongitude() : null)
+                    .heading(hasPosition ? location.getHeading() : null)
+                    .lastLocationUpdate(hasPosition ? location.getLastUpdated() : null)
+                    .locationAgeSeconds(hasPosition
+                            ? Math.max(0L, java.time.Duration.between(location.getLastUpdated(), now).getSeconds())
+                            : null)
+                    .activeTripId(active == null ? null : active.getId())
+                    .activeTripType(active == null ? null : active.getTripType())
+                    .activeTripStatus(active == null ? null : active.getStatus())
+                    .build());
+        }
+
+        return out;
+    }
+
     private FleetTripResponse toFleetResponse(NavigationTrip trip) {
 
         NavigationRequest request = trip.getNavigationRequestId() == null

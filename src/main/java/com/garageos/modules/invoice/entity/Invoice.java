@@ -3,6 +3,7 @@ package com.garageos.modules.invoice.entity;
 import com.garageos.core.audit.BaseEntity;
 import com.garageos.core.enums.InvoiceStatus;
 import com.garageos.core.enums.PaymentStatus;
+import com.garageos.core.enums.catalog.SupplyType;
 import com.garageos.modules.estimate.entity.Estimate;
 import jakarta.persistence.*;
 import lombok.*;
@@ -62,4 +63,38 @@ public class Invoice extends BaseEntity {
     @Version
     @Column(nullable = false)
     private Long version;
+
+    /** True when the canonical per-line tax snapshot below exists (false = legacy invoice). */
+    @Column(name = "tax_snapshot", nullable = false)
+    private boolean taxSnapshot = false;
+
+    /** Total GST including the GST contained in tax-inclusive prices. [gst] keeps its legacy meaning. */
+    @Column(name = "tax_total", precision = 12, scale = 2)
+    private BigDecimal taxTotal;
+
+    @Column(name = "cgst_total", precision = 12, scale = 2)
+    private BigDecimal cgstTotal;
+
+    @Column(name = "sgst_total", precision = 12, scale = 2)
+    private BigDecimal sgstTotal;
+
+    @Column(name = "igst_total", precision = 12, scale = 2)
+    private BigDecimal igstTotal;
+
+    /** Whole-rupee round-off already included in grandTotal. */
+    @Column(name = "round_off", precision = 12, scale = 2)
+    private BigDecimal roundOff;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "supply_type", length = 20)
+    private SupplyType supplyType;
+
+    @Column(name = "supplier_gstin", length = 15)
+    private String supplierGstin;
+
+    @Column(name = "supplier_state", length = 100)
+    private String supplierState;
+
+    @Column(name = "place_of_supply_state", length = 100)
+    private String placeOfSupplyState;
 }

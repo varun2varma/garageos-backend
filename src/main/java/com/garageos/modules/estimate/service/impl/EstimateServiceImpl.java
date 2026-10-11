@@ -112,6 +112,26 @@ public class EstimateServiceImpl implements EstimateService {
         return estimateMapper.toResponse(estimate);
     }
 
+    /**
+     * Write access: unrestricted (platform admin) or staff of the job card's garage (an Owner's other garages
+     * included, through {@link GarageScope}). Never a customer. Anyone else gets the usual not-found.
+     */
+    private void requireStaffAccess(JobCard jobCard, String notFoundMessage) {
+
+        com.garageos.modules.identity.security.principal.GarageUserPrincipal principal =
+                garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return;
+        }
+
+        if (jobCard == null
+                || jobCard.getGarage() == null
+                || !garageScope.canAccessGarage(principal, jobCard.getGarage().getId())) {
+            throw new ResourceNotFoundException(notFoundMessage);
+        }
+    }
+
     /** Staff of the estimate garage (or owner of it), or the customer it belongs to. */
     private void requireAccessible(Estimate estimate) {
 
@@ -186,11 +206,16 @@ public class EstimateServiceImpl implements EstimateService {
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
 
+        requireStaffAccess(estimate.getJobCard(), "Estimate not found with id : " + id);
+
         JobCard jobCard = jobCardRepository.findById(request.getJobCardId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found with id : "
                                         + request.getJobCardId()));
+
+        // The job card the estimate is (re)linked to must also be one this caller may work on.
+        requireStaffAccess(jobCard, "Job Card not found with id : " + request.getJobCardId());
 
         if (jobCard.getStatus() == JobCardStatus.ESTIMATE_PENDING) {
 
@@ -225,6 +250,8 @@ public class EstimateServiceImpl implements EstimateService {
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
 
+        requireStaffAccess(estimate.getJobCard(), "Estimate not found with id : " + id);
+
         estimateRepository.delete(estimate);
     }
 
@@ -241,7 +268,9 @@ public class EstimateServiceImpl implements EstimateService {
      */
     private Estimate getOwnedCustomerEstimate(Long id) {
 
-        Estimate estimate = estimateRepository.findById(id)
+        // Row lock taken before the estimate is read: approval and rejection are lifecycle decisions that must see
+        // the committed state and serialise with line edits, invoice issuance and classification correction.
+        Estimate estimate = estimateRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
@@ -565,7 +594,7 @@ public class EstimateServiceImpl implements EstimateService {
         authorizeEmployeeEstimateApproval(jobCard);
 
         Estimate estimate = estimateRepository
-                .findByJobCardId(jobCard.getId())
+                .findByJobCardIdForUpdate(jobCard.getId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found for Job Card : "
@@ -580,7 +609,10 @@ public class EstimateServiceImpl implements EstimateService {
 
         return estimateRepository
                 .findByJobCardId(jobCardId)
-                .map(estimateMapper::toResponse)
+                .map(estimate -> {
+                    requireAccessible(estimate);
+                    return estimateMapper.toResponse(estimate);
+                })
                 .orElse(null);
     }
 }

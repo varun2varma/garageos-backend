@@ -1,0 +1,251 @@
+type,name,category,default_unit,description
+PART,Cylinder Head,Engine,NOS,"Cast cylinder head carrying valves, ports and combustion chambers. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Engine type: petrol/diesel; Cylinders; Valves per cylinder; Material: aluminium/cast iron."
+PART,Cylinder Head Gasket,Engine,NOS,Seal between block and head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: MLS/composite; Bore size; Thickness.
+PART,Cylinder Head Bolt Set,Engine,NOS,Torque-to-yield or stud set for the cylinder head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Thread size; Quantity; Type: bolt/stud.
+PART,Valve Cover,Engine,NOS,Cover over the valve train. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: aluminium/plastic/steel.
+PART,Valve Cover Gasket,Engine,NOS,Seal for the valve cover. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Material: rubber/cork/silicone.
+PART,Intake Valve,Engine,NOS,Engine inlet valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Stem diameter; Material.
+PART,Exhaust Valve,Engine,NOS,Engine exhaust valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Stem diameter; Material.
+PART,Valve Spring,Engine,NOS,Spring that closes the valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Free length; Wire diameter.
+PART,Valve Guide,Engine,NOS,Guide bushing for the valve stem. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Inner diameter; Length.
+PART,Valve Stem Seal,Engine,NOS,Oil seal on the valve stem. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Stem diameter; Material.
+PART,Valve Seat Insert,Engine,NOS,Hardened seat insert in the head. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Diameter; Material.
+PART,Tappet,Engine,NOS,Hydraulic or mechanical valve lifter. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Type: hydraulic/mechanical; Diameter.
+PART,Rocker Arm,Engine,NOS,Lever transferring cam motion to the valve. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Ratio; Type: roller/slipper.
+PART,Camshaft,Engine,NOS,Shaft with cam lobes operating the valves. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Engine type; Journals; Material.
+PART,Camshaft Oil Seal,Engine,NOS,Rotary seal on the camshaft. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Inner diameter; Material.
+PART,Camshaft Phaser,Engine,NOS,Variable valve timing actuator. Cylinder Head & Valve Train item in the Engine category (Engine system). Variants are distinguished by: Type: intake/exhaust.
+PART,Cylinder Block,Engine,NOS,Block casting housing cylinders and crankcase. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type; Cylinders; Material.
+PART,Cylinder Liner,Engine,NOS,Replaceable cylinder sleeve. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Type: wet/dry.
+PART,Piston,Engine,NOS,Piston for one cylinder. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Oversize; Material.
+PART,Piston Ring Set,Engine,SET,Compression and oil control rings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Bore; Oversize; Rings per piston.
+PART,Piston Pin,Engine,NOS,Pin joining piston and rod. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Diameter; Length.
+PART,Connecting Rod,Engine,NOS,Rod linking piston to crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Length; Material.
+PART,Connecting Rod Bearing Set,Engine,SET,Big-end shell bearings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Size: STD/undersize; Quantity.
+PART,Crankshaft,Engine,NOS,Engine crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinders; Journal size.
+PART,Main Bearing Set,Engine,SET,Main journal shell bearings. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Size: STD/undersize.
+PART,Crankshaft Pulley,Engine,NOS,Pulley or damper on the crank nose. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Groove type; Diameter.
+PART,Crankshaft Oil Seal,Engine,NOS,Rotary seal on the crankshaft. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Position: front/rear; Inner diameter.
+PART,Flywheel,Engine,NOS,Mass wheel carrying the starter ring gear. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type: single mass; Teeth; Diameter.
+PART,Dual Mass Flywheel,Engine,NOS,Two-mass flywheel damping vibration. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Teeth; Diameter.
+PART,Flywheel Ring Gear,Engine,NOS,Toothed ring pressed on the flywheel. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Teeth; Diameter.
+PART,Engine Mounting,Engine,NOS,Rubber or hydraulic engine support. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Position: front/rear/left/right; Type: rubber/hydraulic.
+PART,Engine Assembly - Petrol,Engine,NOS,Complete petrol engine. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinder capacity band; Cylinders.
+PART,Engine Assembly - Diesel,Engine,NOS,Complete diesel engine for road vehicles. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Cylinders; Capacity.
+PART,Engine Gasket Set - Full,Engine,SET,Complete engine gasket kit. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Engine Gasket Set - Top End,Engine,SET,Gaskets for cylinder head work. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Oil Pump,Engine,NOS,Pump circulating engine oil. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type: gear/rotor.
+PART,Oil Pan,Engine,NOS,Engine oil sump. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Material: steel/aluminium.
+PART,Oil Pan Gasket,Engine,NOS,Seal for the oil pan. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Oil Drain Plug,Engine,NOS,Drain bolt for the sump. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread size; Magnetic: yes/no.
+PART,Oil Drain Plug Washer,Engine,NOS,Sealing washer for the drain plug. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread size; Material: copper/aluminium.
+PART,Oil Filler Cap,Engine,NOS,Cap on the oil filler neck. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Thread: screw/bayonet.
+PART,Oil Dipstick,Engine,NOS,Dipstick for oil level. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Length.
+PART,Crankcase Breather Valve,Engine,NOS,Positive crankcase ventilation valve. Short Block & Rotating Assembly item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Timing Belt,Engine,NOS,Synchronous rubber belt driving the camshaft. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Teeth; Width; Length.
+PART,Timing Belt Kit,Engine,KIT,Belt with tensioner and idlers. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Includes: belt/tensioner/idler/water pump.
+PART,Timing Chain,Engine,NOS,Roller chain driving the camshafts. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Pitch; Links.
+PART,Timing Chain Kit,Engine,KIT,"Chain with sprockets, guides and tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Includes: chain/sprockets/guides/tensioner."
+PART,Timing Chain Tensioner,Engine,NOS,Hydraulic or mechanical chain tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Timing Chain Guide,Engine,NOS,Plastic guide rail for the chain. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Position.
+PART,Timing Sprocket,Engine,NOS,Toothed wheel on cam or crank. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Teeth; Position.
+PART,Timing Belt Tensioner,Engine,NOS,Spring or hydraulic belt tensioner. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,Idler Pulley,Engine,NOS,Fixed pulley guiding a belt. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Diameter; Type: smooth/grooved.
+PART,Timing Cover Gasket,Engine,NOS,Seal for the timing cover. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Turbocharger,Engine,NOS,Exhaust-driven compressor. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Engine type; Wastegate: yes/no.
+PART,Turbocharger Gasket Set,Engine,KIT,Gaskets and hardware for turbo fitting. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Engine type.
+PART,Intercooler,Engine,NOS,Air-to-air or air-to-liquid charge cooler. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type.
+PART,EGR Valve,Engine,NOS,Valve routing exhaust gas to the intake. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type: vacuum/electric.
+PART,Throttle Body,Engine,NOS,Air throttle assembly. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Type: cable/electronic.
+PART,Intake Manifold,Engine,NOS,Air distribution manifold. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material: plastic/aluminium.
+PART,Intake Manifold Gasket,Engine,NOS,Seal for the intake manifold. Timing & Drive item in the Engine category (Engine system). Variants are distinguished by: Material.
+PART,Engine Oil - Mineral,Lubricants & Fluids,LTR,Petroleum-based engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; API/ACEA specification; Pack size.
+PART,Engine Oil - Semi-Synthetic,Lubricants & Fluids,LTR,Blended petroleum and synthetic engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; Specification; Pack size.
+PART,Engine Oil - Fully Synthetic,Lubricants & Fluids,LTR,Fully synthetic engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; Specification; Pack size.
+PART,Engine Oil - Diesel Heavy Duty,Lubricants & Fluids,LTR,Heavy-duty diesel engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; API CK-4/CI-4; Pack size.
+PART,Engine Oil - Motorcycle 4T,Lubricants & Fluids,LTR,Four-stroke motorcycle engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Viscosity grade; JASO grade; Pack size.
+PART,Two-Stroke Oil,Lubricants & Fluids,LTR,Two-stroke engine oil. Engine Oils item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Type; Pack size.
+PART,Manual Transmission Oil,Lubricants & Fluids,LTR,Gear oil for manual gearboxes. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity grade; API GL rating; Pack size.
+PART,Automatic Transmission Fluid,Lubricants & Fluids,LTR,Fluid for automatic transmissions. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,CVT Fluid,Lubricants & Fluids,LTR,Fluid for continuously variable transmissions. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Dual Clutch Transmission Fluid,Lubricants & Fluids,LTR,Fluid for dual-clutch gearboxes. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Differential Oil,Lubricants & Fluids,LTR,Oil for differentials and axles. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity grade; API GL-5; Pack size.
+PART,Transfer Case Fluid,Lubricants & Fluids,LTR,Oil for transfer cases. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Specification; Pack size.
+PART,Power Steering Fluid,Lubricants & Fluids,LTR,Hydraulic fluid for power steering. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Type; Pack size.
+PART,Motorcycle Fork Oil,Lubricants & Fluids,LTR,Oil for telescopic forks. Transmission & Driveline Fluids item in the Lubricants & Fluids category (Transmission system). Variants are distinguished by: Viscosity; Pack size.
+PART,Brake Fluid DOT 4,Lubricants & Fluids,LTR,Glycol-based brake and clutch fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 4; Pack size.
+PART,Brake Fluid DOT 5.1,Lubricants & Fluids,LTR,Glycol-based high-performance brake fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 5.1; Pack size.
+PART,Brake Fluid DOT 3,Lubricants & Fluids,LTR,Glycol-based brake fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Grade: DOT 3; Pack size.
+PART,Coolant Concentrate,Lubricants & Fluids,LTR,Concentrated engine coolant to be diluted. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Chemistry: IAT/OAT/HOAT; Colour; Pack size.
+PART,Coolant Ready-Mix,Lubricants & Fluids,LTR,Ready-to-use 50:50 coolant. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Chemistry; Colour; Pack size.
+PART,Radiator Flush,Lubricants & Fluids,LTR,Chemical cleaner for the cooling circuit. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Pack size.
+PART,Radiator Stop Leak,Lubricants & Fluids,LTR,Sealant for small cooling leaks. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Pack size.
+PART,Windscreen Washer Fluid,Lubricants & Fluids,LTR,Screen-wash concentrate or ready fluid. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Type: concentrate/ready; Pack size.
+PART,Diesel Exhaust Fluid,Lubricants & Fluids,LTR,Aqueous urea solution for SCR systems. Brake & Coolant Fluids item in the Lubricants & Fluids category (Hydraulics & Cooling system). Variants are distinguished by: Concentration: 32.5%; Pack size.
+PART,Multipurpose Grease,Lubricants & Fluids,KG,General-purpose chassis and bearing grease. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: NLGI grade; Thickener; Pack size.
+PART,Wheel Bearing Grease,Lubricants & Fluids,KG,High-temperature wheel bearing grease. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: NLGI grade; Pack size.
+PART,CV Joint Grease,Lubricants & Fluids,KG,Molybdenum grease for CV joints. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Copper Anti-Seize Paste,Lubricants & Fluids,GM,Anti-seize for exhaust and brake hardware. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Silicone Grease,Lubricants & Fluids,GM,Silicone grease for rubber and plastic parts. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Brake Caliper Grease,Lubricants & Fluids,GM,High-temperature grease for caliper slides. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Chain Lubricant,Lubricants & Fluids,ML,Spray lubricant for drive chains. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Type: standard/O-ring; Pack size.
+PART,Penetrating Oil,Lubricants & Fluids,ML,Rust-penetrating lubricant spray. Greases & Lubricants item in the Lubricants & Fluids category (Lubrication system). Variants are distinguished by: Pack size.
+PART,Petrol System Cleaner,Lubricants & Fluids,ML,Additive cleaning petrol injectors and valves. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Diesel System Cleaner,Lubricants & Fluids,ML,Additive cleaning diesel injectors. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Diesel Anti-Gel Additive,Lubricants & Fluids,ML,Additive improving cold flow. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Octane Booster,Lubricants & Fluids,ML,Additive raising octane rating. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Engine Oil Additive,Lubricants & Fluids,ML,Additive for engine oil. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Engine Flush,Lubricants & Fluids,ML,Cleaner run before an oil change. Additives & Treatments item in the Lubricants & Fluids category (Fuel & Engine system). Variants are distinguished by: Pack size.
+PART,Oil Filter - Spin-On,Filters,NOS,Spin-on engine oil filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Thread; Height; Diameter; Bypass valve.
+PART,Oil Filter - Cartridge,Filters,NOS,Replaceable oil filter element. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Housing fit; Diameter; Height.
+PART,Fuel Filter - Petrol,Filters,NOS,Inline or in-tank petrol filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection; Type: inline/in-tank.
+PART,Fuel Filter - Diesel,Filters,NOS,Diesel fuel filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection; Water separation: yes/no.
+PART,Fuel Water Separator,Filters,NOS,Separates water from diesel. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type; Connection.
+PART,Air Filter - Engine Intake,Filters,NOS,Engine intake air filter element. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Shape: panel/round; Dimensions.
+PART,Air Filter - Heavy Duty,Filters,NOS,Large intake filter for commercial vehicles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions.
+PART,Breather Filter,Filters,NOS,Filter on the crankcase breather. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type.
+PART,Cabin Air Filter - Particulate,Filters,NOS,Passenger compartment air filter. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions; Type: particulate.
+PART,Cabin Air Filter - Activated Carbon,Filters,NOS,Cabin filter with activated carbon layer. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Dimensions.
+PART,Transmission Oil Filter,Filters,NOS,Filter for automatic transmission fluid. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Vehicle fit.
+PART,Hydraulic Oil Filter,Filters,NOS,Filter for hydraulic circuits. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Connection.
+PART,Fuel Pump Strainer,Filters,NOS,Strainer on the fuel pump inlet. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type.
+PART,Diesel Particulate Filter,Filters,NOS,Particulate filter in the exhaust. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Engine type.
+PART,Motorcycle Air Filter,Filters,NOS,Air filter for motorcycles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type: foam/paper; Dimensions.
+PART,Motorcycle Oil Filter,Filters,NOS,Oil filter for motorcycles. Engine & Fuel Filters item in the Filters category (Engine system). Variants are distinguished by: Type: spin-on/cartridge.
+PART,Brake Pad Set - Front,Brakes,SET,Friction pads for front disc brakes. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle: front; Material: ceramic/semi-metallic/organic; Wear sensor: yes/no.
+PART,Brake Pad Set - Rear,Brakes,SET,Friction pads for rear disc brakes. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle: rear; Material; Wear sensor.
+PART,Brake Disc - Front,Brakes,PAIR,Front brake disc. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Type: vented/solid; Pcd.
+PART,Brake Disc - Rear,Brakes,PAIR,Rear brake disc. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Type: vented/solid.
+PART,Brake Caliper,Brakes,NOS,"Hydraulic disc brake caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Position: front/rear, left/right; Piston count."
+PART,Brake Caliper Repair Kit,Brakes,KIT,Seals and boots for a caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Piston diameter.
+PART,Brake Caliper Guide Pin Kit,Brakes,KIT,Slide pins and boots for a caliper. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Brake Pad Hardware Kit,Brakes,KIT,Clips and shims for pads. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle.
+PART,Brake Pad Wear Sensor,Brakes,NOS,Electrical wear sensor for pads. Disc Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Axle.
+PART,Brake Shoe Set,Brakes,SET,Shoes for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Width; Lined/relined.
+PART,Brake Drum,Brakes,NOS,Drum for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Diameter; Width.
+PART,Wheel Cylinder,Brakes,NOS,Hydraulic cylinder in drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Bore.
+PART,Wheel Cylinder Repair Kit,Brakes,KIT,Seals for a wheel cylinder. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Bore.
+PART,Drum Brake Spring Kit,Brakes,KIT,Springs and retainers for drum brakes. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Brake Adjuster,Brakes,NOS,Adjuster for brake clearance. Drum Brake Parts item in the Brakes category (Braking system). Variants are distinguished by: Type: manual/automatic.
+PART,Brake Master Cylinder,Brakes,NOS,Master cylinder of the hydraulic circuit. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Bore; Circuits.
+PART,Brake Booster,Brakes,NOS,Vacuum brake servo. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Diameter.
+PART,Brake Hose - Flexible,Brakes,NOS,Flexible hose between body and caliper. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; End fittings.
+PART,Brake Pipe,Brakes,NOS,Rigid steel brake line. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; Diameter.
+PART,Handbrake Cable,Brakes,NOS,Cable for the parking brake. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Length; Position.
+PART,Brake Light Switch,Brakes,NOS,Switch signalling brake application. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Proportioning Valve,Brakes,NOS,Valve proportioning rear brake pressure. Hydraulic & Control item in the Brakes category (Braking system). Variants are distinguished by: Type.
+PART,Wheel Speed Sensor,Brakes,NOS,ABS wheel speed sensor. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Position.
+PART,ABS Hydraulic Modulator,Brakes,NOS,Hydraulic unit of the ABS. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Vehicle fit.
+PART,ABS Control Module,Brakes,NOS,Electronic module controlling ABS. ABS & Stability item in the Brakes category (Braking system). Variants are distinguished by: Vehicle fit.
+PART,Clutch Kit,Clutch & Transmission,KIT,"Clutch disc, pressure plate and release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter; Splines; Includes."
+PART,Clutch Disc,Clutch & Transmission,NOS,Driven clutch disc. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter; Splines.
+PART,Clutch Pressure Plate,Clutch & Transmission,NOS,Pressure plate assembly. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Diameter.
+PART,Clutch Release Bearing,Clutch & Transmission,NOS,Release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type: mechanical/hydraulic.
+PART,Clutch Master Cylinder,Clutch & Transmission,NOS,Hydraulic clutch master cylinder. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Bore.
+PART,Clutch Slave Cylinder,Clutch & Transmission,NOS,Hydraulic clutch slave cylinder. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Bore.
+PART,Clutch Cable,Clutch & Transmission,NOS,Clutch actuation cable. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length.
+PART,Clutch Fork,Clutch & Transmission,NOS,Fork operating the release bearing. Clutch item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Vehicle fit.
+PART,Gearbox - Manual,Clutch & Transmission,NOS,Complete manual gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Speeds; Drive.
+PART,Gearbox - Automatic,Clutch & Transmission,NOS,Complete automatic gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type: torque converter/CVT/DCT.
+PART,Gearbox Mounting,Clutch & Transmission,NOS,Support for the gearbox. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position.
+PART,Gear Shift Cable,Clutch & Transmission,NOS,Shift cable. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length.
+PART,Gear Set,Clutch & Transmission,NOS,Gear and synchroniser parts. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Gear position.
+PART,Torque Converter,Clutch & Transmission,NOS,Fluid coupling for automatic gearboxes. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Vehicle fit.
+PART,Differential Assembly,Clutch & Transmission,NOS,Differential unit. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Ratio.
+PART,Crown Wheel and Pinion,Clutch & Transmission,SET,Final drive gear set. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Ratio.
+PART,Differential Bearing,Clutch & Transmission,NOS,Bearing in the differential. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Type.
+PART,Drive Shaft Assembly,Clutch & Transmission,NOS,"Driveshaft with joints. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: front/rear, left/right."
+PART,Propeller Shaft,Clutch & Transmission,NOS,Rear-drive propeller shaft. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Length; Joints.
+PART,CV Joint,Clutch & Transmission,NOS,Outer or inner CV joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: inner/outer.
+PART,CV Boot Kit,Clutch & Transmission,KIT,"Boot, clamps and grease for CV joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Position: inner/outer."
+PART,Universal Joint,Clutch & Transmission,NOS,Cardan cross joint. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Size.
+PART,Centre Support Bearing,Clutch & Transmission,NOS,Centre bearing of the propeller shaft. Gearbox & Drivetrain item in the Clutch & Transmission category (Transmission system). Variants are distinguished by: Size.
+PART,Shock Absorber - Front,Suspension & Steering,NOS,Front hydraulic or gas damper. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Type: oil/gas; Position.
+PART,Shock Absorber - Rear,Suspension & Steering,NOS,Rear hydraulic or gas damper. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Type: oil/gas.
+PART,Strut Assembly,Suspension & Steering,NOS,Strut with spring and mount. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Strut Mount,Suspension & Steering,NOS,Upper strut mounting. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Strut Bearing,Suspension & Steering,NOS,Bearing in the strut mount. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Size.
+PART,Coil Spring,Suspension & Steering,NOS,Coil suspension spring. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position; Rate; Free length.
+PART,Leaf Spring,Suspension & Steering,NOS,Leaf spring or leaf. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Leaves; Length.
+PART,Spring Bump Stop,Suspension & Steering,KIT,Bump stop and dust boot. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Control Arm,Suspension & Steering,NOS,"Suspension control arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position: lower/upper, left/right."
+PART,Ball Joint,Suspension & Steering,NOS,Ball joint of the control arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Suspension Bush,Suspension & Steering,NOS,Rubber or polyurethane bush. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position; Size.
+PART,Stabiliser Bar,Suspension & Steering,NOS,Anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Stabiliser Link,Suspension & Steering,NOS,Link for the anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Stabiliser Bush,Suspension & Steering,NOS,Bush for the anti-roll bar. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Size.
+PART,Trailing Arm,Suspension & Steering,NOS,Rear suspension arm. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Air Spring,Suspension & Steering,NOS,Air suspension spring. Suspension item in the Suspension & Steering category (Suspension system). Variants are distinguished by: Position.
+PART,Steering Rack,Suspension & Steering,NOS,Steering rack assembly. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type: manual/hydraulic/electric.
+PART,Steering Rack Boot,Suspension & Steering,NOS,Boot for the steering rack. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Steering Wheel,Suspension & Steering,NOS,Steering wheel. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Diameter; Airbag: yes/no.
+PART,Steering Column,Suspension & Steering,NOS,Steering column. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Steering Gear Box,Suspension & Steering,NOS,Recirculating-ball steering box. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type.
+PART,Tie Rod End,Suspension & Steering,NOS,Outer steering joint. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Inner Tie Rod,Suspension & Steering,NOS,Inner steering joint. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Position.
+PART,Power Steering Pump,Suspension & Steering,NOS,Hydraulic power steering pump. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type.
+PART,Power Steering Hose,Suspension & Steering,NOS,Power steering hose. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Type: pressure/return.
+PART,Steering Idler Arm,Suspension & Steering,NOS,Steering linkage arm. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Drag Link,Suspension & Steering,NOS,Steering linkage rod. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Length.
+PART,King Pin Kit,Suspension & Steering,KIT,Kingpin and bush set. Steering item in the Suspension & Steering category (Steering system). Variants are distinguished by: Vehicle fit.
+PART,Wheel Bearing - Front,Suspension & Steering,NOS,Front wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Type: ball/tapered; Size.
+PART,Wheel Bearing - Rear,Suspension & Steering,NOS,Rear wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Type; Size.
+PART,Wheel Hub Assembly,Suspension & Steering,NOS,Hub with integrated bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Position; ABS ring.
+PART,Wheel Stud,Suspension & Steering,NOS,Stud or bolt holding the wheel. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Thread; Length.
+PART,Wheel Nut,Suspension & Steering,NOS,Nut holding the wheel. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Thread; Seat type.
+PART,Wheel Bearing Seal,Suspension & Steering,NOS,Seal for the wheel bearing. Wheel Bearings & Hubs item in the Suspension & Steering category (Wheels system). Variants are distinguished by: Size.
+PART,Radiator,Cooling System,NOS,Engine coolant radiator. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Core size; Material: aluminium/copper; Transmission cooler: yes/no.
+PART,Radiator Cap,Cooling System,NOS,Pressure cap of the cooling system. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Pressure rating.
+PART,Radiator Hose - Upper,Cooling System,NOS,Upper radiator hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Radiator Hose - Lower,Cooling System,NOS,Lower radiator hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Heater Hose,Cooling System,NOS,Heater circuit hose. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Length.
+PART,Coolant Expansion Tank,Cooling System,NOS,Coolant reservoir. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Cap: yes/no.
+PART,Water Pump,Cooling System,NOS,Coolant circulation pump. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Drive: belt/chain/electric.
+PART,Thermostat,Cooling System,NOS,Thermostat regulating coolant temperature. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Opening temperature.
+PART,Thermostat Housing,Cooling System,NOS,Housing of the thermostat. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Material.
+PART,Radiator Fan,Cooling System,NOS,Radiator cooling fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Diameter; Type: electric/belt.
+PART,Radiator Fan Motor,Cooling System,NOS,Motor of the radiator fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Voltage.
+PART,Fan Clutch,Cooling System,NOS,Clutch of a belt-driven fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Radiator Fan Shroud,Cooling System,NOS,Shroud around the fan. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Vehicle fit.
+PART,Engine Oil Cooler,Cooling System,NOS,Oil-to-coolant cooler. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Heater Core,Cooling System,NOS,Cabin heater core. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Size.
+PART,Coolant Temperature Sensor,Cooling System,NOS,Sensor for coolant temperature. Cooling item in the Cooling System category (Cooling system). Variants are distinguished by: Type.
+PART,Fuel Pump - Electric,Fuel System,NOS,Electric fuel pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type; Pressure.
+PART,Fuel Pump Module,Fuel System,NOS,Pump with sender and housing. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Vehicle fit.
+PART,Fuel Pump - Mechanical,Fuel System,NOS,Camshaft-driven fuel pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Diesel Injection Pump,Fuel System,NOS,Diesel injection pump. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: inline/rotary.
+PART,High Pressure Fuel Pump,Fuel System,NOS,High-pressure pump for direct injection. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Fuel Injector - Petrol,Fuel System,NOS,Petrol fuel injector. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: port/direct.
+PART,Fuel Injector - Diesel,Fuel System,NOS,Diesel fuel injector. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Injector Seal Kit,Fuel System,KIT,Seals for injectors. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Engine type.
+PART,Fuel Rail,Fuel System,NOS,Fuel distribution rail. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Engine type.
+PART,Fuel Pressure Regulator,Fuel System,NOS,Regulates fuel pressure. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Fuel Tank,Fuel System,NOS,Fuel tank. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Capacity; Material: steel/plastic.
+PART,Fuel Tank Cap,Fuel System,NOS,Fuel filler cap. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type: locking/non-locking.
+PART,Fuel Hose,Fuel System,NOS,Fuel hose. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Length; Diameter.
+PART,Carburettor,Fuel System,NOS,Carburettor. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Throat size; Vehicle fit.
+PART,Carburettor Repair Kit,Fuel System,KIT,"Jets, gaskets and needles. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Vehicle fit."
+PART,Fuel Level Sender,Fuel System,NOS,Fuel level sensor. Fuel Delivery item in the Fuel System category (Fuel system). Variants are distinguished by: Type.
+PART,Car Battery - Lead Acid,Electrical,NOS,12 V lead-acid battery for cars. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; CCA; Terminal layout; Type: flooded/SMF.
+PART,Heavy Duty Battery,Electrical,NOS,Lead-acid battery for commercial vehicles. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Voltage.
+PART,Motorcycle Battery,Electrical,NOS,Battery for motorcycles. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Type: dry/gel/lithium.
+PART,AGM Start-Stop Battery,Electrical,NOS,Battery for start-stop systems. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Capacity Ah; Technology: AGM/EFB.
+PART,Battery Terminal,Electrical,NOS,Terminal clamp. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Polarity.
+PART,Battery Cable,Electrical,NOS,Battery cable. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Length; Gauge.
+PART,Alternator,Electrical,NOS,Charging alternator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Output A; Pulley type.
+PART,Alternator Regulator,Electrical,NOS,Alternator voltage regulator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Alternator Rectifier,Electrical,NOS,Diode bridge of the alternator. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Alternator Pulley,Electrical,NOS,Alternator drive pulley. Battery & Charging item in the Electrical category (Electrical system). Variants are distinguished by: Type.
+PART,Starter Motor,Electrical,NOS,Engine starter motor. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Power.
+PART,Starter Solenoid,Electrical,NOS,Solenoid of the starter. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage.
+PART,Starter Drive,Electrical,NOS,Pinion drive of the starter. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Teeth.
+PART,Ignition Coil,Electrical,NOS,Ignition coil. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Type: single/pack.
+PART,Spark Plug - Iridium,Electrical,NOS,Iridium electrode spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Spark Plug - Platinum,Electrical,NOS,Platinum electrode spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Spark Plug - Standard,Electrical,NOS,Standard spark plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Thread; Reach; Heat range.
+PART,Glow Plug,Electrical,NOS,Diesel pre-heating plug. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Voltage; Length.
+PART,HT Lead Set,Electrical,SET,High-tension lead set. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Cylinders.
+PART,Distributor Cap,Electrical,NOS,Distributor cap. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Cylinders.
+PART,Ignition Switch,Electrical,NOS,Ignition switch. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Type.
+PART,Magneto Coil,Electrical,NOS,Magneto or stator coil. Starting & Ignition item in the Electrical category (Electrical system). Variants are distinguished by: Vehicle fit.
+PART,Fuse - Blade,Electrical,PKT,"Blade-type fuse. Wiring, Switches & Relays item in the Electrical category (Electrical system). Variants are distinguished by: Rating A; Type."

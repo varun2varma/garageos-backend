@@ -61,6 +61,10 @@ public class NavigationTripMedia {
     @Column(name = "file_name")
     private String fileName;
 
+    /** Client-generated id of the captured file; makes retries idempotent (V71). */
+    @Column(name = "client_upload_id", length = 80)
+    private String clientUploadId;
+
     @Column(name = "content_type")
     private String contentType;
 

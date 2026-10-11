@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.garageos.modules.media.util.ImageOrientation;
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Font;
@@ -181,7 +182,8 @@ public class MediaProcessingScheduler {
             return;
         }
 
-        BufferedImage sourceImage = ImageIO.read(new ByteArrayInputStream(r2.downloadBytes(sourceKey)));
+        // Upright pixels (EXIF orientation applied once); the derived JPEGs carry no EXIF, so it is never applied twice.
+        BufferedImage sourceImage = ImageOrientation.decodeUpright(r2.downloadBytes(sourceKey));
 
         if (sourceImage == null) {
             throw new IOException("Source is not a decodable image.");
@@ -265,7 +267,7 @@ public class MediaProcessingScheduler {
 
             byte[] original = r2.downloadBytes(media.getStorageKey());
 
-            sourceImage = ImageIO.read(new ByteArrayInputStream(original));
+            sourceImage = ImageOrientation.decodeUpright(original);
 
             if (sourceImage == null) {
                 log.warn(

@@ -36,4 +36,12 @@ public interface MediaStorageService {
     default void delete(String storageKey) {
         // optional capability
     }
+
+    /**
+     * Stores already-processed evidence bytes (for example an orientation-normalised photo) and returns the storage
+     * key. Cloud-capable implementations override this; the default keeps older implementations working.
+     */
+    default String storeEvidence(byte[] content, String contentType, String folder, String extension) {
+        return uploadBytes(content, folder, extension);
+    }
 }

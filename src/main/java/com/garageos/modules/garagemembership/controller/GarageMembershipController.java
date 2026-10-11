@@ -12,6 +12,7 @@ import com.garageos.modules.identity.security.principal.GarageUserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,13 +53,15 @@ public class GarageMembershipController {
     }
 
     @GetMapping("/pending")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<List<GarageMembershipResponse>>> getPendingMemberships(
-            @AuthenticationPrincipal GarageUserPrincipal principal) {
+            @AuthenticationPrincipal GarageUserPrincipal principal,
+            @RequestParam(required = false) Long garageId) {
 
         return ApiResponseUtil.success(
                 "Pending memberships fetched successfully.",
                 service.getPendingMemberships(
-                        principal.getGarageId()
+                        resolveGarageId(principal, garageId)
                 )
         );
     }
@@ -93,8 +96,9 @@ public class GarageMembershipController {
             return principal.getGarageId();
         }
 
-        boolean hasMembership = membershipRepository
-                .existsByGarage_IdAndUser_Id(requestedGarageId, principal.getId());
+        // Membership model: the account's own garage, plus an OWNER's ACTIVE garages. Never another tenant's.
+        boolean hasMembership = com.garageos.core.security.GarageScope.isMemberOfGarage(
+                new com.garageos.core.security.GarageScope(membershipRepository), principal, requestedGarageId);
 
         if (!hasMembership) {
             throw new ResourceNotFoundException("Garage not found with id : " + requestedGarageId);
@@ -104,6 +108,7 @@ public class GarageMembershipController {
     }
 
     @PutMapping("/{membershipId}/approve")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<GarageMembershipResponse>> approveMembership(
             @AuthenticationPrincipal GarageUserPrincipal principal,
             @PathVariable Long membershipId,
@@ -120,6 +125,7 @@ public class GarageMembershipController {
     }
 
     @PutMapping("/{membershipId}/reject")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<GarageMembershipResponse>> rejectMembership(
             @PathVariable Long membershipId,
             @RequestParam String remarks) {
@@ -134,6 +140,7 @@ public class GarageMembershipController {
     }
 
     @DeleteMapping("/{membershipId}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<Void>> removeMembership(
             @PathVariable Long membershipId) {
 

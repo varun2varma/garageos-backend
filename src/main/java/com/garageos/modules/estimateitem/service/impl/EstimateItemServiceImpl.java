@@ -3,10 +3,18 @@ package com.garageos.modules.estimateitem.service.impl;
 import com.garageos.core.enums.EstimateItemType;
 import com.garageos.core.enums.EstimateStatus;
 import com.garageos.core.enums.RepairStatus;
+import com.garageos.core.enums.catalog.CatalogItemType;
+import com.garageos.core.enums.catalog.ClassificationStatus;
+import com.garageos.core.enums.catalog.EntrySource;
+import com.garageos.core.enums.catalog.ReviewStatus;
 import com.garageos.core.enums.identity.RoleCode;
 import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.ResourceNotFoundException;
+import com.garageos.core.security.GarageScope;
 import com.garageos.core.util.MoneyCalculator;
+import com.garageos.modules.catalog.entity.CatalogItem;
+import com.garageos.modules.catalog.service.CatalogService;
+import com.garageos.modules.estimateitem.tax.EstimateTotalsCalculator;
 import com.garageos.modules.complaint.entity.Complaint;
 import com.garageos.modules.complaint.repository.ComplaintRepository;
 import com.garageos.modules.customer.entity.Customer;
@@ -26,7 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -40,21 +48,199 @@ public class EstimateItemServiceImpl
     private final EstimateItemMapper mapper;
     private final CustomerRepository customerRepository;
     private final RepairTaskRepository repairTaskRepository;
+    private final CatalogService catalogService;
+    private final EstimateTotalsCalculator totalsCalculator;
+    private final GarageScope garageScope;
+
+    /**
+     * Read access to an estimate's lines: unrestricted, staff of the job card's garage (GarageScope, so an Owner's
+     * other garages count), or the customer the job card belongs to. Anyone else gets the usual not-found, so
+     * another garage's prices are never exposed by guessing an id.
+     */
+    private void requireReadable(Estimate estimate, String notFoundMessage) {
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isUnrestricted(principal)) {
+            return;
+        }
+
+        var jobCard = estimate == null ? null : estimate.getJobCard();
+
+        boolean staff = jobCard != null
+                && jobCard.getGarage() != null
+                && garageScope.canAccessGarage(principal, jobCard.getGarage().getId());
+
+        boolean ownCustomer = jobCard != null
+                && jobCard.getCustomer() != null
+                && principal.getMobile() != null
+                && principal.getMobile().equals(jobCard.getCustomer().getMobileNumber());
+
+        if (!staff && !ownCustomer) {
+            throw new ResourceNotFoundException(notFoundMessage);
+        }
+    }
+
+    private void recalculateEstimate(Estimate estimate) {
+        totalsCalculator.recalculate(estimate);
+    }
+
+    /**
+     * Staff mutation guard: the caller must belong to the estimate's garage
+     * (never a customer), and an approved estimate is final - changing a line
+     * would silently un-approve it and drift from the invoice built on it.
+     */
+    private void requireEditable(Estimate estimate) {
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        if (garageScope.isCustomerOnly(principal)) {
+            throw new ResourceNotFoundException("Estimate not found.");
+        }
+
+        Long garageId = estimate.getJobCard().getGarage() == null
+                ? null
+                : estimate.getJobCard().getGarage().getId();
+
+        if (garageId != null && !garageScope.canAccessGarage(principal, garageId)) {
+            throw new ResourceNotFoundException("Estimate not found.");
+        }
+
+        if (estimate.getStatus() == EstimateStatus.APPROVED) {
+            throw new BusinessException(
+                    "This estimate has already been approved and can no longer be changed.");
+        }
+    }
+
+    /**
+     * Takes the estimate row lock (held until this transaction commits) and only then loads the line, so neither the
+     * estimate state nor the line read afterwards can be a stale pre-lock copy.
+     */
+    private EstimateItem lockEstimateThenLoadItem(Long itemId) {
+
+        Long estimateId = repository.findEstimateIdById(itemId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate Item not found with id : " + itemId));
+
+        estimateRepository.findByIdForUpdate(estimateId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate Item not found with id : " + itemId));
+
+        return repository.findById(itemId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Estimate Item not found with id : " + itemId));
+    }
+
+    private static EstimateItemType parseItemType(String raw) {
+        try {
+            return EstimateItemType.valueOf(raw == null ? "" : raw.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessException("Item type must be LABOUR, PART or OTHERS.");
+        }
+    }
+
+    private static void validateLine(CreateEstimateItemRequest request) {
+        if (request.getDescription() == null || request.getDescription().isBlank()) {
+            throw new BusinessException("Item description is required.");
+        }
+        if (request.getQuantity() == null || request.getQuantity().signum() <= 0) {
+            throw new BusinessException("Quantity must be greater than zero.");
+        }
+        if (request.getUnitPrice() == null || request.getUnitPrice().signum() < 0) {
+            throw new BusinessException("Unit price must not be negative.");
+        }
+    }
+
+    /**
+     * Catalog selection versus manual entry. A catalog id must reference an active
+     * item of the matching kind; the classification is snapshotted onto the line.
+     * Without an id the line is MANUAL and queued for review - no catalog id,
+     * code or rate is ever invented, and provenance comes from the authenticated
+     * principal and the job card, never from the request.
+     */
+    private void applyProvenance(
+            EstimateItem item, CreateEstimateItemRequest request, Estimate estimate, boolean isNew) {
+
+        EstimateItemType type = item.getItemType();
+
+        item.setUnit(blankToNull(request.getUnit()));
+        item.setManualNote(blankToNull(request.getManualNote()));
+
+        if (!isNew && request.getCatalogItemId() == null) {
+            // Editing description, quantity or price never changes where a line came from.
+            return;
+        }
+
+        if (request.getCatalogItemId() != null) {
+
+            if (type == EstimateItemType.OTHERS) {
+                throw new BusinessException("Other charges are not catalog items.");
+            }
+
+            CatalogItem catalogItem = catalogService.requireUsable(
+                    request.getCatalogItemId(),
+                    type == EstimateItemType.PART ? CatalogItemType.PART : CatalogItemType.SERVICE);
+
+            item.setCatalogItemId(catalogItem.getId());
+            item.setEntrySource(EntrySource.MASTER);
+            item.setReviewStatus(ReviewStatus.NOT_REQUIRED);
+
+            if (item.getUnit() == null) {
+                item.setUnit(catalogItem.getDefaultUnit());
+            }
+
+            item.setHsnSacCode(catalogItem.getHsnSacCode());
+            item.setTaxRuleCode(catalogItem.getTaxRuleCode());
+            item.setGstRatePercent(
+                    catalogItem.getClassificationStatus() == ClassificationStatus.VERIFIED
+                            ? catalogService.resolveRate(catalogItem.getTaxRuleCode(), LocalDate.now()).orElse(null)
+                            : null);
+            return;
+        }
+
+        item.setCatalogItemId(null);
+        item.setEntrySource(EntrySource.MANUAL);
+        item.setReviewStatus(type == EstimateItemType.OTHERS
+                ? ReviewStatus.NOT_REQUIRED
+                : ReviewStatus.NEEDS_REVIEW);
+        // Manual lines carry no classification: nothing is guessed here.
+        item.setHsnSacCode(null);
+        item.setTaxRuleCode(null);
+        item.setGstRatePercent(null);
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
 
     @Override
+    @Transactional
     public EstimateItemResponse addItem(
             Long estimateId,
             CreateEstimateItemRequest request) {
 
-        Estimate estimate = estimateRepository.findById(estimateId)
+        // Lock first, so the status checked below is the committed state and cannot change until this commits.
+        Estimate estimate = estimateRepository.findByIdForUpdate(estimateId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found with id : "
                                         + estimateId));
 
+        requireEditable(estimate);
+
+        validateLine(request);
+
         EstimateItem item = mapper.toEntity(request);
 
         item.setEstimate(estimate);
+
+        item.setGarageId(estimate.getJobCard().getGarage() == null
+                ? null
+                : estimate.getJobCard().getGarage().getId());
+        item.setCreatedByUserId(garageScope.principal().getId());
 
         if (request.getComplaintId() == null) {
             throw new ResourceNotFoundException(
@@ -77,14 +263,14 @@ public class EstimateItemServiceImpl
 
         item.setComplaint(complaint);
 
-        item.setItemType(
-                EstimateItemType.valueOf(
-                        request.getItemType().toUpperCase()));
+        item.setItemType(parseItemType(request.getItemType()));
 
         item.setTotalPrice(
                 MoneyCalculator.calculateItemTotal(
                         request.getQuantity(),
                         request.getUnitPrice()));
+
+        applyProvenance(item, request, estimate, true);
 
         item = repository.save(item);
 
@@ -101,11 +287,16 @@ public class EstimateItemServiceImpl
                         new ResourceNotFoundException(
                                 "Estimate Item not found with id : " + id));
 
+        requireReadable(item.getEstimate(), "Estimate Item not found with id : " + id);
+
         return mapper.toResponse(item);
     }
 
     @Override
     public List<EstimateItemResponse> getItems(Long estimateId) {
+
+        estimateRepository.findById(estimateId)
+                .ifPresent(e -> requireReadable(e, "Estimate not found with id : " + estimateId));
 
         return repository.findByEstimateId(estimateId)
                 .stream()
@@ -116,32 +307,42 @@ public class EstimateItemServiceImpl
     @Override
     public List<EstimateItemResponse> getItemsByComplaint(Long complaintId) {
 
-        return repository.findByComplaintId(complaintId)
+        List<EstimateItem> found = repository.findByComplaintId(complaintId);
+
+        // every line of one complaint belongs to one job card, so checking each distinct estimate is enough
+        found.stream()
+                .map(EstimateItem::getEstimate)
+                .distinct()
+                .forEach(e -> requireReadable(e, "Complaint not found with id : " + complaintId));
+
+        return found
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
     }
 
     @Override
+    @Transactional
     public EstimateItemResponse updateItem(
             Long id,
             CreateEstimateItemRequest request) {
 
-        EstimateItem item = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Estimate Item not found with id : " + id));
+        EstimateItem item = lockEstimateThenLoadItem(id);
+
+        requireEditable(item.getEstimate());
+
+        validateLine(request);
 
         mapper.updateEntity(request, item);
 
-        item.setItemType(
-                EstimateItemType.valueOf(
-                        request.getItemType().toUpperCase()));
+        item.setItemType(parseItemType(request.getItemType()));
 
         item.setTotalPrice(
                 MoneyCalculator.calculateItemTotal(
                         request.getQuantity(),
                         request.getUnitPrice()));
+
+        applyProvenance(item, request, item.getEstimate(), false);
 
         item = repository.save(item);
 
@@ -151,76 +352,25 @@ public class EstimateItemServiceImpl
     }
 
     @Override
+    @Transactional
     public void deleteItem(Long id) {
 
-        EstimateItem item = repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Estimate Item not found with id : " + id));
+        EstimateItem item = lockEstimateThenLoadItem(id);
 
         Estimate estimate = item.getEstimate();
+
+        requireEditable(estimate);
 
         repository.delete(item);
 
         recalculateEstimate(estimate);
     }
 
-    private void recalculateEstimate(
-            Estimate estimate) {
-
-        List<EstimateItem> items =
-                repository.findByEstimateId(estimate.getId());
-
-        // Mission: a deselected item must not continue to repair/invoice.
-        // Excluding it here, at the one place subtotal/gst/grandTotal are
-        // computed, means that guarantee holds everywhere downstream reads
-        // the estimate's totals, rather than needing a second exclusion
-        // list at invoice time.
-        List<EstimateItem> selectedItems = items.stream()
-                .filter(item -> Boolean.TRUE.equals(item.getSelected()))
-                .toList();
-
-        BigDecimal subtotal = selectedItems.stream()
-                .map(EstimateItem::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Mission's tax rule: GST applies to LABOUR only. PART and
-        // OTHERS items contribute to subtotal/grandTotal but never to
-        // the GST base.
-        BigDecimal labourSubtotal = selectedItems.stream()
-                .filter(item -> item.getItemType() == com.garageos.core.enums.EstimateItemType.LABOUR)
-                .map(EstimateItem::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal discount = estimate.getDiscount();
-
-        BigDecimal gst =
-                MoneyCalculator.calculateGST(
-                        labourSubtotal,
-                        discount);
-
-        BigDecimal grandTotal =
-                MoneyCalculator.calculateGrandTotal(
-                        subtotal,
-                        discount,
-                        gst);
-
-        estimate.setSubtotal(subtotal);
-        estimate.setGst(gst);
-        estimate.setGrandTotal(grandTotal);
-        estimate.setStatus(EstimateStatus.WAITING_FOR_APPROVAL);
-
-        estimateRepository.save(estimate);
-    }
-
     @Override
     @Transactional
     public EstimateItemResponse setItemSelection(Long itemId, boolean selected) {
 
-        EstimateItem item = repository.findById(itemId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Estimate Item not found with id : " + itemId));
+        EstimateItem item = lockEstimateThenLoadItem(itemId);
 
         Estimate estimate = item.getEstimate();
 
@@ -263,6 +413,18 @@ public class EstimateItemServiceImpl
     public List<EstimateItemResponse> setComplaintItemsSelection(
             Long complaintId,
             boolean selected) {
+
+        List<Long> estimateIds = repository.findEstimateIdsByComplaintId(complaintId);
+
+        if (estimateIds.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Estimate items not found for complaint id : " + complaintId);
+        }
+
+        // Lock first, then read the complaint's lines, so they are the committed state held under the lock.
+        estimateRepository.findByIdForUpdate(estimateIds.get(0))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Estimate items not found for complaint id : " + complaintId));
 
         List<EstimateItem> items = repository.findByComplaintId(complaintId);
 

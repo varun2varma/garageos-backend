@@ -39,5 +39,14 @@ public enum AuditEventType {
     RETURN_TRIP_STARTED,
 
     PICKUP_COMPLETED,
-    DELIVERY_COMPLETED
+    DELIVERY_COMPLETED,
+
+    /** The one-time, operator-controlled grant of the platform administrator role (no actor: it runs at startup). */
+    PLATFORM_ADMIN_GRANTED,
+    USER_CREATED,
+    USER_UPDATED,
+    USER_DELETED,
+
+    /** A platform administrator corrected the classification snapshot of an approved estimate line (no financial change). */
+    ESTIMATE_LINE_CLASSIFICATION_CORRECTED
 }

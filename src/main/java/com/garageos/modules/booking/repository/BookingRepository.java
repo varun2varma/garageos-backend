@@ -26,4 +26,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             List<Long> vehicleIds,
             List<BookingStatus> statuses
     );
+
+    java.util.Optional<com.garageos.modules.booking.entity.Booking> findByNavigationRequestId(Long navigationRequestId);
 }

@@ -30,4 +30,22 @@ public class InvoiceItemResponse {
 
     private BigDecimal totalPrice;
 
+    // Snapshot fields; null for legacy lines.
+    private String unit;
+
+    private String hsnSacCode;
+
+    private BigDecimal gstRatePercent;
+
+    private BigDecimal taxableValue;
+
+    private BigDecimal cgstAmount;
+
+    private BigDecimal sgstAmount;
+
+    private BigDecimal igstAmount;
+
+    private BigDecimal taxAmount;
+
+    private BigDecimal lineTotal;
 }

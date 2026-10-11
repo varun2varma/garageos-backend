@@ -34,6 +34,10 @@ import java.util.List;
 public class InspectionFindingServiceImpl
         implements InspectionFindingService {
 
+    /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
     private final InspectionFindingRepository repository;
 
     private final InspectionFindingMapper mapper;
@@ -57,6 +61,8 @@ public class InspectionFindingServiceImpl
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Job Card not found with id : " + jobCardId));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jobCard, "Job Card not found with id : " + jobCardId);
 
         InspectionMasterItem masterItem =
                 inspectionMasterItemRepository.findById(
@@ -85,12 +91,17 @@ public class InspectionFindingServiceImpl
                         new ResourceNotFoundException(
                                 "Inspection Finding not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, finding.getJobCard(), "Inspection Finding not found with id : " + id);
+
         return mapper.toResponse(finding);
     }
 
     @Override
     public List<InspectionFindingResponse> getInspectionFindings(
             Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardRead(garageScope, jc, "Job Card not found with id : " + jobCardId));
 
         return mapper.toResponseList(
                 repository.findByJobCardIdOrderById(jobCardId));
@@ -105,6 +116,8 @@ public class InspectionFindingServiceImpl
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Inspection Finding not found with id : " + id));
+
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, finding.getJobCard(), "Inspection Finding not found with id : " + id);
 
         InspectionMasterItem masterItem =
                 inspectionMasterItemRepository.findById(
@@ -130,11 +143,16 @@ public class InspectionFindingServiceImpl
                         new ResourceNotFoundException(
                                 "Inspection Finding not found with id : " + id));
 
+        com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, finding.getJobCard(), "Inspection Finding not found with id : " + id);
+
         repository.delete(finding);
     }
 
     @Override
     public void loadInspectionTemplate(Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jc, "Job Card not found with id : " + jobCardId));
 
         if (repository.existsByJobCardId(jobCardId)) {
 
@@ -206,6 +224,9 @@ public class InspectionFindingServiceImpl
 
     @Override
     public void completeInspection(Long jobCardId) {
+
+        jobCardRepository.findById(jobCardId).ifPresent(jc ->
+                com.garageos.core.security.GarageScope.requireJobCardStaff(garageScope, jc, "Job Card not found with id : " + jobCardId));
 
         long total = repository.countByJobCardId(jobCardId);
 

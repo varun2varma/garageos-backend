@@ -38,7 +38,7 @@ import static com.garageos.modules.notification.service.NotificationRecipientRes
 @RequiredArgsConstructor
 public class NotificationRecipientResolver {
 
-    enum Audience { CUSTOMER, TECHNICIANS, DRIVER, OWNER, MANAGERS }
+    enum Audience { CUSTOMER, TECHNICIANS, DRIVER, OWNER, MANAGERS, EXPLICIT }
 
     private static final Map<NotificationEventType, Set<Audience>> AUDIENCES =
             new EnumMap<>(NotificationEventType.class);
@@ -85,6 +85,7 @@ public class NotificationRecipientResolver {
         AUDIENCES.put(NotificationEventType.VEHICLE_READY_FOR_DELIVERY, EnumSet.of(CUSTOMER, MANAGERS, OWNER));
         AUDIENCES.put(NotificationEventType.VEHICLE_DELIVERED, EnumSet.of(CUSTOMER, MANAGERS, OWNER));
         AUDIENCES.put(NotificationEventType.JOB_CLOSED, EnumSet.of(OWNER));
+        AUDIENCES.put(NotificationEventType.CHAT_MESSAGE_RECEIVED, EnumSet.of(EXPLICIT));
     }
 
     private final UserRepository userRepository;
@@ -140,6 +141,17 @@ public class NotificationRecipientResolver {
             }
         }
 
+        if (audiences.contains(EXPLICIT)) {
+            for (Long id : asLongList(facts.get(NotificationFacts.CHAT_RECIPIENT_USER_IDS))) {
+                activeUser(id).ifPresent(u -> {
+                    NotificationPersona persona = explicitPersona(u, garageId);
+                    if (persona != null) {
+                        recipients.putIfAbsent(u.getId(), persona);
+                    }
+                });
+            }
+        }
+
         // Actor self-notification suppression.
         Long actorId = asLong(facts.get(NotificationFacts.ACTOR_USER_ID));
         if (actorId != null) {
@@ -149,6 +161,35 @@ public class NotificationRecipientResolver {
         List<NotificationRecipient> result = new ArrayList<>();
         recipients.forEach((id, persona) -> result.add(new NotificationRecipient(id, persona)));
         return result;
+    }
+
+    /**
+     * Persona of an explicitly named recipient, or null when the user may not be told about this garage's event:
+     * customers are cross-garage records (the chat service already authorised them against the conversation), staff
+     * must belong to the event's garage (the same tenant rule as every other audience).
+     */
+    private NotificationPersona explicitPersona(User u, Long garageId) {
+        boolean customer = u.getUserRoles().stream()
+                .anyMatch(ur -> ur.getRole() != null && ur.getRole().getCode() == RoleCode.CUSTOMER);
+        if (customer) {
+            return NotificationPersona.CUSTOMER;
+        }
+        if (garageId == null) {
+            return null;
+        }
+        boolean owner = garageRepository.findById(garageId).map(g -> Objects.equals(g.getOwnerUserId(), u.getId())).orElse(false);
+        if (owner) {
+            return NotificationPersona.OWNER;
+        }
+        if (!Objects.equals(u.getGarageId(), garageId)) {
+            return null;
+        }
+        for (var ur : u.getUserRoles()) {
+            if (ur.getRole() == null) continue;
+            if (ur.getRole().getCode() == RoleCode.DRIVER) return NotificationPersona.DRIVER;
+            if (ur.getRole().getCode() == RoleCode.TECHNICIAN) return NotificationPersona.TECHNICIAN;
+        }
+        return NotificationPersona.STAFF;
     }
 
     private java.util.Optional<Long> resolveCustomer(Long customerId) {

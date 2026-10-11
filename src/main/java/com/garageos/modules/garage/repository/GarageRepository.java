@@ -19,6 +19,13 @@ public interface GarageRepository
     boolean existsByGarageCode(String garageCode);
 
     /**
+     * Guards against registering the same garage twice for one owner (a double-tapped or retried submission).
+     * Same name, address and city, ignoring case, under the same owner.
+     */
+    boolean existsByOwnerUserIdAndGarageNameIgnoreCaseAndAddressIgnoreCaseAndCityIgnoreCase(
+            Long ownerUserId, String garageName, String address, String city);
+
+    /**
      * Pessimistically locks the Garage row so
      * next_employee_sequence can be read-and-incremented without a
      * race between concurrent employee onboarding approvals for the

@@ -88,4 +88,6 @@ public interface NavigationTripRepository
             @Param("garageId") Long garageId,
             @Param("statuses") List<TripStatus> statuses
     );
+
+    List<NavigationTrip> findByNavigationRequestIdIn(java.util.Collection<Long> navigationRequestIds);
 }

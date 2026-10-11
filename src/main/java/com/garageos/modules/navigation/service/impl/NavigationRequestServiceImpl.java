@@ -30,6 +30,27 @@ public class NavigationRequestServiceImpl
 
     private final JobCardRepository jobCardRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.core.security.GarageScope garageScope;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.customer.repository.CustomerRepository customerRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.navigation.repository.NavigationTripRepository navigationTripRepository;
+
+    /** The customer id behind the signed-in account (matched by registered mobile), or null. */
+    private Long ownCustomerId(com.garageos.modules.identity.security.principal.GarageUserPrincipal principal) {
+
+        if (principal == null || principal.getMobile() == null || customerRepository == null) {
+            return null;
+        }
+
+        return customerRepository.findByMobileNumber(principal.getMobile())
+                .map(com.garageos.modules.customer.entity.Customer::getId)
+                .orElse(null);
+    }
+
     @Override
     @Transactional
     public NavigationRequestResponse createRequest(
@@ -37,6 +58,8 @@ public class NavigationRequestServiceImpl
             CreateNavigationRequest request) {
 
         validateRequest(request);
+
+        requireMayCreateFor(customerId, request.getGarageId());
 
         Long jobCardId = null;
 
@@ -119,7 +142,27 @@ public class NavigationRequestServiceImpl
                                 )
                         );
 
+        requireMayView(request);
+
         return toResponse(request);
+    }
+
+    /**
+     * Who may open a navigation request for {@code customerId} at {@code garageId}: that customer themself, or staff
+     * of that garage (membership model). The customer id comes from a query parameter, so it is never trusted alone.
+     */
+    private void requireMayCreateFor(Long customerId, Long garageId) {
+
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        boolean self = principal != null && customerId != null && customerId.equals(ownCustomerId(principal));
+
+        boolean staff = principal != null
+                && com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, garageId);
+
+        if (!self && !staff) {
+            throw new com.garageos.core.exception.ResourceNotFoundException("Customer not found : " + customerId);
+        }
     }
 
     @Override
@@ -127,11 +170,23 @@ public class NavigationRequestServiceImpl
     public List<NavigationRequestResponse> getCustomerRequests(
             Long customerId) {
 
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        if (principal == null) {
+            throw new com.garageos.core.exception.ResourceNotFoundException("Customer not found : " + customerId);
+        }
+
+        boolean self = customerId != null && customerId.equals(ownCustomerId(principal));
+
+        // The customer sees all of their own requests; staff see only those addressed to a garage they belong to.
         return navigationRequestRepository
                 .findByCustomerIdOrderByCreatedAtDesc(
                         customerId
                 )
                 .stream()
+                .filter(r -> self
+                        || com.garageos.core.security.GarageScope.isMemberOfGarage(
+                                garageScope, principal, r.getGarageId()))
                 .map(this::toResponse)
                 .toList();
     }
@@ -141,6 +196,13 @@ public class NavigationRequestServiceImpl
     public List<NavigationRequestResponse> getGarageRequests(
             Long garageId) {
 
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        if (principal == null
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, garageId)) {
+            throw new com.garageos.core.exception.ResourceNotFoundException("Garage not found with id : " + garageId);
+        }
+
         return navigationRequestRepository
                 .findByGarageIdAndStatusOrderByScheduledAtAsc(
                         garageId,
@@ -149,6 +211,31 @@ public class NavigationRequestServiceImpl
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /** The request's own customer, staff of its garage (membership model), or the driver assigned to its trip. */
+    private void requireMayView(NavigationRequest request) {
+
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        if (principal == null) {
+            throw new com.garageos.core.exception.ResourceNotFoundException(
+                    "Navigation request not found: " + request.getId());
+        }
+
+        boolean self = request.getCustomerId() != null && request.getCustomerId().equals(ownCustomerId(principal));
+
+        boolean staff = com.garageos.core.security.GarageScope.isMemberOfGarage(
+                garageScope, principal, request.getGarageId());
+
+        boolean driver = !self && !staff && navigationTripRepository != null
+                && navigationTripRepository.findByNavigationRequestIdIn(List.of(request.getId())).stream()
+                        .anyMatch(t -> t.getDriverId() != null && t.getDriverId().equals(principal.getId()));
+
+        if (!self && !staff && !driver) {
+            throw new com.garageos.core.exception.ResourceNotFoundException(
+                    "Navigation request not found: " + request.getId());
+        }
     }
 
     private NavigationRequestResponse toResponse(

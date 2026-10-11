@@ -29,6 +29,15 @@ public class JwtServiceImpl implements JwtService {
     @Value("${security.jwt.refresh-token-expiration}")
     private Duration refreshTokenExpiration;
 
+    /**
+     * Fails startup (the application does not come up) when the signing secret is missing, weak or a value that was
+     * ever committed to the repository. See {@link JwtSecretPolicy}. The message never contains the secret.
+     */
+    @jakarta.annotation.PostConstruct
+    void validateSigningSecret() {
+        JwtSecretPolicy.validate(secret);
+    }
+
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }

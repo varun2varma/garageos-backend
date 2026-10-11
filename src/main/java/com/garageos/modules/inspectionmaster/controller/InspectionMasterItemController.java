@@ -8,6 +8,7 @@ import com.garageos.modules.inspectionmaster.service.InspectionMasterItemService
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class InspectionMasterItemController {
     private final InspectionMasterItemService service;
 
     @PostMapping("/{masterId}/items")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<InspectionMasterItemResponse>> createItem(
             @PathVariable Long masterId,
             @Valid @RequestBody CreateInspectionMasterItemRequest request) {
@@ -48,6 +50,7 @@ public class InspectionMasterItemController {
     }
 
     @PutMapping("/items/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<InspectionMasterItemResponse>> updateItem(
             @PathVariable Long id,
             @Valid @RequestBody CreateInspectionMasterItemRequest request) {
@@ -58,6 +61,7 @@ public class InspectionMasterItemController {
     }
 
     @DeleteMapping("/items/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteItem(
             @PathVariable Long id) {
 

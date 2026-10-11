@@ -13,6 +13,9 @@ public interface UserRoleRepository
 
     void deleteByUserId(Long userId);
 
+    /** True when any account already holds the role (used to make the platform-admin bootstrap a one-time grant). */
+    boolean existsByRoleCode(RoleCode roleCode);
+
     boolean existsByUserIdAndRoleCode(
             Long userId,
             RoleCode roleCode

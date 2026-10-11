@@ -9,6 +9,7 @@ import com.garageos.modules.vehiclemaster.service.ModelService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class ModelController {
     private final ModelService modelService;
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleModelResponse>> create(
             @Valid @RequestBody CreateVehicleModelRequest request) {
 
@@ -51,6 +53,7 @@ public class ModelController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<VehicleModelResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody CreateVehicleModelRequest request) {
@@ -62,6 +65,7 @@ public class ModelController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable Long id) {
 
