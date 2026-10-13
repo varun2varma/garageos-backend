@@ -31,6 +31,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final HttpServletRequest httpServletRequest;
+    private final com.garageos.modules.identity.security.PasswordRecoveryThrottle recoveryThrottle;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
@@ -96,15 +97,56 @@ public class AuthController {
     public ResponseEntity<Void> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
 
-        authService.forgotPassword(request);
+        // A throttled request is answered exactly like an accepted one (204), so throttling reveals nothing.
+        String ip = com.garageos.modules.identity.security.ClientIpResolver.resolve(httpServletRequest);
+        if (recoveryThrottle.allowSend(ip, request.getIdentifier())) {
+            authService.forgotPassword(request);
+        }
 
         return ResponseEntity.noContent().build();
     }
 
-    /** Mission backlog #13 — forgot password, step 2. */
+    /**
+     * SMS-OTP password recovery, step 2: verify the OTP sent to the account's registered mobile. Returns a
+     * short-lived single-use reset authorization to present to {@code /reset-password}.
+     */
+    @PostMapping("/forgot-password/verify-otp")
+    public ResponseEntity<com.garageos.modules.identity.dto.response.PasswordResetAuthorizationResponse> verifyResetOtp(
+            @Valid @RequestBody com.garageos.modules.identity.dto.request.VerifyResetOtpRequest request) {
+
+        String ip = com.garageos.modules.identity.security.ClientIpResolver.resolve(httpServletRequest);
+        if (!recoveryThrottle.allowVerify(ip, request.getIdentifier())) {
+            throw new com.garageos.modules.otp.exception.OtpException(
+                    com.garageos.modules.otp.exception.OtpException.Code.OTP_RATE_LIMITED,
+                    "Too many attempts. Please try again later.");
+        }
+
+        return ResponseEntity.ok(authService.verifyPasswordResetOtp(request));
+    }
+
+    /** Authenticated: verify the mobile number on the caller's own account (send the OTP with purpose MOBILE_VERIFICATION). */
+    @PostMapping("/mobile/verify")
+    public ResponseEntity<Void> verifyMobile(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal
+            com.garageos.modules.identity.security.principal.GarageUserPrincipal principal,
+            @Valid @RequestBody com.garageos.modules.identity.dto.request.VerifyMobileRequest request) {
+
+        authService.verifyOwnMobile(principal.getId(), request.getOtp());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /** Mission backlog #13 — forgot password, final step: new password + the reset authorization. */
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
+
+        String ip = com.garageos.modules.identity.security.ClientIpResolver.resolve(httpServletRequest);
+        if (!recoveryThrottle.allowReset(ip)) {
+            throw new com.garageos.modules.otp.exception.OtpException(
+                    com.garageos.modules.otp.exception.OtpException.Code.OTP_RATE_LIMITED,
+                    "Too many attempts. Please try again later.");
+        }
 
         authService.resetPassword(request);
 
@@ -144,7 +186,8 @@ public class AuthController {
             @Valid @ModelAttribute AccountDeletionRequestForm form,
             HttpServletRequest request) {
 
-        authService.requestAccountDeletion(form.getIdentifier(), request.getRemoteAddr());
+        authService.requestAccountDeletion(form.getIdentifier(),
+                com.garageos.modules.identity.security.ClientIpResolver.resolve(request));
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create("/delete-account-requested.html"))

@@ -59,6 +59,10 @@ public class Garage extends BaseEntity {
     @Column(name = "owner_user_id")
     Long ownerUserId;
 
+    /** IANA timezone id (e.g. Asia/Kolkata) for displaying this garage events; null = application default (V76). */
+    @Column(name = "time_zone", length = 64)
+    String timeZone;
+
     @Column(
             nullable = false,
             length = 150

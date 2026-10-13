@@ -61,6 +61,24 @@ public class User extends BaseEntity {
     @Column(length = 150)
     private String email;
 
+    /** When the user proved control of {@link #mobileVerifiedNumber} by SMS OTP (V77); null = never proven. */
+    @Column(name = "mobile_verified_at")
+    private java.time.LocalDateTime mobileVerifiedAt;
+
+    /** The exact number that was proven; a different current {@link #mobile} means it is no longer verified. */
+    @Column(name = "mobile_verified_number", length = 20)
+    private String mobileVerifiedNumber;
+
+    public boolean isMobileVerified() {
+        return mobile != null && mobileVerifiedAt != null && mobile.equals(mobileVerifiedNumber);
+    }
+
+    /** Records that the current mobile number was just proven by OTP. */
+    public void markMobileVerified(java.time.LocalDateTime when) {
+        this.mobileVerifiedAt = when;
+        this.mobileVerifiedNumber = this.mobile;
+    }
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

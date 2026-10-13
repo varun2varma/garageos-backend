@@ -714,8 +714,10 @@ public class JobCardServiceImpl implements JobCardService {
                     .orElseThrow(() -> new BusinessException(
                             "The job card has no invoice, so it cannot be closed."));
 
-            if (invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.GENERATED
-                    || invoice.getPaymentStatus() != com.garageos.core.enums.PaymentStatus.PAID) {
+            // ACCEPTED = issued invoice the customer accepted; still a valid, payable invoice.
+            if ((invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.GENERATED
+                    && invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.ACCEPTED)
+                    ||invoice.getPaymentStatus() != com.garageos.core.enums.PaymentStatus.PAID) {
                 throw new BusinessException(
                         "The invoice must be generated and fully paid before the job card can be closed.");
             }

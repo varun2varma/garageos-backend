@@ -15,6 +15,9 @@ public class InvoiceResponse {
 
     private Long estimateId;
 
+    /** Business number of the estimate this invoice bills (e.g. G001-EST-2026-000001); estimateId stays the API key. */
+    private String estimateNumber;
+
     private String invoiceStatus;
 
     private String paymentStatus;

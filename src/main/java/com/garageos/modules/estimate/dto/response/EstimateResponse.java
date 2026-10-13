@@ -15,6 +15,9 @@ public class EstimateResponse {
 
     private Long jobCardId;
 
+    /** Human-readable business number of the job card (e.g. G001-JC-2026-000001); jobCardId stays the API key. */
+    private String jobCardNumber;
+
     private String status;
 
     private BigDecimal subtotal;

@@ -14,6 +14,14 @@ public interface VehicleHandoverRepository extends JpaRepository<VehicleHandover
             HandoverStatus status
     );
 
+    /** Row-locked read used by verify, so two concurrent verifications cannot both consume one code. */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query(
+            "select h from VehicleHandover h where h.tripId = :tripId and h.status = :status order by h.createdAt desc, h.id desc")
+    java.util.List<VehicleHandover> lockPendingForTrip(
+            @org.springframework.data.repository.query.Param("tripId") Long tripId,
+            @org.springframework.data.repository.query.Param("status") HandoverStatus status);
+
     Optional<VehicleHandover> findFirstByTripIdOrderByCreatedAtDesc(Long tripId);
 
     /**

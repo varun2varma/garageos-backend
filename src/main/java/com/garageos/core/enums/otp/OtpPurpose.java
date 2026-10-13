@@ -12,6 +12,8 @@ public enum OtpPurpose {
     USER_REGISTRATION,
     GARAGE_REGISTRATION,
     PHONE_CHANGE,
+    /** An authenticated user proving they control the mobile number on their account (enables SMS recovery). */
+    MOBILE_VERIFICATION,
     PASSWORD_RESET,
     LOGIN,
     PAYMENT_VERIFICATION

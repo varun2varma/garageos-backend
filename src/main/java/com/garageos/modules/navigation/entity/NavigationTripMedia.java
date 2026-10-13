@@ -87,6 +87,22 @@ public class NavigationTripMedia {
 
     private Double longitude;
 
+    /** Historical identity snapshot of the authenticated uploader (V74). */
+    @Column(name = "captured_by_name", length = 200)
+    private String capturedByName;
+
+    /** DEVICE when the validated device capture time was kept, SERVER when it fell back to receipt time (V74). */
+    @Column(name = "captured_at_source", length = 10)
+    private String capturedAtSource;
+
+    /** GPS accuracy in metres of the fix behind latitude/longitude; null when unavailable (V74). */
+    @Column(name = "accuracy_meters")
+    private Double accuracyMeters;
+
+    /** Resolved address/place name when the device supplied one; null when unavailable (V74). */
+    @Column(name = "location_address", length = 500)
+    private String locationAddress;
+
     @Column(
             name = "created_at",
             nullable = false

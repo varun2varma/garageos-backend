@@ -19,4 +19,7 @@ public class HandoverCodeResponse {
     private TripType direction;
     private String code;
     private LocalDateTime expiresAt;
+
+    /** True when this call issued a brand-new code; false when the still-valid pending code was re-shown. */
+    private boolean newlyIssued;
 }

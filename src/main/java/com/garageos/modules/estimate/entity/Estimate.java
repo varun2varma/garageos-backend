@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @Entity
+@org.hibernate.annotations.BatchSize(size = 50)
 @Table(name = "estimate")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Estimate extends BaseEntity {

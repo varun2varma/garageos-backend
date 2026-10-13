@@ -27,7 +27,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.Base64;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
 import com.garageos.modules.notification.event.NotificationEvent;
 import com.garageos.modules.notification.event.NotificationEventPublisher;
@@ -52,7 +58,7 @@ public class HandoverServiceImpl implements HandoverService {
     private NotificationEventPublisher notificationEventPublisher;
 
     private static final int CODE_LENGTH = 6;
-    private static final int EXPIRY_MINUTES = 10;
+    private static final int EXPIRY_MINUTES = 30;
     private static final int MAX_FAILED_ATTEMPTS = 5;
 
     private final VehicleHandoverRepository handoverRepository;
@@ -62,11 +68,36 @@ public class HandoverServiceImpl implements HandoverService {
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
 
+    /**
+     * Key material for deriving codes. Domain-separated from JWT signing by the HMAC message prefix, and never
+     * exposed. A database leak alone does not reveal pending codes (only a bcrypt hash and a random nonce).
+     */
+    @Value("${security.jwt.secret:}")
+    private String codeSecret;
+
+    /**
+     * Optional dedicated secret (variable HANDOVER_CODE_SECRET, at least 32 characters). When set it is used instead of
+     * the JWT key, so compromising or rotating the JWT key no longer affects handover codes. Unset keeps the previous
+     * behaviour. Either way the HMAC key is a purpose-specific subkey, never the raw secret.
+     */
+    @Value("${handover.code-secret:}")
+    private String dedicatedCodeSecret;
+
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
     @Transactional
     public HandoverCodeResponse getOrCreateActiveCode(Long tripId) {
+        return issueCode(tripId, false);
+    }
+
+    @Override
+    @Transactional
+    public HandoverCodeResponse renewCode(Long tripId) {
+        return issueCode(tripId, true);
+    }
+
+    private HandoverCodeResponse issueCode(Long tripId, boolean forceNew) {
 
         GarageUserPrincipal principal = currentPrincipal();
 
@@ -77,7 +108,8 @@ public class HandoverServiceImpl implements HandoverService {
         Customer customer = customerRepository.findByMobileNumber(principal.getMobile())
                 .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
 
-        NavigationTrip trip = navigationTripRepository.findById(tripId)
+        // Row lock: concurrent requests for one trip queue here, so they cannot create competing active codes.
+        NavigationTrip trip = navigationTripRepository.findByIdForUpdate(tripId)
                 .orElseThrow(() -> new ResourceNotFoundException("Trip not found : " + tripId));
 
         NavigationRequest navigationRequest = navigationRequestRepository
@@ -99,20 +131,57 @@ public class HandoverServiceImpl implements HandoverService {
                     "Handover is not available yet - your driver hasn't arrived.");
         }
 
+        if (handoverRepository.existsByTripIdAndDirectionAndStatus(
+                tripId, trip.getTripType(), HandoverStatus.VERIFIED)) {
+            throw new BusinessException("The vehicle handover was already confirmed.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (!forceNew) {
+            VehicleHandover pending = handoverRepository
+                    .findFirstByTripIdAndStatusOrderByCreatedAtDesc(tripId, HandoverStatus.PENDING)
+                    .orElse(null);
+
+            if (pending != null) {
+                boolean live = pending.getExpiresAt().isAfter(now)
+                        && pending.getFailedAttempts() < MAX_FAILED_ATTEMPTS;
+
+                if (live && pending.getCodeNonce() != null) {
+                    String derived = deriveCode(pending.getCodeNonce(), tripId, trip.getTripType());
+
+                    // Only re-show a code that provably matches the stored hash. If the secret changed since it was
+                    // issued, the derivation no longer matches and a fresh code is issued instead of a wrong one.
+                    if (passwordEncoder.matches(derived, pending.getCodeHash())) {
+                        return HandoverCodeResponse.builder()
+                                .tripId(tripId)
+                                .direction(trip.getTripType())
+                                .code(derived)
+                                .expiresAt(pending.getExpiresAt())
+                                .newlyIssued(false)
+                                .build();
+                    }
+                }
+            }
+        }
+
+        // Replace: retire the old pending code (expired, exhausted, legacy, or explicitly renewed) before the new one exists.
         expireExistingActiveCode(tripId);
 
-        String code = generateCode();
+        String nonce = newNonce();
+        String code = deriveCode(nonce, tripId, trip.getTripType());
 
         VehicleHandover handover = VehicleHandover.builder()
                 .tripId(tripId)
                 .direction(trip.getTripType())
                 .codeHash(passwordEncoder.encode(code))
+                .codeNonce(nonce)
                 .status(HandoverStatus.PENDING)
-                .expiresAt(LocalDateTime.now().plusMinutes(EXPIRY_MINUTES))
+                .expiresAt(now.plusMinutes(EXPIRY_MINUTES))
                 .failedAttempts(0)
                 .build();
 
-        handoverRepository.save(handover);
+        handover = handoverRepository.saveAndFlush(handover);
 
         // Never include the code itself in audit metadata - it is
         // security-sensitive material, same as a password.
@@ -121,7 +190,7 @@ public class HandoverServiceImpl implements HandoverService {
                 "VehicleHandover",
                 handover.getId(),
                 navigationRequest.getGarageId(),
-                java.util.Map.of("tripId", tripId, "direction", trip.getTripType())
+                java.util.Map.of("tripId", tripId, "direction", trip.getTripType(), "renewed", forceNew)
         );
 
         NotificationEvents.publish(notificationEventPublisher,
@@ -136,11 +205,15 @@ public class HandoverServiceImpl implements HandoverService {
                 .direction(trip.getTripType())
                 .code(code)
                 .expiresAt(handover.getExpiresAt())
+                .newlyIssued(true)
                 .build();
     }
 
+    // noRollbackFor: a wrong code is reported by throwing, and the failed-attempt count (and an expiry/lock state change)
+    // written just before must be committed. Without it the throw rolled the increment back, so the 5-attempt limit never
+    // took effect (found by HandoverConcurrencyIT).
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public HandoverStatusResponse verify(Long tripId, String code) {
 
         GarageUserPrincipal principal = currentPrincipal();
@@ -169,12 +242,14 @@ public class HandoverServiceImpl implements HandoverService {
                     "The vehicle handover was already confirmed - complete the pickup trip at the garage.");
         }
 
+        // Locked read: two concurrent verifications of one code cannot both succeed (single use).
         VehicleHandover handover = handoverRepository
-                .findFirstByTripIdAndStatusOrderByCreatedAtDesc(tripId, HandoverStatus.PENDING)
+                .lockPendingForTrip(tripId, HandoverStatus.PENDING)
+                .stream().findFirst()
                 .orElseThrow(() -> new BusinessException(
                         "No active confirmation code. Ask the customer to generate a new one."));
 
-        if (handover.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (!handover.getExpiresAt().isAfter(LocalDateTime.now())) {
 
             handover.setStatus(HandoverStatus.EXPIRED);
             handoverRepository.save(handover);
@@ -301,17 +376,50 @@ public class HandoverServiceImpl implements HandoverService {
                 .findFirstByTripIdAndStatusOrderByCreatedAtDesc(tripId, HandoverStatus.PENDING)
                 .ifPresent(existing -> {
                     existing.setStatus(HandoverStatus.EXPIRED);
-                    handoverRepository.save(existing);
+                    handoverRepository.saveAndFlush(existing);
                 });
     }
 
-    private String generateCode() {
+    private String newNonce() {
+        byte[] bytes = new byte[24];
+        secureRandom.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
 
-        int max = (int) Math.pow(10, CODE_LENGTH);
+    /**
+     * Six digits derived as HMAC-SHA256(secret, "handover-code-v1|nonce|trip|direction"). The nonce comes from
+     * SecureRandom, so the code is unpredictable without the server secret; the plaintext is recomputed on demand
+     * and never stored or logged.
+     */
+    String deriveCode(String nonce, Long tripId, TripType direction) {
 
-        int value = secureRandom.nextInt(max);
+        String base = dedicatedCodeSecret != null && dedicatedCodeSecret.length() >= 32 ? dedicatedCodeSecret : codeSecret;
 
-        return String.format("%0" + CODE_LENGTH + "d", value);
+        if (base == null || base.length() < 16) {
+            throw new IllegalStateException("Handover code secret is not configured.");
+        }
+
+        try {
+            // Key separation: derive a purpose-specific subkey so the raw secret is never used directly as an HMAC key.
+            Mac derive = Mac.getInstance("HmacSHA256");
+            derive.init(new SecretKeySpec(base.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] subKey = derive.doFinal("garagest/handover-code/subkey/v1".getBytes(StandardCharsets.UTF_8));
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(subKey, "HmacSHA256"));
+            byte[] h = mac.doFinal(("handover-code-v1|" + nonce + "|" + tripId + "|" + direction)
+                    .getBytes(StandardCharsets.UTF_8));
+
+            long v = 0;
+            for (int i = 0; i < 8; i++) {
+                v = (v << 8) | (h[i] & 0xffL);
+            }
+            long mod = (long) Math.pow(10, CODE_LENGTH);
+
+            return String.format("%0" + CODE_LENGTH + "d", Long.remainderUnsigned(v, mod));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Could not derive handover code.", e);
+        }
     }
 
     private GarageUserPrincipal currentPrincipal() {

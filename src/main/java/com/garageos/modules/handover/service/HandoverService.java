@@ -5,8 +5,11 @@ import com.garageos.modules.handover.dto.response.HandoverStatusResponse;
 
 public interface HandoverService {
 
-    /** Customer only, for a trip they own. Issues a fresh code every call. */
+    /** Customer only, for a trip they own. Returns the valid pending code, issuing one only if none is valid. */
     HandoverCodeResponse getOrCreateActiveCode(Long tripId);
+
+    /** Customer only: explicitly replace the pending code; the previous one stops working immediately. */
+    HandoverCodeResponse renewCode(Long tripId);
 
     /** Driver only, for a trip actually assigned to them. */
     HandoverStatusResponse verify(Long tripId, String code);

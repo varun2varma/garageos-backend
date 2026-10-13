@@ -34,6 +34,17 @@ public interface AuthService {
     void forgotPassword(com.garageos.modules.identity.dto.request.ForgotPasswordRequest request);
 
     /** Mission backlog #13 — forgot password, step 2: consume the token and set a new password. */
+    /**
+     * Step 2 of the SMS-OTP password recovery: verifies the PASSWORD_RESET OTP for the account the identifier
+     * resolves to and returns a short-lived, single-use reset authorization. Every failure (unknown account,
+     * no eligible mobile, wrong/expired OTP) is reported identically where it could reveal account existence.
+     */
+    com.garageos.modules.identity.dto.response.PasswordResetAuthorizationResponse verifyPasswordResetOtp(
+            com.garageos.modules.identity.dto.request.VerifyResetOtpRequest request);
+
+    /** Authenticated user proves control of the mobile number on their account with a MOBILE_VERIFICATION OTP. */
+    void verifyOwnMobile(Long userId, String otp);
+
     void resetPassword(com.garageos.modules.identity.dto.request.ResetPasswordRequest request);
 
     RegisterResponse register(RegisterRequest request);

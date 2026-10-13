@@ -26,7 +26,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import com.garageos.core.util.DisplayTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +90,7 @@ public class FinalReportPdfRenderer {
             delivery(document, d);
             ownerWorkshop(document, d);
             photos(document, d);
+            tripEvidence(document, d);
 
             document.add(disclaimer(d));
 
@@ -287,7 +290,7 @@ public class FinalReportPdfRenderer {
         for (RepairInfo r : repairs) {
             t.addCell(bodyCell(r.description(), Element.ALIGN_LEFT));
             t.addCell(bodyCell(label(r.status()), Element.ALIGN_LEFT));
-            t.addCell(bodyCell(dateTime(r.completedAt()), Element.ALIGN_LEFT));
+            t.addCell(bodyCell(dateTime(d, r.completedAt()), Element.ALIGN_LEFT));
             if (owner) {
                 t.addCell(bodyCell(r.technicianName(), Element.ALIGN_LEFT));
                 t.addCell(bodyCell(r.remarks(), Element.ALIGN_LEFT));
@@ -312,7 +315,7 @@ public class FinalReportPdfRenderer {
                 : section("QUALITY CHECK", new float[]{1.5f, 2f}, "Result", "Checked on");
 
         t.addCell(bodyCell(label(q.status()), Element.ALIGN_LEFT));
-        t.addCell(bodyCell(dateTime(q.inspectedAt()), Element.ALIGN_LEFT));
+        t.addCell(bodyCell(dateTime(d, q.inspectedAt()), Element.ALIGN_LEFT));
         if (owner) {
             t.addCell(bodyCell(q.inspectedBy(), Element.ALIGN_LEFT));
             t.addCell(bodyCell(q.remarks(), Element.ALIGN_LEFT));
@@ -354,7 +357,7 @@ public class FinalReportPdfRenderer {
                 ? section("DELIVERY", new float[]{2f, 2f, 2f}, "Delivered on", "Delivered by", "Received by")
                 : section("DELIVERY", new float[]{2f}, "Delivered on");
 
-        t.addCell(bodyCell(dateTime(del.deliveredAt()), Element.ALIGN_LEFT));
+        t.addCell(bodyCell(dateTime(d, del.deliveredAt()), Element.ALIGN_LEFT));
         if (owner) {
             t.addCell(bodyCell(del.deliveredBy(), Element.ALIGN_LEFT));
             t.addCell(bodyCell(del.receivedBy(), Element.ALIGN_LEFT));
@@ -446,6 +449,87 @@ public class FinalReportPdfRenderer {
         doc.add(grid);
     }
 
+    /**
+     * Pickup and delivery evidence captured by drivers. Only recorded facts are printed: a missing capture time,
+     * driver, GPS fix or address is shown as "not recorded", never guessed.
+     */
+    private void tripEvidence(Document doc, JobCardFinalReportDTO d) throws DocumentException {
+
+        List<JobCardFinalReportDTO.TripEvidenceInfo> items = d.tripEvidence();
+
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        ZoneId zone = DisplayTime.resolveZone(d.garage() == null ? null : d.garage().getTimeZone());
+
+        doc.add(sectionHeader("PICKUP AND DELIVERY EVIDENCE"));
+
+        for (JobCardFinalReportDTO.TripEvidenceInfo e : items) {
+
+            PdfPTable row = new PdfPTable(new float[] {1.1f, 1.9f});
+            row.setWidthPercentage(100);
+            row.setSpacingAfter(4);
+            row.setKeepTogether(true);
+
+            PdfPCell imageCell = new PdfPCell();
+            imageCell.setBorderColor(BORDER);
+            imageCell.setPadding(4);
+
+            if (e.jpegBytes() != null) {
+                try {
+                    Image img = Image.getInstance(e.jpegBytes());
+                    img.scaleToFit(150, 110);
+                    imageCell.addElement(img);
+                } catch (IOException | RuntimeException ex) {
+                    imageCell.addElement(new Paragraph("Photo not available", SMALL));
+                }
+            } else {
+                imageCell.addElement(new Paragraph(e.video() ? "Video (not embedded)" : "Photo not available", SMALL));
+            }
+            row.addCell(imageCell);
+
+            PdfPCell textCell = new PdfPCell();
+            textCell.setBorderColor(BORDER);
+            textCell.setPadding(4);
+
+            textCell.addElement(new Paragraph(
+                    e.stageLabel() + (e.shotType() == null ? "" : " - " + label(e.shotType())), TABLE_HEAD));
+            textCell.addElement(new Paragraph("Captured: " + stamp(e.capturedAt(), zone)
+                    + ("SERVER".equals(e.capturedAtSource()) ? " (upload time; device time unavailable)" : ""), SMALL));
+            if (e.uploadedAt() != null && !e.uploadedAt().equals(e.capturedAt())) {
+                textCell.addElement(new Paragraph("Uploaded: " + stamp(e.uploadedAt(), zone), SMALL));
+            }
+            textCell.addElement(new Paragraph("By: " + (isBlank(e.capturedByName()) ? "not recorded" : e.capturedByName()), SMALL));
+            textCell.addElement(new Paragraph("Location: " + location(e), SMALL));
+            textCell.addElement(new Paragraph("Reference: EV-" + e.mediaId(), SMALL));
+            row.addCell(textCell);
+
+            doc.add(row);
+        }
+    }
+
+    private static String stamp(LocalDateTime t, ZoneId zone) {
+        return t == null ? "not recorded" : DisplayTime.format(t, ZoneId.systemDefault(), zone);
+    }
+
+    private static String location(JobCardFinalReportDTO.TripEvidenceInfo e) {
+        StringBuilder sb = new StringBuilder();
+        if (!isBlank(e.locationAddress())) {
+            sb.append(e.locationAddress());
+        }
+        if (e.latitude() != null && e.longitude() != null) {
+            if (sb.length() > 0) {
+                sb.append("  ");
+            }
+            sb.append(String.format(java.util.Locale.ENGLISH, "%.5f, %.5f", e.latitude(), e.longitude()));
+            if (e.accuracyMeters() != null) {
+                sb.append(String.format(java.util.Locale.ENGLISH, " (+/-%d m)", Math.round(e.accuracyMeters())));
+            }
+        }
+        return sb.length() == 0 ? "not recorded" : sb.toString();
+    }
+
     private PdfPTable disclaimer(JobCardFinalReportDTO d) {
 
         PdfPTable t = new PdfPTable(1);
@@ -459,7 +543,7 @@ public class FinalReportPdfRenderer {
         cell.addElement(new Paragraph(
                 d.audience() == FinalReportAudience.OWNER ? OWNER_DISCLAIMER : CUSTOMER_DISCLAIMER, SMALL));
         cell.addElement(new Paragraph(
-                "Generated on " + dateTime(d.generatedAt()) + "  |  " + d.reference()
+                "Generated on " + dateTime(d, d.generatedAt()) + "  |  " + d.reference()
                         + "  |  Version " + d.version(), SMALL));
 
         t.addCell(cell);
@@ -524,7 +608,12 @@ public class FinalReportPdfRenderer {
         return d == null ? "-" : d.format(DATE);
     }
 
-    private static String dateTime(LocalDateTime d) {
-        return d == null ? "-" : d.format(DATE_TIME);
+    /**
+     * Event times are stored as server-zone LocalDateTime values; show them in the garage timezone (documented
+     * fallback Asia/Kolkata) with the zone abbreviation so the report is unambiguous.
+     */
+    private static String dateTime(JobCardFinalReportDTO report, LocalDateTime t) {
+        String garageZone = report.garage() == null ? null : report.garage().getTimeZone();
+        return DisplayTime.format(t, ZoneId.systemDefault(), DisplayTime.resolveZone(garageZone));
     }
 }

@@ -35,6 +35,23 @@ public interface NavigationTripMediaService {
             String clientUploadId
     );
 
+    /**
+     * Same as the 8-argument upload plus raw device capture metadata (capture time, GPS accuracy, resolved address).
+     * The metadata is validated server-side; the capturing driver's identity always comes from the authenticated
+     * principal, never from the request.
+     */
+    NavigationTripMediaResponse upload(
+            Long tripId,
+            Long driverId,
+            TripMediaStage stage,
+            TripMediaShotType shotType,
+            MultipartFile file,
+            Double latitude,
+            Double longitude,
+            String clientUploadId,
+            CaptureMetadataSanitizer.Raw captureMetadata
+    );
+
     List<NavigationTripMediaResponse> getTripMedia(
             Long tripId
     );

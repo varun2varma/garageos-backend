@@ -25,6 +25,9 @@ public class UserProfileResponse {
 
     private String mobile;
 
+    /** True only when the user has proven control of {@code mobile} by SMS OTP (enables SMS password recovery). */
+    private Boolean mobileVerified;
+
     private UserStatus status;
 
     private Boolean firstLogin;

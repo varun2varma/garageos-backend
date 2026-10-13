@@ -43,6 +43,11 @@ public class DeliveryServiceImpl implements DeliveryService {
     @Autowired
     private com.garageos.core.security.GarageScope garageScope;
 
+
+    /** Field-injected so existing constructor-built tests keep their signature; always present at runtime. */
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.garageos.modules.delivery.preference.ReturnPreferenceGate returnPreferenceGate;
+
     private final DeliveryRepository repository;
     private final JobCardRepository jobCardRepository;
     private final InvoiceRepository invoiceRepository;
@@ -87,6 +92,10 @@ public class DeliveryServiceImpl implements DeliveryService {
                     "This invoice does not belong to the Job Card.");
         }
 
+        // The customer must have chosen in-person collection (payment-gated choice); staff cannot pick the path.
+        returnPreferenceGate.require(jobCard.getId(),
+                com.garageos.modules.delivery.preference.ReturnMethod.COLLECT_AT_GARAGE);
+
         // One completion path: once a delivery has been requested for the job,
         // it is completed by the delivery trip (OTP + evidence), not by hand.
         if (navigationRequestRepository.existsByJobCardIdAndRequestType(
@@ -105,7 +114,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                     "Delivery already exists for this Invoice.");
         }
 
-        if (invoice.getInvoiceStatus() != InvoiceStatus.GENERATED) {
+        if (!isDeliverableInvoiceStatus(invoice.getInvoiceStatus())) {
             throw new BusinessException(
                     "Only generated invoices can be delivered.");
         }
@@ -173,7 +182,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                         new BusinessException(
                                 "The Job Card has no invoice to deliver against."));
 
-        if (invoice.getInvoiceStatus() != InvoiceStatus.GENERATED
+        if (!isDeliverableInvoiceStatus(invoice.getInvoiceStatus())
                 || invoice.getPaymentStatus() != PaymentStatus.PAID) {
             throw new BusinessException(
                     "Invoice must be generated and paid before delivery can be completed.");
@@ -260,6 +269,17 @@ public class DeliveryServiceImpl implements DeliveryService {
         Delivery delivery = requireAccessibleDelivery(id);
 
         repository.delete(delivery);
+    }
+
+    /**
+     * An issued invoice is GENERATED, and becomes ACCEPTED once the customer
+     * accepts it (payment allows both). Accepting must not block delivery; the
+     * separate PAID payment check still gates the handover. DRAFT / CANCELLED
+     * invoices were never issued (or were voided) and stay blocked.
+     */
+    static boolean isDeliverableInvoiceStatus(InvoiceStatus status) {
+        return status == InvoiceStatus.GENERATED
+                || status == InvoiceStatus.ACCEPTED;
     }
 
     /**

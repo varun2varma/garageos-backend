@@ -332,6 +332,7 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
                 .phone(phone)
                 .email(email)
                 .gstNumber(garage.getGstNumber())
+                .timeZone(garage.getTimeZone())
                 .hasLogo(hasLogo)
                 .logoUpdatedAt(garage.getLogoUpdatedAt())
                 .logoUrl(hasLogo ? "/api/v1/garages/" + garage.getId() + "/logo" : null)

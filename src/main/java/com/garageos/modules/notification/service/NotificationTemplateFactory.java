@@ -141,7 +141,7 @@ public class NotificationTemplateFactory {
             case VEHICLE_READY_FOR_DELIVERY -> new Rendered(
                     customer ? "Your vehicle is ready for delivery" : "Vehicle ready for delivery",
                     customer
-                            ? "Your vehicle is ready" + ref + "."
+                            ? "Your vehicle is ready" + ref + ". Open the job card to choose collection at the garage or delivery."
                             : "A vehicle is ready for delivery" + ref + ".");
             case VEHICLE_DELIVERED -> new Rendered(
                     customer ? "Your vehicle has been delivered" : "Vehicle delivered",

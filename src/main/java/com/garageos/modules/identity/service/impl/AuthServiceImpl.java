@@ -9,6 +9,9 @@ import com.garageos.modules.identity.dto.request.ChangePasswordRequest;
 import com.garageos.modules.identity.dto.request.ForgotPasswordRequest;
 import com.garageos.modules.identity.dto.request.LoginRequest;
 import com.garageos.core.enums.otp.OtpPurpose;
+import com.garageos.modules.identity.dto.request.VerifyResetOtpRequest;
+import com.garageos.modules.identity.dto.response.PasswordResetAuthorizationResponse;
+import com.garageos.modules.otp.exception.OtpException;
 import com.garageos.modules.otp.service.OtpService;
 import com.garageos.modules.identity.dto.request.RegisterRequest;
 import com.garageos.modules.identity.dto.request.ResetPasswordRequest;
@@ -59,6 +62,8 @@ public class AuthServiceImpl implements AuthService {
 
     private static final int RESET_TOKEN_LENGTH_BYTES = 24;
     private static final int RESET_TOKEN_EXPIRY_MINUTES = 30;
+    /** Reset authorization issued after a verified OTP: short-lived and single-use. */
+    private static final int OTP_RESET_AUTHORIZATION_MINUTES = 10;
 
     // Minimal in-memory throttle for the public, unauthenticated
     // account-deletion-request form - not a general-purpose rate-limiting
@@ -175,6 +180,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(principal.getEmail())
 
                 .mobile(principal.getMobile())
+
+                .mobileVerified(userRepository.findById(principal.getId()).map(User::isMobileVerified).orElse(false))
 
                 .status(principal.getStatus())
 
@@ -373,47 +380,61 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override
-    @Transactional
-    public void forgotPassword(ForgotPasswordRequest request) {
+    /** Username, then email, then mobile - the same precedence login uses. */
+    private User resolveByIdentifier(String raw) {
 
-        String identifier = request.getIdentifier().trim();
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
 
-        User user = userRepository.findByUsername(identifier)
+        String identifier = raw.trim();
+
+        return userRepository.findByUsername(identifier)
                 .or(() -> userRepository.findByEmail(identifier))
                 .or(() -> userRepository.findByMobile(identifier))
+                .filter(u -> u.getStatus() != UserStatus.DELETED)
                 .orElse(null);
+    }
+
+    /** SMS recovery may only target a number the user has proven they control (V77), never just a stored one. */
+    private static boolean hasEligibleMobile(User user) {
+        return user.isMobileVerified() && user.getMobile().matches("^[6-9]\\d{9}$");
+    }
+
+    // Deliberately not @Transactional: OtpService.send runs in its own transaction and may throw (cooldown, provider
+    // outage); swallowing that inside an outer transaction would mark it rollback-only.
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+
+        User user = resolveByIdentifier(request.getIdentifier());
 
         // Deliberately does not throw when no account matches - revealing
         // "no such account" here is an account-enumeration vector. The
-        // caller always sees the same generic outcome either way; only
-        // the (matched) user's own inbox/phone would ever see a
-        // difference, once real delivery is configured.
+        // caller always sees the same generic outcome either way.
         if (user == null) {
             log.debug("Password reset requested for unknown identifier.");
             return;
         }
 
-        // Any previously-issued, still-unused token for this user is
-        // superseded - only the newest one should be usable, matching
-        // VehicleHandover's expireExistingActiveCode pattern.
-        for (PasswordResetToken existing : passwordResetTokenRepository.findByUserIdAndUsedFalse(user.getId())) {
-            existing.setUsed(true);
-            passwordResetTokenRepository.save(existing);
+        if (otpService.isEnabled()) {
+            // SMS OTP to the account's OWN registered mobile (never a client-supplied number), through the same
+            // provider integration registration uses. Failures (cooldown, hourly limit, provider outage) are
+            // logged and swallowed: surfacing them only for existing accounts would reveal which identifiers
+            // exist. The client enforces its own resend cooldown.
+            if (!hasEligibleMobile(user)) {
+                log.debug("Password reset requested for an account without an eligible mobile number.");
+                return;
+            }
+            try {
+                otpService.send(OtpPurpose.PASSWORD_RESET, user.getMobile(), user.getId());
+            } catch (OtpException e) {
+                log.info("[PASSWORD-RESET] OTP not sent. code={}", e.getCode());
+            }
+            return;
         }
 
-        byte[] randomBytes = new byte[RESET_TOKEN_LENGTH_BYTES];
-        secureRandom.nextBytes(randomBytes);
-        String plaintextToken = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-
-        PasswordResetToken token = PasswordResetToken.builder()
-                .userId(user.getId())
-                .tokenHash(passwordEncoder.encode(plaintextToken))
-                .expiresAt(LocalDateTime.now().plusMinutes(RESET_TOKEN_EXPIRY_MINUTES))
-                .used(false)
-                .build();
-
-        passwordResetTokenRepository.save(token);
+        // OTP switched off (otp.enabled=false): the original delivery-stub token flow, unchanged in behaviour.
+        String plaintextToken = issueResetToken(user.getId(), RESET_TOKEN_EXPIRY_MINUTES);
 
         String destination = user.getEmail() != null && !user.getEmail().isBlank() ? user.getEmail() : user.getMobile();
 
@@ -421,35 +442,119 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(noRollbackFor = OtpException.class)
+    public PasswordResetAuthorizationResponse verifyPasswordResetOtp(VerifyResetOtpRequest request) {
+
+        if (!otpService.isEnabled()) {
+            throw new OtpException(OtpException.Code.OTP_DISABLED, "OTP verification is not enabled.");
+        }
+
+        User user = resolveByIdentifier(request.getIdentifier());
+
+        if (user == null || !hasEligibleMobile(user)) {
+            // Same answer as a wrong code, so this endpoint cannot be used to probe for accounts.
+            throw new OtpException(OtpException.Code.OTP_INVALID, "Invalid OTP. Please request a new one.");
+        }
+
+        // Purpose-bound and single-use: a registration OTP can never satisfy this, nor this one registration.
+        otpService.verifyAndConsume(OtpPurpose.PASSWORD_RESET, user.getMobile(), request.getOtp());
+
+        String authorization = issueResetToken(user.getId(), OTP_RESET_AUTHORIZATION_MINUTES);
+
+        return PasswordResetAuthorizationResponse.builder()
+                .resetToken(authorization)
+                .expiresInSeconds(OTP_RESET_AUTHORIZATION_MINUTES * 60L)
+                .build();
+    }
+
+    /** Supersedes older unused authorizations; stores only a hash. Returns {@code id.secret}. */
+    private String issueResetToken(Long userId, int validForMinutes) {
+
+        for (PasswordResetToken existing : passwordResetTokenRepository.findByUserIdAndUsedFalse(userId)) {
+            existing.setUsed(true);
+            passwordResetTokenRepository.save(existing);
+        }
+
+        byte[] randomBytes = new byte[RESET_TOKEN_LENGTH_BYTES];
+        secureRandom.nextBytes(randomBytes);
+        String secret = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        PasswordResetToken token = PasswordResetToken.builder()
+                .userId(userId)
+                .tokenHash(passwordEncoder.encode(secret))
+                .expiresAt(LocalDateTime.now().plusMinutes(validForMinutes))
+                .used(false)
+                .build();
+
+        token = passwordResetTokenRepository.saveAndFlush(token);
+
+        return token.getId() + "." + secret;
+    }
+
+    @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
 
-        // The token can't be looked up by a direct query (only the hash
-        // is stored, same reasoning as VehicleHandover's codeHash) - scan
-        // not-yet-used, not-yet-expired tokens and match by
-        // passwordEncoder, same shape as HandoverServiceImpl.verify.
-        List<PasswordResetToken> candidates = passwordResetTokenRepository.findAll().stream()
-                .filter(t -> !Boolean.TRUE.equals(t.getUsed()))
-                .filter(t -> t.getExpiresAt().isAfter(LocalDateTime.now()))
-                .toList();
+        String presented = request.getToken() == null ? "" : request.getToken().trim();
+        int dot = presented.indexOf('.');
+        Long tokenId = null;
+        if (dot > 0) {
+            try {
+                tokenId = Long.parseLong(presented.substring(0, dot));
+            } catch (NumberFormatException ignored) {
+                tokenId = null;
+            }
+        }
 
-        PasswordResetToken matched = candidates.stream()
-                .filter(t -> passwordEncoder.matches(request.getToken(), t.getTokenHash()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(
-                        "This reset link is invalid or has expired. Please request a new one."));
+        BusinessException invalid = new BusinessException(
+                "This reset authorization is invalid or has expired. Please start again.");
 
-        User user = userRepository.findById(matched.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        if (tokenId == null) {
+            throw invalid;
+        }
+
+        PasswordResetToken token = passwordResetTokenRepository.findById(tokenId).orElseThrow(() -> invalid);
+
+        if (Boolean.TRUE.equals(token.getUsed())
+                || !token.getExpiresAt().isAfter(LocalDateTime.now())
+                || !passwordEncoder.matches(presented.substring(dot + 1), token.getTokenHash())) {
+            throw invalid;
+        }
+
+        User user = userRepository.findById(token.getUserId()).orElseThrow(() -> invalid);
+
+        // Atomic single use: concurrent requests with the same authorization - only one gets 1 here.
+        if (passwordResetTokenRepository.consumeIfValid(token.getId(), LocalDateTime.now()) != 1) {
+            throw invalid;
+        }
 
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setFirstLogin(false);
         userRepository.save(user);
 
-        matched.setUsed(true);
-        passwordResetTokenRepository.save(matched);
-
         userSessionRepository.revokeAllByUserId(user.getId());
+    }
+
+    @Override
+    @Transactional(noRollbackFor = OtpException.class)
+    public void verifyOwnMobile(Long userId, String otp) {
+
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        if (user.getMobile() == null || !user.getMobile().matches("^[6-9]\\d{9}$")) {
+            throw new BusinessException("Your account has no valid mobile number to verify.");
+        }
+
+        if (!otpService.isEnabled()) {
+            throw new OtpException(OtpException.Code.OTP_DISABLED, "OTP verification is not enabled.");
+        }
+
+        // Always the authenticated user's own stored number, never client input.
+        otpService.verifyAndConsume(OtpPurpose.MOBILE_VERIFICATION, user.getMobile(), otp);
+
+        user.markMobileVerified(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override
@@ -534,6 +639,7 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .mobile(principal.getMobile())
+                .mobileVerified(user.isMobileVerified())
                 .status(principal.getStatus())
                 .firstLogin(principal.getFirstLogin())
                 .roles(principal.getRoles())
@@ -566,9 +672,11 @@ public class AuthServiceImpl implements AuthService {
 
         // After the duplicate checks so a number that cannot register never burns an OTP;
         // before any write so registration cannot complete without it.
+        boolean mobileProven = false;
         if (otpService.isEnabled()) {
             otpService.verifyAndConsume(
                     OtpPurpose.USER_REGISTRATION, request.getMobile(), request.getOtp());
+            mobileProven = true;
         }
 
         Role role =
@@ -606,6 +714,11 @@ public class AuthServiceImpl implements AuthService {
                         .build();
 
         user.getUserRoles().add(userRole);
+
+        if (mobileProven) {
+            // The registration OTP for this exact number was just consumed: ownership is proven.
+            user.markMobileVerified(LocalDateTime.now());
+        }
 
         userRepository.save(user);
 

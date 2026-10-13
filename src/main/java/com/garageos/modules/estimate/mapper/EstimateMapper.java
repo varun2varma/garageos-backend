@@ -27,6 +27,7 @@ public interface EstimateMapper {
     Estimate toEntity(CreateEstimateRequest request);
 
     @Mapping(source = "jobCard.id", target = "jobCardId")
+    @Mapping(source = "jobCard.jobCardNumber", target = "jobCardNumber")
     @Mapping(target = "status", expression = "java(estimate.getStatus().name())")
     EstimateResponse toResponse(Estimate estimate);
 

@@ -55,6 +55,15 @@ public class OtpFlowServiceImpl implements OtpFlowService {
                 destination = user.getMobile();
                 userId = user.getId();
             }
+            case MOBILE_VERIFICATION -> {
+                if (principal == null) {
+                    throw new AccessDeniedException("Authentication is required.");
+                }
+                User user = userRepository.findById(principal.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+                destination = user.getMobile();
+                userId = user.getId();
+            }
             default -> throw new IllegalArgumentException(
                     "OTP purpose " + purpose + " is not supported yet.");
         }

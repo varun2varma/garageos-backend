@@ -40,6 +40,7 @@ public interface InvoiceMapper {
     Invoice toEntity(CreateInvoiceRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
+    @Mapping(source = "estimate.estimateNumber", target = "estimateNumber")
     @Mapping(target = "invoiceStatus",
             expression = "java(invoice.getInvoiceStatus().name())")
     @Mapping(target = "paymentStatus",

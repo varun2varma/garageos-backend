@@ -38,7 +38,41 @@ public record JobCardFinalReportDTO(
         DeliveryInfo delivery,
         List<PhotoInfo> photos,
         /** OWNER audience only; null for CUSTOMER. */
-        OwnerInfo ownerInfo) {
+        OwnerInfo ownerInfo,
+        /** Driver pickup/delivery evidence linked to this job card, already filtered for the audience. */
+        List<TripEvidenceInfo> tripEvidence) {
+
+    /** Compatibility constructor for callers that carry no trip evidence. */
+    public JobCardFinalReportDTO(
+            FinalReportAudience audience, int version, String reference, LocalDateTime generatedAt,
+            GarageBrandingResponse garage, byte[] logoBytes, PartyInfo customer, VehicleInfo vehicle, JobInfo job,
+            List<String> complaints, InspectionInfo inspection, String estimateNumber, String estimateStatus,
+            InvoiceTaxCalculator.Breakdown work, List<RepairInfo> repairs, QualityInfo qualityCheck,
+            InvoiceInfo invoice, DeliveryInfo delivery, List<PhotoInfo> photos, OwnerInfo ownerInfo) {
+        this(audience, version, reference, generatedAt, garage, logoBytes, customer, vehicle, job, complaints,
+                inspection, estimateNumber, estimateStatus, work, repairs, qualityCheck, invoice, delivery, photos,
+                ownerInfo, List.of());
+    }
+
+    /**
+     * One driver-captured pickup/delivery item. Every metadata field is null when it was not recorded - nothing is
+     * invented. {@code jpegBytes} is null for videos and for photos whose object could not be read.
+     */
+    public record TripEvidenceInfo(
+            Long mediaId,
+            String stageLabel,
+            String shotType,
+            boolean video,
+            LocalDateTime capturedAt,
+            String capturedAtSource,
+            LocalDateTime uploadedAt,
+            String capturedByName,
+            Double latitude,
+            Double longitude,
+            Double accuracyMeters,
+            String locationAddress,
+            byte[] jpegBytes) {
+    }
 
     public record PartyInfo(String name, String mobile, String address) {
     }

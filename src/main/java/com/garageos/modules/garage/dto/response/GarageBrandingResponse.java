@@ -37,6 +37,9 @@ public class GarageBrandingResponse {
 
     private String gstNumber;
 
+    /** IANA timezone id of the garage; null when not configured (callers use the documented fallback). */
+    private String timeZone;
+
     private Boolean hasLogo;
 
     private LocalDateTime logoUpdatedAt;

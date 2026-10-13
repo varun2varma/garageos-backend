@@ -15,6 +15,11 @@ import java.util.Optional;
 public interface NavigationTripRepository
         extends JpaRepository<NavigationTrip, Long> {
 
+    /** Serialises concurrent handover-code requests for one trip (lock released at transaction end). */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from NavigationTrip t where t.id = :id")
+    Optional<NavigationTrip> findByIdForUpdate(@Param("id") Long id);
+
     List<NavigationTrip>
     findByDriverIdAndStatusIn(
             Long driverId,

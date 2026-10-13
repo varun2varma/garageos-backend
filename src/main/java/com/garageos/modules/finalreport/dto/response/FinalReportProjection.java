@@ -72,6 +72,6 @@ public final class FinalReportProjection {
                 audience, f.version(), f.reference(), f.generatedAt(), f.garage(), f.logoBytes(),
                 f.customer(), f.vehicle(), f.job(), f.complaints(), inspection,
                 f.estimateNumber(), f.estimateStatus(), f.work(), repairs, quality,
-                f.invoice(), delivery, photos, ownerInfo);
+                f.invoice(), delivery, photos, ownerInfo, f.tripEvidence());
     }
 }

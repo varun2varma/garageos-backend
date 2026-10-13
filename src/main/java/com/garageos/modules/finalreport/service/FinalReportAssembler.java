@@ -91,6 +91,7 @@ public class FinalReportAssembler {
     private final JobCardMediaRepository jobCardMediaRepository;
     private final MediaService mediaService;
     private final GarageBrandingService garageBrandingService;
+    private final FinalReportTripEvidenceLoader tripEvidenceLoader;
 
     public JobCardFinalReportDTO assemble(
             JobCard jobCard, FinalReportAudience audience, int version, LocalDateTime generatedAt) {
@@ -154,7 +155,9 @@ public class FinalReportAssembler {
                 new OwnerInfo(
                         jobCard.getRemarks(),
                         technicians(jobCardId),
-                        (int) photos.stream().filter(p -> !p.customerVisible()).count()));
+                        (int) photos.stream().filter(p -> !p.customerVisible()).count()),
+                // Selected by relationship and filtered for the audience inside the loader (server side).
+                tripEvidenceLoader.load(jobCard, audience));
 
         return FinalReportProjection.project(full, audience);
     }

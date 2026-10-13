@@ -80,6 +80,22 @@ public class NavigationTripMediaServiceImpl
             Double longitude,
             String clientUploadId) {
 
+        return upload(tripId, driverId, stage, shotType, file, latitude, longitude, clientUploadId, null);
+    }
+
+    @Override
+    @Transactional
+    public NavigationTripMediaResponse upload(
+            Long tripId,
+            Long driverId,
+            TripMediaStage stage,
+            TripMediaShotType shotType,
+            MultipartFile file,
+            Double latitude,
+            Double longitude,
+            String clientUploadId,
+            com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Raw captureMetadata) {
+
         // Root-cause fix: this previously trusted the client-supplied
         // driverId outright - any authenticated user of any role could
         // upload pickup/delivery evidence attributed to a different
@@ -156,6 +172,24 @@ public class NavigationTripMediaServiceImpl
             }
         }
 
+        GarageUserPrincipal uploader = currentPrincipal();
+        String uploaderName = ((uploader.getFirstName() == null ? "" : uploader.getFirstName()) + " "
+                + (uploader.getLastName() == null ? "" : uploader.getLastName())).trim();
+
+        // Device-supplied metadata is validated; coordinates may also arrive via the legacy latitude/longitude params.
+        com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Raw rawMeta =
+                captureMetadata == null
+                        ? new com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Raw(null, latitude, longitude, null, null)
+                        : new com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Raw(
+                                captureMetadata.capturedAt(),
+                                captureMetadata.latitude() != null ? captureMetadata.latitude() : latitude,
+                                captureMetadata.longitude() != null ? captureMetadata.longitude() : longitude,
+                                captureMetadata.accuracyMeters(),
+                                captureMetadata.locationAddress());
+        com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Result meta =
+                com.garageos.modules.navigation.service.CaptureMetadataSanitizer.sanitize(
+                        rawMeta, java.time.Instant.now(), java.time.ZoneId.systemDefault());
+
         String storageKey = stored != null
                 ? mediaStorageService.storeEvidence(stored, storedContentType, folder, ".jpg")
                 : mediaStorageService.upload(file, folder);
@@ -189,13 +223,19 @@ public class NavigationTripMediaServiceImpl
                                 driverId
                         )
 
-                        .capturedAt(
-                                LocalDateTime.now()
-                        )
+                        .capturedAt(meta.capturedAt())
 
-                        .latitude(latitude)
+                        .capturedAtSource(meta.capturedAtSource())
 
-                        .longitude(longitude)
+                        .capturedByName(uploaderName.isEmpty() ? null : uploaderName)
+
+                        .latitude(meta.latitude())
+
+                        .longitude(meta.longitude())
+
+                        .accuracyMeters(meta.accuracyMeters())
+
+                        .locationAddress(meta.locationAddress())
 
                         .build();
 
@@ -211,8 +251,8 @@ public class NavigationTripMediaServiceImpl
                 saved.getId(),
                 resolveGarageId(tripId),
                 java.util.Map.of("tripId", tripId, "stage", stage, "shotType", shotType == null ? "OTHER" : shotType),
-                latitude,
-                longitude
+                meta.latitude(),
+                meta.longitude()
         );
 
         return toResponse(saved);
@@ -495,6 +535,16 @@ public class NavigationTripMediaServiceImpl
                 .longitude(
                         media.getLongitude()
                 )
+
+                .capturedByName(media.getCapturedByName())
+
+                .capturedAtSource(media.getCapturedAtSource())
+
+                .accuracyMeters(media.getAccuracyMeters())
+
+                .locationAddress(media.getLocationAddress())
+
+                .uploadedAt(media.getCreatedAt())
 
                 .mediaUrl(
                         mediaStorageService.getUrl(

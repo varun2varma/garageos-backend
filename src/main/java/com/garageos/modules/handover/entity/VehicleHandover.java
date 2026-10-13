@@ -57,6 +57,10 @@ public class VehicleHandover {
     @Column(name = "code_hash", nullable = false)
     private String codeHash;
 
+    /** Random per-row nonce the server derives the (never stored) code from; null for rows issued before V73. */
+    @Column(name = "code_nonce", length = 64)
+    private String codeNonce;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private HandoverStatus status;

@@ -79,6 +79,10 @@ public class NavigationTripServiceImpl
 
     private final DeliveryService deliveryService;
 
+    /** Field-injected so existing constructor-built tests keep their signature; always present at runtime. */
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.garageos.modules.delivery.preference.ReturnPreferenceGate returnPreferenceGate;
+
 
     @Override
     @Transactional
@@ -129,6 +133,13 @@ public class NavigationTripServiceImpl
                 request.getDriverId(),
                 navigationRequest.getGarageId()
         );
+
+        // A delivery trip may only be dispatched for a job whose customer chose driver delivery.
+        if (navigationRequest.getRequestType() == NavigationRequestType.DELIVERY
+                && navigationRequest.getJobCardId() != null) {
+            returnPreferenceGate.require(navigationRequest.getJobCardId(),
+                    com.garageos.modules.delivery.preference.ReturnMethod.DRIVER_DELIVERY);
+        }
 
 
         TripType tripType =

@@ -21,6 +21,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Entity
+@org.hibernate.annotations.BatchSize(size = 50)
 @Table(name = "job_card")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JobCard extends BaseEntity {

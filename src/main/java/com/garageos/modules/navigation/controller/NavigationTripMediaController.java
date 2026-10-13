@@ -48,7 +48,16 @@ public class NavigationTripMediaController {
             Double longitude,
 
             @RequestParam(required = false)
-            String clientUploadId) {
+            String clientUploadId,
+
+            @RequestParam(required = false)
+            String capturedAt,
+
+            @RequestParam(required = false)
+            Double accuracyMeters,
+
+            @RequestParam(required = false)
+            String locationAddress) {
 
         return mediaService.upload(
                 tripId,
@@ -58,7 +67,9 @@ public class NavigationTripMediaController {
                 file,
                 latitude,
                 longitude,
-                clientUploadId
+                clientUploadId,
+                new com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Raw(
+                        capturedAt, latitude, longitude, accuracyMeters, locationAddress)
         );
     }
 

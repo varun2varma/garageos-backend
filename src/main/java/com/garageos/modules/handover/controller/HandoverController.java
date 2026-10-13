@@ -18,13 +18,23 @@ public class HandoverController {
 
     private final HandoverService handoverService;
 
-    /** Customer only: get (or freshly issue) the active confirmation code for their trip. */
+    /** Customer only: get the active confirmation code (re-shown until it expires) for their trip. */
     @GetMapping("/code")
     public ResponseEntity<ApiResponse<HandoverCodeResponse>> getCode(@PathVariable Long tripId) {
 
         return ApiResponseUtil.success(
-                "Confirmation code issued.",
+                "Confirmation code fetched.",
                 handoverService.getOrCreateActiveCode(tripId)
+        );
+    }
+
+    /** Customer only: "Get a New Code" - replaces the pending code at once. */
+    @PostMapping("/code/renew")
+    public ResponseEntity<ApiResponse<HandoverCodeResponse>> renewCode(@PathVariable Long tripId) {
+
+        return ApiResponseUtil.success(
+                "New confirmation code issued.",
+                handoverService.renewCode(tripId)
         );
     }
 

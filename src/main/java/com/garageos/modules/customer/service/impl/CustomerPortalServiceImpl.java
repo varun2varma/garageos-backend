@@ -193,6 +193,7 @@ public class CustomerPortalServiceImpl
                         .id(invoice.getId())
                         .invoiceNumber(invoice.getInvoiceNumber())
                         .estimateId(estimateId)
+                        .estimateNumber(invoice.getEstimate().getEstimateNumber())
                         .invoiceStatus(invoice.getInvoiceStatus().name())
                         .paymentStatus(invoice.getPaymentStatus().name())
                         .subtotal(invoice.getSubtotal())

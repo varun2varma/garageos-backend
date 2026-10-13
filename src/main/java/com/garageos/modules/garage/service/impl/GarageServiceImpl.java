@@ -75,6 +75,9 @@ public class GarageServiceImpl implements GarageService {
             // Always the authenticated user's own registered number, never client input.
             otpService.verifyAndConsume(
                     OtpPurpose.GARAGE_REGISTRATION, user.getMobile(), request.getOtp());
+            // That OTP went to the user's own number and was just consumed: ownership is proven.
+            user.markMobileVerified(java.time.LocalDateTime.now());
+            userRepository.save(user);
         }
 
         Garage garage = garageMapper.toEntity(request);

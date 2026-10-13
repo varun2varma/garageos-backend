@@ -28,6 +28,11 @@ public class NavigationRequestServiceImpl
     private final NavigationRequestRepository
             navigationRequestRepository;
 
+
+    /** Field-injected so existing constructor-built tests keep their signature; always present at runtime. */
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.garageos.modules.delivery.preference.ReturnPreferenceGate returnPreferenceGate;
+
     private final JobCardRepository jobCardRepository;
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
@@ -344,6 +349,9 @@ public class NavigationRequestServiceImpl
             throw new BusinessException(
                     "Delivery can only be requested once the Job Card is ready for delivery.");
         }
+
+        returnPreferenceGate.require(jobCard.getId(),
+                com.garageos.modules.delivery.preference.ReturnMethod.DRIVER_DELIVERY);
 
         if (jobCard.getVehicle() == null
                 || !jobCard.getVehicle().getId().equals(request.getVehicleId())
