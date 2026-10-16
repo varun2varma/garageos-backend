@@ -214,6 +214,14 @@ public class MediaProcessingScheduler {
         String evidenceKey = MediaKeys.derive(sourceKey, MediaKeys.EVIDENCE, "jpg");
         String thumbnailKey = MediaKeys.derive(sourceKey, MediaKeys.THUMBNAIL, "jpg");
 
+        // Never write over an object another row owns (uploads overwrite). A legacy row whose sequence was shared
+        // with a completed row (V80 conflict table) would otherwise replace that row's evidence.
+        if (jobCardMediaRepository.countOtherRowsReferencingKey(media.getId(), evidenceKey) > 0
+                || jobCardMediaRepository.countOtherRowsReferencingKey(media.getId(), thumbnailKey) > 0) {
+            throw new IllegalStateException(
+                    "Derived evidence/thumbnail key is already referenced by another media row; refusing to overwrite it.");
+        }
+
         r2.uploadBytes(evidenceKey, evidenceBytes.toByteArray(), "image/jpeg");
         r2.uploadBytes(thumbnailKey, thumbnailBytes.toByteArray(), "image/jpeg");
 

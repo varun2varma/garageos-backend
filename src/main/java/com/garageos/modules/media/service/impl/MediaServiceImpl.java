@@ -65,6 +65,14 @@ public class MediaServiceImpl implements MediaService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private MediaSequenceAllocator sequenceAllocator;
 
+    /**
+     * Runs the upload-intent body in its own transaction so a unique-index violation (two concurrent requests with
+     * the same client upload id) can be turned into an idempotent replay after the loser rolled back. Field-injected
+     * so hand-built unit-test instances keep working (they run the body directly).
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
+
     private static final Pattern SEQUENCE_PATTERN =
             Pattern.compile("_(\\d+)\\.[^.]+$");
 
@@ -637,8 +645,51 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    @Transactional
     public UploadIntentResponse createUploadIntent(
+            Long jobCardId,
+            UploadIntentRequest request) {
+
+        if (transactionTemplate == null) {
+            return createUploadIntentInTransaction(jobCardId, request);
+        }
+
+        try {
+            return transactionTemplate.execute(status -> createUploadIntentInTransaction(jobCardId, request));
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+
+            String clientUploadId = normalizedClientUploadId(request);
+
+            if (clientUploadId == null || !violatesClientUploadIndex(ex)) {
+                throw ex;
+            }
+
+            // A concurrent request carrying the same client upload id committed first. This attempt rolled back
+            // completely (its sequence number included), so replay the committed row instead of failing.
+            return transactionTemplate.execute(status -> {
+                JobCardMedia winner = jobCardMediaRepository
+                        .findByJobCardIdAndClientUploadId(jobCardId, clientUploadId).orElseThrow(() -> ex);
+                return replayUploadIntent(winner, request, currentPrincipal(), resolveProvider(StorageProvider.R2));
+            });
+        }
+    }
+
+    private static String normalizedClientUploadId(UploadIntentRequest request) {
+        return request.getClientUploadId() == null || request.getClientUploadId().isBlank()
+                ? null : request.getClientUploadId().trim();
+    }
+
+    private static boolean violatesClientUploadIndex(Exception ex) {
+        Throwable cause = ex;
+        while (cause != null) {
+            if (cause.getMessage() != null && cause.getMessage().contains("uk_job_card_media_client_upload")) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
+    }
+
+    private UploadIntentResponse createUploadIntentInTransaction(
             Long jobCardId,
             UploadIntentRequest request) {
 
@@ -694,8 +745,7 @@ public class MediaServiceImpl implements MediaService {
             );
         }
 
-        String clientUploadId = request.getClientUploadId() == null || request.getClientUploadId().isBlank()
-                ? null : request.getClientUploadId().trim();
+        String clientUploadId = normalizedClientUploadId(request);
 
         if (clientUploadId != null) {
             // Idempotent retry: the first attempt's response may have been lost after the row was created.
@@ -703,7 +753,7 @@ public class MediaServiceImpl implements MediaService {
                     .findByJobCardIdAndClientUploadId(jobCardId, clientUploadId).orElse(null);
 
             if (existing != null) {
-                return replayUploadIntent(existing, r2);
+                return replayUploadIntent(existing, request, principal, r2);
             }
         }
 
@@ -812,9 +862,30 @@ public class MediaServiceImpl implements MediaService {
      * Replays an intent for an already-reserved row (same client upload id). Only a row still waiting for its
      * bytes (PENDING) gets a fresh upload authorization; anything further along was already received.
      */
-    private UploadIntentResponse replayUploadIntent(JobCardMedia existing, MediaStorageProvider r2) {
+    private UploadIntentResponse replayUploadIntent(
+            JobCardMedia existing,
+            UploadIntentRequest request,
+            GarageUserPrincipal principal,
+            MediaStorageProvider r2) {
 
-        if (!MediaUploadStatus.PENDING.name().equals(existing.getUploadStatus())) {
+        // The same client upload id must describe the same logical upload; anything else is a different upload
+        // that must use its own id, never silently attached to this row.
+        boolean pending = MediaUploadStatus.PENDING.name().equals(existing.getUploadStatus());
+
+        boolean sameUpload = request.getStage() != null
+                && request.getStage().name().equals(existing.getMediaStage())
+                && java.util.Objects.equals(request.getRepairTaskId(), existing.getRepairTaskId())
+                && java.util.Objects.equals(principal.getId(), existing.getUploadedBy())
+                // once processed the stored content type is the rendered one, so it is compared only while PENDING
+                && (!pending || java.util.Objects.equals(request.getContentType(), existing.getContentType()));
+
+        if (!sameUpload) {
+            throw new BusinessException(
+                    "This client upload id was already used for a different upload.",
+                    "MEDIA_CLIENT_UPLOAD_ID_REUSED");
+        }
+
+        if (!pending) {
             throw new BusinessException(
                     "This upload was already received.", "MEDIA_UPLOAD_ALREADY_RECEIVED");
         }
