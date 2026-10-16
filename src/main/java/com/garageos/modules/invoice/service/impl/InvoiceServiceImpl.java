@@ -51,6 +51,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
 
+    /** Credit reconciliation; optional so hand-built test instances keep working. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.credit.service.InvoiceCreditService creditService;
+
     /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private com.garageos.core.security.GarageScope garageScope;
@@ -157,6 +161,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setInvoiceNumber(invoiceNumber);
         invoice.setEstimate(estimate);
+        invoice.setGeneratedByUserId(com.garageos.core.security.CurrentActor.userIdOrNull());
 
         invoice.setInvoiceStatus(InvoiceStatus.GENERATED);
         invoice.setPaymentStatus(PaymentStatus.PENDING);
@@ -328,6 +333,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setInvoiceNumber(invoiceNumber);
 
         invoice.setEstimate(estimate);
+        invoice.setGeneratedByUserId(com.garageos.core.security.CurrentActor.userIdOrNull());
 
         invoice.setInvoiceStatus(InvoiceStatus.GENERATED);
 
@@ -525,10 +531,20 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new BusinessException("Invoice already paid.");
         }
 
+        // Legacy "mark as paid" settles the whole balance: reconcile any active credit authorization too.
+        if (creditService != null) {
+            creditService.onPaymentRecorded(invoice, null, principal.getId());
+        }
+
         NotificationEvents.publishJobCardEvent(notificationEventPublisher,
                 NotificationEventType.PAYMENT_RECEIVED, jobCard, invoice.getId(), "1");
 
-        if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
+        // A job still waiting for release becomes ready now. A job already released under an Owner credit
+        // (READY_FOR_DELIVERY / DELIVERED / CLOSED) is not transitioned again when the balance is finally paid.
+        if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY
+                && jobCard.getStatus() != JobCardStatus.DELIVERED
+                && jobCard.getStatus() != JobCardStatus.CLOSED
+                && jobCard.getStatus() != JobCardStatus.CANCELLED) {
             jobCardService.readyForDelivery(jobCardNumber);
         }
 

@@ -20,7 +20,11 @@ public class QualityCheckResponse {
 
     private QualityCheckStatus status;
 
+    /** Inspector name snapshot. */
     private String inspectedBy;
+
+    /** Stable inspector reference; null for legacy records that only stored a name. */
+    private Long inspectedByUserId;
 
     private LocalDateTime inspectedAt;
 

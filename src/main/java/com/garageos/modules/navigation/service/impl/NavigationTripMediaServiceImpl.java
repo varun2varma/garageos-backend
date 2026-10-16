@@ -201,6 +201,8 @@ public class NavigationTripMediaServiceImpl
 
                         .mediaStage(stage)
 
+                        .customerVisible(stage != null && stage.defaultCustomerVisible())
+
                         .shotType(shotType)
 
                         .storageKey(storageKey)

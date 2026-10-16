@@ -25,6 +25,23 @@ public interface JobCardMediaRepository
             Long repairTaskId
     );
 
+    java.util.Optional<JobCardMedia> findByJobCardIdAndClientUploadId(Long jobCardId, String clientUploadId);
+
+    /** Rows (other than {@code id}) that reference an object key as storage, evidence or thumbnail key. */
+    @org.springframework.data.jpa.repository.Query(
+            "select count(m) from JobCardMedia m where m.id <> :id "
+                    + "and (m.storageKey = :key or m.evidenceKey = :key or m.thumbnailKey = :key "
+                    + "or m.stagingSourceKey = :key)")
+    long countOtherRowsReferencingKey(
+            @org.springframework.data.repository.query.Param("id") Long id,
+            @org.springframework.data.repository.query.Param("key") String key);
+
+    /** Completed rows that still carry a staging source key awaiting deletion (restart-safe sweeper). */
+    List<JobCardMedia> findByStorageProviderAndUploadStatusAndStagingSourceKeyIsNotNull(
+            String storageProvider,
+            String uploadStatus
+    );
+
     List<JobCardMedia> findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
             Long jobCardId,
             String visibility

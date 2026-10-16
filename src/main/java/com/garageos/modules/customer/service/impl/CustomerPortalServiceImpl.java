@@ -310,8 +310,8 @@ public class CustomerPortalServiceImpl
                 .map(e -> e.getStatus() == EstimateStatus.APPROVED)
                 .orElse(false);
 
-        boolean invoiceGenerated =
-                invoiceRepository.findByEstimateJobCardId(jobCard.getId()).isPresent();
+        var invoice = invoiceRepository.findByEstimateJobCardId(jobCard.getId());
+        boolean invoiceGenerated = invoice.isPresent();
 
         return CustomerRepairTrackingResponse.builder()
                 .jobCardNumber(jobCard.getJobCardNumber())
@@ -327,6 +327,13 @@ public class CustomerPortalServiceImpl
                 .qualityChecked(reached(status, JobCardStatus.READY_FOR_INVOICE))
                 .invoiceGenerated(invoiceGenerated)
                 .paymentCompleted(reached(status, JobCardStatus.PAYMENT_COMPLETED))
+
+                // ids are only ever those of this (already ownership-checked) job card
+                .estimateId(estimate.map(e -> e.getId()).orElse(null))
+                .invoiceId(invoice.map(i -> i.getId()).orElse(null))
+                .invoiceStatus(invoice.map(i -> i.getInvoiceStatus() == null ? null : i.getInvoiceStatus().name()).orElse(null))
+                .invoicePaymentStatus(invoice.map(i -> i.getPaymentStatus() == null ? null : i.getPaymentStatus().name()).orElse(null))
+                .invoicePdfAvailable(invoice.map(i -> i.getPaymentStatus() == com.garageos.core.enums.PaymentStatus.PAID).orElse(false))
 
                 .build();
     }

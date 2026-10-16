@@ -473,6 +473,23 @@ public class InvoicePdfRenderer {
         return table;
     }
 
+    /** Embeds the garage authorization image (right-aligned); an unreadable image is skipped, never fatal. */
+    private static void addAuthorizationImage(PdfPCell cell, byte[] bytes, float maxWidth, float maxHeight) {
+
+        if (bytes == null) {
+            return;
+        }
+
+        try {
+            com.lowagie.text.Image image = com.lowagie.text.Image.getInstance(bytes);
+            image.scaleToFit(maxWidth, maxHeight);
+            image.setAlignment(Element.ALIGN_RIGHT);
+            cell.addElement(image);
+        } catch (Exception e) {
+            // validated at upload; a corrupt object falls back to the blank signatory line
+        }
+    }
+
     private PdfPTable signatureBlock(InvoiceDocumentData data) {
 
         PdfPTable table = new PdfPTable(2);
@@ -487,6 +504,8 @@ public class InvoicePdfRenderer {
 
         PdfPCell garage = noBorder();
         garage.setPaddingTop(16);
+        addAuthorizationImage(garage, data.stampBytes(), 90, 90);
+        addAuthorizationImage(garage, data.signatureBytes(), 140, 50);
         Paragraph line = new Paragraph("______________________", NORMAL);
         line.setAlignment(Element.ALIGN_RIGHT);
         garage.addElement(line);

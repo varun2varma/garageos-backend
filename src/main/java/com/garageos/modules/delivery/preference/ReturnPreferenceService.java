@@ -33,6 +33,10 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class ReturnPreferenceService {
 
+    /** The single release rule; optional so hand-built test instances fall back to PAID-only. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.credit.service.ReleaseClearance releaseClearance;
+
     private final ReturnPreferenceRepository preferenceRepository;
     private final JobCardRepository jobCardRepository;
     private final CustomerRepository customerRepository;
@@ -174,9 +178,12 @@ public class ReturnPreferenceService {
         }
     }
 
+    /** Release clearance (fully paid OR active Owner credit); the method name is kept for its existing callers. */
     private boolean isPaid(Long jobCardId) {
         return invoiceRepository.findByEstimateJobCardId(jobCardId)
-                .map(i -> i.getPaymentStatus() == com.garageos.core.enums.PaymentStatus.PAID)
+                .map(i -> releaseClearance != null
+                        ? releaseClearance.isCleared(i)
+                        : i.getPaymentStatus() == com.garageos.core.enums.PaymentStatus.PAID)
                 .orElse(false);
     }
 

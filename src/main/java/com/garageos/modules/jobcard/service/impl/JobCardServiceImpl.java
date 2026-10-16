@@ -56,6 +56,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor
 public class JobCardServiceImpl implements JobCardService {
 
+    /** The single release rule (PAID or active Owner credit). Optional so hand-built test instances fall back to PAID-only. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.credit.service.ReleaseClearance releaseClearance;
+
+    private boolean isReleaseCleared(com.garageos.modules.invoice.entity.Invoice invoice) {
+        if (releaseClearance != null) {
+            return releaseClearance.isCleared(invoice);
+        }
+        return invoice != null && invoice.getPaymentStatus() == com.garageos.core.enums.PaymentStatus.PAID;
+    }
+
+
     @Autowired(required = false)
     private ApplicationEventPublisher applicationEventPublisher;
 
@@ -145,6 +157,12 @@ public class JobCardServiceImpl implements JobCardService {
         jobCard.setCustomer(vehicle.getCustomer());
         jobCard.setServiceDate(LocalDate.now());
         jobCard.setStatus(JobCardStatus.OPEN);
+        // D11: attribution comes from the authenticated principal only (never the request body).
+        jobCard.setCreatedByUserId(principal.getId());
+        jobCard.setCreatedByRoles(String.join(",", new java.util.TreeSet<>(principal.getRoles())));
+        jobCard.setCreatedByName(
+                ((principal.getFirstName() == null ? "" : principal.getFirstName()) + " "
+                        + (principal.getLastName() == null ? "" : principal.getLastName())).trim());
         if (booking != null) {
             jobCard.setBookingId(booking.getId());
         }
@@ -475,9 +493,12 @@ public class JobCardServiceImpl implements JobCardService {
                         .getAuthentication()
                         .getPrincipal();
 
-        if (!principal.getRoles().contains(RoleCode.MANAGER.name())) {
+        // D06: the Owner holds the Manager's operational authority over the workflow. Explicit allow-list -
+        // Service Advisor, Technician and every other role remain refused.
+        if (!principal.getRoles().contains(RoleCode.MANAGER.name())
+                && !principal.getRoles().contains(RoleCode.OWNER.name())) {
             throw new BusinessException(
-                    "Only a Manager can proceed a Job Card to repair.");
+                    "Only a Manager or the Owner can proceed a Job Card to repair.");
         }
     }
 
@@ -606,8 +627,11 @@ public class JobCardServiceImpl implements JobCardService {
 
         qualityCheckService.passQualityCheck(
                 jobCardNumber,
+                // D10: the legacy endpoint attributes the check to the authenticated employee performing it,
+                // not to a literal placeholder name.
                 CreateQualityCheckRequest.builder()
-                        .inspectedBy("Legacy Quality Check Endpoint")
+                        .inspectedByUserId(((GarageUserPrincipal) SecurityContextHolder.getContext()
+                                .getAuthentication().getPrincipal()).getId())
                         .build()
         );
 
@@ -630,10 +654,27 @@ public class JobCardServiceImpl implements JobCardService {
                 JobCardStatus.READY_FOR_DELIVERY
         );
 
+        // A job card is "ready" - and the customer is asked to choose collection or delivery - only when its
+        // invoice is cleared for release: fully paid, or covered by an active Owner credit authorization. An
+        // unpaid, uncredited invoice never makes a vehicle ready, whichever route calls this.
+        if (invoiceRepository != null) {
+            com.garageos.modules.invoice.entity.Invoice invoice =
+                    invoiceRepository.findByEstimateJobCardId(jobCard.getId()).orElse(null);
+
+            if (!isReleaseCleared(invoice)) {
+                throw new BusinessException(
+                        "The vehicle cannot be marked ready for delivery until the invoice is paid or covered by "
+                                + "an Owner-authorized credit.",
+                        "RELEASE_NOT_CLEARED");
+            }
+        }
+
         jobCard.setStatus(JobCardStatus.READY_FOR_DELIVERY);
 
+        // Stable business key (job card + event type): a repeated call or retry can never create a second
+        // logical "choose how to receive your vehicle" prompt.
         NotificationEvents.publishJobCardEvent(notificationEventPublisher,
-                NotificationEventType.VEHICLE_READY_FOR_DELIVERY, jobCard, System.currentTimeMillis());
+                NotificationEventType.VEHICLE_READY_FOR_DELIVERY, jobCard, "ready");
 
         jobCardRepository.save(jobCard);
 
@@ -717,9 +758,10 @@ public class JobCardServiceImpl implements JobCardService {
             // ACCEPTED = issued invoice the customer accepted; still a valid, payable invoice.
             if ((invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.GENERATED
                     && invoice.getInvoiceStatus() != com.garageos.core.enums.InvoiceStatus.ACCEPTED)
-                    ||invoice.getPaymentStatus() != com.garageos.core.enums.PaymentStatus.PAID) {
+                    || !isReleaseCleared(invoice)) {
                 throw new BusinessException(
-                        "The invoice must be generated and fully paid before the job card can be closed.");
+                        "The invoice must be generated and either fully paid or covered by an Owner-authorized "
+                                + "credit before the job card can be closed.");
             }
         }
     }

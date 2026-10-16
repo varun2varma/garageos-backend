@@ -65,7 +65,9 @@ public class InvoiceController {
      * the owning customer) is enforced in InvoicePdfServiceImpl; branding
      * comes from the invoice's job card garage, never from the caller.
      */
-    @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    // No `produces` constraint on the mapping: a refusal (payment pending / not found) is JSON and must
+    // reach every client; the success response sets application/pdf itself.
+    @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> getInvoicePdf(
             @AuthenticationPrincipal GarageUserPrincipal user,
             @PathVariable Long id) {

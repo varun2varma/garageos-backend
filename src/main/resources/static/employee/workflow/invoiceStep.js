@@ -437,11 +437,13 @@ Grand Total
 
 <button
 id="printInvoiceBtn"
-class="btn btn-outline-primary">
+class="btn btn-outline-primary"
+${invoice.paymentStatus === "PAID" ? "" : 'disabled title="Payment is pending, so the invoice cannot be printed yet."'}>
 
 🖨 Print Invoice
 
 </button>
+${invoice.paymentStatus === "PAID" ? "" : '<div class="text-muted small mt-1">Payment is pending, so the invoice cannot be printed yet.</div>'}
 
 <button
 id="paymentBtn"
@@ -490,7 +492,11 @@ Proceed To Payment →
             .getElementById("printInvoiceBtn")
             ?.addEventListener(
                 "click",
-                () => window.print()
+                () => {
+                    const btn = document.getElementById("printInvoiceBtn");
+                    if (btn && btn.disabled) { return; }
+                    window.print();
+                }
             );
 
         document

@@ -41,6 +41,9 @@ public class RepairTaskResponse {
 
     private LocalDateTime completedAt;
 
+    /** Elapsed hours from the recorded start to completion; null until both are recorded. */
+    private Double actualHours;
+
     private String remarks;
 
 }

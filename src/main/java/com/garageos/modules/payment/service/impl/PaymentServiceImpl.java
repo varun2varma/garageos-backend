@@ -53,6 +53,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Credit reconciliation (repayment audit + settlement); optional so hand-built test instances keep working. */
+    @Autowired(required = false)
+    private com.garageos.modules.credit.service.InvoiceCreditService creditService;
+
+    @Autowired(required = false)
+    private com.garageos.modules.credit.repository.InvoiceCreditAuthorizationRepository creditRepository;
+
     private final PaymentRepository paymentRepository;
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
@@ -90,6 +97,8 @@ public class PaymentServiceImpl implements PaymentService {
         if (invoice.getInvoiceStatus() == InvoiceStatus.CANCELLED) {
             throw new BusinessException("This invoice has been cancelled and cannot receive payments.");
         }
+
+        requireRepaymentScopeForAccountant(principal, invoice);
 
         String key = blankToNull(request.getIdempotencyKey());
 
@@ -155,12 +164,20 @@ public class PaymentServiceImpl implements PaymentService {
         invoice.setPaymentStatus(fullyPaid ? PaymentStatus.PAID : PaymentStatus.PARTIALLY_PAID);
         invoiceRepository.saveAndFlush(invoice);
 
+        // A repayment against Owner-authorized credit is audited; a fully paid invoice settles the authorization
+        // in this same transaction. Payment status above is the ONLY thing that decides "paid".
+        if (creditService != null) {
+            creditService.onPaymentRecorded(invoice, amount, principal.getId());
+        }
+
         if (fullyPaid) {
 
             NotificationEvents.publishJobCardEvent(notificationEventPublisher,
                     NotificationEventType.PAYMENT_RECEIVED, jobCard, invoice.getId(), "1");
 
-            if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY) {
+            // A job still waiting for release becomes ready now. A job already released under an Owner
+            // credit (READY_FOR_DELIVERY / DELIVERED / CLOSED) is not transitioned again when the balance is finally paid.
+            if (jobCard.getStatus() != JobCardStatus.READY_FOR_DELIVERY && jobCard.getStatus() != JobCardStatus.DELIVERED && jobCard.getStatus() != JobCardStatus.CLOSED && jobCard.getStatus() != JobCardStatus.CANCELLED) {
                 jobCardService.readyForDelivery(jobCard.getJobCardNumber());
             }
         }
@@ -484,5 +501,31 @@ public class PaymentServiceImpl implements PaymentService {
 
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /**
+     * An Accountant (and nobody holding a collecting role) records REPAYMENTS only: the invoice must have an
+     * ACTIVE Owner credit authorization. Cashier / Manager / Service Advisor / Owner keep full collection rights.
+     */
+    private void requireRepaymentScopeForAccountant(GarageUserPrincipal principal, Invoice invoice) {
+
+        java.util.Set<String> roles = principal.getRoles();
+
+        boolean accountantOnly = roles.contains("ACCOUNTANT")
+                && !roles.contains("CASHIER") && !roles.contains("MANAGER")
+                && !roles.contains("SERVICE_ADVISOR") && !roles.contains("OWNER");
+
+        if (!accountantOnly) {
+            return;
+        }
+
+        boolean hasActiveCredit = creditRepository != null
+                && creditRepository.existsByInvoiceIdAndStatus(
+                        invoice.getId(), com.garageos.core.enums.CreditAuthorizationStatus.ACTIVE);
+
+        if (!hasActiveCredit) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Accountants can record repayments only against invoices with an active credit authorization.");
+        }
     }
 }

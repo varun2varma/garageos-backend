@@ -33,7 +33,7 @@ public interface JobCardFinalReportRepository extends JpaRepository<JobCardFinal
 
     /** Reports whose e-mail is due: waiting or failed with attempts left, or a crashed claim past its lease. */
     @Query("select r.id from JobCardFinalReport r where r.emailStatus in :statuses "
-            + "and r.emailAttempts < :maxAttempts and r.generatedAt > :since "
+            + "and r.emailAttempts < :maxAttempts and r.generatedAt > :since and r.withheld = false "
             + "and (r.emailNextAttemptAt is null or r.emailNextAttemptAt <= :now) order by r.id")
     List<Long> findDueForEmail(
             @Param("statuses") Collection<FinalReportEmailStatus> statuses,
@@ -48,7 +48,7 @@ public interface JobCardFinalReportRepository extends JpaRepository<JobCardFinal
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update JobCardFinalReport r set r.emailStatus = com.garageos.core.enums.report.FinalReportEmailStatus.SENDING, "
-            + "r.emailNextAttemptAt = :lease where r.id = :id and r.emailStatus in :claimable "
+            + "r.emailNextAttemptAt = :lease where r.id = :id and r.withheld = false and r.emailStatus in :claimable "
             + "and (r.emailNextAttemptAt is null or r.emailNextAttemptAt <= :now)")
     int claimForEmail(
             @Param("id") Long id,
@@ -56,7 +56,22 @@ public interface JobCardFinalReportRepository extends JpaRepository<JobCardFinal
             @Param("now") LocalDateTime now,
             @Param("lease") LocalDateTime lease);
 
+    /**
+     * Withholds every not-yet-withheld report of a Job Card (privacy-first): the rows and their bytes are
+     * kept as an audit record, but no route serves or e-mails them any more. A regenerated version is
+     * built from the current customer-visible media and is served normally.
+     */
+    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update JobCardFinalReport r set r.withheld = true, r.withheldReason = :reason, r.withheldAt = :at "
+            + "where r.jobCardId = :jobCardId and r.withheld = false")
+    int withholdAllForJobCard(
+            @Param("jobCardId") Long jobCardId,
+            @Param("reason") String reason,
+            @Param("at") LocalDateTime at);
+
     interface ReportMeta {
+        boolean getWithheld();
         FinalReportAudience getAudience();
 
         Integer getVersion();

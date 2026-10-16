@@ -46,4 +46,8 @@ public class Estimate extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String remarks;
+
+    /** Who prepared this estimate (V82). The preparer only - never the approver. Null for historical rows. */
+    @Column(name = "generated_by_user_id")
+    Long generatedByUserId;
 }

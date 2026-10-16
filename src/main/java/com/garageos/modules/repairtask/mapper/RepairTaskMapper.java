@@ -39,6 +39,8 @@ public interface RepairTaskMapper {
     @Mapping(target = "estimateItemId", source = "estimateItem.id")
     @Mapping(target = "description", source = "complaint.complaint")
     @Mapping(target = "jobAssignmentId", source = "jobAssignment.id")
+    @Mapping(target = "actualHours",
+            expression = "java(com.garageos.core.util.ActualDuration.hours(entity.getStartedAt(), entity.getCompletedAt()))")
     RepairTaskResponse toResponse(RepairTask entity);
 
     List<RepairTaskResponse> toResponseList(

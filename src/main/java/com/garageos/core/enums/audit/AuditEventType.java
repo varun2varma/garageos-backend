@@ -48,5 +48,14 @@ public enum AuditEventType {
     USER_DELETED,
 
     /** A platform administrator corrected the classification snapshot of an approved estimate line (no financial change). */
-    ESTIMATE_LINE_CLASSIFICATION_CORRECTED
+    ESTIMATE_LINE_CLASSIFICATION_CORRECTED,
+
+    /** An Owner authorized credit on an unpaid invoice (financial authorization; payment status unchanged). */
+    CREDIT_AUTHORIZED,
+    /** An Owner revoked an active credit authorization. */
+    CREDIT_REVOKED,
+    /** A repayment was recorded against an invoice that has an active credit authorization. */
+    CREDIT_REPAYMENT,
+    /** The invoice became fully paid and its credit authorization was closed. */
+    CREDIT_SETTLED
 }

@@ -25,6 +25,16 @@ public interface JobAssignmentMapper {
     // actually represents.
     @Mapping(target = "serviceName", source = "repairTask.complaint.complaint")
     @Mapping(target = "employeeId", source = "user.id")
+    // Actual duration is derived ONLY from the linked RepairTask's recorded start/completion
+    // timestamps (the authoritative source). The assignment's own copies, the technician-typed
+    // value and the estimate are never reported as "actual". Assignments without a repair task
+    // (e.g. driver assignments) have no repair duration.
+    @Mapping(
+            target = "actualHours",
+            expression = "java(jobAssignment.getRepairTask() == null ? null : "
+                    + "com.garageos.core.util.ActualDuration.hours("
+                    + "jobAssignment.getRepairTask().getStartedAt(), jobAssignment.getRepairTask().getCompletedAt()))"
+    )
 
     @Mapping(
             target = "employeeName",

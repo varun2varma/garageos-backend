@@ -95,7 +95,9 @@ public class FinalReportEmailServiceImpl implements FinalReportEmailService {
             Prepared prepared = tx.execute(s -> prepare(reportId));
 
             if (prepared == null || prepared.recipient() == null || prepared.recipient().isBlank()) {
-                record(reportId, FinalReportEmailStatus.SKIPPED, null, "No recipient e-mail address on record.", false);
+                record(reportId, FinalReportEmailStatus.SKIPPED, null,
+                        prepared == null ? "Report is withheld or unavailable." : "No recipient e-mail address on record.",
+                        false);
                 return;
             }
 
@@ -121,6 +123,12 @@ public class FinalReportEmailServiceImpl implements FinalReportEmailService {
     private Prepared prepare(Long reportId) {
 
         JobCardFinalReport report = reportRepository.findById(reportId).orElseThrow();
+
+        // Defence in depth: the claim query already excludes withheld rows.
+        if (report.isWithheld()) {
+            return null;
+        }
+
         JobCard jobCard = jobCardRepository.findById(report.getJobCardId()).orElseThrow();
         GarageBrandingResponse garage = garageBrandingService.resolve(report.getGarageId());
         Vehicle vehicle = jobCard.getVehicle();

@@ -50,6 +50,10 @@ public class Invoice extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     String remarks;
 
+    /** Who generated this invoice (V82). Null for historical rows. */
+    @Column(name = "generated_by_user_id")
+    Long generatedByUserId;
+
     @Column(nullable = false)
     private LocalDateTime generatedAt;
 

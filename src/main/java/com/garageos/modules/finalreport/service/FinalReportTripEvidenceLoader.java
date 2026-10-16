@@ -76,7 +76,10 @@ public class FinalReportTripEvidenceLoader {
                 continue;
             }
             for (NavigationTripMedia m : mediaRepository.findByTripIdOrderByCapturedAtAsc(trip.getId())) {
-                if (audience == FinalReportAudience.OWNER || CUSTOMER_VISIBLE_STAGES.contains(m.getMediaStage())) {
+                // Same rule for both audiences: owner and customer reports share one evidence set. A trip
+                // photo is included only when its persisted customer_visible flag is set AND its stage is
+                // an allowed report stage - the stage alone never proves visibility.
+                if (m.isCustomerVisible() && CUSTOMER_VISIBLE_STAGES.contains(m.getMediaStage())) {
                     media.add(m);
                 }
             }

@@ -26,6 +26,9 @@ public interface JobCardMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "bookingId", ignore = true)
+    @Mapping(target = "createdByUserId", ignore = true)
+    @Mapping(target = "createdByRoles", ignore = true)
+    @Mapping(target = "createdByName", ignore = true)
     JobCard toEntity(CreateJobCardRequest request);
 
     @Mapping(source = "garage.id", target = "garageId")
@@ -53,6 +56,9 @@ public interface JobCardMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "bookingId", ignore = true)
+    @Mapping(target = "createdByUserId", ignore = true)
+    @Mapping(target = "createdByRoles", ignore = true)
+    @Mapping(target = "createdByName", ignore = true)
     void updateEntity(CreateJobCardRequest request,
                       @MappingTarget JobCard jobCard);
 }

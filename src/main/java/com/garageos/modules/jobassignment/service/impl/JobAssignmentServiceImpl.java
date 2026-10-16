@@ -157,6 +157,12 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         assignment.setUser(user);
 
+        // D11: who made the assignment (authenticated actor only).
+        Long assignerId = com.garageos.core.security.CurrentActor.userIdOrNull();
+        if (assignerId != null) {
+            userRepository.findById(assignerId).ifPresent(assignment::setAssignedBy);
+        }
+
         assignment.setAssignmentType(
                 request.getAssignmentType()
         );
@@ -447,10 +453,8 @@ public class JobAssignmentServiceImpl implements JobAssignmentService {
 
         if (request != null) {
 
-            assignment.setActualHours(
-                    request.getActualHours()
-            );
-
+            // request.getActualHours() is intentionally ignored: actual duration is derived from
+            // the recorded start/completion timestamps (core.util.ActualDuration), never typed.
             assignment.setRemarks(
                     request.getRemarks()
             );

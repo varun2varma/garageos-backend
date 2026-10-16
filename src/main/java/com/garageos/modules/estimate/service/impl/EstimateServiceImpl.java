@@ -88,6 +88,8 @@ public class EstimateServiceImpl implements EstimateService {
         estimate.setEstimateNumber(estimateNumber);
         estimate.setJobCard(jobCard);
         estimate.setStatus(EstimateStatus.DRAFT);
+        // D11: who prepared it (the preparer, not the approver).
+        estimate.setGeneratedByUserId(com.garageos.core.security.CurrentActor.userIdOrNull());
 
         estimate.setSubtotal(BigDecimal.ZERO);
         estimate.setDiscount(BigDecimal.ZERO);
@@ -568,9 +570,11 @@ public class EstimateServiceImpl implements EstimateService {
                         .getAuthentication()
                         .getPrincipal();
 
-        if (!principal.getRoles().contains(RoleCode.MANAGER.name())) {
+        // D06: Owner has the Manager's authority here; all other roles are still refused.
+        if (!principal.getRoles().contains(RoleCode.MANAGER.name())
+                && !principal.getRoles().contains(RoleCode.OWNER.name())) {
             throw new BusinessException(
-                    "Only a Manager can approve this estimate.");
+                    "Only a Manager or the Owner can approve this estimate.");
         }
 
         if (jobCard.getGarage() == null

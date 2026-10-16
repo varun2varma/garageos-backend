@@ -17,6 +17,9 @@ public interface CatalogItemRepository
 
     long countByTaxRuleCodeAndClassificationStatus(String taxRuleCode, ClassificationStatus status);
 
+    /** Catalog-wide count per classification status (read-only tax policy visibility). */
+    long countByClassificationStatus(ClassificationStatus status);
+
     Optional<CatalogItem> findByItemTypeAndNameNormalized(CatalogItemType itemType, String nameNormalized);
 
     Page<CatalogItem> findByItemTypeAndActiveTrueOrderByNameAsc(CatalogItemType itemType, Pageable pageable);

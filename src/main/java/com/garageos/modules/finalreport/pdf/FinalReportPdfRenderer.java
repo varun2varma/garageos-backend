@@ -82,6 +82,7 @@ public class FinalReportPdfRenderer {
             document.add(parties(d));
 
             complaints(document, d);
+            declinedComplaints(document, d);
             inspection(document, d);
             approvedWork(document, d);
             repairs(document, d);
@@ -126,6 +127,11 @@ public class FinalReportPdfRenderer {
         labelledCell(table, "Service Date", date(d.job().serviceDate()));
         labelledCell(table, "Odometer In", d.job().odometerIn() == null ? "-" : d.job().odometerIn() + " km");
         labelledCell(table, "Report", d.reference());
+        labelledCell(table, "Service Advisor",
+                d.job().serviceAdvisor() == null || d.job().serviceAdvisor().isBlank()
+                        ? com.garageos.core.util.StaffAttribution.NOT_RECORDED
+                        : d.job().serviceAdvisor());
+        table.completeRow();
 
         table.setSpacingAfter(6);
         return table;
@@ -179,6 +185,25 @@ public class FinalReportPdfRenderer {
         doc.add(t);
     }
 
+    /** Complaints the customer removed from this visit: listed as NOT performed, never as completed work. */
+    private void declinedComplaints(Document doc, JobCardFinalReportDTO d) throws DocumentException {
+
+        if (d.declinedComplaints() == null || d.declinedComplaints().isEmpty()) {
+            return;
+        }
+
+        PdfPTable t = section("REMOVED AT THE CUSTOMER'S REQUEST (NOT PERFORMED)", new float[]{0.6f, 8f},
+                "#", "Complaint - removed from this service visit");
+
+        int i = 1;
+        for (String c : d.declinedComplaints()) {
+            t.addCell(bodyCell(String.valueOf(i++), Element.ALIGN_LEFT));
+            t.addCell(bodyCell(c, Element.ALIGN_LEFT));
+        }
+
+        doc.add(t);
+    }
+
     private void inspection(Document doc, JobCardFinalReportDTO d) throws DocumentException {
 
         JobCardFinalReportDTO.InspectionInfo ins = d.inspection();
@@ -224,7 +249,14 @@ public class FinalReportPdfRenderer {
         }
 
         if (!isBlank(ins.recommendedWork())) {
-            doc.add(textBox("RECOMMENDED WORK", ins.recommendedWork()));
+            String recommended = ins.recommendedWork();
+            if (d.declinedComplaints() != null && !d.declinedComplaints().isEmpty()) {
+                // The recommendation is the inspector's free text, recorded before the customer removed work; it cannot be
+                // matched to complaints reliably, so say plainly (inside the same box) that removal overrides it.
+                recommended += "\n\nNote: work listed under \"Removed at the customer's request\" was not authorised and "
+                        + "was not performed, even if it was recommended above.";
+            }
+            doc.add(textBox("RECOMMENDED WORK", recommended));
         }
 
         if (d.audience() == FinalReportAudience.OWNER && !isBlank(ins.notes())) {
@@ -432,9 +464,7 @@ public class FinalReportPdfRenderer {
                 continue;
             }
 
-            String caption = p.stageLabel()
-                    + (d.audience() == FinalReportAudience.OWNER && !p.customerVisible() ? "  (internal)" : "");
-            Paragraph c = new Paragraph(caption, SMALL);
+            Paragraph c = new Paragraph(p.stageLabel(), SMALL);
             c.setAlignment(Element.ALIGN_CENTER);
             cell.addElement(c);
 

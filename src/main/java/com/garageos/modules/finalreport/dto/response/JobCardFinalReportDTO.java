@@ -40,7 +40,26 @@ public record JobCardFinalReportDTO(
         /** OWNER audience only; null for CUSTOMER. */
         OwnerInfo ownerInfo,
         /** Driver pickup/delivery evidence linked to this job card, already filtered for the audience. */
-        List<TripEvidenceInfo> tripEvidence) {
+        List<TripEvidenceInfo> tripEvidence,
+        /**
+         * Complaints the customer removed from this visit (all their estimate lines deselected, or the complaint was
+         * cancelled). They stay in {@code complaints} as received, are listed here as NOT performed, and never appear
+         * in the repair work or the billed work.
+         */
+        List<String> declinedComplaints) {
+
+    /** Compatibility constructor for callers that carry no declined-complaint information. */
+    public JobCardFinalReportDTO(
+            FinalReportAudience audience, int version, String reference, LocalDateTime generatedAt,
+            GarageBrandingResponse garage, byte[] logoBytes, PartyInfo customer, VehicleInfo vehicle, JobInfo job,
+            List<String> complaints, InspectionInfo inspection, String estimateNumber, String estimateStatus,
+            InvoiceTaxCalculator.Breakdown work, List<RepairInfo> repairs, QualityInfo qualityCheck,
+            InvoiceInfo invoice, DeliveryInfo delivery, List<PhotoInfo> photos, OwnerInfo ownerInfo,
+            List<TripEvidenceInfo> tripEvidence) {
+        this(audience, version, reference, generatedAt, garage, logoBytes, customer, vehicle, job, complaints,
+                inspection, estimateNumber, estimateStatus, work, repairs, qualityCheck, invoice, delivery, photos,
+                ownerInfo, tripEvidence, List.of());
+    }
 
     /** Compatibility constructor for callers that carry no trip evidence. */
     public JobCardFinalReportDTO(
@@ -85,7 +104,12 @@ public record JobCardFinalReportDTO(
             LocalDate serviceDate,
             Long odometerIn,
             String status,
-            LocalDate estimatedDeliveryDate) {
+            LocalDate estimatedDeliveryDate,
+            /**
+             * The recorded Service Advisor, else the responsible Manager / Owner, else the neutral label
+             * "Garage team (not individually recorded)" - see StaffAttribution. Never guessed.
+             */
+            String serviceAdvisor) {
     }
 
     public record InspectionInfo(

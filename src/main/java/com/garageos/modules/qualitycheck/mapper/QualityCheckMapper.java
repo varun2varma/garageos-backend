@@ -15,6 +15,8 @@ public interface QualityCheckMapper {
     @Mapping(target = "jobCard", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "inspectedAt", ignore = true)
+    @Mapping(target = "inspectedBy", ignore = true)
+    @Mapping(target = "inspectedByUserId", ignore = true)
 //    @Mapping(target = "createdAt", ignore = true)
 //    @Mapping(target = "updatedAt", ignore = true)
     QualityCheck toEntity(CreateQualityCheckRequest request);
@@ -31,6 +33,9 @@ public interface QualityCheckMapper {
     @Mapping(target = "jobCard", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "inspectedAt", ignore = true)
+    // The inspector is resolved and validated by QualityInspectorService - never copied from request text.
+    @Mapping(target = "inspectedBy", ignore = true)
+    @Mapping(target = "inspectedByUserId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(

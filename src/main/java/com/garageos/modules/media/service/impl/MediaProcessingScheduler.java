@@ -125,6 +125,20 @@ public class MediaProcessingScheduler {
         }
     }
 
+    /**
+     * Restart-safe orphan sweeper: a COMPLETED image whose staging source was not deleted (crash between the
+     * save and the delete, or a transient storage error) still carries {@code stagingSourceKey}; retry here.
+     */
+    @Scheduled(fixedDelay = 600_000L, initialDelay = 120_000L)
+    public void sweepStagingSources() {
+
+        for (JobCardMedia media : jobCardMediaRepository
+                .findByStorageProviderAndUploadStatusAndStagingSourceKeyIsNotNull(
+                        StorageProvider.R2.name(), MediaUploadStatus.COMPLETED.name())) {
+            deleteStagingSource(media);
+        }
+    }
+
     /** Bounded retries for evidence rendering; afterwards the row is FAILED and the source is kept. */
     private static final int MAX_PROCESSING_ATTEMPTS = 5;
 
@@ -210,19 +224,29 @@ public class MediaProcessingScheduler {
         media.setFileSize((long) evidenceBytes.size());
 
         pendingSourceDeletes.put(media.getId(), sourceKey);
+        // Persisted with the row (V80) so a restart between "COMPLETED" and the delete cannot orphan the object.
+        media.setStagingSourceKey(sourceKey);
     }
 
     /** Runs after the row has been saved as COMPLETED; best-effort by design (see processEvidenceOnlyImage). */
     private void deleteStagingSource(JobCardMedia media) {
 
-        String sourceKey = pendingSourceDeletes.remove(media.getId());
+        String pending = pendingSourceDeletes.remove(media.getId());
+        String sourceKey = pending != null ? pending : media.getStagingSourceKey();
 
         if (sourceKey == null) {
             return;
         }
 
         try {
-            resolveProvider(StorageProvider.R2).deleteKey(sourceKey);
+            // Never delete an object another row still references (key-collision safety).
+            if (!sourceKey.equals(media.getStorageKey())
+                    && !sourceKey.equals(media.getEvidenceKey())
+                    && jobCardMediaRepository.countOtherRowsReferencingKey(media.getId(), sourceKey) == 0) {
+                resolveProvider(StorageProvider.R2).deleteKey(sourceKey);
+            }
+            media.setStagingSourceKey(null);
+            jobCardMediaRepository.save(media);
         } catch (RuntimeException ex) {
             log.warn(
                     "[MEDIA_PROCESSING_SCHEDULER] Could not delete staging source (orphaned object). mediaId={}, key={}, error={}",

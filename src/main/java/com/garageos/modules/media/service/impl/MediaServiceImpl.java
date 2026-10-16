@@ -6,6 +6,7 @@ import com.garageos.core.enums.media.MediaType;
 import com.garageos.core.enums.media.MediaUploadStatus;
 import com.garageos.core.enums.media.MediaVisibility;
 import com.garageos.core.enums.media.StorageProvider;
+import com.garageos.core.exception.BusinessException;
 import com.garageos.core.exception.MediaException;
 import com.garageos.core.exception.ResourceNotFoundException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -55,6 +56,14 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Slf4j
 public class MediaServiceImpl implements MediaService {
+
+    /** Field-injected so hand-built unit-test instances keep working. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.finalreport.repository.JobCardFinalReportRepository finalReportRepository;
+
+    /** Atomic per-(job card, stage) sequence; field-injected so hand-built unit-test instances keep working. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private MediaSequenceAllocator sequenceAllocator;
 
     private static final Pattern SEQUENCE_PATTERN =
             Pattern.compile("_(\\d+)\\.[^.]+$");
@@ -233,6 +242,8 @@ public class MediaServiceImpl implements MediaService {
             );
         }
 
+        requireOwnTaskForTechnician(principal, repairTask);
+
         String contentType =
                 file.getContentType();
 
@@ -335,6 +346,7 @@ public class MediaServiceImpl implements MediaService {
                 JobCardMedia.builder()
                         .jobCardId(jobCardId)
                         .repairTaskId(repairTaskId)
+                        .mediaSequence(sequence)
                         .fileName(generatedFileName)
                         .mediaType(mediaType.name())
                         .mediaStage(mediaStage.name())
@@ -596,10 +608,23 @@ public class MediaServiceImpl implements MediaService {
             );
         }
 
+        String previousVisibility = media.getVisibility();
+
         media.setVisibility(visibility.name());
 
         JobCardMedia saved =
                 jobCardMediaRepository.save(media);
+
+        // Privacy: stored report PDFs embed photo bytes and do not follow later visibility changes. When a
+        // photo stops being customer-visible, the job card's issued reports are withheld (kept as an audit
+        // record, no longer served or e-mailed) until an owner/manager regenerates them.
+        if ("CUSTOMER_VISIBLE".equals(previousVisibility)
+                && !"CUSTOMER_VISIBLE".equals(visibility.name())
+                && finalReportRepository != null) {
+
+            finalReportRepository.withholdAllForJobCard(
+                    jobCardId, "MEDIA_VISIBILITY_WITHDRAWN", LocalDateTime.now());
+        }
 
         log.info(
                 "[MEDIA] Visibility updated. mediaId={}, jobCardId={}, visibility={}",
@@ -628,6 +653,8 @@ public class MediaServiceImpl implements MediaService {
 
         validateRepairTaskRequirement(jobCardId, request.getStage(), request.getRepairTaskId());
 
+        RepairTask intentTask = null;
+
         if (request.getRepairTaskId() != null) {
 
             RepairTask repairTask =
@@ -643,7 +670,11 @@ public class MediaServiceImpl implements MediaService {
                         "Repair Task does not belong to this Job Card."
                 );
             }
+
+            intentTask = repairTask;
         }
+
+        requireOwnTaskForTechnician(principal, intentTask);
 
         MediaStorageProvider r2 = resolveProvider(StorageProvider.R2);
 
@@ -661,6 +692,19 @@ public class MediaServiceImpl implements MediaService {
                     MediaException.MediaErrorCode.MEDIA_INVALID_REQUEST,
                     "File is too large."
             );
+        }
+
+        String clientUploadId = request.getClientUploadId() == null || request.getClientUploadId().isBlank()
+                ? null : request.getClientUploadId().trim();
+
+        if (clientUploadId != null) {
+            // Idempotent retry: the first attempt's response may have been lost after the row was created.
+            JobCardMedia existing = jobCardMediaRepository
+                    .findByJobCardIdAndClientUploadId(jobCardId, clientUploadId).orElse(null);
+
+            if (existing != null) {
+                return replayUploadIntent(existing, r2);
+            }
         }
 
         MediaType mediaType = resolveMediaType(request.getContentType());
@@ -686,6 +730,8 @@ public class MediaServiceImpl implements MediaService {
                 JobCardMedia.builder()
                         .jobCardId(jobCardId)
                         .repairTaskId(request.getRepairTaskId())
+                        .clientUploadId(clientUploadId)
+                        .mediaSequence(sequence)
                         .fileName(generatedFileName)
                         .mediaType(mediaType.name())
                         .mediaStage(request.getStage().name())
@@ -745,10 +791,47 @@ public class MediaServiceImpl implements MediaService {
                 extension);
 
         savedMedia.setStorageKey(storageKey);
+        if (!isVideo) {
+            // The temporary "_source" object is removed after evidence rendering; persisting its key means a
+            // restart or crash cannot orphan it (see MediaProcessingScheduler's sweeper).
+            savedMedia.setStagingSourceKey(storageKey);
+        }
         savedMedia = jobCardMediaRepository.save(savedMedia);
 
+        log.info(
+                "[MEDIA][R2] Upload intent created. mediaId={}, jobCardId={}, storageKey={}",
+                savedMedia.getId(),
+                jobCardId,
+                storageKey
+        );
+
+        return buildUploadIntentResponse(savedMedia, r2);
+    }
+
+    /**
+     * Replays an intent for an already-reserved row (same client upload id). Only a row still waiting for its
+     * bytes (PENDING) gets a fresh upload authorization; anything further along was already received.
+     */
+    private UploadIntentResponse replayUploadIntent(JobCardMedia existing, MediaStorageProvider r2) {
+
+        if (!MediaUploadStatus.PENDING.name().equals(existing.getUploadStatus())) {
+            throw new BusinessException(
+                    "This upload was already received.", "MEDIA_UPLOAD_ALREADY_RECEIVED");
+        }
+
+        log.info("[MEDIA][R2] Upload intent replayed (idempotent). mediaId={}, jobCardId={}",
+                existing.getId(), existing.getJobCardId());
+
+        return buildUploadIntentResponse(existing, r2);
+    }
+
+    private UploadIntentResponse buildUploadIntentResponse(JobCardMedia savedMedia, MediaStorageProvider r2) {
+
+        String storageKey = savedMedia.getStorageKey();
+        boolean isVideo = "VIDEO".equals(savedMedia.getMediaType());
+
         UploadAuthorization authorization =
-                r2.createUploadAuthorization(storageKey, request.getContentType());
+                r2.createUploadAuthorization(storageKey, savedMedia.getContentType());
 
         UploadAuthorization thumbnailAuthorization = null;
 
@@ -757,13 +840,6 @@ public class MediaServiceImpl implements MediaService {
                     MediaKeys.derive(storageKey, MediaKeys.THUMBNAIL, "jpg"),
                     "image/jpeg");
         }
-
-        log.info(
-                "[MEDIA][R2] Upload intent created. mediaId={}, jobCardId={}, storageKey={}",
-                savedMedia.getId(),
-                jobCardId,
-                storageKey
-        );
 
         return UploadIntentResponse.builder()
                 .thumbnailUploadUrl(thumbnailAuthorization != null ? thumbnailAuthorization.uploadUrl() : null)
@@ -776,7 +852,7 @@ public class MediaServiceImpl implements MediaService {
                 .storageProvider(StorageProvider.R2.name())
                 .storageKey(storageKey)
                 .expiresAt(authorization.expiresAt())
-                .uploadSessionId(uploadSessionId)
+                .uploadSessionId(savedMedia.getUploadSessionId())
                 .status(savedMedia.getUploadStatus())
                 .build();
     }
@@ -1004,7 +1080,7 @@ public class MediaServiceImpl implements MediaService {
 
         try {
 
-            resolveProvider(providerType).delete(media);
+            deleteUnsharedObjects(media, providerType);
 
         } catch (Exception ex) {
 
@@ -1026,6 +1102,82 @@ public class MediaServiceImpl implements MediaService {
                 media.getJobCardId(),
                 providerType
         );
+    }
+
+    /**
+     * D09: a technician-only caller may attach media only to a specific Repair Task assigned to them. A task
+     * id is mandatory for them and the task's own (non-cancelled) assignment must belong to the caller, so an
+     * assignment to another task of the same Job Card gives no upload rights. Management roles (and a user who
+     * also holds one) keep the existing Job Card-level behaviour.
+     */
+    private void requireOwnTaskForTechnician(GarageUserPrincipal principal, RepairTask task) {
+
+        Set<String> roles = principal.getRoles();
+
+        boolean technicianOnly = roles.contains("TECHNICIAN")
+                && !roles.contains("MANAGER")
+                && !roles.contains("SERVICE_ADVISOR")
+                && !roles.contains("OWNER");
+
+        if (!technicianOnly) {
+            return;
+        }
+
+        if (task == null) {
+            throw new AccessDeniedException(
+                    "Technicians can upload media only from the details of a task assigned to them.");
+        }
+
+        JobAssignment assignment = task.getJobAssignment();
+
+        boolean own = assignment != null
+                && assignment.getUser() != null
+                && assignment.getUser().getId() != null
+                && assignment.getUser().getId().equals(principal.getId())
+                && assignment.getStatus() != JobAssignmentStatus.CANCELLED;
+
+        if (!own) {
+            log.warn("[MEDIA] Technician is not assigned to the Repair Task. repairTaskId={}, userId={}",
+                    task.getId(), principal.getId());
+            throw new AccessDeniedException("You are not assigned to this Repair Task.");
+        }
+    }
+
+    /**
+     * Deletes only the objects no other media row references. A key shared with another row (the historical
+     * D04 collision) is left in place, so deleting one row can never destroy evidence another row still needs.
+     */
+    private void deleteUnsharedObjects(JobCardMedia media, StorageProvider providerType) {
+
+        java.util.Set<String> keys = new java.util.LinkedHashSet<>();
+        if (media.getStorageKey() != null) keys.add(media.getStorageKey());
+        if (media.getEvidenceKey() != null) keys.add(media.getEvidenceKey());
+        if (media.getThumbnailKey() != null) keys.add(media.getThumbnailKey());
+        if (media.getStagingSourceKey() != null) keys.add(media.getStagingSourceKey());
+
+        boolean sharesAKey = false;
+
+        for (String key : keys) {
+            if (jobCardMediaRepository.countOtherRowsReferencingKey(media.getId(), key) > 0) {
+                sharesAKey = true;
+                log.warn("[MEDIA] Object key is shared with another media row; it is NOT deleted. mediaId={}, key={}",
+                        media.getId(), key);
+            }
+        }
+
+        if (!sharesAKey) {
+            resolveProvider(providerType).delete(media);
+            return;
+        }
+
+        // Shared: delete (R2) only the individually-owned keys; other providers keep the object.
+        if (providerType == StorageProvider.R2) {
+            for (String key : keys) {
+                if (jobCardMediaRepository.countOtherRowsReferencingKey(media.getId(), key) == 0) {
+                    resolveProvider(providerType).deleteKey(key);
+                }
+            }
+        }
     }
 
     private PlaybackAccess signedR2Access(String key) {
@@ -1392,6 +1544,12 @@ public class MediaServiceImpl implements MediaService {
     private int getNextSequence(
             Long jobCardId,
             MediaStage mediaStage) {
+
+        // Concurrency-safe path (job_card_media_counter, V80). The legacy read-max-plus-one below is only
+        // reachable for hand-built instances without the allocator (unit tests) and is race-prone.
+        if (sequenceAllocator != null) {
+            return sequenceAllocator.next(jobCardId, mediaStage);
+        }
 
         log.debug(
                 "[MEDIA] Calculating next sequence. jobCardId={}, stage={}",

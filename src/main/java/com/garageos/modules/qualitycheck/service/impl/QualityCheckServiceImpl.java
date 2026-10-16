@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.garageos.modules.qualitycheck.service.QualityInspectorService;
 import com.garageos.modules.notification.event.NotificationEventPublisher;
 import com.garageos.core.enums.notification.NotificationEventType;
 import com.garageos.modules.notification.event.NotificationEvents;
@@ -32,6 +33,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor
 public class QualityCheckServiceImpl
         implements QualityCheckService {
+
+    /** Inspector eligibility (field-injected so hand-built unit-test instances still work). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private QualityInspectorService inspectorService;
 
     /** Membership-based tenant scope (field-injected so hand-built unit-test instances still work). */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
@@ -149,6 +154,7 @@ public class QualityCheckServiceImpl
         }
 
         mapper.updateEntity(request, qualityCheck);
+        applyInspector(qualityCheck, request, jobCard);
 
         qualityCheck.setStatus(QualityCheckStatus.PASSED);
         qualityCheck.setInspectedAt(LocalDateTime.now());
@@ -187,6 +193,7 @@ public class QualityCheckServiceImpl
         }
 
         mapper.updateEntity(request, qualityCheck);
+        applyInspector(qualityCheck, request, jobCard);
 
         qualityCheck.setStatus(QualityCheckStatus.FAILED);
         qualityCheck.setInspectedAt(LocalDateTime.now());
@@ -226,6 +233,25 @@ public class QualityCheckServiceImpl
         jobCardRepository.save(jobCard);
 
         return mapper.toResponse(qualityCheck);
+    }
+
+    /**
+     * D10: the inspector is a validated employee of the job card garage, recorded by stable user id with a name
+     * snapshot taken from that employee. Free text from the request is never trusted.
+     */
+    private void applyInspector(QualityCheck qualityCheck, CreateQualityCheckRequest request, JobCard jobCard) {
+
+        if (inspectorService == null) {
+            // hand-built unit-test instances only; the running application always has the service
+            qualityCheck.setInspectedBy(request.getInspectedBy());
+            return;
+        }
+
+        com.garageos.modules.identity.entity.User inspector =
+                inspectorService.requireEligible(request.getInspectedByUserId(), jobCard.getGarage().getId());
+
+        qualityCheck.setInspectedByUserId(inspector.getId());
+        qualityCheck.setInspectedBy(QualityInspectorService.displayName(inspector));
     }
 
     /**

@@ -47,6 +47,21 @@ public class JobCard extends BaseEntity {
     @Column(nullable = false)
     LocalDate serviceDate;
 
+    /**
+     * Who opened this job card (V82), recorded at creation from the authenticated principal only. Null on
+     * records created before attribution existed - those are NEVER back-filled by guessing.
+     */
+    @Column(name = "created_by_user_id")
+    Long createdByUserId;
+
+    /** Comma-separated roles the creator held when creating it (snapshot), e.g. {@code SERVICE_ADVISOR}. */
+    @Column(name = "created_by_roles", length = 100)
+    String createdByRoles;
+
+    /** Name of the creator at creation time (snapshot; survives renames / deactivation). */
+    @Column(name = "created_by_name", length = 200)
+    String createdByName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     JobCardStatus status;

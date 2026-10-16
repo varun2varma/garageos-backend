@@ -37,6 +37,7 @@ public interface InvoiceMapper {
     @Mapping(target = "supplierGstin", ignore = true)
     @Mapping(target = "supplierState", ignore = true)
     @Mapping(target = "placeOfSupplyState", ignore = true)
+    @Mapping(target = "generatedByUserId", ignore = true)
     Invoice toEntity(CreateInvoiceRequest request);
 
     @Mapping(source = "estimate.id", target = "estimateId")
@@ -70,6 +71,7 @@ public interface InvoiceMapper {
     @Mapping(target = "supplierGstin", ignore = true)
     @Mapping(target = "supplierState", ignore = true)
     @Mapping(target = "placeOfSupplyState", ignore = true)
+    @Mapping(target = "generatedByUserId", ignore = true)
     void updateEntity(
             CreateInvoiceRequest request,
             @MappingTarget Invoice invoice);

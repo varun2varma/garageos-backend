@@ -24,6 +24,7 @@ public interface EstimateMapper {
     @Mapping(target = "grandTotal", ignore =true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "generatedByUserId", ignore = true)
     Estimate toEntity(CreateEstimateRequest request);
 
     @Mapping(source = "jobCard.id", target = "jobCardId")
@@ -41,6 +42,7 @@ public interface EstimateMapper {
     @Mapping(target = "grandTotal", ignore =true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "generatedByUserId", ignore = true)
     void updateEntity(
             CreateEstimateRequest request,
             @MappingTarget Estimate estimate);

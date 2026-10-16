@@ -34,8 +34,10 @@ import java.util.List;
 public class PaymentController {
 
     /** Who may record a payment. ACCOUNTANT deliberately excluded (review only). */
+    // ACCOUNTANT may record repayments only against invoices with an active Owner credit authorization; that
+    // narrowing is enforced in PaymentServiceImpl.requireRepaymentScopeForAccountant, not by this annotation.
     private static final String COLLECT_ROLES =
-            "hasAnyRole('CASHIER', 'MANAGER', 'SERVICE_ADVISOR', 'OWNER')";
+            "hasAnyRole('CASHIER', 'MANAGER', 'SERVICE_ADVISOR', 'OWNER', 'ACCOUNTANT')";
 
     private static final String READ_ROLES =
             "hasAnyRole('CASHIER', 'ACCOUNTANT', 'MANAGER', 'SERVICE_ADVISOR', 'OWNER')";

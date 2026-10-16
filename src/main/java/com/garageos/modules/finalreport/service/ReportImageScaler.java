@@ -33,7 +33,9 @@ public final class ReportImageScaler {
         }
 
         try {
-            BufferedImage source = ImageIO.read(new ByteArrayInputStream(original));
+            // Applies the photo's EXIF orientation: a portrait photo stored sideways (media not processed into an
+            // upright evidence image, e.g. legacy uploads) must still be printed upright in the report.
+            BufferedImage source = com.garageos.modules.media.util.ImageOrientation.decodeUpright(original);
 
             if (source == null) {
                 return null;

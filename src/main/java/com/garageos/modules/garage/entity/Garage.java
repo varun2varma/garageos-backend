@@ -142,4 +142,26 @@ public class Garage extends BaseEntity {
     @Column(name = "logo_updated_at")
     LocalDateTime logoUpdatedAt;
 
+    /**
+     * The garage authorized signature and stamp printed on the final invoice PDF (V83). Private keys in the object
+     * store (never URLs); null until the Owner uploads them. Unrelated to the optional customer signature.
+     */
+    @Column(name = "signature_storage_key", length = 500)
+    String signatureStorageKey;
+
+    @Column(name = "signature_content_type", length = 100)
+    String signatureContentType;
+
+    @Column(name = "signature_updated_at")
+    LocalDateTime signatureUpdatedAt;
+
+    @Column(name = "stamp_storage_key", length = 500)
+    String stampStorageKey;
+
+    @Column(name = "stamp_content_type", length = 100)
+    String stampContentType;
+
+    @Column(name = "stamp_updated_at")
+    LocalDateTime stampUpdatedAt;
+
 }

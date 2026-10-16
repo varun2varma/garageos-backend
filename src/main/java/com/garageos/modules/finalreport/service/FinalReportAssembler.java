@@ -93,6 +93,51 @@ public class FinalReportAssembler {
     private final GarageBrandingService garageBrandingService;
     private final FinalReportTripEvidenceLoader tripEvidenceLoader;
 
+    /** Optional so hand-built unit-test instances keep working; absent = no declined-complaint information. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.estimateitem.repository.EstimateItemRepository estimateItemRepository;
+
+    /**
+     * Complaints the customer removed from the visit: cancelled, or having estimate lines of which NONE is still
+     * selected. Derived from persisted records only; a complaint with no estimate line at all is simply
+     * unquoted, not "declined".
+     */
+    private List<String> declinedComplaints(Long jobCardId) {
+
+        if (estimateItemRepository == null) {
+            return List.of();
+        }
+
+        Estimate estimate = estimateRepository.findByJobCardId(jobCardId).orElse(null);
+
+        java.util.Map<Long, List<com.garageos.modules.estimateitem.entity.EstimateItem>> byComplaint =
+                new java.util.HashMap<>();
+
+        if (estimate != null) {
+            for (com.garageos.modules.estimateitem.entity.EstimateItem item
+                    : estimateItemRepository.findByEstimateId(estimate.getId())) {
+                if (item.getComplaint() != null) {
+                    byComplaint.computeIfAbsent(item.getComplaint().getId(), k -> new ArrayList<>()).add(item);
+                }
+            }
+        }
+
+        List<String> declined = new ArrayList<>();
+
+        for (Complaint c : complaintRepository.findByJobCardId(jobCardId)) {
+            List<com.garageos.modules.estimateitem.entity.EstimateItem> lines = byComplaint.get(c.getId());
+            boolean cancelled = c.getStatus() == com.garageos.core.enums.ComplaintStatus.CANCELLED;
+            boolean allDeselected = lines != null && !lines.isEmpty()
+                    && lines.stream().noneMatch(l -> Boolean.TRUE.equals(l.getSelected()));
+
+            if (cancelled || allDeselected) {
+                declined.add(c.getComplaint());
+            }
+        }
+
+        return declined;
+    }
+
     public JobCardFinalReportDTO assemble(
             JobCard jobCard, FinalReportAudience audience, int version, LocalDateTime generatedAt) {
 
@@ -134,7 +179,8 @@ public class FinalReportAssembler {
                         jobCard.getServiceDate(),
                         jobCard.getOdometerReading(),
                         jobCard.getStatus() == null ? null : jobCard.getStatus().name(),
-                        jobCard.getEstimatedDeliveryDate()),
+                        jobCard.getEstimatedDeliveryDate(),
+                        com.garageos.core.util.StaffAttribution.serviceAdvisorLabel(jobCard)),
                 complaintRepository.findByJobCardId(jobCardId).stream().map(Complaint::getComplaint).toList(),
                 inspection(jobCardId),
                 estimate == null ? null : estimate.getEstimateNumber(),
@@ -155,9 +201,12 @@ public class FinalReportAssembler {
                 new OwnerInfo(
                         jobCard.getRemarks(),
                         technicians(jobCardId),
-                        (int) photos.stream().filter(p -> !p.customerVisible()).count()),
+                        // Internal photos are no longer reported on at all: owner and customer
+                        // reports share one customer-visible photo set.
+                        0),
                 // Selected by relationship and filtered for the audience inside the loader (server side).
-                tripEvidenceLoader.load(jobCard, audience));
+                tripEvidenceLoader.load(jobCard, audience),
+                declinedComplaints(jobCardId));
 
         return FinalReportProjection.project(full, audience);
     }
@@ -196,9 +245,18 @@ public class FinalReportAssembler {
         List<RepairInfo> out = new ArrayList<>();
 
         for (RepairTask t : repairTaskRepository.findByJobCardIdOrderById(jobCardId)) {
-            String description = t.getEstimateItem() != null
-                    ? t.getEstimateItem().getDescription()
-                    : (t.getComplaint() == null ? "Repair task" : t.getComplaint().getComplaint());
+
+            // A cancelled task (e.g. the customer removed the complaint after a task had been created) is not
+            // work that was done: it never appears as repair work.
+            if (t.getStatus() == com.garageos.core.enums.RepairStatus.CANCELLED) {
+                continue;
+            }
+
+            // One repair task = one customer complaint, so the work is named by the complaint it resolves. (The
+            // task's "representative" estimate line is just its first part/labour line and would mislabel it.)
+            String description = t.getComplaint() != null
+                    ? t.getComplaint().getComplaint()
+                    : (t.getEstimateItem() != null ? t.getEstimateItem().getDescription() : "Repair task");
 
             out.add(new RepairInfo(
                     description,
@@ -222,7 +280,10 @@ public class FinalReportAssembler {
                     a.getAssignmentType() == null ? null : a.getAssignmentType().name(),
                     a.getStatus() == null ? null : a.getStatus().name(),
                     a.getEstimatedHours(),
-                    a.getActualHours(),
+                    // Actual = the RepairTask's recorded start -> completion; never the typed or
+                    // estimated hours, and never the assignment's possibly stale copy of the timestamps.
+                    a.getRepairTask() == null ? null : com.garageos.core.util.ActualDuration.hours(
+                            a.getRepairTask().getStartedAt(), a.getRepairTask().getCompletedAt()),
                     a.getCompletedAt(),
                     a.getRemarks()));
         }
@@ -231,15 +292,14 @@ public class FinalReportAssembler {
     }
 
     /**
-     * The visibility rule lives in this query choice: CUSTOMER gets only
-     * CUSTOMER_VISIBLE rows, OWNER gets every row of the job card.
+     * The visibility rule lives in this query choice: BOTH audiences get only
+     * CUSTOMER_VISIBLE rows, so the owner and customer reports always carry the
+     * same photo set. Internal media is never read from storage for a report.
      */
     private List<PhotoInfo> loadPhotos(Long jobCardId, FinalReportAudience audience) {
 
-        List<JobCardMedia> rows = audience == FinalReportAudience.CUSTOMER
-                ? jobCardMediaRepository.findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
-                jobCardId, VISIBILITY_CUSTOMER_VISIBLE)
-                : jobCardMediaRepository.findByJobCardIdOrderByCreatedAtAsc(jobCardId);
+        List<JobCardMedia> rows = jobCardMediaRepository.findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
+                jobCardId, VISIBILITY_CUSTOMER_VISIBLE);
 
         List<PhotoInfo> photos = new ArrayList<>();
 

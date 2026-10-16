@@ -84,6 +84,7 @@ public class FinalReportServiceImpl implements FinalReportService {
                                     .fileName(r.getFileName())
                                     .fileSize(r.getFileSize())
                                     .generatedAt(r.getGeneratedAt())
+                                    .withheld(r.getWithheld())
                                     .emailStatus(access.staff() ? r.getEmailStatus().name() : null)
                                     .build()));
                 }
@@ -118,6 +119,16 @@ public class FinalReportServiceImpl implements FinalReportService {
 
             JobCardFinalReport r = report.orElseThrow(() ->
                     new ResourceNotFoundException("The final report is not available yet."));
+
+            // Privacy: a withheld version (legacy owner report, or media visibility withdrawn) is never
+            // served - not as "latest" and not by explicit version. The default route never falls back
+            // to an older version either, because the latest version is the only candidate.
+            if (r.isWithheld()) {
+                throw new BusinessException(
+                        "This report version is withheld for privacy and cannot be downloaded. "
+                                + "Ask the garage owner or manager to regenerate the report.",
+                        "FINAL_REPORT_WITHHELD");
+            }
 
             return new FinalReportFile(r.getContent(), r.getFileName(), r.getContentType(), r.getVersion());
         });

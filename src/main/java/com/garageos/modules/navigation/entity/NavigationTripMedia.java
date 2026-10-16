@@ -103,6 +103,10 @@ public class NavigationTripMedia {
     @Column(name = "location_address", length = 500)
     private String locationAddress;
 
+    /** Explicit customer-visibility decision (V79). Final reports include a trip photo only when true. */
+    @Column(name = "customer_visible", nullable = false)
+    private boolean customerVisible;
+
     @Column(
             name = "created_at",
             nullable = false

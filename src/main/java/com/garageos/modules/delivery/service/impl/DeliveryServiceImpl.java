@@ -36,6 +36,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
 
+    /** The single release rule (PAID or active Owner credit). Optional so hand-built test instances fall back to PAID-only. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.credit.service.ReleaseClearance releaseClearance;
+
+    private boolean isReleaseCleared(com.garageos.modules.invoice.entity.Invoice invoice) {
+        if (releaseClearance != null) {
+            return releaseClearance.isCleared(invoice);
+        }
+        return invoice != null && invoice.getPaymentStatus() == com.garageos.core.enums.PaymentStatus.PAID;
+    }
+
+
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
@@ -119,9 +131,10 @@ public class DeliveryServiceImpl implements DeliveryService {
                     "Only generated invoices can be delivered.");
         }
 
-        if (invoice.getPaymentStatus() != PaymentStatus.PAID) {
+        // Release clearance: fully paid, or covered by an active Owner credit authorization.
+        if (!isReleaseCleared(invoice)) {
             throw new BusinessException(
-                    "Invoice must be paid before delivery can be completed.");
+                    "Invoice must be paid, or covered by an Owner-authorized credit, before delivery can be completed.");
         }
 
         Delivery delivery = mapper.toEntity(request);
@@ -183,9 +196,9 @@ public class DeliveryServiceImpl implements DeliveryService {
                                 "The Job Card has no invoice to deliver against."));
 
         if (!isDeliverableInvoiceStatus(invoice.getInvoiceStatus())
-                || invoice.getPaymentStatus() != PaymentStatus.PAID) {
+                || !isReleaseCleared(invoice)) {
             throw new BusinessException(
-                    "Invoice must be generated and paid before delivery can be completed.");
+                    "Invoice must be generated and paid, or covered by an Owner-authorized credit, before delivery can be completed.");
         }
 
         Delivery delivery = new Delivery();

@@ -236,6 +236,21 @@ public class JobCardMedia {
     @Column(name = "evidence_key", length = 500)
     private String evidenceKey;
 
+    /** Client-generated idempotency id of the queued upload (V80); unique per job card when present. */
+    @Column(name = "client_upload_id", length = 100)
+    private String clientUploadId;
+
+    /** Sequence number within (job card, stage), allocated atomically (V80); part of the object key. */
+    @Column(name = "media_sequence")
+    private Integer mediaSequence;
+
+    /**
+     * The temporary "_source" object of an image still awaiting evidence rendering. Persisted so a restart
+     * cannot orphan it: it is deleted once the row is COMPLETED, by the processor or the orphan sweeper.
+     */
+    @Column(name = "staging_source_key", length = 500)
+    private String stagingSourceKey;
+
     /**
      * True for rows created under the final evidence-only model (no
      * permanent original). While true and {@code evidenceKey} is still null

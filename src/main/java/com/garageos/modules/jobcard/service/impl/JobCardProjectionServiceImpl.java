@@ -235,7 +235,8 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
                 // (JobCardServiceImpl.authorizeProceedToRepair). Offering it
                 // to other operational roles would put a button on screen
                 // that the backend then refuses.
-                if (!principal.getRoles().contains(RoleCode.MANAGER.name())) {
+                if (!principal.getRoles().contains(RoleCode.MANAGER.name())
+                        && !principal.getRoles().contains(RoleCode.OWNER.name())) {
                     allowedActions.remove("start_repair");
                 }
             }

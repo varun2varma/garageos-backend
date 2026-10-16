@@ -78,4 +78,17 @@ public class JobCardFinalReport extends BaseEntity {
 
     @Column(name = "email_last_error", length = 500)
     String emailLastError;
+
+    /**
+     * A withheld report keeps its bytes (audit record) but is never served, used as "latest" or e-mailed.
+     * Set for legacy owner reports and when a photo's customer visibility is withdrawn.
+     */
+    @Column(nullable = false)
+    boolean withheld;
+
+    @Column(name = "withheld_reason", length = 80)
+    String withheldReason;
+
+    @Column(name = "withheld_at")
+    LocalDateTime withheldAt;
 }

@@ -15,7 +15,7 @@ import com.lowagie.text.pdf.PdfWriter;
  * of its own (the cause of the old blank trailing invoice page).
  *
  * Left: a document note (e.g. "This is a computer-generated tax invoice.").
- * Centre: "Page X of Y". Right: "Powered by GarageST" and an optional
+ * Left (second line): "Page X of Y". Right: "Powered by GarageST" and an optional
  * document/version reference.
  */
 public class GarageStPageFooter extends PdfPageEventHelper {
@@ -55,12 +55,13 @@ public class GarageStPageFooter extends PdfPageEventHelper {
         }
 
         String pageText = "Page " + writer.getPageNumber() + " of ";
-        float center = (left + right) / 2;
+        // Left-aligned on the second footer line. It used to be centred, where the (long) right-aligned
+        // "Powered by GarageST | <reference>" text ran into it ("Page 3 off Powered by ...").
         float textWidth = GarageStPdf.SMALL.getBaseFont().getWidthPoint(pageText, GarageStPdf.SMALL.getSize());
 
         ColumnText.showTextAligned(cb, Element.ALIGN_LEFT,
-                new Phrase(pageText, GarageStPdf.SMALL), center - 10, y - 11, 0);
-        cb.addTemplate(total, center - 10 + textWidth, y - 11);
+                new Phrase(pageText, GarageStPdf.SMALL), left, y - 11, 0);
+        cb.addTemplate(total, left + textWidth, y - 11);
 
         String brand = GarageStPdf.isBlank(reference)
                 ? "Powered by GarageST"

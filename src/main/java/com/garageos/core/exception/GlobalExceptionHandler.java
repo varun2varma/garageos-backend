@@ -8,6 +8,7 @@ import com.garageos.core.util.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,7 +52,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException ex) {
 
+        // Explicit JSON content type: the error must stay readable even on a route whose success
+        // response is not JSON (e.g. a PDF download) and for a client whose Accept header excludes JSON.
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(buildError(ex.getMessage(), ex.getCode()));
     }
 
@@ -65,7 +69,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
 
+        // Explicit JSON content type: see handleResourceNotFound.
         return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(buildError(ex.getMessage(), ex.getCode()));
     }
 
@@ -147,6 +153,7 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(buildError(ex.getMessage()));
     }
 

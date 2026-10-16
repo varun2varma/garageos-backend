@@ -31,6 +31,13 @@ public class UploadIntentRequest {
     @Positive
     private Long fileSize;
 
+    /**
+     * Optional stable id the client generates once per queued item and re-sends on every retry. A retry of an
+     * intent whose response was lost then returns the SAME media row instead of creating a duplicate.
+     */
+    @jakarta.validation.constraints.Size(max = 100)
+    private String clientUploadId;
+
     /** Optional client-computed checksum, recorded for later integrity comparison at completion time. */
     private String checksum;
 

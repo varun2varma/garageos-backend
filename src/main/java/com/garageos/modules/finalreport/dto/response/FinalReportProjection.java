@@ -6,8 +6,9 @@ import java.util.List;
 
 /**
  * Narrows the shared {@link JobCardFinalReportDTO} to what one audience may
- * see. The CUSTOMER projection removes every owner-only field and any photo
- * that is not customer-visible; the OWNER projection keeps everything.
+ * see. The CUSTOMER projection removes every owner-only field; BOTH projections
+ * drop any photo that is not customer-visible, so the owner and customer reports
+ * carry an identical photo set.
  *
  * This is the second line of defence: the assembler already loads only
  * customer-visible media for a customer report, so restricted photos are never
@@ -24,7 +25,7 @@ public final class FinalReportProjection {
 
     public static JobCardFinalReportDTO owner(JobCardFinalReportDTO f) {
         return copy(f, FinalReportAudience.OWNER, f.inspection(), f.repairs(), f.qualityCheck(),
-                f.delivery(), f.photos(), f.ownerInfo());
+                f.delivery(), customerVisiblePhotos(f), f.ownerInfo());
     }
 
     public static JobCardFinalReportDTO customer(JobCardFinalReportDTO f) {
@@ -52,10 +53,13 @@ public final class FinalReportProjection {
         JobCardFinalReportDTO.DeliveryInfo delivery = f.delivery() == null ? null
                 : new JobCardFinalReportDTO.DeliveryInfo(f.delivery().deliveredAt(), null, null);
 
-        List<JobCardFinalReportDTO.PhotoInfo> photos = f.photos() == null ? List.of()
-                : f.photos().stream().filter(JobCardFinalReportDTO.PhotoInfo::customerVisible).toList();
+        return copy(f, FinalReportAudience.CUSTOMER, inspection, repairs, quality, delivery,
+                customerVisiblePhotos(f), null);
+    }
 
-        return copy(f, FinalReportAudience.CUSTOMER, inspection, repairs, quality, delivery, photos, null);
+    private static List<JobCardFinalReportDTO.PhotoInfo> customerVisiblePhotos(JobCardFinalReportDTO f) {
+        return f.photos() == null ? List.of()
+                : f.photos().stream().filter(JobCardFinalReportDTO.PhotoInfo::customerVisible).toList();
     }
 
     private static JobCardFinalReportDTO copy(
@@ -72,6 +76,6 @@ public final class FinalReportProjection {
                 audience, f.version(), f.reference(), f.generatedAt(), f.garage(), f.logoBytes(),
                 f.customer(), f.vehicle(), f.job(), f.complaints(), inspection,
                 f.estimateNumber(), f.estimateStatus(), f.work(), repairs, quality,
-                f.invoice(), delivery, photos, ownerInfo, f.tripEvidence());
+                f.invoice(), delivery, photos, ownerInfo, f.tripEvidence(), f.declinedComplaints());
     }
 }

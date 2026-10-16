@@ -40,5 +40,11 @@ public class FinalReportStatusResponse {
         private LocalDateTime generatedAt;
         /** Owner/manager callers only; null for customers. */
         private String emailStatus;
+
+        /**
+         * True when this version is withheld for privacy (legacy owner report, or a photo's customer
+         * visibility was withdrawn). It cannot be downloaded; an owner or manager must regenerate it.
+         */
+        private boolean withheld;
     }
 }
