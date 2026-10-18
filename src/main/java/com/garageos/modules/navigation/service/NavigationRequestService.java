@@ -24,6 +24,12 @@ public interface NavigationRequestService {
             Long garageId
     );
 
+    /** Garage staff move the scheduled time of a request that has not started yet. */
+    NavigationRequestResponse reschedule(
+            Long requestId,
+            java.time.LocalDateTime scheduledAt
+    );
+
     NavigationRequestResponse getDeliveryRequestForJobCard(
             Long jobCardId
     );

@@ -20,6 +20,9 @@ public class ReturnPreferenceResponse {
     private BigDecimal deliveryLongitude;
     private LocalDateTime selectedAt;
 
+    /** Requested delivery time (the DELIVERY request's scheduledAt); null when none was asked for. Not the actual handover time. */
+    private LocalDateTime requestedDeliveryAt;
+
     /** The linked DELIVERY navigation request, when the choice is driver delivery. */
     private Long navigationRequestId;
     private String navigationRequestStatus;

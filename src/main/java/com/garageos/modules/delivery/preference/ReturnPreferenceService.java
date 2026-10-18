@@ -130,6 +130,7 @@ public class ReturnPreferenceService {
 
             String address = request.getDeliveryAddress() == null ? "" : request.getDeliveryAddress().trim();
             validateDestination(address, request.getDeliveryLatitude(), request.getDeliveryLongitude());
+            validateRequestedTime(request.getRequestedDeliveryAt());
 
             if (delivery == null) {
                 delivery = navigationRequestRepository.save(NavigationRequest.builder()
@@ -141,6 +142,10 @@ public class ReturnPreferenceService {
                         .deliveryAddress(address)
                         .deliveryLatitude(request.getDeliveryLatitude())
                         .deliveryLongitude(request.getDeliveryLongitude())
+                        // navigation_request.scheduled_at is NOT NULL: no requested time means "as soon as possible" (now), the same
+                        // convention the manager dispatch uses. Omitting it made every customer choice fail on save.
+                        .scheduledAt(request.getRequestedDeliveryAt() != null
+                                ? request.getRequestedDeliveryAt() : java.time.LocalDateTime.now())
                         .status(NavigationRequestStatus.REQUESTED)
                         .build());
             } else {
@@ -148,6 +153,9 @@ public class ReturnPreferenceService {
                 delivery.setDeliveryAddress(address);
                 delivery.setDeliveryLatitude(request.getDeliveryLatitude());
                 delivery.setDeliveryLongitude(request.getDeliveryLongitude());
+                if (request.getRequestedDeliveryAt() != null) {
+                    delivery.setScheduledAt(request.getRequestedDeliveryAt());
+                }
                 navigationRequestRepository.save(delivery);
             }
 
@@ -165,6 +173,16 @@ public class ReturnPreferenceService {
         }
 
         return toResponse(jobCard, preference);
+    }
+
+    /**
+     * The time is a wall-clock value typed by the customer (same convention as booking times). Only a clearly past
+     * value is rejected; the server clock is UTC, so a few hours of leniency for users east of UTC is accepted.
+     */
+    static void validateRequestedTime(java.time.LocalDateTime requested) {
+        if (requested != null && requested.isBefore(java.time.LocalDateTime.now())) {
+            throw new BusinessException("Choose a delivery time in the future.");
+        }
     }
 
     static void validateDestination(String address, BigDecimal lat, BigDecimal lon) {
@@ -237,6 +255,7 @@ public class ReturnPreferenceService {
                 .deliveryLatitude(preference == null ? null : preference.getDeliveryLatitude())
                 .deliveryLongitude(preference == null ? null : preference.getDeliveryLongitude())
                 .selectedAt(preference == null ? null : preference.getUpdatedAt())
+                .requestedDeliveryAt(delivery == null ? null : delivery.getScheduledAt())
                 .navigationRequestId(delivery == null ? null : delivery.getId())
                 .navigationRequestStatus(delivery == null ? null : delivery.getStatus().name())
                 .tripId(trip == null ? null : trip.getId())

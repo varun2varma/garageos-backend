@@ -79,6 +79,7 @@ public class FinalReportPdfRenderer {
             document.add(titleBar("VEHICLE SERVICE REPORT"));
             document.add(audienceLine(d));
             document.add(summaryStrip(d));
+            document.add(outcomeBand(d));
             document.add(parties(d));
 
             complaints(document, d);
@@ -131,6 +132,34 @@ public class FinalReportPdfRenderer {
                 d.job().serviceAdvisor() == null || d.job().serviceAdvisor().isBlank()
                         ? com.garageos.core.util.StaffAttribution.NOT_RECORDED
                         : d.job().serviceAdvisor());
+        table.completeRow();
+
+        table.setSpacingAfter(6);
+        return table;
+    }
+
+    /**
+     * "At a glance": the outcome of the visit in four facts, all derived from data already in the report (nothing new
+     * is asserted): quality result, tasks completed, total recorded work time, and the handover date.
+     */
+    private PdfPTable outcomeBand(JobCardFinalReportDTO d) {
+
+        List<JobCardFinalReportDTO.RepairInfo> repairs = d.repairs() == null ? List.of() : d.repairs();
+        long done = repairs.stream().filter(r -> "COMPLETED".equals(r.status())).count();
+        double hours = repairs.stream().map(JobCardFinalReportDTO.RepairInfo::actualHours)
+                .filter(java.util.Objects::nonNull).mapToDouble(Double::doubleValue).sum();
+        boolean anyTime = repairs.stream().anyMatch(r -> r.actualHours() != null);
+
+        PdfPTable table = new PdfPTable(new float[]{1.4f, 1.4f, 1.4f, 1.8f});
+        table.setWidthPercentage(100);
+
+        labelledCell(table, "Quality check",
+                d.qualityCheck() == null ? "-" : label(d.qualityCheck().status()));
+        labelledCell(table, "Work completed", repairs.isEmpty() ? "-" : done + " of " + repairs.size());
+        labelledCell(table, "Total work time",
+                anyTime ? com.garageos.core.util.ActualDuration.format(hours) : "-");
+        labelledCell(table, "Handed over",
+                d.delivery() == null ? "Not yet" : dateTime(d, d.delivery().deliveredAt()));
         table.completeRow();
 
         table.setSpacingAfter(6);
@@ -315,14 +344,15 @@ public class FinalReportPdfRenderer {
         boolean owner = d.audience() == FinalReportAudience.OWNER;
 
         PdfPTable t = owner
-                ? section("REPAIR WORK", new float[]{3.2f, 1.3f, 1.6f, 1.6f, 2.4f},
-                "Work", "Status", "Completed", "Technician", "Remarks")
-                : section("REPAIR WORK", new float[]{4f, 1.6f, 1.8f}, "Work", "Status", "Completed");
+                ? section("REPAIR WORK", new float[]{3f, 1.2f, 1.6f, 1.2f, 1.5f, 2f},
+                "Work", "Status", "Completed", "Time taken", "Technician", "Remarks")
+                : section("REPAIR WORK", new float[]{3.6f, 1.4f, 1.8f, 1.3f}, "Work", "Status", "Completed", "Time taken");
 
         for (RepairInfo r : repairs) {
             t.addCell(bodyCell(r.description(), Element.ALIGN_LEFT));
             t.addCell(bodyCell(label(r.status()), Element.ALIGN_LEFT));
             t.addCell(bodyCell(dateTime(d, r.completedAt()), Element.ALIGN_LEFT));
+            t.addCell(bodyCell(com.garageos.core.util.ActualDuration.format(r.actualHours()), Element.ALIGN_LEFT));
             if (owner) {
                 t.addCell(bodyCell(r.technicianName(), Element.ALIGN_LEFT));
                 t.addCell(bodyCell(r.remarks(), Element.ALIGN_LEFT));
@@ -409,14 +439,14 @@ public class FinalReportPdfRenderer {
         List<TechnicianInfo> techs = o.technicians() == null ? List.of() : o.technicians();
 
         if (!techs.isEmpty()) {
-            PdfPTable t = section("TECHNICIANS (INTERNAL)", new float[]{2.2f, 1.6f, 1.5f, 1f, 1f, 2f},
-                    "Technician", "Type", "Status", "Est. h", "Actual h", "Remarks");
+            PdfPTable t = section("TECHNICIANS (INTERNAL)", new float[]{2.2f, 1.6f, 1.5f, 1f, 1.4f, 2f},
+                    "Technician", "Type", "Status", "Est. h", "Actual time", "Remarks");
             for (TechnicianInfo x : techs) {
                 t.addCell(bodyCell(x.name(), Element.ALIGN_LEFT));
                 t.addCell(bodyCell(label(x.assignmentType()), Element.ALIGN_LEFT));
                 t.addCell(bodyCell(label(x.status()), Element.ALIGN_LEFT));
                 t.addCell(bodyCell(x.estimatedHours() == null ? "-" : String.valueOf(x.estimatedHours()), Element.ALIGN_RIGHT));
-                t.addCell(bodyCell(x.actualHours() == null ? "-" : String.valueOf(x.actualHours()), Element.ALIGN_RIGHT));
+                t.addCell(bodyCell(com.garageos.core.util.ActualDuration.format(x.actualHours()), Element.ALIGN_RIGHT));
                 t.addCell(bodyCell(x.remarks(), Element.ALIGN_LEFT));
             }
             doc.add(t);
@@ -435,6 +465,15 @@ public class FinalReportPdfRenderer {
         }
     }
 
+    private static int stageRank(String label) {
+        if (label == null) return 9;
+        String l = label.toLowerCase();
+        if (l.startsWith("before")) return 0;
+        if (l.startsWith("during")) return 1;
+        if (l.startsWith("after")) return 2;
+        return 3;
+    }
+
     private void photos(Document doc, JobCardFinalReportDTO d) throws DocumentException {
 
         List<PhotoInfo> photos = d.photos();
@@ -447,33 +486,60 @@ public class FinalReportPdfRenderer {
 
         PdfPTable grid = new PdfPTable(2);
         grid.setWidthPercentage(100);
-        int placed = 0;
 
+        // Grouped by stage in journey order (before, during, after), then anything else.
+        java.util.Map<String, List<PhotoInfo>> byStage = new java.util.TreeMap<>(
+                java.util.Comparator.comparingInt(FinalReportPdfRenderer::stageRank).thenComparing(x -> x));
         for (PhotoInfo p : photos) {
-
-            PdfPCell cell = new PdfPCell();
-            cell.setBorderColor(BORDER);
-            cell.setPadding(4);
-
-            try {
-                Image img = Image.getInstance(p.jpegBytes());
-                img.scaleToFit(240, 170);
-                img.setAlignment(Element.ALIGN_CENTER);
-                cell.addElement(img);
-            } catch (IOException | RuntimeException e) {
-                continue;
-            }
-
-            Paragraph c = new Paragraph(p.stageLabel(), SMALL);
-            c.setAlignment(Element.ALIGN_CENTER);
-            cell.addElement(c);
-
-            grid.addCell(cell);
-            placed++;
+            byStage.computeIfAbsent(nullSafe(p.stageLabel(), "Photo"), k -> new java.util.ArrayList<>()).add(p);
         }
 
-        if (placed % 2 == 1) {
-            grid.addCell(noBorder());
+        for (java.util.Map.Entry<String, List<PhotoInfo>> group : byStage.entrySet()) {
+
+            PdfPCell heading = new PdfPCell(new Paragraph(group.getKey().toUpperCase(), BOLD));
+            heading.setColspan(2);
+            heading.setBorder(Rectangle.NO_BORDER);
+            heading.setPaddingTop(6);
+            heading.setPaddingBottom(2);
+            grid.addCell(heading);
+
+            int placed = 0;
+
+            for (PhotoInfo p : group.getValue()) {
+
+                PdfPCell cell = new PdfPCell();
+                cell.setBorderColor(BORDER);
+                cell.setPadding(4);
+
+                boolean drawn = false;
+
+                if (p.jpegBytes() != null) {
+                    try {
+                        Image img = Image.getInstance(p.jpegBytes());
+                        img.scaleToFit(240, 170);
+                        img.setAlignment(Element.ALIGN_CENTER);
+                        cell.addElement(img);
+                        drawn = true;
+                    } catch (IOException | RuntimeException e) {
+                        drawn = false;
+                    }
+                }
+
+                if (!drawn) {
+                    Paragraph missing = new Paragraph("Photo not available in this report", SMALL);
+                    missing.setAlignment(Element.ALIGN_CENTER);
+                    missing.setSpacingBefore(60);
+                    missing.setSpacingAfter(60);
+                    cell.addElement(missing);
+                }
+
+                grid.addCell(cell);
+                placed++;
+            }
+
+            if (placed % 2 == 1) {
+                grid.addCell(noBorder());
+            }
         }
 
         doc.add(grid);

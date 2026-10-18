@@ -131,10 +131,18 @@ public record JobCardFinalReportDTO(
             String description,
             String status,
             LocalDateTime completedAt,
+            /** Elapsed hours from the task's recorded start to completion; null when it cannot be established. */
+            Double actualHours,
             /** Owner only. */
             String technicianName,
             /** Owner only. */
             String remarks) {
+
+        /** Compatibility constructor for callers that carry no duration. */
+        public RepairInfo(String description, String status, LocalDateTime completedAt, String technicianName,
+                          String remarks) {
+            this(description, status, completedAt, null, technicianName, remarks);
+        }
     }
 
     public record QualityInfo(
@@ -165,6 +173,9 @@ public record JobCardFinalReportDTO(
      * A photo that made it into the report. {@code customerVisible} mirrors the
      * stored media visibility so the CUSTOMER projection can drop anything that
      * is not CUSTOMER_VISIBLE even if it was loaded by mistake.
+     *
+     * {@code jpegBytes} is null when the image is expected but could not be included (still uploading, or the object
+     * could not be read). The PDF then prints a visible "not available" placeholder instead of silently dropping it.
      */
     public record PhotoInfo(
             Long mediaId,

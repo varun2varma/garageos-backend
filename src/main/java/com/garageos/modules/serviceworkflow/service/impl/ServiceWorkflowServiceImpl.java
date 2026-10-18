@@ -55,6 +55,7 @@ public class ServiceWorkflowServiceImpl
     private final InvoiceService invoiceService;
     private final RepairTaskService repairTaskService;
     private final JobCardRepository jobCardRepository;
+    private final com.garageos.modules.jobcard.progress.JobCardProgressService progressService;
     private final CustomerService customerService;
     private final VehicleService vehicleService;
     private final ComplaintService complaintService;
@@ -310,7 +311,7 @@ public class ServiceWorkflowServiceImpl
                 .jobCardNumber(jobCard.getJobCardNumber())
                 .status(jobCard.getStatus().name())
                 .nextStep(resolveStep(jobCard.getStatus()))
-                .progress(resolveProgress(jobCard.getStatus()))
+                .progress(progressService.progressOf(jobCard).percent())
                 .completedSteps(resolveCompleted(jobCard.getStatus()))
                 .build();
 
@@ -357,43 +358,6 @@ public class ServiceWorkflowServiceImpl
 
             default -> 1;
         };
-    }
-
-    private int resolveProgress(JobCardStatus status){
-
-        return switch(status){
-
-            case OPEN, INSPECTION_PENDING -> 20;
-
-            case INSPECTION_COMPLETED -> 25;
-
-            case ESTIMATE_PENDING -> 35;
-
-            case WAITING_FOR_APPROVAL -> 45;
-
-            case ESTIMATE_APPROVED -> 55;
-
-            case REPAIR_PENDING -> 60;
-
-            case REPAIR_IN_PROGRESS -> 70;
-
-            case REPAIR_COMPLETED -> 80;
-
-            case QUALITY_CHECK -> 85;
-
-            case READY_FOR_INVOICE -> 90;
-
-            case INVOICE_GENERATED -> 95;
-
-            case PAYMENT_COMPLETED,
-                    READY_FOR_DELIVERY -> 98;
-
-            case CLOSED -> 100;
-
-            default -> 0;
-
-        };
-
     }
 
     private List<String> resolveCompleted(JobCardStatus status) {

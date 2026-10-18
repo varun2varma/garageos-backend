@@ -43,7 +43,7 @@ public final class FinalReportProjection {
         List<JobCardFinalReportDTO.RepairInfo> repairs = f.repairs() == null ? List.of()
                 : f.repairs().stream()
                 .map(r -> new JobCardFinalReportDTO.RepairInfo(
-                        r.description(), r.status(), r.completedAt(), null, null))
+                        r.description(), r.status(), r.completedAt(), r.actualHours(), null, null))
                 .toList();
 
         JobCardFinalReportDTO.QualityInfo quality = f.qualityCheck() == null ? null

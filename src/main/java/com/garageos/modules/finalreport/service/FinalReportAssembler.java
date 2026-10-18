@@ -76,7 +76,13 @@ public class FinalReportAssembler {
     /** Bound on photos per report so one report cannot grow without limit. */
     static final int MAX_PHOTOS = 60;
 
+    static final String ADDITIONAL_PHOTOS_LABEL = "Additional photos (not shown in this report)";
+
     private static final Set<String> USABLE_UPLOAD_STATES = Set.of("COMPLETED", "UPLOADED", "PROCESSING");
+
+    /** Uploads that are expected to finish: shown as a placeholder (not silently omitted) until they do. */
+    private static final Set<String> IN_FLIGHT_UPLOAD_STATES =
+            Set.of("PENDING", "UPLOADING", "RETRY_WAIT", "AUTH_REQUIRED");
 
     private final ComplaintRepository complaintRepository;
     private final InspectionRepository inspectionRepository;
@@ -262,6 +268,7 @@ public class FinalReportAssembler {
                     description,
                     t.getStatus() == null ? null : t.getStatus().name(),
                     t.getCompletedAt(),
+                    com.garageos.core.util.ActualDuration.hours(t.getStartedAt(), t.getCompletedAt()),
                     t.getTechnicianName(),
                     t.getRemarks()));
         }
@@ -306,30 +313,49 @@ public class FinalReportAssembler {
         for (JobCardMedia media : rows) {
 
             if (photos.size() >= MAX_PHOTOS) {
+                // Never a silent drop: one visible placeholder says more photos exist than the report can hold.
+                long remaining = rows.stream().filter(r -> "IMAGE".equals(r.getMediaType())).count() - photos.size();
+                log.warn("[FINAL-REPORT] Photo cap reached. jobCardId={}, shown={}, notShown={}", jobCardId, photos.size(), remaining);
+                photos.add(new PhotoInfo(null, ADDITIONAL_PHOTOS_LABEL, true, null));
                 break;
             }
 
-            if (!"IMAGE".equals(media.getMediaType())
-                    || !USABLE_UPLOAD_STATES.contains(media.getUploadStatus())) {
+            if (!"IMAGE".equals(media.getMediaType())) {
                 continue;
             }
 
-            try {
-                MediaContent content = mediaService.downloadContent(media);
-                byte[] jpeg = ReportImageScaler.toReportJpeg(content.content());
+            boolean visible = VISIBILITY_CUSTOMER_VISIBLE.equals(media.getVisibility());
 
-                if (jpeg != null) {
-                    photos.add(new PhotoInfo(
-                            media.getId(),
-                            stageLabel(media.getMediaStage()),
-                            VISIBILITY_CUSTOMER_VISIBLE.equals(media.getVisibility()),
-                            jpeg));
+            if (!USABLE_UPLOAD_STATES.contains(media.getUploadStatus())) {
+                // In flight, or failed/cancelled in the canonical sequence: keep its slot as a visible "Photo not
+                // available" placeholder. A failed row WITHOUT a media sequence is a superseded retry (the canonical
+                // row of that sequence is reported instead), so it is skipped - it is not a missing photo.
+                boolean inFlight = IN_FLIGHT_UPLOAD_STATES.contains(media.getUploadStatus());
+                if (inFlight || media.getMediaSequence() != null) {
+                    if (!inFlight) {
+                        log.warn("[FINAL-REPORT] Photo upload not usable. jobCardId={}, mediaId={}, status={}",
+                                jobCardId, media.getId(), media.getUploadStatus());
+                    }
+                    photos.add(new PhotoInfo(media.getId(), stageLabel(media.getMediaStage()), visible, null));
                 }
-            } catch (RuntimeException e) {
-                // One unavailable photo must never fail the report.
-                log.warn("[FINAL-REPORT] Photo skipped. jobCardId={}, mediaId={}, reason={}",
-                        jobCardId, media.getId(), e.getClass().getSimpleName());
+                continue;
             }
+
+            byte[] jpeg = null;
+
+            // One retry: a transient storage hiccup must not drop an expected photo from a closed job's report.
+            for (int attempt = 1; attempt <= 2 && jpeg == null; attempt++) {
+                try {
+                    MediaContent content = mediaService.downloadContent(media);
+                    jpeg = ReportImageScaler.toReportJpeg(content.content());
+                } catch (RuntimeException e) {
+                    log.warn("[FINAL-REPORT] Photo unreadable. jobCardId={}, mediaId={}, attempt={}, reason={}",
+                            jobCardId, media.getId(), attempt, e.getClass().getSimpleName());
+                }
+            }
+
+            // Unreadable after retry: still listed (placeholder) so the gap is visible, never a failed report.
+            photos.add(new PhotoInfo(media.getId(), stageLabel(media.getMediaStage()), visible, jpeg));
         }
 
         return photos;

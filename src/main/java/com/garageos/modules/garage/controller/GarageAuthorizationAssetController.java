@@ -37,6 +37,18 @@ public class GarageAuthorizationAssetController {
         return ApiResponseUtil.success("Authorization status fetched.", service.status(user, garageId));
     }
 
+    /** One file holding both the signature and the stamp (the separate endpoints below remain for existing clients). */
+    @PostMapping(value = "/combined", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<ApiResponse<GarageAuthorizationAssetService.Status>> uploadCombined(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @PathVariable Long garageId,
+            @RequestParam("file") MultipartFile file) {
+
+        return ApiResponseUtil.success("Signature and stamp updated.",
+                service.upload(user, garageId, GarageAuthorizationAssetService.Kind.COMBINED, file));
+    }
+
     @PostMapping(value = "/signature", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ApiResponse<GarageAuthorizationAssetService.Status>> uploadSignature(

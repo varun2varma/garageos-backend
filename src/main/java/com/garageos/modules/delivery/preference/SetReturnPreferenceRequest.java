@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,4 +18,7 @@ public class SetReturnPreferenceRequest {
     private String deliveryAddress;
     private BigDecimal deliveryLatitude;
     private BigDecimal deliveryLongitude;
+
+    /** Optional wall-clock time the customer wants the vehicle delivered (DRIVER_DELIVERY only); null = as soon as possible. */
+    private LocalDateTime requestedDeliveryAt;
 }

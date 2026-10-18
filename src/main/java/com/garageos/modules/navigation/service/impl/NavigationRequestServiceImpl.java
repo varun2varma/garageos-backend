@@ -170,6 +170,52 @@ public class NavigationRequestServiceImpl
         }
     }
 
+    /**
+     * Reschedules a request that has not started. Only the scheduled time changes: actual trip timestamps and the
+     * delivery record are never touched, and a request whose trip is already under way or finished is refused.
+     */
+    @Override
+    @Transactional
+    public NavigationRequestResponse reschedule(Long requestId, java.time.LocalDateTime scheduledAt) {
+
+        if (scheduledAt == null) {
+            throw new BusinessException("A new scheduled time is required.");
+        }
+
+        if (scheduledAt.isBefore(java.time.LocalDateTime.now().minusMinutes(1))) {
+            throw new BusinessException("Choose a time in the future.");
+        }
+
+        NavigationRequest request = navigationRequestRepository.findById(requestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Navigation request not found : " + requestId));
+
+        var principal = com.garageos.core.security.GarageScope.currentOrNull();
+
+        if (principal == null
+                || !com.garageos.core.security.GarageScope.isMemberOfGarage(garageScope, principal, request.getGarageId())) {
+            // never confirms that another garage's request exists
+            throw new ResourceNotFoundException("Navigation request not found : " + requestId);
+        }
+
+        if (request.getStatus() != NavigationRequestStatus.REQUESTED
+                && request.getStatus() != NavigationRequestStatus.ASSIGNED) {
+            throw new BusinessException("This request can no longer be rescheduled.");
+        }
+
+        if (navigationTripRepository != null) {
+            navigationTripRepository.findFirstByNavigationRequestIdOrderByIdDesc(requestId).ifPresent(trip -> {
+                if (trip.getStatus() == com.garageos.core.enums.navigation.TripStatus.IN_PROGRESS
+                        || trip.getStatus() == com.garageos.core.enums.navigation.TripStatus.COMPLETED) {
+                    throw new BusinessException("The trip has already started, so it can no longer be rescheduled.");
+                }
+            });
+        }
+
+        request.setScheduledAt(scheduledAt);
+
+        return toResponse(navigationRequestRepository.save(request));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<NavigationRequestResponse> getCustomerRequests(

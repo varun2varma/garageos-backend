@@ -72,6 +72,7 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
     private com.garageos.core.security.GarageScope garageScope;
 
     private final JobCardRepository jobCardRepository;
+    private final com.garageos.modules.jobcard.progress.JobCardProgressService progressService;
     private final JobCardMapper jobCardMapper;
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
@@ -112,7 +113,7 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
                         .id(jobCard.getId())
                         .jobCardNumber(jobCard.getJobCardNumber())
                         .status(jobCard.getStatus().name())
-                        .progress(resolveProgress(jobCard.getStatus()))
+                        .progress(progressService.progressOf(jobCard).percent())
                         .header(jobCardMapper.toResponse(jobCard));
 
         List<String> visibleSections = new ArrayList<>();
@@ -376,26 +377,6 @@ public class JobCardProjectionServiceImpl implements JobCardProjectionService {
             case READY_FOR_DELIVERY -> List.of("complete_delivery");
             case DELIVERED -> List.of("close_job_card");
             default -> List.of();
-        };
-    }
-
-    private int resolveProgress(JobCardStatus status) {
-
-        return switch (status) {
-
-            case OPEN, INSPECTION_PENDING -> 10;
-            case INSPECTION_COMPLETED -> 20;
-            case ESTIMATE_PENDING -> 30;
-            case WAITING_FOR_APPROVAL -> 40;
-            case REPAIR_PENDING -> 50;
-            case REPAIR_IN_PROGRESS -> 60;
-            case REPAIR_COMPLETED -> 70;
-            case READY_FOR_INVOICE -> 80;
-            case INVOICE_GENERATED -> 85;
-            case READY_FOR_DELIVERY -> 90;
-            case DELIVERED -> 95;
-            case CLOSED -> 100;
-            default -> 0;
         };
     }
 }

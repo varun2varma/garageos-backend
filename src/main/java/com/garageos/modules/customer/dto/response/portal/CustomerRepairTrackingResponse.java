@@ -10,6 +10,9 @@ import java.time.LocalDate;
 @Builder
 public class CustomerRepairTrackingResponse {
 
+    /** The caller's own job card id (the customer app opens the service report with it). */
+    private Long jobCardId;
+
     private String jobCardNumber;
 
     private String registrationNumber;
@@ -19,6 +22,9 @@ public class CustomerRepairTrackingResponse {
     private LocalDate serviceDate;
 
     private LocalDate estimatedDeliveryDate;
+
+    /** Authoritative 0-100 work progress (same value every persona sees); null only if it could not be computed. */
+    private Integer progress;
 
     private Boolean inspectionCompleted;
 

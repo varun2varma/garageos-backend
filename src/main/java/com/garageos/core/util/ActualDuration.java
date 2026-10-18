@@ -30,6 +30,32 @@ public final class ActualDuration {
         return Duration.between(startedAt, completedAt);
     }
 
+    /**
+     * Human text for an {@link #hours} value: {@code 35 min}, {@code 1 hr 5 min}, {@code 3 hr}; {@code -} when there
+     * is no duration. Mirrors the app's DurationFormatter so every surface (app, PDF) reads the same.
+     */
+    public static String format(Double hours) {
+
+        if (hours == null || hours.isNaN() || hours.isInfinite() || hours < 0) {
+            return "-";
+        }
+
+        long minutes = Math.round(hours * 60);
+
+        if (minutes == 0) {
+            return "< 1 min";
+        }
+
+        long h = minutes / 60;
+        long m = minutes % 60;
+
+        if (h == 0) {
+            return m + " min";
+        }
+
+        return m == 0 ? h + " hr" : h + " hr " + m + " min";
+    }
+
     /** Elapsed hours rounded to 2 decimals (HALF_UP), or null when it cannot be established. */
     public static Double hours(LocalDateTime startedAt, LocalDateTime completedAt) {
 

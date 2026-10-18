@@ -57,5 +57,8 @@ public enum AuditEventType {
     /** A repayment was recorded against an invoice that has an active credit authorization. */
     CREDIT_REPAYMENT,
     /** The invoice became fully paid and its credit authorization was closed. */
-    CREDIT_SETTLED
+    CREDIT_SETTLED,
+
+    /** A platform administrator activated or deactivated a garage (reason recorded in the metadata). */
+    GARAGE_STATUS_CHANGED
 }

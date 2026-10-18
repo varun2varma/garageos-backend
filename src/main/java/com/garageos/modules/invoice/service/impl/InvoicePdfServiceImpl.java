@@ -75,6 +75,9 @@ public class InvoicePdfServiceImpl implements InvoicePdfService {
                     garageId, com.garageos.modules.garage.service.GarageAuthorizationAssetService.Kind.SIGNATURE).orElse(null);
             stampBytes = authorizationAssets.load(
                     garageId, com.garageos.modules.garage.service.GarageAuthorizationAssetService.Kind.STAMP).orElse(null);
+            if (authorizationAssets.isCombined(garageId)) {
+                stampBytes = null; // one combined image: print it once, in the larger slot
+            }
         }
 
         GarageBrandingResponse garage = garageBrandingService.resolve(garageId);

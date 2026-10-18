@@ -364,8 +364,14 @@ public class NavigationTripServiceImpl
                 )
                 .stream()
                 .map(this::toResponse)
+                .sorted(BY_SCHEDULE)
                 .toList();
     }
+
+    /** Driver queue order: scheduled time ascending, trips without one last, ties by id (oldest first). */
+    static final java.util.Comparator<NavigationTripResponse> BY_SCHEDULE = java.util.Comparator
+            .comparing(NavigationTripResponse::getScheduledAt, java.util.Comparator.nullsLast(java.util.Comparator.<java.time.LocalDateTime>naturalOrder()))
+            .thenComparing(NavigationTripResponse::getId, java.util.Comparator.nullsLast(java.util.Comparator.<Long>naturalOrder()));
 
     /**
      * A driver's own finished work - COMPLETED and CANCELLED trips, most
@@ -1204,8 +1210,11 @@ public class NavigationTripServiceImpl
         BigDecimal destinationLongitude = null;
         Long customerId = null;
         Long jobCardId = null;
+        java.time.LocalDateTime scheduledAt = null;
 
         if (request != null) {
+
+            scheduledAt = request.getScheduledAt();
 
             customerId = request.getCustomerId();
             jobCardId = request.getJobCardId();
@@ -1222,6 +1231,8 @@ public class NavigationTripServiceImpl
         }
 
         return NavigationTripResponse.builder()
+
+                .scheduledAt(scheduledAt)
 
                 .destinationLatitude(destinationLatitude)
 

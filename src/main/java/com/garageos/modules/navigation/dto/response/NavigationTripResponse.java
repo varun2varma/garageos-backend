@@ -51,6 +51,9 @@ public class NavigationTripResponse {
     /** The JobCard this trip serves (delivery: the job being delivered; pickup: the job created from its booking); null if unknown. */
     private Long jobCardId;
 
+    /** When the delivery/pickup is scheduled for (the request's scheduledAt); null when none was set. Distinct from the actual timestamps below. */
+    private LocalDateTime scheduledAt;
+
     private LocalDateTime acceptedAt;
 
     private LocalDateTime startedAt;

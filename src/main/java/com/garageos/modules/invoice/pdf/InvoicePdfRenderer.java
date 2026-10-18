@@ -504,8 +504,13 @@ public class InvoicePdfRenderer {
 
         PdfPCell garage = noBorder();
         garage.setPaddingTop(16);
-        addAuthorizationImage(garage, data.stampBytes(), 90, 90);
-        addAuthorizationImage(garage, data.signatureBytes(), 140, 50);
+        if (data.stampBytes() == null && data.signatureBytes() != null) {
+            // combined signature + stamp image
+            addAuthorizationImage(garage, data.signatureBytes(), 170, 90);
+        } else {
+            addAuthorizationImage(garage, data.stampBytes(), 90, 90);
+            addAuthorizationImage(garage, data.signatureBytes(), 140, 50);
+        }
         Paragraph line = new Paragraph("______________________", NORMAL);
         line.setAlignment(Element.ALIGN_RIGHT);
         garage.addElement(line);

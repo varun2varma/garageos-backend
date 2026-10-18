@@ -36,6 +36,16 @@ public class NavigationRequestController {
         );
     }
 
+    /** Garage staff reschedule a pickup/delivery that has not started (the service re-checks garage membership). */
+    @PutMapping("/{requestId}/schedule")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'SERVICE_ADVISOR')")
+    public NavigationRequestResponse reschedule(
+            @PathVariable Long requestId,
+            @Valid @RequestBody com.garageos.modules.navigation.dto.request.RescheduleNavigationRequest body) {
+
+        return navigationRequestService.reschedule(requestId, body.getScheduledAt());
+    }
+
     @GetMapping("/{requestId}")
     public NavigationRequestResponse getRequest(
             @PathVariable Long requestId) {

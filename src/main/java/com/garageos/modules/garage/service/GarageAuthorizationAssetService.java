@@ -43,7 +43,9 @@ public class GarageAuthorizationAssetService {
 
     public enum Kind {
         SIGNATURE("signature"),
-        STAMP("stamp");
+        STAMP("stamp"),
+        /** One image holding both the signature and the stamp; stored once and referenced by both slots. */
+        COMBINED("signature and stamp");
 
         private final String label;
 
@@ -56,7 +58,8 @@ public class GarageAuthorizationAssetService {
         }
     }
 
-    public record Status(boolean hasSignature, boolean hasStamp) {
+    /** [combined] is true when one stored image serves as both signature and stamp (uploaded as a single file). */
+    public record Status(boolean hasSignature, boolean hasStamp, boolean combined) {
         public boolean complete() {
             return hasSignature && hasStamp;
         }
@@ -76,6 +79,12 @@ public class GarageAuthorizationAssetService {
         Garage garage = find(garageId);
         authorizeOwner(principal, garage);
         return statusOf(garage);
+    }
+
+    /** True when one image serves as both signature and stamp, so the invoice must print it once. */
+    @Transactional(readOnly = true)
+    public boolean isCombined(Long garageId) {
+        return statusOf(find(garageId)).combined();
     }
 
     /** Which required assets the garage still lacks (empty = complete). Internal use by the invoice PDF. */
@@ -99,10 +108,18 @@ public class GarageAuthorizationAssetService {
         String extension = sniffExtension(bytes);
         String contentType = ".png".equals(extension) ? "image/png" : "image/jpeg";
 
-        String previousKey = kind == Kind.SIGNATURE ? garage.getSignatureStorageKey() : garage.getStampStorageKey();
+        String previousSignature = garage.getSignatureStorageKey();
+        String previousStamp = garage.getStampStorageKey();
         String newKey = store(garage.getId(), kind, bytes, extension, contentType);
 
-        if (kind == Kind.SIGNATURE) {
+        if (kind == Kind.COMBINED) {
+            garage.setSignatureStorageKey(newKey);
+            garage.setSignatureContentType(contentType);
+            garage.setSignatureUpdatedAt(LocalDateTime.now());
+            garage.setStampStorageKey(newKey);
+            garage.setStampContentType(contentType);
+            garage.setStampUpdatedAt(LocalDateTime.now());
+        } else if (kind == Kind.SIGNATURE) {
             garage.setSignatureStorageKey(newKey);
             garage.setSignatureContentType(contentType);
             garage.setSignatureUpdatedAt(LocalDateTime.now());
@@ -114,8 +131,13 @@ public class GarageAuthorizationAssetService {
 
         garageRepository.save(garage);
 
-        if (previousKey != null && !previousKey.equals(newKey)) {
-            delete(previousKey);
+        // A key may be shared by both slots (combined upload): only delete an object nothing references any more.
+        for (String previous : new java.util.LinkedHashSet<>(java.util.Arrays.asList(previousSignature, previousStamp))) {
+            if (previous != null
+                    && !previous.equals(garage.getSignatureStorageKey())
+                    && !previous.equals(garage.getStampStorageKey())) {
+                delete(previous);
+            }
         }
 
         log.info("[AUTH-ASSET] {} updated. garageId={}, bytes={}", kind.label(), garage.getId(), bytes.length);
@@ -128,7 +150,7 @@ public class GarageAuthorizationAssetService {
     public Optional<byte[]> load(Long garageId, Kind kind) {
 
         Garage garage = find(garageId);
-        String key = kind == Kind.SIGNATURE ? garage.getSignatureStorageKey() : garage.getStampStorageKey();
+        String key = kind == Kind.STAMP ? garage.getStampStorageKey() : garage.getSignatureStorageKey();
 
         if (key == null) {
             return Optional.empty();
@@ -145,7 +167,9 @@ public class GarageAuthorizationAssetService {
     // ------------------------------------------------------------------ internals
 
     private Status statusOf(Garage garage) {
-        return new Status(garage.getSignatureStorageKey() != null, garage.getStampStorageKey() != null);
+        boolean combined = garage.getSignatureStorageKey() != null
+                && garage.getSignatureStorageKey().equals(garage.getStampStorageKey());
+        return new Status(garage.getSignatureStorageKey() != null, garage.getStampStorageKey() != null, combined);
     }
 
     private Garage find(Long garageId) {

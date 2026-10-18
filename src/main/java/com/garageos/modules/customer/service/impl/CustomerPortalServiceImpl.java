@@ -42,6 +42,10 @@ import java.util.Map;
 public class CustomerPortalServiceImpl
         implements CustomerPortalService {
 
+    /** The single progress model; optional so hand-built test instances still work. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.jobcard.progress.JobCardProgressService progressService;
+
     private final CustomerRepository customerRepository;
 
     private final VehicleRepository vehicleRepository;
@@ -314,9 +318,11 @@ public class CustomerPortalServiceImpl
         boolean invoiceGenerated = invoice.isPresent();
 
         return CustomerRepairTrackingResponse.builder()
+                .jobCardId(jobCard.getId())
                 .jobCardNumber(jobCard.getJobCardNumber())
                 .registrationNumber(jobCard.getVehicle().getRegistrationNumber())
                 .status(jobCard.getStatus())
+                .progress(progressService == null ? null : progressService.progressOf(jobCard).percent())
                 .serviceDate(jobCard.getServiceDate())
                 .estimatedDeliveryDate(jobCard.getEstimatedDeliveryDate())
 
