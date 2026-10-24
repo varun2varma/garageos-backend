@@ -25,6 +25,21 @@ public class CustomerGarageServiceImpl implements CustomerGarageService {
     private final CustomerGarageRepository repository;
     private final GarageRepository garageRepository;
 
+    /** Field-injected so existing positional construction is unchanged. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.customer.repository.CustomerRepository customerRepository;
+
+    /**
+     * Customer-row lock taken before any check-then-write on that customer's garage relationships: two concurrent
+     * "first garage" links, or two concurrent default changes, then queue instead of racing into the
+     * one-default-per-customer unique index. The index stays as the last line of defence.
+     */
+    private void lockCustomer(Long customerId) {
+        if (customerRepository != null) {
+            customerRepository.findByIdForUpdate(customerId);
+        }
+    }
+
     @Override
     @Transactional
     public void link(Long customerId, Long garageId, CustomerGarageSource source) {
@@ -32,6 +47,8 @@ public class CustomerGarageServiceImpl implements CustomerGarageService {
         if (customerId == null || garageId == null) {
             return;
         }
+
+        lockCustomer(customerId);
 
         Optional<CustomerGarage> existing =
                 repository.findByCustomerIdAndGarageId(customerId, garageId);
@@ -109,6 +126,8 @@ public class CustomerGarageServiceImpl implements CustomerGarageService {
     @Transactional
     public List<MyGarageResponse> setDefaultGarage(Long customerId, Long garageId) {
 
+        lockCustomer(customerId);
+
         if (!hasServiceRelationship(customerId, garageId)) {
             throw new BusinessException(
                     "You can only set a garage you have used as your default garage.");
@@ -137,6 +156,7 @@ public class CustomerGarageServiceImpl implements CustomerGarageService {
                 .longitude(garage.getLongitude())
                 .status(garage.getStatus() == null ? null : garage.getStatus().name())
                 .bookable(garage.getStatus() == GarageStatus.ACTIVE)
+                .unavailableReason(garage.getStatus() == GarageStatus.ACTIVE ? null : "GARAGE_INACTIVE")
                 .defaultGarage(isDefault)
                 .build();
     }

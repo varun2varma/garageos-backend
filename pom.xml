@@ -181,6 +181,42 @@
 	</dependencies>
 
 	<build>
+		<!-- Legacy MVP pages (src/main/resources/static/** except the three compliance pages) stay in the repository but are
+		     not packaged, so no deployment of this service can serve them. Same two resource entries as
+		     spring-boot-starter-parent, plus the exclusions. -->
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/application*.yml</include>
+					<include>**/application*.yaml</include>
+					<include>**/application*.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>**/application*.yml</exclude>
+					<exclude>**/application*.yaml</exclude>
+					<exclude>**/application*.properties</exclude>
+					<exclude>static/assets/**</exclude>
+					<exclude>static/auth/**</exclude>
+					<exclude>static/components/**</exclude>
+					<exclude>static/css/**</exclude>
+					<exclude>static/customer/**</exclude>
+					<exclude>static/employee/**</exclude>
+					<exclude>static/garage/**</exclude>
+					<exclude>static/js/**</exclude>
+					<exclude>static/onboarding/**</exclude>
+					<exclude>static/owner/**</exclude>
+					<exclude>static/pages/**</exclude>
+					<exclude>static/services/**</exclude>
+					<exclude>static/workflow/**</exclude>
+					<exclude>static/index.html</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

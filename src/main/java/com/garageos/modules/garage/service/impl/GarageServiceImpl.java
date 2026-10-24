@@ -82,6 +82,10 @@ public class GarageServiceImpl implements GarageService {
 
         Garage garage = garageMapper.toEntity(request);
 
+        // Normalised, then structurally validated (shape, state code, check character, PAN match). "Format valid" is
+        // not "verified with the GST portal"; nothing here claims the registration is real.
+        garage.setGstNumber(validatedGstin(request.getGstNumber(), request.getPanNumber()));
+
         garage.setStatus(GarageStatus.ACTIVE);
         garage.setNextEmployeeSequence(1);
         // Corrective fix: Garage.ownerUserId (see its own doc comment) was
@@ -231,7 +235,12 @@ public class GarageServiceImpl implements GarageService {
         garage.setCity(request.getCity());
         garage.setState(request.getState());
         garage.setPincode(request.getPincode());
-        garage.setGstNumber(request.getGstNumber());
+        // Only a CHANGED GSTIN is validated, so a garage that already holds an older value can still save other edits.
+        String newGstin = com.garageos.core.util.GstinValidator.normalize(request.getGstNumber());
+        if (!java.util.Objects.equals(newGstin, com.garageos.core.util.GstinValidator.normalize(garage.getGstNumber()))) {
+            newGstin = validatedGstin(request.getGstNumber(), request.getPanNumber());
+        }
+        garage.setGstNumber(newGstin);
         garage.setPanNumber(request.getPanNumber());
         garage.setLatitude(request.getLatitude());
         garage.setLongitude(request.getLongitude());
@@ -277,6 +286,32 @@ public class GarageServiceImpl implements GarageService {
      * the caller must also belong to, or be the registered owner of, the
      * target garage - never trusted from the request.
      */
+    /** Off only as an emergency escape hatch (garagest.gstin.enforce-checksum=false); on by default. */
+    @org.springframework.beans.factory.annotation.Value("${garagest.gstin.enforce-checksum:true}")
+    private boolean enforceGstinChecksum = true;
+
+    private String validatedGstin(String rawGstin, String rawPan) {
+
+        String gstin = com.garageos.core.util.GstinValidator.normalize(rawGstin);
+
+        if (gstin == null) {
+            return null;
+        }
+
+        if (enforceGstinChecksum && !com.garageos.core.util.GstinValidator.isStructurallyValid(gstin)) {
+            throw new BusinessException("The GSTIN is not valid. Check the 15 characters and try again.");
+        }
+
+        String pan = rawPan == null ? null : rawPan.trim().toUpperCase();
+
+        if (enforceGstinChecksum && pan != null && !pan.isEmpty()
+                && !pan.equals(com.garageos.core.util.GstinValidator.embeddedPan(gstin))) {
+            throw new BusinessException("The GSTIN does not match the PAN entered.");
+        }
+
+        return gstin;
+    }
+
     /** Member (any status) or registered owner of this garage. */
     private boolean isGarageStaff(GarageUserPrincipal principal, Garage garage) {
 

@@ -60,5 +60,27 @@ public enum AuditEventType {
     CREDIT_SETTLED,
 
     /** A platform administrator activated or deactivated a garage (reason recorded in the metadata). */
-    GARAGE_STATUS_CHANGED
+    GARAGE_STATUS_CHANGED,
+    /** A platform administrator's garage status change was refused (for example failed re-authentication). */
+    GARAGE_STATUS_CHANGE_REFUSED,
+    /** A platform administrator queried the platform audit trail. */
+    PLATFORM_AUDIT_VIEWED,
+    /** A garage owner changed the garage colour palette (previous and new values in the metadata). */
+    GARAGE_BRANDING_UPDATED,
+    /** Garage staff changed a vehicle's RC review status (previous and new status in the metadata). */
+    VEHICLE_RC_STATUS_CHANGED,
+    BANK_ACCOUNT_REGISTERED,
+    BANK_ACCOUNT_RETIRED,
+    /** A bank-account change was refused because the owner failed step-up re-authentication. */
+    BANK_ACCOUNT_STEPUP_REFUSED,
+    BANK_ACCOUNT_VERIFICATION_RESULT,
+    /** A platform administrator looked at a garage's (masked) bank account. */
+    PLATFORM_BANK_ACCOUNT_VIEWED,
+    EMERGENCY_REQUEST_CREATED,
+    EMERGENCY_REQUEST_ACCEPTED,
+    EMERGENCY_REQUEST_REJECTED,
+    EMERGENCY_REQUEST_COMPLETED,
+    EMERGENCY_REQUEST_CANCELLED,
+    /** An Emergency Assist submission was refused because the garage was not eligible (no silent re-routing). */
+    EMERGENCY_REQUEST_REFUSED
 }

@@ -51,6 +51,10 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private com.garageos.core.security.GarageScope garageScope;
 
+    /** Field-injected so existing constructor-built tests are unaffected. */
+    @Autowired(required = false)
+    private com.garageos.modules.invoice.repository.InvoiceRepository invoiceRepository;
+
     private final EstimateRepository estimateRepository;
     private final JobCardRepository jobCardRepository;
     private final EstimateMapper estimateMapper;
@@ -203,12 +207,17 @@ public class EstimateServiceImpl implements EstimateService {
             Long id,
             CreateEstimateRequest request) {
 
-        Estimate estimate = estimateRepository.findById(id)
+        requireEstimateEditorRole();
+
+        // Lock-first: the status read below can never be a stale pre-lock copy of a concurrent approval.
+        Estimate estimate = estimateRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
 
         requireStaffAccess(estimate.getJobCard(), "Estimate not found with id : " + id);
+
+        requireNotFinal(estimate);
 
         JobCard jobCard = jobCardRepository.findById(request.getJobCardId())
                 .orElseThrow(() ->
@@ -218,6 +227,13 @@ public class EstimateServiceImpl implements EstimateService {
 
         // The job card the estimate is (re)linked to must also be one this caller may work on.
         requireStaffAccess(jobCard, "Job Card not found with id : " + request.getJobCardId());
+
+        // An estimate belongs to one job card for its whole life; relinking would move priced work (and its
+        // approval) between customers' jobs.
+        if (!estimate.getJobCard().getId().equals(request.getJobCardId())) {
+            throw new BusinessException(
+                    "An estimate cannot be moved to a different job card.");
+        }
 
         if (jobCard.getStatus() == JobCardStatus.ESTIMATE_PENDING) {
 
@@ -245,16 +261,56 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
+    @Transactional
     public void deleteEstimate(Long id) {
 
-        Estimate estimate = estimateRepository.findById(id)
+        requireEstimateEditorRole();
+
+        Estimate estimate = estimateRepository.findByIdForUpdate(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Estimate not found with id : " + id));
 
         requireStaffAccess(estimate.getJobCard(), "Estimate not found with id : " + id);
 
+        requireNotFinal(estimate);
+
         estimateRepository.delete(estimate);
+    }
+
+    /**
+     * Estimate-level edits are for the roles that prepare estimates (the same set as the guided workflow's
+     * operational roles). Enforced here as well as on the controller so a future caller cannot bypass it.
+     */
+    private void requireEstimateEditorRole() {
+
+        GarageUserPrincipal principal = garageScope.principal();
+
+        boolean allowed = garageScope.hasRole(principal, RoleCode.OWNER)
+                || garageScope.hasRole(principal, RoleCode.MANAGER)
+                || garageScope.hasRole(principal, RoleCode.SERVICE_ADVISOR);
+
+        if (!allowed) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You are not allowed to change estimates.");
+        }
+    }
+
+    /**
+     * An approved estimate is the customer's agreed price and the basis of the repair tasks and the invoice, so it is
+     * never rewritten or deleted in place; an estimate that already has an invoice is financial history.
+     */
+    private void requireNotFinal(Estimate estimate) {
+
+        if (estimate.getStatus() == EstimateStatus.APPROVED) {
+            throw new BusinessException(
+                    "This estimate has already been approved and can no longer be changed.");
+        }
+
+        if (invoiceRepository != null && invoiceRepository.existsByEstimateId(estimate.getId())) {
+            throw new BusinessException(
+                    "This estimate already has an invoice and can no longer be changed.");
+        }
     }
 
     /**

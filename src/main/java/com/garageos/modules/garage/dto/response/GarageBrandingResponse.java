@@ -46,4 +46,10 @@ public class GarageBrandingResponse {
 
     /** Relative, authenticated path serving the logo bytes; null when there is no logo. */
     private String logoUrl;
+    /** Upper-case {@code #RRGGBB}, or null when the garage uses the GarageST default theme. */
+    private String primaryColor;
+    private String secondaryColor;
+    /** True when at least one colour is configured. */
+    private Boolean hasCustomTheme;
+    private LocalDateTime brandingUpdatedAt;
 }

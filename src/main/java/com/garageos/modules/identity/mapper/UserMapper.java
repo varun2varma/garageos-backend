@@ -17,6 +17,8 @@ public interface UserMapper {
 
     @Mapping(target = "mobileVerifiedAt", ignore = true)
     @Mapping(target = "mobileVerifiedNumber", ignore = true)
+    @Mapping(target = "emailVerifiedAt", ignore = true)
+    @Mapping(target = "emailVerifiedAddress", ignore = true)
 //    @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -53,6 +55,8 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "mobileVerifiedAt", ignore = true)
     @Mapping(target = "mobileVerifiedNumber", ignore = true)
+    @Mapping(target = "emailVerifiedAt", ignore = true)
+    @Mapping(target = "emailVerifiedAddress", ignore = true)
     void updateEntity(UpdateUserRequest request,
                       @MappingTarget User user);
 }

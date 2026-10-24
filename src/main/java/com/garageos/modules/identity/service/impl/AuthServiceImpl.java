@@ -101,17 +101,33 @@ public class AuthServiceImpl implements AuthService {
 
     private final SecureRandom secureRandom = new SecureRandom();
 
+    /** Cannot match any real username (contains a NUL), so authentication fails uniformly. */
+    private static final String UNRESOLVED_LOGIN_NAME = "\u0000unresolved";
+
+    /** Field-injected so the existing positional constructor (used by unit tests) is unchanged. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.identity.security.LoginIdentifierResolver loginIdentifierResolver;
+
     @Override
     public LoginResponse login(
             LoginRequest request,
             HttpServletRequest servletRequest) {
+
+        // One server-side identifier policy (username / email / mobile). An unknown or ambiguous identifier is sent
+        // through the authentication manager under a name that cannot exist, so it fails exactly like a wrong
+        // password (same message, same timing mitigation) and never reveals which case it was.
+        String loginName = loginIdentifierResolver == null
+                ? request.getUsername()
+                : loginIdentifierResolver.resolve(request.getUsername())
+                        .map(User::getUsername)
+                        .orElse(UNRESOLVED_LOGIN_NAME);
 
         Authentication authentication =
                 authenticationManager.authenticate(
 
                         new UsernamePasswordAuthenticationToken(
 
-                                request.getUsername(),
+                                loginName,
 
                                 request.getPassword()
                         ));
@@ -182,6 +198,7 @@ public class AuthServiceImpl implements AuthService {
                 .mobile(principal.getMobile())
 
                 .mobileVerified(userRepository.findById(principal.getId()).map(User::isMobileVerified).orElse(false))
+                .emailVerified(userRepository.findById(principal.getId()).map(User::isEmailVerified).orElse(false))
 
                 .status(principal.getStatus())
 
@@ -640,6 +657,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .mobile(principal.getMobile())
                 .mobileVerified(user.isMobileVerified())
+                .emailVerified(user.isEmailVerified())
                 .status(principal.getStatus())
                 .firstLogin(principal.getFirstLogin())
                 .roles(principal.getRoles())

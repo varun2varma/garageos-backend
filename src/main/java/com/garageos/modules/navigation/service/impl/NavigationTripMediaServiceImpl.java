@@ -142,8 +142,17 @@ public class NavigationTripMediaServiceImpl
         );
 
 
+        // Tenant-scoped object key: garage / trip / stage / unique id (the id is added by the storage layer), e.g.
+        // trip-evidence/garage-12/navigation/55/before_pickup/<uuid>.jpg. Objects written before this convention keep
+        // their stored key (the key is read from the row, never rebuilt), so nothing is renamed or lost. If the
+        // garage cannot be resolved the previous layout is used rather than failing the upload.
+        Long evidenceGarageId = trip.getNavigationRequestId() == null ? null
+                : navigationRequestRepository.findById(trip.getNavigationRequestId())
+                        .map(NavigationRequest::getGarageId).orElse(null);
+
         String folder =
-                "navigation/"
+                (evidenceGarageId == null ? "" : "garage-" + evidenceGarageId + "/")
+                        + "navigation/"
                         + tripId
                         + "/"
                         + stage.name().toLowerCase();

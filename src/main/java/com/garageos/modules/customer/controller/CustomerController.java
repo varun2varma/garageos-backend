@@ -23,8 +23,9 @@ public class CustomerController {
 
     private final CustomerService service;
 
+    /** Garage staff who register customers (same roles that create job cards). Customers never create customers. */
     @PostMapping
-//    @PreAuthorize("hasAuthority('CUSTOMER_CREATE')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'SERVICE_ADVISOR')")
     public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(
             @Valid @RequestBody CreateCustomerRequest request) {
 
@@ -48,6 +49,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER')")
     public ResponseEntity<ApiResponse<Void>> deleteCustomer(
             @PathVariable Long id) {
 
@@ -59,6 +61,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'SERVICE_ADVISOR')")
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable Long id,
             @Valid @RequestBody CreateCustomerRequest request) {

@@ -116,8 +116,41 @@ public class AuditServiceImpl implements AuditService {
         return auditEventRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc(entityType, entityId)
                 .stream()
                 .filter(event -> Objects.equals(event.getGarageId(), principal.getGarageId()))
-                .map(this::toResponse)
+                // Platform-only actions are never part of a garage's view; other actions a platform administrator
+                // took on this garage's records stay visible but without who they were or why.
+                .filter(event -> !PLATFORM_ONLY.contains(event.getEventType()))
+                .map(event -> isPlatformActor(event) ? toGarageSafeResponse(event) : toResponse(event))
                 .toList();
+    }
+
+    /** Events that describe platform administration itself and must never reach a garage. */
+    static final java.util.Set<AuditEventType> PLATFORM_ONLY = java.util.EnumSet.of(
+            AuditEventType.PLATFORM_ADMIN_GRANTED,
+            AuditEventType.GARAGE_STATUS_CHANGED,
+            AuditEventType.GARAGE_STATUS_CHANGE_REFUSED,
+            AuditEventType.PLATFORM_AUDIT_VIEWED,
+            // Banking trail: not part of the general staff audit view (a manager has no need to see it); the platform
+            // trail carries it.
+            AuditEventType.BANK_ACCOUNT_REGISTERED,
+            AuditEventType.BANK_ACCOUNT_RETIRED,
+            AuditEventType.BANK_ACCOUNT_STEPUP_REFUSED,
+            AuditEventType.BANK_ACCOUNT_VERIFICATION_RESULT,
+            AuditEventType.PLATFORM_BANK_ACCOUNT_VIEWED);
+
+    private static boolean isPlatformActor(AuditEvent event) {
+        return event.getActorRole() != null && event.getActorRole().contains("SUPER_ADMIN");
+    }
+
+    /** What a garage may see of an action taken by a platform administrator: that it happened, not by whom or why. */
+    private AuditEventResponse toGarageSafeResponse(AuditEvent event) {
+        return AuditEventResponse.builder()
+                .id(event.getId())
+                .eventType(event.getEventType())
+                .entityType(event.getEntityType())
+                .entityId(event.getEntityId())
+                .actorRole("PLATFORM_ADMIN")
+                .createdAt(event.getCreatedAt())
+                .build();
     }
 
     private AuditEventResponse toResponse(AuditEvent event) {

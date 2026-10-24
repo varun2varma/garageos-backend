@@ -8,6 +8,7 @@ import com.garageos.modules.estimate.service.EstimateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class EstimateController {
 
     private final EstimateService service;
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @PostMapping
     public ResponseEntity<ApiResponse<EstimateResponse>> createEstimate(
             @Valid @RequestBody CreateEstimateRequest request) {
@@ -48,6 +50,7 @@ public class EstimateController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<EstimateResponse>> updateEstimate(
             @PathVariable Long id,
@@ -59,6 +62,7 @@ public class EstimateController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteEstimate(
             @PathVariable Long id) {

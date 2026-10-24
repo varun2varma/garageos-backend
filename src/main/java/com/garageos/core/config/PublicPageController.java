@@ -2,6 +2,7 @@ package com.garageos.core.config;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Serves the extension-less "clean" URL for public static pages that must
@@ -15,6 +16,16 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 @Controller
 public class PublicPageController {
+
+    /**
+     * The root address used to serve the legacy MVP dashboard. That page is no longer deployed; this keeps "/" answering
+     * 200 with no page content, so a hosting health check or a bookmark on the bare address still gets a healthy reply.
+     */
+    @GetMapping(value = "/", produces = "text/plain;charset=UTF-8")
+    @ResponseBody
+    public String root() {
+        return "GarageST API";
+    }
 
     @GetMapping("/delete-account")
     public String deleteAccount() {

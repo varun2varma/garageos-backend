@@ -46,6 +46,13 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
     private final MediaStorageService mediaStorageService;
     private final R2MediaStorageProvider r2;
 
+    /** Field-injected so existing positional construction (unit tests) is unchanged. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.audit.service.AuditService auditService;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.customer.repository.CustomerGarageRepository customerGarageRepository;
+
     /**
      * Keys under this prefix live in the persistent Cloudflare R2 bucket (the
      * same private bucket job-card media uses); anything else is a key in the
@@ -120,6 +127,47 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
     }
 
     @Override
+    @Transactional
+    public GarageBrandingResponse updateTheme(
+            GarageUserPrincipal principal,
+            Long garageId,
+            String primaryColor,
+            String secondaryColor) {
+
+        Garage garage = findGarage(garageId);
+
+        authorizeWrite(principal, garage);
+
+        String primary = com.garageos.modules.garage.util.BrandColors.normalize(primaryColor);
+        String secondary = com.garageos.modules.garage.util.BrandColors.normalize(secondaryColor);
+
+        String before = describe(garage);
+
+        garage.setBrandPrimaryColor(primary);
+        garage.setBrandSecondaryColor(secondary);
+        garage.setBrandingUpdatedAt(LocalDateTime.now());
+        garage.setBrandingUpdatedBy(principal.getId());
+
+        garageRepository.save(garage);
+
+        if (auditService != null) {
+            auditService.record(com.garageos.core.enums.audit.AuditEventType.GARAGE_BRANDING_UPDATED, "GARAGE",
+                    garage.getId(), garage.getId(),
+                    java.util.Map.of("from", before, "to", describe(garage),
+                            "actorUserId", String.valueOf(principal.getId())));
+        }
+
+        log.info("[BRANDING] Garage theme updated. garageId={}", garage.getId());
+
+        return toBranding(garage);
+    }
+
+    private static String describe(Garage g) {
+        return (g.getBrandPrimaryColor() == null ? "default" : g.getBrandPrimaryColor())
+                + "/" + (g.getBrandSecondaryColor() == null ? "default" : g.getBrandSecondaryColor());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public GarageBrandingResponse resolve(Long garageId) {
 
@@ -168,6 +216,14 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
                     garage.getId(), customer.getId())) {
                 return;
             }
+
+            // An established customer-garage relationship ("My Garages", including the default garage) is enough to
+            // see that garage's branding even before the first job card exists.
+            if (customer != null
+                    && customerGarageRepository != null
+                    && customerGarageRepository.existsByCustomerIdAndGarageId(customer.getId(), garage.getId())) {
+                return;
+            }
         }
 
         throw new ResourceNotFoundException("Garage not found.");
@@ -178,7 +234,7 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
 
         if (principal.getRoles() == null
                 || !principal.getRoles().contains(RoleCode.OWNER.name())) {
-            throw new BusinessException("Only the garage owner can change the garage logo.");
+            throw new BusinessException("Only the garage owner can change the garage branding.");
         }
 
         boolean ownsGarage =
@@ -336,6 +392,10 @@ public class GarageBrandingServiceImpl implements GarageBrandingService {
                 .hasLogo(hasLogo)
                 .logoUpdatedAt(garage.getLogoUpdatedAt())
                 .logoUrl(hasLogo ? "/api/v1/garages/" + garage.getId() + "/logo" : null)
+                .primaryColor(garage.getBrandPrimaryColor())
+                .secondaryColor(garage.getBrandSecondaryColor())
+                .hasCustomTheme(garage.getBrandPrimaryColor() != null || garage.getBrandSecondaryColor() != null)
+                .brandingUpdatedAt(garage.getBrandingUpdatedAt())
                 .build();
     }
 }

@@ -34,6 +34,11 @@ public interface UserRepository
 
     Optional<User> findByMobile(String mobile);
 
+    /** Case-insensitive comparison only; stored emails are never rewritten. Used by the login identifier resolver. */
+    List<User> findAllByEmailIgnoreCase(String email);
+
+    List<User> findAllByMobileIn(Collection<String> mobiles);
+
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);

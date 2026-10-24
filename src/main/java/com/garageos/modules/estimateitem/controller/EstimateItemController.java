@@ -9,6 +9,7 @@ import com.garageos.modules.estimateitem.service.EstimateItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class EstimateItemController {
 
     private final EstimateItemService service;
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @PostMapping("/estimates/{estimateId}/items")
     public ResponseEntity<ApiResponse<EstimateItemResponse>> addItem(
             @PathVariable Long estimateId,
@@ -67,6 +69,7 @@ public class EstimateItemController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @PutMapping("/estimate-items/{id}")
     public ResponseEntity<ApiResponse<EstimateItemResponse>> updateItem(
             @PathVariable Long id,
@@ -111,6 +114,7 @@ public class EstimateItemController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'SERVICE_ADVISOR', 'OWNER')")
     @DeleteMapping("/estimate-items/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteItem(
             @PathVariable Long id) {

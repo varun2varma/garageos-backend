@@ -41,8 +41,10 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        config.setExposedHeaders(List.of("Content-Disposition"));
+        // Idempotency-Key and X-Emergency-Token are the two custom request headers the public Emergency Assist API uses;
+        // without them a browser blocks those calls at the preflight (the native apps are unaffected by CORS).
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Idempotency-Key", "X-Emergency-Token"));
+        config.setExposedHeaders(List.of("Content-Disposition", "Retry-After"));
         config.setAllowCredentials(false);
         config.setMaxAge(3600L);
 

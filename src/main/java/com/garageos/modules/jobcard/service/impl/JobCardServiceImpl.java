@@ -134,6 +134,13 @@ public class JobCardServiceImpl implements JobCardService {
                                 "Garage not found with id : "
                                         + garageId));
 
+        // A garage a platform administrator has deactivated takes no NEW work. Existing job cards keep running to
+        // completion (nothing else in this service checks the garage status), and its history stays readable.
+        if (garage.getStatus() == com.garageos.core.enums.garage.GarageStatus.INACTIVE) {
+            throw new BusinessException(
+                    "This garage is currently inactive, so new job cards cannot be created.", "GARAGE_INACTIVE");
+        }
+
         // Never trust a client-supplied bookingId blindly - resolve and
         // validate it (garage scope, status, vehicle/customer consistency,
         // duplicate protection) before it can be attached to a Job Card.

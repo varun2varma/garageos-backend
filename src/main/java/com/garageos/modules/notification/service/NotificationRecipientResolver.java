@@ -49,6 +49,7 @@ public class NotificationRecipientResolver {
         AUDIENCES.put(NotificationEventType.BOOKING_CONFIRMED, EnumSet.of(CUSTOMER));
         AUDIENCES.put(NotificationEventType.BOOKING_REJECTED, EnumSet.of(CUSTOMER));
         AUDIENCES.put(NotificationEventType.BOOKING_CANCELLED, EnumSet.of(CUSTOMER, MANAGERS));
+        AUDIENCES.put(NotificationEventType.EMERGENCY_REQUESTED, EnumSet.of(OWNER, MANAGERS));
 
         AUDIENCES.put(NotificationEventType.PICKUP_DRIVER_ASSIGNED, EnumSet.of(DRIVER, CUSTOMER));
         AUDIENCES.put(NotificationEventType.TRIP_ACCEPTED, EnumSet.of(CUSTOMER, MANAGERS));

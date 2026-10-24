@@ -15,6 +15,8 @@ public enum NotificationEventType {
     BOOKING_CONFIRMED(BOOKING, NORMAL, "BOOKING"),
     BOOKING_REJECTED(BOOKING, NORMAL, "BOOKING"),
     BOOKING_CANCELLED(BOOKING, NORMAL, "BOOKING"),
+    /** A verified customer asked this garage for roadside help (Emergency Assist). */
+    EMERGENCY_REQUESTED(BOOKING, HIGH, "BOOKING"),
 
     PICKUP_DRIVER_ASSIGNED(TRIP, HIGH, "TRIP"),
     TRIP_ACCEPTED(TRIP, NORMAL, "TRIP"),

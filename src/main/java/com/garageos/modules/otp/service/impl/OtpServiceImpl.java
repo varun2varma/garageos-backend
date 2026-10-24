@@ -54,16 +54,40 @@ public class OtpServiceImpl implements OtpService {
     @Override
     @Transactional
     public void send(OtpPurpose purpose, String destination, Long userId) {
+        issue(purpose, destination, userId, false);
+    }
+
+    /**
+     * Same OTP rules as the SMS path (expiry, attempts, cooldown, hourly cap, hashing, one live challenge per
+     * destination and purpose); only the destination check and the delivery provider differ. The address is stored
+     * lower-cased so the same mailbox always maps to the same challenge.
+     */
+    @Override
+    @Transactional
+    public void sendEmail(OtpPurpose purpose, String email, Long userId) {
+        issue(purpose, normalizeEmail(email), userId, true);
+    }
+
+    static String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
+    }
+
+    private void issue(OtpPurpose purpose, String destination, Long userId, boolean emailChannel) {
 
         if (!props.isEnabled()) {
             throw new OtpException(Code.OTP_DISABLED, "OTP verification is not enabled.");
         }
 
-        if (destination == null || !destination.matches("^[6-9]\\d{9}$")) {
+        if (emailChannel) {
+            if (destination == null || destination.length() > 150
+                    || !destination.matches("^[a-z0-9._%+'-]+@[a-z0-9.-]+\\.[a-z]{2,}$")) {
+                throw new OtpException(Code.OTP_INVALID_DESTINATION, "Invalid email address.");
+            }
+        } else if (destination == null || !destination.matches("^[6-9]\\d{9}$")) {
             throw new OtpException(Code.OTP_INVALID_DESTINATION, "Invalid mobile number.");
         }
 
-        OtpProvider provider = provider();
+        OtpProvider provider = emailChannel ? emailProvider() : provider();
 
         if (!provider.isConfigured() || props.getHashSecret().isBlank()) {
             throw new OtpException(Code.OTP_NOT_CONFIGURED,
@@ -139,6 +163,10 @@ public class OtpServiceImpl implements OtpService {
     @Transactional(propagation = Propagation.REQUIRES_NEW,
             noRollbackFor = OtpException.class)
     public void verifyAndConsume(OtpPurpose purpose, String destination, String otp) {
+
+        if (destination != null && destination.indexOf('@') > 0) {
+            destination = normalizeEmail(destination);
+        }
 
         if (otp == null || otp.isBlank()) {
             throw new OtpException(Code.OTP_REQUIRED, "OTP is required.");
@@ -236,6 +264,15 @@ public class OtpServiceImpl implements OtpService {
                 .findFirst()
                 .orElseThrow(() -> new OtpException(Code.OTP_NOT_CONFIGURED,
                         "OTP delivery is not configured. Please try again later."));
+    }
+
+    /** The e-mail provider, only if it is configured (e-mail switched on with an SMTP host); never a default. */
+    private OtpProvider emailProvider() {
+        return providers.stream()
+                .filter(p -> p.channel() == com.garageos.core.enums.otp.OtpChannel.EMAIL && p.isConfigured())
+                .findFirst()
+                .orElseThrow(() -> new OtpException(Code.OTP_NOT_CONFIGURED,
+                        "E-mail verification is not available right now. Please try again later."));
     }
 
     /** The provider that issued this challenge (null if it is no longer registered). */

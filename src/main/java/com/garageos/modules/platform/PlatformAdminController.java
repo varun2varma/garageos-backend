@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlatformAdminController {
 
     private final PlatformAdminService service;
+    private final com.garageos.modules.bankaccount.service.BankAccountService bankAccountService;
 
     @GetMapping("/overview")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -49,6 +50,9 @@ public class PlatformAdminController {
         private GarageStatus status;
         @NotBlank
         private String reason;
+        /** The administrator's own current password: step-up for a high-impact change. */
+        @NotBlank
+        private String password;
     }
 
     @PutMapping("/garages/{id}/status")
@@ -57,8 +61,10 @@ public class PlatformAdminController {
             @AuthenticationPrincipal GarageUserPrincipal user,
             @PathVariable Long id,
             @Valid @RequestBody ChangeStatusRequest body) {
+        Long actorId = user == null ? null : user.getId();
+        service.requireReauthentication(actorId, body.getPassword(), id);
         return ApiResponseUtil.success("Garage status updated.",
-                service.changeStatus(id, body.getStatus(), body.getReason(), user == null ? null : user.getId()));
+                service.changeStatus(id, body.getStatus(), body.getReason(), actorId));
     }
 
     @GetMapping("/garages")
@@ -69,5 +75,32 @@ public class PlatformAdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ApiResponseUtil.success("Garages fetched.", service.garages(q, status, page, size));
+    }
+
+    /** The platform audit trail (full actor and reason detail). Garage users read their own, filtered view elsewhere. */
+    @GetMapping("/audit")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<Page<PlatformAdminService.AuditRow>>> audit(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @RequestParam(required = false) Long garageId,
+            @RequestParam(required = false) String entityType,
+            @RequestParam(required = false) com.garageos.core.enums.audit.AuditEventType eventType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ApiResponseUtil.success("Audit events fetched.",
+                service.audit(garageId, entityType, eventType, page, size, user == null ? null : user.getId()));
+    }
+
+    /**
+     * A garage's registered bank account as a platform administrator may see it: masked number, status, provider
+     * reference and timestamps; never the full number. The read is audited.
+     */
+    @GetMapping("/garages/{id}/bank-account")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<ApiResponse<com.garageos.modules.bankaccount.dto.response.BankAccountView>> bankAccount(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @PathVariable Long id) {
+        return ApiResponseUtil.success("Bank account fetched.",
+                bankAccountService.currentForPlatform(id, user == null ? null : user.getId()).orElse(null));
     }
 }

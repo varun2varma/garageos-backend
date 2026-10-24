@@ -28,6 +28,9 @@ public class UserProfileResponse {
     /** True only when the user has proven control of {@code mobile} by SMS OTP (enables SMS password recovery). */
     private Boolean mobileVerified;
 
+    /** True when the user proved control of their current e-mail address by OTP. */
+    private Boolean emailVerified;
+
     private UserStatus status;
 
     private Boolean firstLogin;

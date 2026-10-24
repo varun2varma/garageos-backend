@@ -100,7 +100,7 @@ public class GoogleDriveOAuthService {
         return flow;
     }
 
-    public String getAuthorizationUrl()
+    public String getAuthorizationUrl(String state)
             throws GeneralSecurityException, IOException {
 
         log.info(
@@ -132,6 +132,8 @@ public class GoogleDriveOAuthService {
                         // which is what actually makes the one-time-setup
                         // promise true going forward.
                         .set("prompt", "consent")
+                        // Signed, expiring anti-forgery value verified by the callback (see DriveOAuthGuard).
+                        .setState(state)
                         .build();
 
         log.info(

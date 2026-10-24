@@ -22,6 +22,13 @@ public interface GarageBrandingService {
     /** Owner-only add/replace of the garage's logo. */
     GarageBrandingResponse updateLogo(GarageUserPrincipal principal, Long garageId, MultipartFile file);
 
+    /**
+     * Owner-only set or clear (null) of the garage's primary / secondary colour. Validated and normalised to
+     * upper-case #RRGGBB; audited with the previous and new values.
+     */
+    GarageBrandingResponse updateTheme(GarageUserPrincipal principal, Long garageId, String primaryColor,
+                                       String secondaryColor);
+
     /** Internal resolution for server-side documents (callers authorize first). */
     GarageBrandingResponse resolve(Long garageId);
 

@@ -143,6 +143,22 @@ public class Garage extends BaseEntity {
     LocalDateTime logoUpdatedAt;
 
     /**
+     * Garage colour palette (V86), upper-case {@code #RRGGBB}; null means the GarageST default theme. Belongs to
+     * the garage, never to a user.
+     */
+    @Column(name = "brand_primary_color", length = 7)
+    String brandPrimaryColor;
+
+    @Column(name = "brand_secondary_color", length = 7)
+    String brandSecondaryColor;
+
+    @Column(name = "branding_updated_at")
+    LocalDateTime brandingUpdatedAt;
+
+    @Column(name = "branding_updated_by")
+    Long brandingUpdatedBy;
+
+    /**
      * The garage authorized signature and stamp printed on the final invoice PDF (V83). Private keys in the object
      * store (never URLs); null until the Owner uploads them. Unrelated to the optional customer signature.
      */

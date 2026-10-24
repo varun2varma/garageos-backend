@@ -533,6 +533,13 @@ public class FinalReportPdfRenderer {
                     cell.addElement(missing);
                 }
 
+                // Owner report only (a customer report never contains an internal photo): say so on the photo.
+                if (d.audience() == com.garageos.core.enums.report.FinalReportAudience.OWNER && !p.customerVisible()) {
+                    Paragraph tag = new Paragraph("INTERNAL - not shown to the customer", SMALL);
+                    tag.setAlignment(Element.ALIGN_CENTER);
+                    cell.addElement(tag);
+                }
+
                 grid.addCell(cell);
                 placed++;
             }

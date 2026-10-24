@@ -113,6 +113,24 @@ public class GarageController {
         );
     }
 
+    /**
+     * Owner-only set/clear of the garage colour palette (primary and secondary, {@code #RRGGBB}; omit or send null to
+     * go back to the default theme). Ownership of THIS garage is enforced in GarageBrandingServiceImpl against the
+     * authenticated principal, never trusted from the request.
+     */
+    @PutMapping("/garages/{id}/branding")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<ApiResponse<GarageBrandingResponse>> updateGarageTheme(
+            @AuthenticationPrincipal GarageUserPrincipal user,
+            @PathVariable Long id,
+            @jakarta.validation.Valid @RequestBody com.garageos.modules.garage.dto.request.UpdateBrandingThemeRequest body) {
+
+        return ApiResponseUtil.success(
+                "Garage branding updated successfully.",
+                brandingService.updateTheme(user, id, body.getPrimaryColor(), body.getSecondaryColor())
+        );
+    }
+
     /** Raw logo bytes - authenticated and authorized like branding; never a public path. */
     @GetMapping("/garages/{id}/logo")
     public ResponseEntity<byte[]> getGarageLogo(

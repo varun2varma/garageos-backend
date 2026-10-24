@@ -48,6 +48,12 @@ public class CustomerServiceImpl implements CustomerService {
 
         GarageUserPrincipal principal = garageScope.principal();
 
+        // Defence behind the controller's role guard: only a garage staff member (or the platform) registers customers.
+        if (!garageScope.isUnrestricted(principal) && !garageScope.isStaff(principal)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Only garage staff can register customers.");
+        }
+
         Customer existing = repository.findByMobileNumber(request.getMobileNumber()).orElse(null);
 
         if (existing != null) {
@@ -75,7 +81,13 @@ public class CustomerServiceImpl implements CustomerService {
             customerGarageService.link(existing.getId(), principal.getGarageId(),
                     CustomerGarageSource.STAFF_REGISTERED);
 
-            return mapper.toResponse(existing);
+            // The record belongs to another garage's relationship until this link existed, so what comes back is
+            // limited to what this caller just typed (plus the shared id): another garage's stored name, e-mail
+            // and address for this number are not disclosed by "registering" it.
+            Customer typed = mapper.toEntity(request);
+            typed.setId(existing.getId());
+
+            return mapper.toResponse(typed);
         }
 
         Customer customer = mapper.toEntity(request);

@@ -21,6 +21,12 @@ public class AuditController {
 
     private final AuditService auditService;
 
+    /**
+     * Garage staff only (the service additionally scopes to the caller's own garage and hides platform-only
+     * actions). A platform administrator reads the audit trail through GET /api/v1/platform/audit.
+     */
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasAnyRole('OWNER', 'MANAGER', 'SERVICE_ADVISOR', 'ACCOUNTANT')")
     @GetMapping("/events")
     public List<AuditEventResponse> findForEntity(
             @RequestParam String entityType,

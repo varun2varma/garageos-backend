@@ -40,6 +40,9 @@ public class NotificationTemplateFactory {
             case BOOKING_REJECTED -> new Rendered(
                     "Booking not accepted",
                     "Your service booking could not be accepted. Open the app for details.");
+            case EMERGENCY_REQUESTED -> new Rendered(
+                    "Emergency assistance requested",
+                    "A customer needs roadside help. Open the app to review and respond.");
             case BOOKING_CANCELLED -> new Rendered(
                     "Booking cancelled",
                     customer ? "Your service booking has been cancelled." : "A service booking has been cancelled.");

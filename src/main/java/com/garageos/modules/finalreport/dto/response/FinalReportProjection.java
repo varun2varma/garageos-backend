@@ -6,12 +6,12 @@ import java.util.List;
 
 /**
  * Narrows the shared {@link JobCardFinalReportDTO} to what one audience may
- * see. The CUSTOMER projection removes every owner-only field; BOTH projections
- * drop any photo that is not customer-visible, so the owner and customer reports
- * carry an identical photo set.
+ * see. The CUSTOMER projection removes every owner-only field and drops any photo
+ * that is not customer-visible. The OWNER projection keeps the garage's complete
+ * evidence set (internal and customer-visible photos).
  *
- * This is the second line of defence: the assembler already loads only
- * customer-visible media for a customer report, so restricted photos are never
+ * This is the second line of defence for the customer: the assembler already loads
+ * only customer-visible media for a customer report, so restricted photos are never
  * even read from storage.
  */
 public final class FinalReportProjection {
@@ -25,7 +25,7 @@ public final class FinalReportProjection {
 
     public static JobCardFinalReportDTO owner(JobCardFinalReportDTO f) {
         return copy(f, FinalReportAudience.OWNER, f.inspection(), f.repairs(), f.qualityCheck(),
-                f.delivery(), customerVisiblePhotos(f), f.ownerInfo());
+                f.delivery(), f.photos() == null ? List.of() : f.photos(), f.ownerInfo());
     }
 
     public static JobCardFinalReportDTO customer(JobCardFinalReportDTO f) {

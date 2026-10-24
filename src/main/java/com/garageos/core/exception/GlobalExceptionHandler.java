@@ -215,6 +215,58 @@ public class GlobalExceptionHandler {
      * now logged with its stack trace. Previously it was swallowed
      * entirely, which is why "Something went wrong." was untraceable.
      */
+    /**
+     * Wrong password, unknown/ambiguous identifier, disabled and locked accounts all end here with ONE message, so
+     * the response never reveals whether an account exists or why it was refused. Previously these fell through to
+     * the catch-all below and surfaced as a 500 "Something went wrong."
+     */
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimit(RateLimitExceededException ex) {
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(buildError(ex.getMessage(), "RATE_LIMITED"));
+    }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(
+            org.springframework.security.core.AuthenticationException ex) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(buildError("Invalid username or password."));
+    }
+
+    /**
+     * A request the client built wrongly (missing or mistyped parameter/header, unreadable body) is a 400, not a
+     * server failure: before this it fell into the catch-all below, was logged as an ERROR with a stack trace and was
+     * reported to the caller as "Something went wrong." with a 500. The message never echoes the offending value.
+     */
+    @ExceptionHandler({
+            org.springframework.web.bind.MissingServletRequestParameterException.class,
+            org.springframework.web.bind.MissingRequestHeaderException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class})
+    public ResponseEntity<ApiError> handleMalformedRequest(Exception ex) {
+
+        return ResponseEntity.badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(buildError("The request is incomplete or malformed."));
+    }
+
+    /**
+     * A URL that matches no controller and no packaged static file is a plain 404. Before this it fell into the
+     * catch-all below: a 500 "Something went wrong." plus an ERROR stack trace for every probe of a removed page.
+     */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResource(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(buildError("Not found."));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
 

@@ -73,6 +73,24 @@ public class User extends BaseEntity {
         return mobile != null && mobileVerifiedAt != null && mobile.equals(mobileVerifiedNumber);
     }
 
+    /** When the user proved control of {@link #emailVerifiedAddress} by e-mail OTP (V88); null = never proven. */
+    @Column(name = "email_verified_at")
+    private java.time.LocalDateTime emailVerifiedAt;
+
+    /** The exact address that was proven; a different current {@link #email} means it is no longer verified. */
+    @Column(name = "email_verified_address", length = 150)
+    private String emailVerifiedAddress;
+
+    public boolean isEmailVerified() {
+        return email != null && emailVerifiedAt != null && email.trim().equalsIgnoreCase(emailVerifiedAddress);
+    }
+
+    /** Records that the current e-mail address was just proven by OTP. */
+    public void markEmailVerified(java.time.LocalDateTime when) {
+        this.emailVerifiedAt = when;
+        this.emailVerifiedAddress = this.email == null ? null : this.email.trim().toLowerCase();
+    }
+
     /** Records that the current mobile number was just proven by OTP. */
     public void markMobileVerified(java.time.LocalDateTime when) {
         this.mobileVerifiedAt = when;

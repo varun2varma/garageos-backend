@@ -29,6 +29,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VehicleServiceImpl implements VehicleService {
 
+    /** Field-injected so existing positional construction is unchanged. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.audit.service.AuditService auditService;
+
     private final VehicleRepository repository;
     private final CustomerRepository customerRepository;
     private final VehicleMapper mapper;
@@ -234,6 +238,18 @@ public class VehicleServiceImpl implements VehicleService {
                 .getAuthentication()
                 .getPrincipal();
 
+        // "Verified" is a staff review of a document, so it must point at one. This records a human decision; it is
+        // not OCR and not an official registry lookup, and nothing here claims otherwise.
+        boolean hasDocument = (documentReference != null && !documentReference.isBlank())
+                || (vehicle.getRcDocumentReference() != null && !vehicle.getRcDocumentReference().isBlank());
+
+        if (status == RcVerificationStatus.VERIFIED && !hasDocument) {
+            throw new com.garageos.core.exception.BusinessException(
+                    "A document reference is required to mark the RC as verified.");
+        }
+
+        RcVerificationStatus previous = vehicle.getRcVerificationStatus();
+
         vehicle.setRcVerificationStatus(status);
 
         if (documentReference != null) {
@@ -243,9 +259,20 @@ public class VehicleServiceImpl implements VehicleService {
         if (status == RcVerificationStatus.VERIFIED || status == RcVerificationStatus.REJECTED) {
             vehicle.setRcVerifiedBy(principal.getId());
             vehicle.setRcVerifiedAt(java.time.LocalDateTime.now());
+        } else {
+            // Back to NOT_SUBMITTED / PENDING: the earlier reviewer's decision no longer stands.
+            vehicle.setRcVerifiedBy(null);
+            vehicle.setRcVerifiedAt(null);
         }
 
         vehicle = repository.save(vehicle);
+
+        if (auditService != null) {
+            auditService.record(com.garageos.core.enums.audit.AuditEventType.VEHICLE_RC_STATUS_CHANGED, "Vehicle",
+                    vehicle.getId(), principal.getGarageId(),
+                    java.util.Map.of("from", String.valueOf(previous), "to", String.valueOf(status),
+                            "actorUserId", String.valueOf(principal.getId())));
+        }
 
         return mapper.toResponse(vehicle);
     }

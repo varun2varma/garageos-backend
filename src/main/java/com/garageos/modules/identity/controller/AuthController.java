@@ -32,10 +32,16 @@ public class AuthController {
     private final AuthService authService;
     private final HttpServletRequest httpServletRequest;
     private final com.garageos.modules.identity.security.PasswordRecoveryThrottle recoveryThrottle;
+    private final com.garageos.core.ratelimit.RateLimitService rateLimitService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest request) {
+
+        // Per account/identifier (the per-IP limit is applied by RateLimitFilter): slows credential guessing against
+        // one account from many addresses without revealing whether the account exists.
+        rateLimitService.require("login-identifier",
+                com.garageos.core.ratelimit.RateLimitService.normalizeIdentifier(request.getUsername()));
 
         return ApiResponseUtil.success(
                 "Login successful.",

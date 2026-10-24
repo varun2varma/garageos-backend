@@ -29,6 +29,12 @@ public class MyGarageResponse {
     /** True when the garage is ACTIVE and can receive a new booking. */
     private boolean bookable;
 
+    /**
+     * Why {@link #bookable} is false ({@code GARAGE_INACTIVE}); null when it is bookable. Lets the app say so
+     * explicitly instead of silently offering another garage.
+     */
+    private String unavailableReason;
+
     @Builder.Default
     private boolean defaultGarage = false;
 }

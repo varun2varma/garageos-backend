@@ -173,6 +173,11 @@ public class BookingServiceImpl implements BookingService {
                         new ResourceNotFoundException(
                                 "Garage not found with id : " + garageId));
 
+        if (garage.getStatus() == com.garageos.core.enums.garage.GarageStatus.INACTIVE) {
+            throw new BusinessException(
+                    "This garage is currently inactive, so new bookings cannot be created.", "GARAGE_INACTIVE");
+        }
+
         if (request.isPickupRequested()
                 && (request.getPickupLatitude() == null || request.getPickupLongitude() == null)) {
 

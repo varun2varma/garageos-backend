@@ -1,5 +1,6 @@
 package com.garageos.modules.media.controller;
 
+import com.garageos.modules.media.service.DriveOAuthGuard;
 import com.garageos.modules.media.service.GoogleDriveClientService;
 import com.garageos.modules.media.service.GoogleDriveFolderService;
 import com.garageos.modules.media.service.GoogleDriveOAuthService;
@@ -23,12 +24,16 @@ public class GoogleDriveOAuthController {
     private final GoogleDriveClientService driveClientService;
     private final GoogleDriveFolderService folderService;
     private final MediaUploadRetryService mediaUploadRetryService;
+    private final DriveOAuthGuard guard;
 
     public GoogleDriveOAuthController(
             GoogleDriveOAuthService oauthService,
             GoogleDriveClientService driveClientService,
             GoogleDriveFolderService folderService,
-            MediaUploadRetryService mediaUploadRetryService) {
+            MediaUploadRetryService mediaUploadRetryService,
+            DriveOAuthGuard guard) {
+
+        this.guard = guard;
 
         this.oauthService = oauthService;
         this.driveClientService = driveClientService;
@@ -36,12 +41,20 @@ public class GoogleDriveOAuthController {
         this.mediaUploadRetryService = mediaUploadRetryService;
     }
 
+    /**
+     * Starts the Drive consent flow. Reachable from a browser, so it is gated by the operator token instead of a
+     * Bearer header; with no token configured the flow is disabled (403).
+     */
     @GetMapping("/authorize")
-    public ResponseEntity<Void> authorize()
+    public ResponseEntity<Void> authorize(@RequestParam(value = "token", required = false) String token)
             throws GeneralSecurityException, IOException {
 
+        if (!guard.operatorAllowed(token)) {
+            return ResponseEntity.status(403).build();
+        }
+
         String authorizationUrl =
-                oauthService.getAuthorizationUrl();
+                oauthService.getAuthorizationUrl(guard.newState());
 
         return ResponseEntity
                 .status(302)
@@ -51,8 +64,14 @@ public class GoogleDriveOAuthController {
 
     @GetMapping("/callback")
     public ResponseEntity<String> callback(
-            @RequestParam("code") String code)
+            @RequestParam("code") String code,
+            @RequestParam(value = "state", required = false) String state)
             throws GeneralSecurityException, IOException {
+
+        // Only a consent started through /authorize in the last few minutes may store credentials.
+        if (!guard.validState(state)) {
+            return ResponseEntity.status(403).body("Invalid or expired authorization request.");
+        }
 
         oauthService.exchangeCode(code);
 
@@ -72,6 +91,7 @@ public class GoogleDriveOAuthController {
         );
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/test")
     public ResponseEntity<Map<String, Object>> testDriveAccess()
             throws GeneralSecurityException, IOException {
@@ -98,6 +118,7 @@ public class GoogleDriveOAuthController {
         );
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/test/create-folder")
     public ResponseEntity<String> createTestFolder()
             throws GeneralSecurityException, IOException {
@@ -113,6 +134,7 @@ public class GoogleDriveOAuthController {
         );
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/test/create-job-card-structure")
     public ResponseEntity<?> createJobCardStructure(
             @RequestParam String garageCode,

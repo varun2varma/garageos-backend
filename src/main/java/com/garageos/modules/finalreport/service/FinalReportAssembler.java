@@ -207,9 +207,10 @@ public class FinalReportAssembler {
                 new OwnerInfo(
                         jobCard.getRemarks(),
                         technicians(jobCardId),
-                        // Internal photos are no longer reported on at all: owner and customer
-                        // reports share one customer-visible photo set.
-                        0),
+                        // Owner report only: how many of its photos are internal (never present for a customer).
+                        audience == FinalReportAudience.OWNER
+                                ? (int) photos.stream().filter(p -> !p.customerVisible()).count()
+                                : 0),
                 // Selected by relationship and filtered for the audience inside the loader (server side).
                 tripEvidenceLoader.load(jobCard, audience),
                 declinedComplaints(jobCardId));
@@ -299,14 +300,20 @@ public class FinalReportAssembler {
     }
 
     /**
-     * The visibility rule lives in this query choice: BOTH audiences get only
-     * CUSTOMER_VISIBLE rows, so the owner and customer reports always carry the
-     * same photo set. Internal media is never read from storage for a report.
+     * The visibility rule lives in this query choice, on the server, before any object is read from storage:
+     * <ul>
+     *   <li>CUSTOMER report: only CUSTOMER_VISIBLE rows. Internal media is never read for a customer.</li>
+     *   <li>OWNER report: the garage's complete evidence, internal and customer-visible, each photo carrying its
+     *       stored visibility so the PDF can mark the internal ones.</li>
+     * </ul>
+     * The CUSTOMER projection filters again ({@code FinalReportProjection}) as a second line of defence.
      */
     private List<PhotoInfo> loadPhotos(Long jobCardId, FinalReportAudience audience) {
 
-        List<JobCardMedia> rows = jobCardMediaRepository.findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
-                jobCardId, VISIBILITY_CUSTOMER_VISIBLE);
+        List<JobCardMedia> rows = audience == FinalReportAudience.OWNER
+                ? jobCardMediaRepository.findByJobCardIdOrderByCreatedAtAsc(jobCardId)
+                : jobCardMediaRepository.findByJobCardIdAndVisibilityOrderByCreatedAtAsc(
+                        jobCardId, VISIBILITY_CUSTOMER_VISIBLE);
 
         List<PhotoInfo> photos = new ArrayList<>();
 

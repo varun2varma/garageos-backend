@@ -23,6 +23,12 @@ public interface OtpService {
     void send(OtpPurpose purpose, String destination, Long userId);
 
     /**
+     * Issues and delivers an OTP to an e-mail address, under exactly the same rules as {@link #send}. Fails with
+     * OTP_NOT_CONFIGURED unless an e-mail provider is configured; e-mail is never assumed available.
+     */
+    void sendEmail(OtpPurpose purpose, String email, Long userId);
+
+    /**
      * Verifies and consumes the OTP in its own transaction, so a wrong-attempt
      * count survives the caller's rollback. Succeeds at most once per issued OTP.
      *

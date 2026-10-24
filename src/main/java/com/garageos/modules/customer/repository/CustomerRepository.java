@@ -12,6 +12,15 @@ import java.util.Optional;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
+    /**
+     * Pessimistically locks the customer row. Serialises work that must be one-at-a-time per customer, such as
+     * choosing the single default garage. Only call within an existing transaction.
+     */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Customer c where c.id = :id")
+    Optional<Customer> findByIdForUpdate(@Param("id") Long id);
+
+
     Optional<Customer> findByMobileNumber(String mobileNumber);
 
     boolean existsByMobileNumber(String mobileNumber);

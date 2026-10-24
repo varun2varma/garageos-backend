@@ -16,5 +16,9 @@ public enum OtpPurpose {
     MOBILE_VERIFICATION,
     PASSWORD_RESET,
     LOGIN,
-    PAYMENT_VERIFICATION
+    PAYMENT_VERIFICATION,
+    /** A not-yet-logged-in person proving they control the mobile number they raise an Emergency Assist request from. */
+    EMERGENCY_ASSIST,
+    /** An authenticated user proving they control the e-mail address on their account. */
+    EMAIL_VERIFICATION
 }
