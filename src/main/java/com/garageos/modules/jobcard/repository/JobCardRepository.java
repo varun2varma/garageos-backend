@@ -20,6 +20,10 @@ public interface JobCardRepository extends JpaRepository<JobCard, Long> {
 
     Optional<JobCard> findByJobCardNumber(String jobCardNumber);
 
+    /** The job card's garage id as a scalar (no lazy association involved). */
+    @org.springframework.data.jpa.repository.Query("select j.garage.id from JobCard j where j.id = :id")
+    Optional<Long> findGarageIdById(@org.springframework.data.repository.query.Param("id") Long id);
+
     Optional<JobCard> findTopByGarageIdOrderByIdDesc(Long garageId);
 
     long countByStatusNotIn(List<JobCardStatus> statuses);

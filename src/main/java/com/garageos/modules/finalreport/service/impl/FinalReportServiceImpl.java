@@ -55,6 +55,10 @@ public class FinalReportServiceImpl implements FinalReportService {
     private final FinalReportEmailService emailService;
     private final TransactionTemplate tx;
 
+    /** Optional (existing constructor-built tests): recovery touchpoint, see {@link #generateOnClosure}. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.navigation.service.TripEvidenceAdoptionService tripEvidenceAdoption;
+
     /** What a caller may do, decided from their relationship to the Job Card. */
     record Access(boolean canViewOwner, boolean canViewCustomer, boolean canRegenerate, boolean staff) {
     }
@@ -164,6 +168,16 @@ public class FinalReportServiceImpl implements FinalReportService {
 
     @Override
     public void generateOnClosure(Long jobCardId) {
+
+        // Recovery touchpoint: finish moving this job card's trip evidence into its folder if an earlier attempt did not
+        // (idempotent; reports read whichever key a photo currently has, so a failure here never blocks the report).
+        if (tripEvidenceAdoption != null) {
+            try {
+                tripEvidenceAdoption.adoptForJobCard(jobCardId);
+            } catch (RuntimeException e) {
+                log.warn("[FINAL-REPORT] Trip-evidence adoption before generation failed. jobCardId={}", jobCardId, e);
+            }
+        }
 
         List<Long> issued;
 

@@ -114,8 +114,10 @@ public class MediaProcessingScheduler {
             } catch (Exception ex) {
 
                 log.error(
-                        "[MEDIA_PROCESSING_SCHEDULER] Failed to finalize mediaId={}. error={}",
+                        "[MEDIA_PROCESSING_SCHEDULER] Failed to finalize mediaId={}, jobCardId={}, attempt={}. error={}",
                         media.getId(),
+                        media.getJobCardId(),
+                        (media.getRetryCount() == null ? 0 : media.getRetryCount()) + 1,
                         ex.getMessage(),
                         ex
                 );
@@ -158,6 +160,12 @@ public class MediaProcessingScheduler {
 
             if (media.isEvidenceOnly() && media.getRetryCount() >= MAX_PROCESSING_ATTEMPTS) {
                 media.setUploadStatus(MediaUploadStatus.FAILED.name());
+                log.warn(
+                        "[MEDIA_PROCESSING_SCHEDULER] Giving up on evidence rendering; staging source kept. mediaId={}, jobCardId={}, attempts={}",
+                        media.getId(),
+                        media.getJobCardId(),
+                        media.getRetryCount()
+                );
             }
 
             jobCardMediaRepository.save(media);
@@ -266,9 +274,7 @@ public class MediaProcessingScheduler {
     }
 
     private void writeJpeg(BufferedImage image, ByteArrayOutputStream out) throws IOException {
-        if (!ImageIO.write(image, "jpg", out)) {
-            throw new IOException("No JPEG writer available.");
-        }
+        com.garageos.modules.media.util.EvidenceImageOps.writeJpeg(image, out);
     }
 
     /**
@@ -436,26 +442,7 @@ public class MediaProcessingScheduler {
     }
 
     private BufferedImage resize(BufferedImage source, int maxDimension) {
-
-        int width = source.getWidth();
-        int height = source.getHeight();
-
-        double scale = Math.min(1.0, (double) maxDimension / Math.max(width, height));
-
-        int targetWidth = Math.max(1, (int) Math.round(width * scale));
-        int targetHeight = Math.max(1, (int) Math.round(height * scale));
-
-        BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-
-        Graphics2D graphics = resized.createGraphics();
-        try {
-            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics.drawImage(source, 0, 0, targetWidth, targetHeight, null);
-        } finally {
-            graphics.dispose();
-        }
-
-        return resized;
+        return com.garageos.modules.media.util.EvidenceImageOps.resize(source, maxDimension);
     }
 
     private MediaStorageProvider resolveProvider(StorageProvider type) {

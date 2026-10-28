@@ -203,6 +203,13 @@ public class JobCardServiceImpl implements JobCardService {
                             navigationRequest.setJobCardId(savedJobCardId);
                             navigationRequestRepository.save(navigationRequest);
                         });
+
+                // Pickup photos taken before the job card existed are moved into its folder AFTER this transaction
+                // commits; a failure there never affects the job card (see TripEvidenceAdoptionListener).
+                if (applicationEventPublisher != null) {
+                    applicationEventPublisher.publishEvent(
+                            new com.garageos.modules.navigation.event.TripEvidenceAdoptionRequested(savedJobCardId));
+                }
             }
         }
 

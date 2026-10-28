@@ -204,11 +204,12 @@ public class BankAccountServiceImpl implements BankAccountService {
             throw new ResourceNotFoundException("Garage not found.");
         }
 
-        // Sensitive read, so it leaves a trace even though the view is masked.
+        // Sensitive read (the platform administrator sees the full number), so it leaves a trace. The audit row records
+        // who and which garage only: never the number.
         auditService.record(AuditEventType.PLATFORM_BANK_ACCOUNT_VIEWED, ENTITY, garageId, null,
-                Map.of("actorUserId", String.valueOf(adminUserId)));
+                Map.of("actorUserId", String.valueOf(adminUserId), "fullNumber", "true"));
 
-        return repository.findByGarageIdAndCurrentTrue(garageId).map(this::view);
+        return repository.findByGarageIdAndCurrentTrue(garageId).map(a -> view(a, fullNumberOf(a)));
     }
 
     @Override
@@ -289,11 +290,27 @@ public class BankAccountServiceImpl implements BankAccountService {
         return "bank:" + garageId;
     }
 
+    /** Decrypts the number for the platform administrator; null (masked view only) if the key is missing or the value cannot be read. */
+    private String fullNumberOf(GarageBankAccount a) {
+        if (!encryptor.isConfigured()) {
+            return null;
+        }
+        try {
+            return encryptor.decrypt(a.getAccountNumberEnc(), aad(a.getGarageId()));
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
     private BankAccountView view(GarageBankAccount a) {
+        return view(a, null);
+    }
+
+    private BankAccountView view(GarageBankAccount a, String fullNumber) {
         return new BankAccountView(a.getId(), a.getAccountHolderName(), a.getBankName(), a.getIfsc(),
                 a.getAccountType().name(), "XXXXXX" + a.getAccountNumberLast4(), a.getVerificationStatus().name(),
                 a.getVerificationProvider(), a.getVerificationReference(), a.getVerifiedAt(), a.getFailureReason(),
-                a.getCreatedAt());
+                a.getCreatedAt(), fullNumber);
     }
 
     private static String blankToNull(String s) {

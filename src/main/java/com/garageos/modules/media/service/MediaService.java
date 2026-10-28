@@ -43,6 +43,13 @@ public interface MediaService {
     MediaContent downloadContent(JobCardMedia media);
 
     /**
+     * Bytes of an already-authorized image for server-side embedding (the service report PDF). Resolves the storage
+     * provider recorded on the row: an R2-backed row is read from R2 (its evidence key, else its storage key); every
+     * other row keeps the Google Drive path of {@link #downloadContent}. Does not authorize; callers do.
+     */
+    MediaContent downloadReportImage(JobCardMedia media);
+
+    /**
      * Visibility-correction: OWNER/MANAGER/SERVICE_ADVISOR only (enforced
      * by the controller's {@code @PreAuthorize} — TECHNICIAN never reaches
      * this method). Reuses the same garage-isolation check every other

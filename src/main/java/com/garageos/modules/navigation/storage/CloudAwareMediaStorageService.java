@@ -28,6 +28,12 @@ public class CloudAwareMediaStorageService implements MediaStorageService {
 
     public static final String CLOUD_PREFIX = "trip-evidence/";
 
+    /**
+     * Evidence in the garage / job-card hierarchy ({@code GarageST/<garage>/<owner>/<stage>/...}, see
+     * {@link TripEvidenceKeys}). Such keys, like the legacy {@link #CLOUD_PREFIX} keys, live in R2.
+     */
+    public static final String HIERARCHY_PREFIX = TripEvidenceKeys.ROOT;
+
     private final LocalMediaStorageService local;
     private final R2MediaStorageProvider r2;
 
@@ -45,10 +51,10 @@ public class CloudAwareMediaStorageService implements MediaStorageService {
 
         if (!r2.isAvailable()) {
             log.warn("[MEDIA][TRIP] R2 is not configured; storing trip evidence on local disk (not durable). folder={}", folder);
-            return local.upload(file, folder);
+            return local.upload(file, localFolder(folder));
         }
 
-        String key = CLOUD_PREFIX + folder + "/" + UUID.randomUUID() + extensionOf(file.getOriginalFilename());
+        String key = cloudFolder(folder) + "/" + UUID.randomUUID() + extensionOf(file.getOriginalFilename());
 
         try {
             r2.uploadBytes(key, file.getBytes(),
@@ -90,10 +96,10 @@ public class CloudAwareMediaStorageService implements MediaStorageService {
 
         if (!r2.isAvailable()) {
             log.warn("[MEDIA][TRIP] R2 is not configured; storing trip evidence on local disk (not durable). folder={}", folder);
-            return local.uploadBytes(content, folder, extension);
+            return local.uploadBytes(content, localFolder(folder), extension);
         }
 
-        String key = CLOUD_PREFIX + folder + "/" + UUID.randomUUID() + (extension == null ? "" : extension);
+        String key = cloudFolder(folder) + "/" + UUID.randomUUID() + (extension == null ? "" : extension);
 
         try {
             r2.uploadBytes(key, content, contentType == null ? "application/octet-stream" : contentType);
@@ -123,8 +129,68 @@ public class CloudAwareMediaStorageService implements MediaStorageService {
         }
     }
 
+    @Override
+    public boolean supportsObjectKeys() {
+        return r2.isAvailable();
+    }
+
+    @Override
+    public DeleteResult deleteObject(String storageKey) {
+
+        if (!isCloud(storageKey)) {
+            throw new UnsupportedOperationException("deleteObject is only supported for R2 keys");
+        }
+
+        try {
+            if (!r2.exists(storageKey)) {
+                return DeleteResult.ALREADY_ABSENT;
+            }
+            r2.deleteKey(storageKey);
+            return r2.exists(storageKey) ? DeleteResult.FAILED : DeleteResult.DELETED;
+        } catch (RuntimeException ex) {
+            log.warn("[MEDIA][TRIP] Could not delete cloud object. reason={}", ex.getClass().getSimpleName());
+            return DeleteResult.FAILED;
+        }
+    }
+
+    @Override
+    public boolean exists(String storageKey) {
+
+        if (!isCloud(storageKey)) {
+            throw new UnsupportedOperationException("exists is only supported for R2 keys");
+        }
+
+        return r2.exists(storageKey);
+    }
+
+    @Override
+    public void putObject(String storageKey, byte[] content, String contentType) {
+
+        if (!isCloud(storageKey) || !r2.isAvailable()) {
+            throw new IllegalStateException("putObject needs an R2 key and a configured R2.");
+        }
+
+        try {
+            r2.uploadBytes(storageKey, content, contentType == null ? "application/octet-stream" : contentType);
+        } catch (RuntimeException ex) {
+            throw new MediaException(MediaErrorCode.MEDIA_CLOUD_UPLOAD_FAILED,
+                    "The evidence could not be saved to cloud storage.", ex);
+        }
+    }
+
     public static boolean isCloud(String storageKey) {
-        return storageKey != null && storageKey.startsWith(CLOUD_PREFIX);
+        return storageKey != null
+                && (storageKey.startsWith(CLOUD_PREFIX) || storageKey.startsWith(HIERARCHY_PREFIX));
+    }
+
+    /** A hierarchy folder is already a complete key prefix; any other folder keeps the legacy cloud prefix. */
+    private static String cloudFolder(String folder) {
+        return folder.startsWith(HIERARCHY_PREFIX) ? folder : CLOUD_PREFIX + folder;
+    }
+
+    /** Local-disk keys must never look like R2 keys (isCloud routes by prefix), so hierarchy folders get a local root. */
+    private static String localFolder(String folder) {
+        return folder.startsWith(HIERARCHY_PREFIX) ? "local-evidence/" + folder : folder;
     }
 
     private static String extensionOf(String name) {

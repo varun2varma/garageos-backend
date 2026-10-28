@@ -980,7 +980,22 @@ public class MediaServiceImpl implements MediaService {
 
         MediaStorageProvider r2 = resolveProvider(StorageProvider.R2);
 
-        Long actualSize = r2.confirmUpload(media.getStorageKey());
+        Long actualSize;
+
+        try {
+            actualSize = r2.confirmUpload(media.getStorageKey());
+        } catch (RuntimeException ex) {
+            // The row stays PENDING so the client's retry can upload again; this line ties the storage failure to
+            // the row (the provider only knows the key).
+            log.warn(
+                    "[MEDIA][R2] Completion rejected: object not confirmed. mediaId={}, jobCardId={}, uploadStatus={}, reason={}",
+                    mediaId,
+                    media.getJobCardId(),
+                    currentStatus,
+                    ex.getClass().getSimpleName()
+            );
+            throw ex;
+        }
 
         if (request.getFileSize() != null
                 && actualSize != null
@@ -1080,7 +1095,7 @@ public class MediaServiceImpl implements MediaService {
         if (wantsThumbnail) {
 
             if (r2Backed && media.getThumbnailKey() != null) {
-                access = signedR2Access(media.getThumbnailKey());
+                access = signedR2AccessIfPresent(media, media.getThumbnailKey(), "thumbnail");
             } else if ("VIDEO".equals(media.getMediaType()) || media.isEvidenceOnly()) {
                 // Never fall back to a full video (or a temporary staging
                 // source) for a grid tile.
@@ -1097,14 +1112,14 @@ public class MediaServiceImpl implements MediaService {
             // "original" request) resolves to it; while an image is still
             // being rendered the staging source is never signed.
             access = (r2Backed && media.getEvidenceKey() != null)
-                    ? signedR2Access(media.getEvidenceKey())
+                    ? signedR2AccessIfPresent(media, media.getEvidenceKey(), "evidence")
                     : PlaybackAccess.unavailable();
 
         } else if ("evidence".equalsIgnoreCase(variant)
                 && r2Backed && media.getEvidenceKey() != null) {
 
             // Legacy image that has a rendered evidence object.
-            access = signedR2Access(media.getEvidenceKey());
+            access = signedR2AccessIfPresent(media, media.getEvidenceKey(), "evidence");
 
         } else {
 
@@ -1251,6 +1266,32 @@ public class MediaServiceImpl implements MediaService {
         }
     }
 
+    /**
+     * Signs {@code key} only when the object is confirmed to exist. A definitively missing object (the provider's
+     * {@code exists} answers false, which for R2 is exactly a NoSuchKey on HEAD) yields the existing
+     * {@link PlaybackAccess#unavailable()} result instead of a URL that would 404. Any other failure (timeout,
+     * access denied, provider error) is NOT proof of absence: it is logged and the URL is signed exactly as before, so
+     * a transient storage problem never hides media that exists. The row is never modified.
+     *
+     * Cost: one HEAD request per resolved evidence or thumbnail URL (one per call; no result is reused across calls).
+     * Report generation does not use this path (it downloads the bytes directly), so reports add no extra requests.
+     */
+    private PlaybackAccess signedR2AccessIfPresent(JobCardMedia media, String key, String kind) {
+
+        try {
+            if (!resolveProvider(StorageProvider.R2).exists(key)) {
+                log.warn("[MEDIA][R2] Object missing from storage; access reported unavailable. mediaId={}, jobCardId={}, kind={}",
+                        media.getId(), media.getJobCardId(), kind);
+                return PlaybackAccess.unavailable();
+            }
+        } catch (RuntimeException ex) {
+            log.warn("[MEDIA][R2] Could not verify the object exists; signing without the check. mediaId={}, jobCardId={}, kind={}, reason={}",
+                    media.getId(), media.getJobCardId(), kind, ex.getClass().getSimpleName());
+        }
+
+        return signedR2Access(key);
+    }
+
     private PlaybackAccess signedR2Access(String key) {
         return ((R2MediaStorageProvider) resolveProvider(StorageProvider.R2))
                 .createPlaybackAccessForKey(key);
@@ -1308,6 +1349,25 @@ public class MediaServiceImpl implements MediaService {
                 return LocalDateTime.now();
             }
         }
+    }
+
+    @Override
+    public MediaContent downloadReportImage(JobCardMedia media) {
+
+        if (!StorageProvider.R2.name().equals(media.getStorageProvider())) {
+            return downloadContent(media);
+        }
+
+        // After evidence processing storageKey equals evidenceKey; before it, only the staged source exists.
+        String key = media.getEvidenceKey() != null ? media.getEvidenceKey() : media.getStorageKey();
+
+        if (key == null || key.isBlank()) {
+            throw new IllegalStateException("R2 media has no storage key. mediaId=" + media.getId());
+        }
+
+        byte[] content = resolveProvider(StorageProvider.R2).downloadBytes(key);
+
+        return new MediaContent(content, media.getContentType(), media.getFileName());
     }
 
     @Override

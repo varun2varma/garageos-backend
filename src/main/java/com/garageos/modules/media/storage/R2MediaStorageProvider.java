@@ -71,6 +71,11 @@ public class R2MediaStorageProvider implements MediaStorageProvider {
         return properties.isConfigured();
     }
 
+    /** The bucket this provider really writes to, or null when R2 is not (fully) configured. */
+    public String configuredBucketName() {
+        return properties.isConfigured() ? properties.getBucketName() : null;
+    }
+
     @Override
     public UploadAuthorization createUploadAuthorization(String storageKey, String contentType) {
 

@@ -82,5 +82,9 @@ public enum AuditEventType {
     EMERGENCY_REQUEST_COMPLETED,
     EMERGENCY_REQUEST_CANCELLED,
     /** An Emergency Assist submission was refused because the garage was not eligible (no silent re-routing). */
-    EMERGENCY_REQUEST_REFUSED
+    EMERGENCY_REQUEST_REFUSED,
+    /** Trip evidence was moved into its job card's folder (old and new key, mode and whether the old object was kept in the metadata). */
+    TRIP_EVIDENCE_ADOPTED,
+    /** Moving trip evidence into its job card's folder failed or found neither object (reason class only; a later run retries). */
+    TRIP_EVIDENCE_ADOPTION_FAILED
 }

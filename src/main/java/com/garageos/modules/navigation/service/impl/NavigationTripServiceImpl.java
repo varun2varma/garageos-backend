@@ -50,6 +50,10 @@ public class NavigationTripServiceImpl
     @Autowired(required = false)
     private NotificationEventPublisher notificationEventPublisher;
 
+    /** Optional (existing constructor-built tests): used to re-trigger trip-evidence adoption after a trip completes. */
+    @Autowired(required = false)
+    private org.springframework.context.ApplicationEventPublisher applicationEventPublisher;
+
     private final NavigationRequestRepository
             navigationRequestRepository;
 
@@ -750,6 +754,13 @@ public class NavigationTripServiceImpl
                     driverDisplayName(completedTrip.getDriverId()),
                     "Customer (OTP verified)"
             );
+        }
+
+        // Recovery touchpoint: when the request is linked to a job card, make sure its trip evidence has been moved into
+        // the job-card folder (idempotent; runs after this transaction commits and can never affect it).
+        if (completedRequest != null && completedRequest.getJobCardId() != null && applicationEventPublisher != null) {
+            applicationEventPublisher.publishEvent(
+                    new com.garageos.modules.navigation.event.TripEvidenceAdoptionRequested(completedRequest.getJobCardId()));
         }
 
         auditService.record(

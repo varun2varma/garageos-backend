@@ -353,7 +353,7 @@ public class FinalReportAssembler {
             // One retry: a transient storage hiccup must not drop an expected photo from a closed job's report.
             for (int attempt = 1; attempt <= 2 && jpeg == null; attempt++) {
                 try {
-                    MediaContent content = mediaService.downloadContent(media);
+                    MediaContent content = mediaService.downloadReportImage(media);
                     jpeg = ReportImageScaler.toReportJpeg(content.content());
                 } catch (RuntimeException e) {
                     log.warn("[FINAL-REPORT] Photo unreadable. jobCardId={}, mediaId={}, attempt={}, reason={}",

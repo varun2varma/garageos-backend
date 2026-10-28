@@ -52,6 +52,23 @@ public class FinalReportTripEvidenceLoader {
     private final NavigationTripMediaRepository mediaRepository;
     private final MediaStorageService storage;
 
+    /**
+     * Reads the photo from the key the row had when it was loaded. If that fails, the row may have been moved into its
+     * job-card folder in the meantime (trip-evidence adoption), so the CURRENT key is read once from the database and
+     * tried once. No lock and no wait: still unreadable means a genuine placeholder.
+     */
+    private byte[] readWithKeyRefresh(NavigationTripMedia m) {
+        try {
+            return storage.readBytes(m.getStorageKey());
+        } catch (RuntimeException first) {
+            String current = mediaRepository.findStorageKeyById(m.getId()).orElse(null);
+            if (current != null && !current.equals(m.getStorageKey())) {
+                return storage.readBytes(current);
+            }
+            throw first;
+        }
+    }
+
     public List<TripEvidenceInfo> load(JobCard jobCard, FinalReportAudience audience) {
 
         Long garageId = jobCard.getGarage() == null ? null : jobCard.getGarage().getId();
@@ -100,7 +117,7 @@ public class FinalReportTripEvidenceLoader {
 
             if (!video) {
                 try {
-                    jpeg = ReportImageScaler.toReportJpeg(storage.readBytes(m.getStorageKey()));
+                    jpeg = ReportImageScaler.toReportJpeg(readWithKeyRefresh(m));
                 } catch (RuntimeException e) {
                     // Missing / unreadable object: keep the metadata row, never fail the report.
                     log.warn("[FINAL-REPORT] Trip photo unavailable. jobCardId={}, mediaId={}, reason={}",

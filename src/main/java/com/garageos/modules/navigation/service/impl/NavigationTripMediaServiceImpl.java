@@ -53,6 +53,10 @@ public class NavigationTripMediaServiceImpl
     private final AuditService
             auditService;
 
+    /** Optional: when absent (or when it cannot resolve a garage code) the previous key layout is used. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.garageos.modules.navigation.storage.TripEvidenceFolderResolver folderResolver;
+
 
     @Override
     @Transactional
@@ -150,12 +154,17 @@ public class NavigationTripMediaServiceImpl
                 : navigationRequestRepository.findById(trip.getNavigationRequestId())
                         .map(NavigationRequest::getGarageId).orElse(null);
 
-        String folder =
+        String legacyFolder =
                 (evidenceGarageId == null ? "" : "garage-" + evidenceGarageId + "/")
                         + "navigation/"
                         + tripId
                         + "/"
                         + stage.name().toLowerCase();
+
+        // New layout (server-side records only): GarageST/<garageCode>/<jobCardNumber|TRIP-<tripId>>/DURING_PICKUP|DURING_DELIVERY
+        String folder = folderResolver == null
+                ? legacyFolder
+                : folderResolver.folderFor(trip, stage).orElse(legacyFolder);
 
 
         // Photos: bake the EXIF orientation into the pixels once (the stored bytes then carry no orientation tag, so
@@ -198,6 +207,26 @@ public class NavigationTripMediaServiceImpl
         com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Result meta =
                 com.garageos.modules.navigation.service.CaptureMetadataSanitizer.sanitize(
                         rawMeta, java.time.Instant.now(), java.time.ZoneId.systemDefault());
+
+        // Canonical path: an image, R2 available and the job card already linked (delivery, or pickup after the link).
+        // The upright evidence and a genuine thumbnail are written under the job-card naming convention from the start.
+        // Everything else (videos, no job card yet = provisional pickup, no R2, undecodable image) keeps the previous path.
+        com.garageos.modules.navigation.storage.TripEvidenceFolderResolver.Placement placement =
+                folderResolver == null ? null : folderResolver.placementFor(trip, stage).orElse(null);
+        com.garageos.modules.navigation.storage.TripEvidenceImages.Rendition rendition = null;
+
+        if (placement != null && placement.jobCardNumber() != null && mediaStorageService.supportsObjectKeys()
+                && file.getContentType() != null && file.getContentType().toLowerCase().startsWith("image/")) {
+            try {
+                rendition = com.garageos.modules.navigation.storage.TripEvidenceImages.render(file.getBytes());
+            } catch (java.io.IOException | RuntimeException ex) {
+                rendition = null;
+            }
+        }
+
+        if (rendition != null) {
+            return saveCanonical(tripId, driverId, stage, shotType, file, uploadId, meta, uploaderName, placement, rendition);
+        }
 
         String storageKey = stored != null
                 ? mediaStorageService.storeEvidence(stored, storedContentType, folder, ".jpg")
@@ -267,6 +296,80 @@ public class NavigationTripMediaServiceImpl
         );
 
         return toResponse(saved);
+    }
+
+    /**
+     * Stores one photo under its canonical keys. Uploads of one job card and stage are serialised by a transaction-scoped
+     * advisory lock; the row is inserted first (its id fixes the sequence: 1 + the number of lower-id photos of that
+     * job card and stage), then evidence and thumbnail are written, then the row gets the evidence key. Any failure rolls
+     * the whole transaction back, and a client retry (same upload id) starts again and lands on the same keys.
+     */
+    private NavigationTripMediaResponse saveCanonical(
+            Long tripId, Long driverId, TripMediaStage stage, TripMediaShotType shotType,
+            MultipartFile file, String uploadId,
+            com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Result meta, String uploaderName,
+            com.garageos.modules.navigation.storage.TripEvidenceFolderResolver.Placement placement,
+            com.garageos.modules.navigation.storage.TripEvidenceImages.Rendition rendition) {
+
+        Long jobCardId = placement.jobCardId();
+
+        mediaRepository.lockStageSequence((int) (jobCardId % Integer.MAX_VALUE), 0x54524950 + stage.ordinal());
+
+        NavigationTripMedia pending = mediaRepository.saveAndFlush(
+                NavigationTripMedia.builder()
+                        .tripId(tripId)
+                        .mediaStage(stage)
+                        .customerVisible(stage != null && stage.defaultCustomerVisible())
+                        .shotType(shotType)
+                        .storageKey("pending/" + java.util.UUID.randomUUID()) // replaced below, inside this transaction
+                        .fileName(file.getOriginalFilename())
+                        .clientUploadId(uploadId)
+                        .contentType("image/jpeg")
+                        .fileSize((long) rendition.evidence().length)
+                        .capturedBy(driverId)
+                        .capturedAt(meta.capturedAt())
+                        .capturedAtSource(meta.capturedAtSource())
+                        .capturedByName(uploaderName.isEmpty() ? null : uploaderName)
+                        .latitude(meta.latitude())
+                        .longitude(meta.longitude())
+                        .accuracyMeters(meta.accuracyMeters())
+                        .locationAddress(meta.locationAddress())
+                        .build());
+
+        int sequence = (int) mediaRepository.countStageRowsBefore(jobCardId, stage, pending.getId()) + 1;
+
+        String evidenceKey = com.garageos.modules.navigation.storage.TripEvidenceKeys.canonicalEvidenceKey(
+                placement.garageCode(), placement.jobCardNumber(), stage, sequence);
+
+        if (evidenceKey == null) {
+            throw new IllegalStateException("Could not build the evidence key for this photo.");
+        }
+
+        String thumbnailKey = com.garageos.modules.navigation.storage.TripEvidenceKeys.thumbnailKeyOf(evidenceKey);
+
+        mediaStorageService.putObject(evidenceKey, rendition.evidence(), "image/jpeg");
+        mediaStorageService.putObject(thumbnailKey, rendition.thumbnail(), "image/jpeg");
+
+        pending.setStorageKey(evidenceKey);
+
+        NavigationTripMedia saved = mediaRepository.save(pending);
+
+        recordCaptured(saved, tripId, stage, shotType, meta);
+
+        return toResponse(saved);
+    }
+
+    private void recordCaptured(NavigationTripMedia saved, Long tripId, TripMediaStage stage, TripMediaShotType shotType,
+                                com.garageos.modules.navigation.service.CaptureMetadataSanitizer.Result meta) {
+        auditService.record(
+                AuditEventType.EVIDENCE_CAPTURED,
+                "NavigationTripMedia",
+                saved.getId(),
+                resolveGarageId(tripId),
+                java.util.Map.of("tripId", tripId, "stage", stage, "shotType", shotType == null ? "OTHER" : shotType),
+                meta.latitude(),
+                meta.longitude()
+        );
     }
 
     private Long resolveGarageId(Long tripId) {
@@ -358,6 +461,17 @@ public class NavigationTripMediaServiceImpl
     @Override
     @Transactional(readOnly = true)
     public TripMediaContent getMediaContent(Long tripId, Long mediaId) {
+        return getMediaContent(tripId, mediaId, null);
+    }
+
+    /**
+     * Evidence by default; {@code variant=thumbnail} serves the thumbnail of a canonical photo. Same authorization, trip
+     * and media lookup as the full image. A photo without a thumbnail (legacy / provisional keys, videos, or an object that
+     * is not there) is answered as not found (the unavailable response), never with a URL or bytes of something else.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public TripMediaContent getMediaContent(Long tripId, Long mediaId, String variant) {
 
         accessGuard.authorizeViewer(currentPrincipal(), tripId);
 
@@ -365,6 +479,25 @@ public class NavigationTripMediaServiceImpl
                 .filter(m -> m.getTripId() != null && m.getTripId().equals(tripId))
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Media not found for trip : " + tripId));
+
+        if ("thumbnail".equalsIgnoreCase(variant)) {
+
+            String evidenceKey = media.getStorageKey();
+
+            if (!com.garageos.modules.navigation.storage.TripEvidenceKeys.isCanonicalEvidenceKey(evidenceKey)
+                    || !mediaStorageService.supportsObjectKeys()) {
+                throw new ResourceNotFoundException("Thumbnail not available for media : " + mediaId);
+            }
+
+            String thumbnailKey = com.garageos.modules.navigation.storage.TripEvidenceKeys.thumbnailKeyOf(evidenceKey);
+
+            if (!mediaStorageService.exists(thumbnailKey)) {
+                throw new ResourceNotFoundException("Thumbnail not available for media : " + mediaId);
+            }
+
+            return new TripMediaContent(mediaStorageService.readBytes(thumbnailKey), "image/jpeg",
+                    "thumbnail-" + media.getId() + ".jpg");
+        }
 
         byte[] content = mediaStorageService.readBytes(media.getStorageKey());
 

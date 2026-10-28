@@ -51,8 +51,9 @@ public class PlatformAdminService {
 
     /**
      * Everything a platform admin may see about ONE garage: profile facts, ownership, branding status, business
-     * identifier status and activity counts. Sensitive values are masked (owner phone and e-mail, GSTIN) and there are
-     * no customer records, vehicle documents, internal photos or invoice lines. A dedicated admin shape: it is never
+     * identifier status and activity counts. The single SUPER_ADMIN (TVASTRI, provisioned by the bootstrap runner) sees
+     * the garage's own business and owner details in full (owner phone and e-mail, GSTIN, PAN); the masked variants stay in
+     * the payload for older app builds. There are no customer records, vehicle documents, internal photos or invoice lines. A dedicated admin shape: it is never
      * built from the broader staff or customer garage DTOs.
      */
     public record GarageDetail(
@@ -64,11 +65,12 @@ public class PlatformAdminService {
             LocalDateTime updatedAt, OwnerSummary owner, Map<String, Long> activeStaffByRole,
             BrandingSummary branding, BusinessIdentifiers identifiers,
             Map<String, Long> bookingsByStatus, Map<String, Long> estimatesByStatus,
-            StatusChange lastStatusChange, String bankAccountStatus) {
+            StatusChange lastStatusChange, String bankAccountStatus,
+            String landmark, String pincode, String timeZone) {
     }
 
-    /** The garage owner, masked: enough to recognise them, not enough to contact or impersonate them from here. */
-    public record OwnerSummary(Long userId, String name, String mobileMasked, String emailMasked) {
+    /** The garage owner. Full contact details for the platform administrator; masked variants kept for older app builds. */
+    public record OwnerSummary(Long userId, String name, String mobileMasked, String emailMasked, String mobile, String email) {
     }
 
     /** Read-only view of the garage's branding configuration. */
@@ -80,7 +82,7 @@ public class PlatformAdminService {
      * GSTIN status is LOCAL format validation only: {@code ABSENT}, {@code FORMAT_VALID} or {@code FORMAT_INVALID}.
      * Nothing here means "verified with the GST portal"; no such check exists yet.
      */
-    public record BusinessIdentifiers(String gstinStatus, String gstinMasked, boolean panPresent) {
+    public record BusinessIdentifiers(String gstinStatus, String gstinMasked, boolean panPresent, String gstin, String pan) {
     }
 
     public record StatusChange(String from, String to, String reason, Long actorUserId, LocalDateTime at) {
@@ -223,7 +225,8 @@ public class PlatformAdminService {
                 countsBy("select b.status, count(b) from Booking b where b.garageId = :id group by b.status", id),
                 countsBy("select e.status, count(e) from Estimate e where e.jobCard.garage.id = :id group by e.status", id),
                 lastStatusChange(id),
-                bankAccountService == null ? "NOT_AVAILABLE" : bankAccountService.statusSummary(id));
+                bankAccountService == null ? "NOT_AVAILABLE" : bankAccountService.statusSummary(id),
+                g.getLandmark(), g.getPincode(), g.getTimeZone());
     }
 
     private OwnerSummary ownerOf(Garage g) {
@@ -242,7 +245,7 @@ public class PlatformAdminService {
         String name = ((u.getFirstName() == null ? "" : u.getFirstName()) + " "
                 + (u.getLastName() == null ? "" : u.getLastName())).trim();
 
-        return new OwnerSummary(u.getId(), name, maskMobile(u.getMobile()), maskEmail(u.getEmail()));
+        return new OwnerSummary(u.getId(), name, maskMobile(u.getMobile()), maskEmail(u.getEmail()), u.getMobile(), u.getEmail());
     }
 
     static String maskMobile(String mobile) {
@@ -289,8 +292,10 @@ public class PlatformAdminService {
         String status = gstin == null ? "ABSENT"
                 : com.garageos.core.util.GstinValidator.isStructurallyValid(gstin) ? "FORMAT_VALID" : "FORMAT_INVALID";
 
-        return new BusinessIdentifiers(status, com.garageos.core.util.GstinValidator.mask(gstin),
-                g.getPanNumber() != null && !g.getPanNumber().isBlank());
+        boolean panPresent = g.getPanNumber() != null && !g.getPanNumber().isBlank();
+
+        return new BusinessIdentifiers(status, com.garageos.core.util.GstinValidator.mask(gstin), panPresent,
+                gstin, panPresent ? g.getPanNumber().trim() : null);
     }
 
     private Map<String, Long> countsBy(String jpql, Long garageId) {

@@ -68,6 +68,9 @@ public interface NavigationTripMediaService {
      */
     TripMediaContent getMediaContent(Long tripId, Long mediaId);
 
+    /** {@code variant} is "thumbnail" or anything else for the full evidence (the default). */
+    TripMediaContent getMediaContent(Long tripId, Long mediaId, String variant);
+
     /**
      * Driver pickup (BEFORE_PICKUP) and delivery (DELIVERY) evidence of every trip linked to the job card, oldest first.
      * Only trips the caller may view (the same rule as a single trip) contribute; an unrelated caller gets an empty

@@ -107,9 +107,10 @@ public class NavigationTripMediaController {
     @GetMapping("/{tripId}/media/{mediaId}/content")
     public ResponseEntity<byte[]> getMediaContent(
             @PathVariable Long tripId,
-            @PathVariable Long mediaId) {
+            @PathVariable Long mediaId,
+            @RequestParam(required = false) String variant) {
 
-        TripMediaContent content = mediaService.getMediaContent(tripId, mediaId);
+        TripMediaContent content = mediaService.getMediaContent(tripId, mediaId, variant);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(content.contentType()))

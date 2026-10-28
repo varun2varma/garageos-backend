@@ -92,8 +92,8 @@ public class PlatformAdminController {
     }
 
     /**
-     * A garage's registered bank account as a platform administrator may see it: masked number, status, provider
-     * reference and timestamps; never the full number. The read is audited.
+     * A garage's registered bank account for the platform administrator (SUPER_ADMIN): full account number, holder,
+     * IFSC, bank, status, provider reference and timestamps. The read is audited (never with the number).
      */
     @GetMapping("/garages/{id}/bank-account")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
